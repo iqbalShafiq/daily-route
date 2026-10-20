@@ -1,0 +1,11 @@
+{
+  "extends": "./packages/config/tsconfig.base.json",
+  "compilerOptions": {
+    "noEmit": true,
+    "paths": {
+      "@daily-route/config/*": ["./packages/config/*"]
+    }
+  },
+  "include": ["packages/*/src/**/*.ts", "apps/*/src/**/*.ts", "apps/*/src/**/*.tsx"],
+  "exclude": ["node_modules", "**/dist/**"]
+}

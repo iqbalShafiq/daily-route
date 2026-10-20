@@ -1,0 +1,35 @@
+<!doctype html>
+<html lang="id">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta
+      name="description"
+      content="Cari rute Transjakarta, MRT Jakarta, LRT Jakarta, LRT Jabodebek, dan KRL Jabodetabek. Pantau pengalihan dan penutupan jalur."
+    />
+    <meta name="theme-color" content="#0b6b4f" />
+    <title>Daily Route — Rute Transportasi Jakarta</title>
+    <script>
+      // The theme is resolved before the first paint so the page never
+      // flashes the wrong colours.
+      (function () {
+        try {
+          var stored = localStorage.getItem("daily-route-theme");
+          var theme =
+            stored === "light" || stored === "dark"
+              ? stored
+              : window.matchMedia("(prefers-color-scheme: dark)").matches
+                ? "dark"
+                : "light";
+          document.documentElement.dataset.theme = theme;
+        } catch (error) {
+          document.documentElement.dataset.theme = "light";
+        }
+      })();
+    </script>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>

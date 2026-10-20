@@ -1,0 +1,50 @@
+{
+  "$schema": "https://turbo.build/schema.json",
+  "agentGuidance": false,
+  "globalEnv": ["NODE_ENV"],
+  "tasks": {
+    "build": {
+      "dependsOn": ["^build"],
+      "outputs": ["dist/**"]
+    },
+    "typecheck": {
+      "dependsOn": ["^build"],
+      "outputs": []
+    },
+    "lint": {
+      "outputs": []
+    },
+    "test": {
+      "dependsOn": ["^build"],
+      "outputs": ["coverage/**"]
+    },
+    "e2e": {
+      "dependsOn": ["^build", "build"],
+      "outputs": ["playwright-report/**", "test-results/**"]
+    },
+    "dev": {
+      "cache": false,
+      "persistent": true,
+      "env": [
+        "NODE_ENV",
+        "API_PORT",
+        "WEB_PORT",
+        "WORKER_PORT",
+        "WEB_ORIGIN",
+        "DATABASE_URL",
+        "AGENT_BASE_URL",
+        "AGENT_API_KEY",
+        "AGENT_MODEL",
+        "EMBEDDINGS_BASE_URL",
+        "EMBEDDINGS_API_KEY",
+        "EMBEDDINGS_MODEL",
+        "EMBEDDINGS_DIMENSIONS",
+        "TAVILY_API_KEY",
+        "X_BEARER_TOKEN",
+        "X_API_BASE_URL",
+        "X_POLL_INTERVAL_MS",
+        "WORKER_CRON_ENABLED"
+      ]
+    }
+  }
+}

@@ -1,0 +1,10 @@
+{
+  "extends": "@daily-route/config/tsconfig.base.json",
+  "compilerOptions": {
+    "rootDir": ".",
+    "jsx": "react-jsx",
+    "lib": ["ES2023", "DOM", "DOM.Iterable"],
+    "types": ["node", "vite/client"]
+  },
+  "include": ["src/**/*.ts", "src/**/*.tsx", "e2e/**/*.ts", "vite.config.ts", "playwright.config.ts"]
+}

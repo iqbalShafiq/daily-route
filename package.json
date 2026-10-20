@@ -1,0 +1,43 @@
+{
+  "name": "daily-route",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "packageManager": "pnpm@10.30.3",
+  "engines": {
+    "node": ">=22.16.0"
+  },
+  "scripts": {
+    "dev": "dotenv -e .env -- turbo run dev --filter=@daily-route/api --filter=@daily-route/worker --filter=@daily-route/web",
+    "dev:api": "dotenv -e .env -- pnpm --filter @daily-route/api dev",
+    "dev:worker": "dotenv -e .env -- pnpm --filter @daily-route/worker dev",
+    "dev:web": "dotenv -e .env -- pnpm --filter @daily-route/web dev",
+    "build": "turbo run build",
+    "typecheck": "turbo run typecheck",
+    "lint": "turbo run lint",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "test": "turbo run test",
+    "test:e2e": "pnpm --filter @daily-route/web e2e",
+    "db:migrate": "dotenv -e .env -- pnpm --filter @daily-route/db migrate",
+    "db:seed": "dotenv -e .env -- pnpm --filter @daily-route/db seed",
+    "db:reset": "dotenv -e .env -- pnpm --filter @daily-route/db reset",
+    "db:studio": "dotenv -e .env -- pnpm --filter @daily-route/db studio",
+    "data:ingest": "dotenv -e .env -- pnpm --filter @daily-route/ingest ingest",
+    "data:embed": "dotenv -e .env -- pnpm --filter @daily-route/ingest embed",
+    "infra:up": "docker compose up -d db",
+    "infra:down": "docker compose down",
+    "infra:reset": "docker compose down -v && docker compose up -d db"
+  },
+  "devDependencies": {
+    "dotenv-cli": "^11.0.0",
+    "prettier": "^3.8.1",
+    "turbo": "^2.9.14",
+    "typescript": "^5.9.3"
+  },
+  "pnpm": {
+    "onlyBuiltDependencies": [
+      "esbuild"
+    ]
+  }
+}

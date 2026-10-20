@@ -1,0 +1,47 @@
+# Dependencies
+node_modules/
+
+# Build output
+dist/
+build/
+*.tsbuildinfo
+
+# Environment — only the root `.env` exists; `.env.example` is committed.
+.env
+.env.*
+!.env.example
+
+# Tooling caches
+.vite/
+.turbo/
+.cache/
+.eslintcache
+
+# Playwright browsers (installed locally, not committed)
+.playwright/
+
+# pnpm store when it is placed inside the repository
+.pnpm-store/
+
+# The cached OpenStreetMap responses: reproducible with `pnpm data:ingest`.
+data/raw/
+
+# Tests
+coverage/
+.nyc_output/
+/playwright-report/
+/test-results/
+/apps/web/playwright-report/
+/apps/web/test-results/
+
+# Logs
+logs/
+*.log
+
+# OS / editor
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/*
+!.vscode/extensions.json
+*.swp

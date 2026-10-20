@@ -1,0 +1,33 @@
+{
+  "name": "@daily-route/db",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint src",
+    "test": "dotenv -e ../../.env -- vitest run",
+    "migrate": "drizzle-kit migrate",
+    "generate": "drizzle-kit generate",
+    "seed": "tsx src/seed/run.ts",
+    "reset": "tsx src/seed/reset.ts"
+  },
+  "dependencies": {
+    "drizzle-orm": "^0.45.4",
+    "postgres": "^3.4.9"
+  },
+  "devDependencies": {
+    "@daily-route/config": "workspace:*",
+    "@daily-route/transit": "workspace:*",
+    "@types/node": "^26.6.5",
+    "dotenv-cli": "^11.0.0",
+    "drizzle-kit": "^0.31.11",
+    "eslint": "^9.39.4",
+    "tsx": "^4.23.15",
+    "typescript": "^5.9.3",
+    "vitest": "^4.1.4"
+  }
+}

@@ -1,0 +1,47 @@
+{
+  "name": "@daily-route/web",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint src",
+    "test": "vitest run --passWithNoTests",
+    "e2e": "playwright test"
+  },
+  "dependencies": {
+    "@anvia/client": "^1.6.0",
+    "@base-ui/react": "^1.9.0",
+    "@daily-route/transit": "workspace:*",
+    "@fontsource-variable/jetbrains-mono": "^5.3.0",
+    "@fontsource-variable/plus-jakarta-sans": "^5.3.0",
+    "@tanstack/react-query": "^5.104.5",
+    "@tanstack/react-router": "^1.170.45",
+    "clsx": "^2.1.1",
+    "lucide-react": "^1.60.0",
+    "maplibre-gl": "^6.15.0",
+    "motion": "^14.4.0",
+    "react": "^19.2.4",
+    "react-dom": "^19.2.4",
+    "tailwind-merge": "^3.7.0"
+  },
+  "devDependencies": {
+    "@daily-route/config": "workspace:*",
+    "@daily-route/env": "workspace:*",
+    "@playwright/test": "^1.64.1",
+    "@tailwindcss/vite": "^4.3.3",
+    "@types/node": "^26.6.5",
+    "@types/react": "^19.2.14",
+    "@types/react-dom": "^19.2.3",
+    "@vitejs/plugin-react": "^5.1.4",
+    "eslint": "^9.39.4",
+    "tailwindcss": "^4.3.3",
+    "typescript": "^5.9.3",
+    "vite": "^7.3.1",
+    "vitest": "^4.1.4",
+    "@types/geojson": "^7946.0.16"
+  }
+}

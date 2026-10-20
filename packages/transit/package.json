@@ -1,0 +1,21 @@
+{
+  "name": "@daily-route/transit",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint src",
+    "test": "vitest run"
+  },
+  "devDependencies": {
+    "@daily-route/config": "workspace:*",
+    "@types/node": "^26.6.5",
+    "eslint": "^9.39.4",
+    "typescript": "^5.9.3",
+    "vitest": "^4.1.4"
+  }
+}

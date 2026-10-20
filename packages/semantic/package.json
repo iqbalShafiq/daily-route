@@ -1,0 +1,30 @@
+{
+  "name": "@daily-route/semantic",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint src",
+    "test": "dotenv -e ../../.env -- vitest run"
+  },
+  "dependencies": {
+    "@daily-route/db": "workspace:*",
+    "@daily-route/transit": "workspace:*",
+    "postgres": "^3.4.9",
+    "zod": "^4.6.5",
+    "drizzle-orm": "^0.45.4"
+  },
+  "devDependencies": {
+    "@daily-route/config": "workspace:*",
+    "@daily-route/env": "workspace:*",
+    "@types/node": "^26.6.5",
+    "eslint": "^9.39.4",
+    "typescript": "^5.9.3",
+    "vitest": "^4.1.4",
+    "dotenv-cli": "^11.0.0"
+  }
+}

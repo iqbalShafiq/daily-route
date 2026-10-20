@@ -1,0 +1,1687 @@
+{
+  "systems": [
+    {
+      "systemId": "mrt-jakarta",
+      "name": "MRT Jakarta",
+      "mode": "metro",
+      "operator": "PT MRT Jakarta Perseroda",
+      "serviceClass": "rapid-transit",
+      "lines": [
+        {
+          "code": "NS",
+          "name": "North-South Line (Lin Utara-Selatan)",
+          "operator": "PT MRT Jakarta Perseroda",
+          "lengthKm": 15.7,
+          "status": "operating (Phase 1: Lebak Bulus-Bundaran HI); Phase 2A under construction; Phase 2B planned",
+          "corridorType": "metro",
+          "stations": [
+            {
+              "name": "Lebak Bulus Bank Syariah Indonesia",
+              "code": "LBB",
+              "latitude": -6.2893,
+              "longitude": 106.7746,
+              "note": "Phase 1, elevated, 2 side platforms. Southern terminus and MRT Jakarta depot/offices. Interchange: Transjakarta Corridor 8 (Lebak Bulus); Transjabodetabek S21, S22, D21, D41; Lebak Bulus bus terminal. id.wikipedia code field 'NS21, LBB'."
+            },
+            {
+              "name": "Fatmawati Indomaret",
+              "code": "FTM",
+              "latitude": -6.2923,
+              "longitude": 106.7923,
+              "note": "Phase 1, elevated, 2 side platforms. Interchange: planned MRT Outer Ring Line; Transjabodetabek D21, D41. id.wikipedia code field 'NS20, FTM'."
+            },
+            {
+              "name": "Cipete Raya Tuku",
+              "code": "CPR",
+              "latitude": -6.2774,
+              "longitude": 106.7975,
+              "note": "Phase 1, elevated, 2 side platforms. id.wikipedia code field 'NS19, CPR'."
+            },
+            {
+              "name": "Haji Nawi",
+              "code": "HJN",
+              "latitude": -6.266798,
+              "longitude": 106.797316,
+              "note": "Phase 1, elevated, 2 side platforms. id.wikipedia code field 'NS18, HJN'."
+            },
+            {
+              "name": "Blok A Visa",
+              "code": "BLA",
+              "latitude": -6.255584,
+              "longitude": 106.797134,
+              "note": "Phase 1, elevated, 2 side platforms. TOD integrated with Pasar Blok A. id.wikipedia code field 'NS17, BLA'."
+            },
+            {
+              "name": "Blok M BCA",
+              "code": "BLM",
+              "latitude": -6.244527,
+              "longitude": 106.79821,
+              "note": "Phase 1, elevated; the only MRT station with 3 tracks / 2 island platforms. Interchange: Transjakarta Corridor 1 (Blok M); Transjabodetabek P11, S21, S61, SH2, T31; Blok M bus terminal. id.wikipedia code field 'NS16, BLM'."
+            },
+            {
+              "name": "ASEAN Headquarters",
+              "code": "SSM",
+              "latitude": -6.239085,
+              "longitude": 106.798595,
+              "note": "Phase 1, elevated, 2 side platforms. Originally named 'Sisingamangaraja'. Interchange: Transjakarta Corridor 1 (ASEAN /astes Agung); CSW transport hub (CSW 1); Transjabodetabek P11, S61, T31. id.wikipedia code field 'NS15, SSM'."
+            },
+            {
+              "name": "Senayan Mastercard",
+              "code": "SNY",
+              "latitude": -6.226691,
+              "longitude": 106.80247,
+              "note": "Phase 1, underground, single island platform. First underground station; elevated/underground transition is between ASEAN and Senayan. Interchange: Transjakarta Corridor 1 (Bundaran Senayan, Senayan Bank Jakarta); Transjabodetabek S61, SH2, T31. id.wikipedia code field 'NS14, SNY'."
+            },
+            {
+              "name": "Istora Mandiri",
+              "code": "IST",
+              "latitude": -6.222955,
+              "longitude": 106.807368,
+              "note": "Phase 1, underground, single island platform. Interchange: Transjakarta Corridor 1 (Polda Metro Jaya, Senayan Bank Jakarta). id.wikipedia code field 'NS13, IST'."
+            },
+            {
+              "name": "Bendungan Hilir",
+              "code": "BNH",
+              "latitude": -6.215446,
+              "longitude": 106.817319,
+              "note": "Phase 1, underground, single island platform. Interchange: Transjakarta Corridor 1 (Bendungan Hilir, Karet). id.wikipedia code field 'NS12, BNH'."
+            },
+            {
+              "name": "Setiabudi Astra",
+              "code": "STB",
+              "latitude": -6.20993,
+              "longitude": 106.821517,
+              "note": "Phase 1, underground, single island platform. id.wikipedia code field 'NS11, STB'."
+            },
+            {
+              "name": "Dukuh Atas BNI",
+              "code": "DKA",
+              "latitude": -6.20095,
+              "longitude": 106.822809,
+              "note": "Phase 1, underground, single island platform. Dukuh Atas TOD. Interchange: KRL Commuter Line (BNI City and Sudirman stations), Soekarno-Hatta Airport Rail Link (BNI City), LRT Jakarta and LRT Jabodebek (Dukuh Atas LRT station), Transjakarta Corridor 1 (Dukuh Atas), Corridor 4 and 6 (Galunggung). id.wikipedia code field 'NS10, DKA'."
+            },
+            {
+              "name": "Bundaran HI Bank Jakarta",
+              "code": "BHI",
+              "latitude": -6.193409,
+              "longitude": 106.822858,
+              "note": "Phase 1, underground, single island platform; northern terminus of the operating line. Directly integrated with the Transjakarta Bundaran HI Astra BRT station (stairs only - not wheelchair accessible). id.wikipedia code field 'NS09, BHI'. Named 'Bundaran Hotel Indonesia' until the 2024 Bank DKI naming-rights deal; renamed 'Bundaran HI Bank Jakarta' in July 2025 after Bank DKI rebranded to Bank Jakarta."
+            },
+            {
+              "name": "Thamrin station (Jakarta MRT)",
+              "code": null,
+              "latitude": null,
+              "longitude": null,
+              "note": "Phase 2A, underground (planned). Interchange with the East-West Line and Transjakarta Corridor 1 (Kebon Sirih). No id.wikipedia station article and no verified coordinates; official MRT Jakarta Phase 2A page lists Thamrin first. Target opening: 2027 (segment 1)."
+            },
+            {
+              "name": "Monumen Nasional",
+              "code": null,
+              "latitude": null,
+              "longitude": null,
+              "note": "Phase 2A, underground (planned); located inside the National Monument complex. Interchange: Transjakarta Corridors 1, 2 and 3 (Monumen Nasional). Official MRT Jakarta names it 'Monas'. No code or verified coordinates published yet."
+            },
+            {
+              "name": "Harmoni",
+              "code": null,
+              "latitude": -6.165723,
+              "longitude": 106.820278,
+              "note": "Phase 2A, underground (planned). Interchange: Transjakarta Corridor 1 (Harmoni). No code published yet."
+            },
+            {
+              "name": "Sawah Besar",
+              "code": null,
+              "latitude": -6.160576,
+              "longitude": 106.81912,
+              "note": "Phase 2A, underground (planned). Interchange: Transjakarta Corridor 1 (Sawah Besar). No code published yet."
+            },
+            {
+              "name": "Mangga Besar",
+              "code": null,
+              "latitude": -6.151219,
+              "longitude": 106.817311,
+              "note": "Phase 2A, underground (planned). Interchange: Transjakarta Corridor 1 (Mangga Besar). No code published yet."
+            },
+            {
+              "name": "Glodok",
+              "code": null,
+              "latitude": -6.14553,
+              "longitude": 106.81575,
+              "note": "Phase 2A, underground (planned). Interchange: Transjakarta Corridor 1 (Glodok). No code published yet."
+            },
+            {
+              "name": "Kota",
+              "code": null,
+              "latitude": -6.139299,
+              "longitude": 106.814023,
+              "note": "Phase 2A, underground (planned); terminus of Phase 2A. Interchange: KRL Commuter Line Bogor and Tanjung Priok lines (Jakarta Kota station), Transjakarta Corridors 1 and 12 (Kota). No code published yet."
+            },
+            {
+              "name": "Mangga Dua",
+              "code": null,
+              "latitude": null,
+              "longitude": null,
+              "note": "Phase 2B, underground (planned). Interchange: KRL Commuter Line Tanjung Priok line (Kampung Bandan station); Transjakarta Corridor 12 (Mangga Dua). No code or verified coordinates."
+            },
+            {
+              "name": "Ancol Marina",
+              "code": null,
+              "latitude": null,
+              "longitude": null,
+              "note": "Phase 2B, underground (planned). id.wikipedia names the northernmost stations 'Ancol Park' and 'Ancol Marina'; en.wikipedia and the official MRT site use 'Ancol' / 'Ancol Barat'. No code or verified coordinates."
+            },
+            {
+              "name": "Ancol Barat",
+              "code": null,
+              "latitude": null,
+              "longitude": null,
+              "note": "Phase 2B, surface-level depot and terminus area (planned, 'Ancol Barat'). Naming differs between sources; no code or coordinates."
+            }
+          ],
+          "sources": [
+            "https://www.jakartamrt.co.id/",
+            "https://beweb-dev.jakartamrt.co.id/middleware/api/datum",
+            "https://en.wikipedia.org/wiki/North%E2%80%93South_Line_(Jakarta_MRT)",
+            "https://id.wikipedia.org/wiki/Jalur_Utara%E2%80%93Selatan_(MRT_Jakarta)",
+            "https://id.wikipedia.org/wiki/MRT_Jakarta",
+            "https://id.wikipedia.org/wiki/Jalur_Timur%E2%80%93Barat_(MRT_Jakarta)",
+            "https://jakartamrt.co.id/id/proyek/fase-2"
+          ]
+        },
+        {
+          "code": "EW",
+          "name": "East-West Line (Lin Timur-Barat)",
+          "operator": "PT MRT Jakarta Perseroda",
+          "lengthKm": 87.0,
+          "status": "under construction (Phase 1 Stage 1: Tomang-Medan Satria, 24.5 km); Stage 2 and Phase 2 planned",
+          "corridorType": "metro",
+          "stations": [
+            {
+              "name": "Balaraja",
+              "code": "EW01",
+              "latitude": null,
+              "longitude": null,
+              "note": "Phase 3B planned, elevated. Western terminus of the full East-West Line."
+            },
+            {
+              "name": "Cibadak",
+              "code": "EW02",
+              "latitude": null,
+              "longitude": null,
+              "note": "Phase 3B planned, elevated."
+            },
+            {
+              "name": "Pasir Gadung",
+              "code": "EW03",
+              "latitude": null,
+              "longitude": null,
+              "note": "Phase 3B planned, elevated."
+            },
+            {
+              "name": "Otonom",
+              "code": "EW04",
+              "latitude": null,
+              "longitude": null,
+              "note": "Phase 3B planned, elevated."
+            },
+            {
+              "name": "Bunder",
+              "code": "EW05",
+              "latitude": null,
+              "longitude": null,
+              "note": "Phase 3B planned, elevated."
+            },
+            {
+              "name": "Kadu",
+              "code": "EW06",
+              "latitude": null,
+              "longitude": null,
+              "note": "Phase 3B planned, elevated. Interchange: Transjabodetabek T12."
+            },
+            {
+              "name": "Bencongan",
+              "code": "EW07",
+              "latitude": null,
+              "longitude": null,
+              "note": "Phase 3B planned, elevated."
+            },
+            {
+              "name": "Danau Ranau",
+              "code": "EW08",
+              "latitude": null,
+              "longitude": null,
+              "note": "Phase 3B planned, elevated."
+            },
+            {
+              "name": "Kelapa Dua",
+              "code": "EW09",
+              "latitude": null,
+              "longitude": null,
+              "note": "Phase 3B planned, elevated."
+            },
+            {
+              "name": "Kebon Nanas",
+              "code": "EW10",
+              "latitude": null,
+              "longitude": null,
+              "note": "Phase 3B planned, elevated. Interchange: Transjabodetabek T11, S11."
+            },
+            {
+              "name": "Panunggangan",
+              "code": "EW11",
+              "latitude": null,
+              "longitude": null,
+              "note": "Phase 3B planned, elevated. Interchange: Transjabodetabek S61."
+            },
+            {
+              "name": "Kunciran",
+              "code": "EW12",
+              "latitude": null,
+              "longitude": null,
+              "note": "Phase 3B planned, elevated."
+            },
+            {
+              "name": "Hasyim Asyari",
+              "code": "EW13",
+              "latitude": null,
+              "longitude": null,
+              "note": "Phase 3B planned, elevated. Interchange: Trans Tangerang."
+            },
+            {
+              "name": "Karang Tengah",
+              "code": "EW14",
+              "latitude": null,
+              "longitude": null,
+              "note": "Phase 3B planned, elevated."
+            },
+            {
+              "name": "Kembangan",
+              "code": "EW15",
+              "latitude": null,
+              "longitude": null,
+              "note": "Phase 3A Stage 2 planned, elevated."
+            },
+            {
+              "name": "Batu Mulia",
+              "code": "EW16",
+              "latitude": null,
+              "longitude": null,
+              "note": "Phase 3A Stage 2 planned, elevated. Planned interchange with the MRT Outer Ring Line."
+            },
+            {
+              "name": "Teknologi",
+              "code": "EW17",
+              "latitude": null,
+              "longitude": null,
+              "note": "Phase 3A Stage 2 planned, elevated."
+            },
+            {
+              "name": "Kebon Jeruk",
+              "code": "EW18",
+              "latitude": null,
+              "longitude": null,
+              "note": "Phase 3A Stage 2 planned, elevated. Interchange: Transjabodetabek T11, T12, S11, S61."
+            },
+            {
+              "name": "Tanjung Duren",
+              "code": "EW19",
+              "latitude": null,
+              "longitude": null,
+              "note": "Phase 3A Stage 2 planned, elevated."
+            },
+            {
+              "name": "Arjuna Selatan",
+              "code": "EW20",
+              "latitude": null,
+              "longitude": null,
+              "note": "Phase 3A Stage 2 planned, elevated."
+            },
+            {
+              "name": "Tomang",
+              "code": "EW21",
+              "latitude": null,
+              "longitude": null,
+              "note": "Phase 3A Stage 1 planned, underground. Groundbreaking for this stage: 11 September 2024."
+            },
+            {
+              "name": "Grogol",
+              "code": "EW22",
+              "latitude": null,
+              "longitude": null,
+              "note": "Phase 3A Stage 1 planned, underground."
+            },
+            {
+              "name": "Roxy",
+              "code": "EW23",
+              "latitude": null,
+              "longitude": null,
+              "note": "Phase 3A Stage 1 planned, underground."
+            },
+            {
+              "name": "Petojo",
+              "code": "EW24",
+              "latitude": null,
+              "longitude": null,
+              "note": "Phase 3A Stage 1 planned, underground."
+            },
+            {
+              "name": "Cideng",
+              "code": "EW25",
+              "latitude": null,
+              "longitude": null,
+              "note": "Phase 3A Stage 1 planned, underground. Interchange: KRL Commuter Line Cikarang and Rangkasbitung lines (Tanah Abang)."
+            },
+            {
+              "name": "Thamrin",
+              "code": "EW26",
+              "latitude": null,
+              "longitude": null,
+              "note": "Phase 3A Stage 1 planned, underground. Planned interchange with the North-South Line and Transjakarta Corridor 1."
+            },
+            {
+              "name": "Kebon Sirih",
+              "code": "EW27",
+              "latitude": null,
+              "longitude": null,
+              "note": "Phase 3A Stage 1 planned, underground. Interchange: KRL Commuter Line Bogor line (Gondangdia)."
+            },
+            {
+              "name": "Kwitang",
+              "code": "EW28",
+              "latitude": null,
+              "longitude": null,
+              "note": "Phase 3A Stage 1 planned, underground."
+            },
+            {
+              "name": "Senen",
+              "code": "EW29",
+              "latitude": null,
+              "longitude": null,
+              "note": "Phase 3A Stage 1 planned, underground. Interchange: KRL Commuter Line Cikarang line (Pasar Senen), Transjakarta corridors, Senen bus terminal."
+            },
+            {
+              "name": "Galur",
+              "code": "EW30",
+              "latitude": null,
+              "longitude": null,
+              "note": "Phase 3A Stage 1 planned, underground."
+            },
+            {
+              "name": "Cempaka Baru",
+              "code": "EW31",
+              "latitude": null,
+              "longitude": null,
+              "note": "Phase 3A Stage 1 planned, underground."
+            },
+            {
+              "name": "Sumur Batu",
+              "code": "EW32",
+              "latitude": null,
+              "longitude": null,
+              "note": "Phase 3A Stage 1 planned, underground."
+            },
+            {
+              "name": "Pakulonan Barat",
+              "code": "EW33",
+              "latitude": null,
+              "longitude": null,
+              "note": "Phase 3A Stage 1 planned, underground."
+            },
+            {
+              "name": "Pakulonan Timur",
+              "code": "EW34",
+              "latitude": null,
+              "longitude": null,
+              "note": "Phase 3A Stage 1 planned, underground. Planned interchange: LRT Jakarta (Pulomas)."
+            },
+            {
+              "name": "Perintis",
+              "code": "EW35",
+              "latitude": null,
+              "longitude": null,
+              "note": "Phase 3A Stage 1 planned, underground."
+            },
+            {
+              "name": "Pulo Gadung",
+              "code": "EW36",
+              "latitude": null,
+              "longitude": null,
+              "note": "Phase 3A Stage 1 planned, underground."
+            },
+            {
+              "name": "Penggilingan",
+              "code": "EW37",
+              "latitude": null,
+              "longitude": null,
+              "note": "Phase 3A Stage 1 planned, underground."
+            },
+            {
+              "name": "Cakung Barat",
+              "code": "EW38",
+              "latitude": null,
+              "longitude": null,
+              "note": "Phase 3A Stage 1 planned, underground. Planned interchange with the MRT Outer Ring Line."
+            },
+            {
+              "name": "Pulo Gebang",
+              "code": "EW39",
+              "latitude": null,
+              "longitude": null,
+              "note": "Phase 3A Stage 1 planned, underground."
+            },
+            {
+              "name": "Ujung Menteng",
+              "code": "EW40",
+              "latitude": null,
+              "longitude": null,
+              "note": "Phase 3A Stage 1 planned, underground. Rorotan depot access."
+            },
+            {
+              "name": "Medan Satria",
+              "code": "EW41",
+              "latitude": null,
+              "longitude": null,
+              "note": "Phase 3A Stage 1 planned, underground. Eastern terminus of Stage 1."
+            },
+            {
+              "name": "Kaliabang",
+              "code": "EW42",
+              "latitude": null,
+              "longitude": null,
+              "note": "Phase 3B planned (Medan Satria-Cikarang), elevated."
+            },
+            {
+              "name": "Harapan Baru",
+              "code": "EW43",
+              "latitude": null,
+              "longitude": null,
+              "note": "Phase 3B planned, elevated."
+            },
+            {
+              "name": "Karang Satria",
+              "code": "EW44",
+              "latitude": null,
+              "longitude": null,
+              "note": "Phase 3B planned, elevated."
+            },
+            {
+              "name": "Sumberjaya",
+              "code": "EW45",
+              "latitude": null,
+              "longitude": null,
+              "note": "Phase 3B planned, elevated."
+            },
+            {
+              "name": "Wanajaya",
+              "code": "EW46",
+              "latitude": null,
+              "longitude": null,
+              "note": "Phase 3B planned, elevated."
+            },
+            {
+              "name": "Cibitung",
+              "code": "EW47",
+              "latitude": null,
+              "longitude": null,
+              "note": "Phase 3B planned, elevated."
+            },
+            {
+              "name": "Cikarang",
+              "code": "EW48",
+              "latitude": null,
+              "longitude": null,
+              "note": "Phase 3B planned, elevated. Eastern terminus of the full line; interchange with KRL Commuter Line Cikarang."
+            }
+          ],
+          "sources": [
+            "https://www.jakartamrt.co.id/",
+            "https://beweb-dev.jakartamrt.co.id/middleware/api/datum",
+            "https://en.wikipedia.org/wiki/North%E2%80%93South_Line_(Jakarta_MRT)",
+            "https://id.wikipedia.org/wiki/Jalur_Utara%E2%80%93Selatan_(MRT_Jakarta)",
+            "https://id.wikipedia.org/wiki/MRT_Jakarta",
+            "https://id.wikipedia.org/wiki/Jalur_Timur%E2%80%93Barat_(MRT_Jakarta)",
+            "https://jakartamrt.co.id/id/proyek/fase-2"
+          ]
+        }
+      ]
+    },
+    {
+      "systemId": "lrt-jakarta",
+      "name": "LRT Jakarta",
+      "mode": "light-rail",
+      "operator": "PT LRT Jakarta",
+      "serviceClass": "light-rail",
+      "lines": [
+        {
+          "code": "S",
+          "name": "South Line (Lin Selatan) - Kelapa Gading to Manggarai",
+          "operator": "PT LRT Jakarta",
+          "lengthKm": 12.2,
+          "status": "operating (Phase 1A Velodrome-Kelapa Gading since 2019; Phase 1B Velodrome-Manggarai since 16 September 2026)",
+          "corridorType": "light-rail",
+          "stations": [
+            {
+              "name": "Kelapa Gading",
+              "code": "KPG",
+              "latitude": -6.157589,
+              "longitude": 106.914076,
+              "note": "Northern terminus; LRT Jakarta depot and head office (Gedung MCC, Jl. Raya Kelapa Nias, Pegangsaan Dua). Also published as 'Stasiun LRT Pegangsaan Dua (Kelapa Gading)'. id.wikipedia code field 'S-01, KPG'."
+            },
+            {
+              "name": "Boulevard Utara Summarecon Mall",
+              "code": "BVU",
+              "latitude": -6.1594,
+              "longitude": 106.906,
+              "note": "Interchange: Summarecon Mall Kelapa Gading via a 120 m covered connecting bridge opened 24 July 2025. id.wikipedia code field 'S-02, BVU'."
+            },
+            {
+              "name": "Boulevard Selatan",
+              "code": "BVS",
+              "latitude": -6.169,
+              "longitude": 106.9,
+              "note": "id.wikipedia code field 'S-03, BVS'."
+            },
+            {
+              "name": "Pulomas",
+              "code": "PUM",
+              "latitude": -6.177311,
+              "longitude": 106.893393,
+              "note": "Interchange: Transjakarta Corridor 2 (Pulomas). id.wikipedia code field 'S-04, PUM'. Coordinates from OpenStreetMap (Nominatim): the id.wikipedia article wrongly duplicates Equestrian's coordinate."
+            },
+            {
+              "name": "Equestrian",
+              "code": "EQS",
+              "latitude": -6.183553,
+              "longitude": 106.891354,
+              "note": "Next to the Jakarta International Equestrian Park. id.wikipedia code field 'S-05, EQS' (coordinates from OpenStreetMap/Nominatim; the id.wikipedia article wrongly duplicates Pulomas's coordinate). (the LRT Jakarta line article uses 'EQT')."
+            },
+            {
+              "name": "Velodrome",
+              "code": "VEL",
+              "latitude": -6.192581,
+              "longitude": 106.89121,
+              "note": "Southern terminus of the original 5.8 km / 6-station operation; next to the Jakarta International Velodrome. Interchange: Transjakarta Corridor 4 (Pemuda Rawamangun). id.wikipedia code field 'S-06, VEL'."
+            },
+            {
+              "name": "Rawamangun",
+              "code": "RWM",
+              "latitude": -6.19323,
+              "longitude": 106.88367,
+              "note": "First station of the Phase 1B extension (opened 16 September 2026). Interchange: Transjakarta Corridor 4 (Kayu Jati); near Universitas Negeri Jakarta. id.wikipedia code field 'S-07, RWM'."
+            },
+            {
+              "name": "Pramuka",
+              "code": "PKA",
+              "latitude": -6.192024,
+              "longitude": 106.870633,
+              "note": "Phase 1B extension. id.wikipedia notes trains do not yet call at this station. Interchange: Transjakarta Corridor 4 (Simpang Pramuka) and Corridor 10 (Pemuda Pramuka). id.wikipedia code field 'S-08, PKA'."
+            },
+            {
+              "name": "Matraman",
+              "code": "MAT",
+              "latitude": -6.195062,
+              "longitude": 106.859983,
+              "note": "Phase 1B extension. id.wikipedia notes trains do not yet call at this station. Interchange: KRL Commuter Line (Kramat station), Transjakarta Corridor 4 and 4D (Pasar Genjing). id.wikipedia code field 'S-09, MAT'."
+            },
+            {
+              "name": "Proklamasi",
+              "code": "PKM",
+              "latitude": -6.201803,
+              "longitude": 106.849896,
+              "note": "Phase 1B extension. id.wikipedia notes trains do not yet call at this station. id.wikipedia code field 'S-10, PKM'."
+            },
+            {
+              "name": "Manggarai",
+              "code": "MGI",
+              "latitude": -6.2099,
+              "longitude": 106.85,
+              "note": "Southern terminus of the Phase 1B extension, inaugurated by President Prabowo Subianto on 16 September 2026. Major interchange hub: KRL Commuter Line (Bogor, Cikarang and Rangkasbitung lines), Commuter Line Soekarno-Hatta, Transjakarta Corridor 4 and 4D (Manggarai), Transjabodetabek B25, Manggarai bus terminal. id.wikipedia code field 'S-11, MGI'."
+            }
+          ],
+          "sources": [
+            "https://lrtjakarta.co.id/",
+            "https://lrtjakarta.co.id/schedule",
+            "https://lrtjakarta.co.id/api/schedule/live",
+            "https://lrtjakarta.co.id/press_conference/yAQ95X1p0X",
+            "https://lrtjakarta.co.id/press_conference/lgN9gjdpYR",
+            "https://id.wikipedia.org/wiki/LRT_Jakarta",
+            "https://id.wikipedia.org/wiki/Stasiun_LRT_Velodrome"
+          ]
+        }
+      ]
+    },
+    {
+      "systemId": "lrt-jabodebek",
+      "name": "LRT Jabodebek",
+      "mode": "light-rail",
+      "operator": "PT Kereta Api Indonesia (Persero), Divisi LRT Jabodebek",
+      "serviceClass": "light-rail",
+      "lines": [
+        {
+          "code": "CB",
+          "name": "Cibubur Line (Lin Cibubur) - Dukuh Atas to Harjamukti",
+          "operator": "PT Kereta Api Indonesia (Persero), Divisi LRT Jabodebek",
+          "lengthKm": 25.94,
+          "status": "operating (opened 28 August 2023); Cibubur-Bogor extension in feasibility study",
+          "corridorType": "light-rail",
+          "stations": [
+            {
+              "name": "Dukuh Atas",
+              "code": "DKA",
+              "latitude": -6.204706,
+              "longitude": 106.825646,
+              "note": "Official name on the LRT Jabodebek station list is 'Dukuh Atas'; the official fare table calls it 'Dukuh Atas BNI'; id.wikipedia titles the article 'Stasiun LRT Dukuh Atas Bank Syariah Indonesia'. Shared terminus of both LRT Jabodebek lines and the northern end of the 18-station Phase 1 network. Interchange: KRL Commuter Line (Sudirman, BNI City), Commuter Line Soekarno-Hatta, MRT Jakarta North-South Line (Dukuh Atas BNI), Transjakarta Corridor 1 (Dukuh Atas) and Corridors 4/6 (Galunggung), LRT Jakarta (planned Dukuh Atas stop), Transjabodetabek B25. Dukuh Atas interchange complex."
+            },
+            {
+              "name": "Setiabudi",
+              "code": "SET",
+              "latitude": -6.209277,
+              "longitude": 106.830211,
+              "note": "Interchange: Transjakarta Corridor 6 (Setiabudi Integritas)."
+            },
+            {
+              "name": "Rasuna Said",
+              "code": "RAS",
+              "latitude": -6.221753,
+              "longitude": 106.832261,
+              "note": "Interchange: Transjakarta Corridor 6 (Rasuna Said)."
+            },
+            {
+              "name": "Kuningan",
+              "code": "KUA",
+              "latitude": -6.228881,
+              "longitude": 106.833175,
+              "note": "Interchange: Transjakarta Corridor 6 (Kuningan)."
+            },
+            {
+              "name": "Pancoran",
+              "code": null,
+              "latitude": -6.242127,
+              "longitude": 106.838469,
+              "note": "Official fare table and station list on lrtjabodebek.kai.id name it 'Pancoran bank bjb'. Interchange: Transjakarta Corridor 9 (Pancoran); Transjabodetabek P11. No 3-letter code published."
+            },
+            {
+              "name": "Cikoko",
+              "code": "CKK",
+              "latitude": -6.243476,
+              "longitude": 106.857102,
+              "note": "Interchange: KRL Commuter Line Bogor line (Cawang station); Transjakarta Corridor 9 (Cikoko)."
+            },
+            {
+              "name": "Ciliwung",
+              "code": "CIL",
+              "latitude": -6.243477,
+              "longitude": 106.864131,
+              "note": "Interchange: Transjakarta Corridor 9 (Ciliwung)."
+            },
+            {
+              "name": "Cawang",
+              "code": "CWG",
+              "latitude": -6.246225,
+              "longitude": 106.872386,
+              "note": "Branch point of the two LRT Jabodebek lines. Interchange: KRL Commuter Line Bogor line (Cawang station); Transjakarta Corridors 7 and 9 (Cawang); Transjabodetabek B11, B21."
+            },
+            {
+              "name": "Taman Mini",
+              "code": "TMI",
+              "latitude": -6.292874,
+              "longitude": 106.880535,
+              "note": "On the Cibubur line only, near Taman Mini Indonesia Indah. Official station list names it 'Taman Mini'; id.wikipedia article title is 'Stasiun LRT TMII'. Interchange: Transjakarta Corridor 9 (Makasar)."
+            },
+            {
+              "name": "Kampung Rambutan",
+              "code": "KAM",
+              "latitude": -6.309541,
+              "longitude": 106.884325,
+              "note": "Interchange: Transjakarta Corridor 7 (Kampung Rambutan), Kampung Rambutan bus terminal, Transjabodetabek S22."
+            },
+            {
+              "name": "Ciracas",
+              "code": "CRC",
+              "latitude": -6.323826,
+              "longitude": 106.886606,
+              "note": "Cibubur line only."
+            },
+            {
+              "name": "Harjamukti",
+              "code": "HAR",
+              "latitude": -6.373988,
+              "longitude": 106.895623,
+              "note": "Southern terminus of the Cibubur line. Interchange: Transjakarta D11 (Stasiun LRT Harjamukti); Transjabodetabek D11, P11 at Cibubur Junction / buperta Cibubur."
+            }
+          ],
+          "sources": [
+            "https://lrtjabodebek.kai.id/stations",
+            "https://lrtjabodebek.kai.id/informasi-tarif",
+            "https://lrtjabodebek.kai.id/lrt-guides",
+            "https://lrtjabodebek.kai.id/jadwal-keberangkatan",
+            "https://id.wikipedia.org/wiki/LRT_Jabodebek",
+            "https://id.wikipedia.org/wiki/Lin_Cibubur",
+            "https://id.wikipedia.org/wiki/Lin_Bekasi"
+          ]
+        },
+        {
+          "code": "BK",
+          "name": "Bekasi Line (Lin Bekasi) - Dukuh Atas to Jati Mulya",
+          "operator": "PT Kereta Api Indonesia (Persero), Divisi LRT Jabodebek",
+          "lengthKm": 29.54,
+          "status": "operating (opened 28 August 2023)",
+          "corridorType": "light-rail",
+          "stations": [
+            {
+              "name": "Dukuh Atas",
+              "code": "DKA",
+              "latitude": -6.204706,
+              "longitude": 106.825646,
+              "note": "Official name on the LRT Jabodebek station list is 'Dukuh Atas'; the official fare table calls it 'Dukuh Atas BNI'; id.wikipedia titles the article 'Stasiun LRT Dukuh Atas Bank Syariah Indonesia'. Shared terminus of both LRT Jabodebek lines and the northern end of the 18-station Phase 1 network. Interchange: KRL Commuter Line (Sudirman, BNI City), Commuter Line Soekarno-Hatta, MRT Jakarta North-South Line (Dukuh Atas BNI), Transjakarta Corridor 1 (Dukuh Atas) and Corridors 4/6 (Galunggung), LRT Jakarta (planned Dukuh Atas stop), Transjabodetabek B25. Dukuh Atas interchange complex."
+            },
+            {
+              "name": "Setiabudi",
+              "code": "SET",
+              "latitude": -6.209277,
+              "longitude": 106.830211,
+              "note": "Interchange: Transjakarta Corridor 6 (Setiabudi Integritas)."
+            },
+            {
+              "name": "Rasuna Said",
+              "code": "RAS",
+              "latitude": -6.221753,
+              "longitude": 106.832261,
+              "note": "Interchange: Transjakarta Corridor 6 (Rasuna Said)."
+            },
+            {
+              "name": "Kuningan",
+              "code": "KUA",
+              "latitude": -6.228881,
+              "longitude": 106.833175,
+              "note": "Interchange: Transjakarta Corridor 6 (Kuningan)."
+            },
+            {
+              "name": "Pancoran",
+              "code": null,
+              "latitude": -6.242127,
+              "longitude": 106.838469,
+              "note": "Official fare table and station list on lrtjabodebek.kai.id name it 'Pancoran bank bjb'. Interchange: Transjakarta Corridor 9 (Pancoran); Transjabodetabek P11. No 3-letter code published."
+            },
+            {
+              "name": "Cikoko",
+              "code": "CKK",
+              "latitude": -6.243476,
+              "longitude": 106.857102,
+              "note": "Interchange: KRL Commuter Line Bogor line (Cawang station); Transjakarta Corridor 9 (Cikoko)."
+            },
+            {
+              "name": "Ciliwung",
+              "code": "CIL",
+              "latitude": -6.243477,
+              "longitude": 106.864131,
+              "note": "Interchange: Transjakarta Corridor 9 (Ciliwung)."
+            },
+            {
+              "name": "Cawang",
+              "code": "CWG",
+              "latitude": -6.246225,
+              "longitude": 106.872386,
+              "note": "Branch point of the two LRT Jabodebek lines. Interchange: KRL Commuter Line Bogor line (Cawang station); Transjakarta Corridors 7 and 9 (Cawang); Transjabodetabek B11, B21."
+            },
+            {
+              "name": "Halim",
+              "code": "HAL",
+              "latitude": -6.246471,
+              "longitude": 106.885241,
+              "note": "On the Bekasi line only. Interchange: Whoosh high-speed rail (Halim station); KAI Commuter Line Cikarang line (Cawang is the nearest KRL interchange). id.wikipedia code field 'HLM (kereta cepat) / HAL (LRT)'."
+            },
+            {
+              "name": "Jati Bening Baru",
+              "code": "JBU",
+              "latitude": -6.257775,
+              "longitude": 106.927679,
+              "note": "Bekasi line only."
+            },
+            {
+              "name": "Cikunir 1",
+              "code": "CK1",
+              "latitude": -6.25624,
+              "longitude": 106.950998,
+              "note": "Bekasi line only."
+            },
+            {
+              "name": "Cikunir 2",
+              "code": "CK2",
+              "latitude": -6.254512,
+              "longitude": 106.963378,
+              "note": "Bekasi line only."
+            },
+            {
+              "name": "Bekasi Barat",
+              "code": "BEK",
+              "latitude": -6.252926,
+              "longitude": 106.990076,
+              "note": "Bekasi line only. Interchange: Transjakarta B1/B3 (Revo Town); Transjabodetabek B11, B25. Connected to Revo Town and Pakuwon Mall Bekasi."
+            },
+            {
+              "name": "Jati Mulya",
+              "code": "JTM",
+              "latitude": -6.263952,
+              "longitude": 107.021432,
+              "note": "Eastern terminus of the Bekasi line and the LRT Jabodebek depot. Interchange: Transjakarta TWM1, B1; Transjabodetabek B21."
+            }
+          ],
+          "sources": [
+            "https://lrtjabodebek.kai.id/stations",
+            "https://lrtjabodebek.kai.id/informasi-tarif",
+            "https://lrtjabodebek.kai.id/lrt-guides",
+            "https://lrtjabodebek.kai.id/jadwal-keberangkatan",
+            "https://id.wikipedia.org/wiki/LRT_Jabodebek",
+            "https://id.wikipedia.org/wiki/Lin_Cibubur",
+            "https://id.wikipedia.org/wiki/Lin_Bekasi"
+          ]
+        }
+      ]
+    },
+    {
+      "systemId": "krl-jabodetabek",
+      "name": "KRL Commuter Line Jabodetabek",
+      "mode": "commuter-rail",
+      "operator": "PT Kereta Api Indonesia (Persero) / KAI Commuter",
+      "serviceClass": "commuter-rail",
+      "lines": [
+        {
+          "code": "B",
+          "name": "Commuter Line Bogor",
+          "operator": "PT Kereta Api Indonesia (Persero) / KAI Commuter",
+          "lengthKm": 54.8,
+          "status": "operating (Jakarta Kota-Bogor); Nambo shuttle service since 28 May 2022",
+          "corridorType": "commuter-rail",
+          "stations": [
+            {
+              "name": "Jakarta Kota",
+              "code": "JAKK",
+              "latitude": -6.137579,
+              "longitude": 106.814634,
+              "note": "Western terminus of the Bogor line and of the Tanjung Priok line. Interchange: Transjakarta Corridors 1 and 12, Transjabodetabek routes 1A and 12B."
+            },
+            {
+              "name": "Jayakarta",
+              "code": "JAY",
+              "latitude": -6.141285,
+              "longitude": 106.823133,
+              "note": "Interchange: Transjakarta microtrans (mikrotrans)."
+            },
+            {
+              "name": "Mangga Besar",
+              "code": "MGB",
+              "latitude": -6.149681,
+              "longitude": 106.827026,
+              "note": ""
+            },
+            {
+              "name": "Sawah Besar",
+              "code": "SW",
+              "latitude": -6.160667,
+              "longitude": 106.827639,
+              "note": ""
+            },
+            {
+              "name": "Juanda",
+              "code": "JUA",
+              "latitude": -6.166722,
+              "longitude": 106.830473,
+              "note": "Interchange: Transjakarta Corridors 2, 5C, 7F and 8; Transjabodetabek T12; 51ST."
+            },
+            {
+              "name": "Gambir",
+              "code": "GMR",
+              "latitude": -6.176716,
+              "longitude": 106.830508,
+              "note": "KRL trains do not stop here (passes through only). Interchange: all intercity trains, Transjakarta Corridors 2 and 2A, Transjabodetabek 1P, 2P, 6H."
+            },
+            {
+              "name": "Gondangdia",
+              "code": "GDD",
+              "latitude": -6.185556,
+              "longitude": 106.832222,
+              "note": "Interchange: Transjakarta Corridor 1."
+            },
+            {
+              "name": "Cikini",
+              "code": "CKI",
+              "latitude": -6.19846,
+              "longitude": 106.841,
+              "note": "Interchange: Transjakarta Corridor 1."
+            },
+            {
+              "name": "Manggarai",
+              "code": "MRI",
+              "latitude": -6.2099,
+              "longitude": 106.85,
+              "note": "Major interchange hub: Commuter Line Cikarang, Commuter Line Soekarno-Hatta, LRT Jakarta (Manggarai LRT station), Transjakarta Corridors 4 and 4D; Manggarai bus terminal."
+            },
+            {
+              "name": "Tebet",
+              "code": "TEB",
+              "latitude": -6.22596,
+              "longitude": 106.858406,
+              "note": ""
+            },
+            {
+              "name": "Cawang",
+              "code": "CW",
+              "latitude": -6.24238,
+              "longitude": 106.858655,
+              "note": "Interchange: LRT Jabodebek (both lines), Transjakarta Corridors 7 and 9, Transjabodetabek B11, B21."
+            },
+            {
+              "name": "Duren Kalibata",
+              "code": "DRN",
+              "latitude": -6.255341,
+              "longitude": 106.855039,
+              "note": ""
+            },
+            {
+              "name": "Pasar Minggu Baru",
+              "code": "PSMB",
+              "latitude": -6.262784,
+              "longitude": 106.851857,
+              "note": ""
+            },
+            {
+              "name": "Pasar Minggu",
+              "code": "PSM",
+              "latitude": -6.284245,
+              "longitude": 106.844546,
+              "note": "Interchange: Transjakarta Corridor 9."
+            },
+            {
+              "name": "Tanjung Barat",
+              "code": "TNT",
+              "latitude": -6.307808,
+              "longitude": 106.838845,
+              "note": "Interchange: Transjakarta Corridor 1; MRT Jakarta Phase 4 (planned)."
+            },
+            {
+              "name": "Lenteng Agung",
+              "code": "LNA",
+              "latitude": -6.33066,
+              "longitude": 106.834981,
+              "note": ""
+            },
+            {
+              "name": "Universitas Pancasila",
+              "code": "UP",
+              "latitude": -6.33894,
+              "longitude": 106.83443,
+              "note": ""
+            },
+            {
+              "name": "Universitas Indonesia",
+              "code": "UI",
+              "latitude": -6.360754,
+              "longitude": 106.831748,
+              "note": ""
+            },
+            {
+              "name": "Pondok Cina",
+              "code": "POC",
+              "latitude": -6.368834,
+              "longitude": 106.832155,
+              "note": ""
+            },
+            {
+              "name": "Depok Baru",
+              "code": "DPB",
+              "latitude": -6.391045,
+              "longitude": 106.821678,
+              "note": ""
+            },
+            {
+              "name": "Depok",
+              "code": "DP",
+              "latitude": -6.404424,
+              "longitude": 106.817086,
+              "note": "Interchange: Transjakarta Corridor 1; MRT Jakarta Outer Ring Line (planned)."
+            },
+            {
+              "name": "Citayam",
+              "code": "CTA",
+              "latitude": -6.448794,
+              "longitude": 106.802412,
+              "note": "Branch point for the Nambo shuttle."
+            },
+            {
+              "name": "Bojonggede",
+              "code": "BJD",
+              "latitude": -6.49333,
+              "longitude": 106.795,
+              "note": ""
+            },
+            {
+              "name": "Cilebut",
+              "code": "CLT",
+              "latitude": -6.530575,
+              "longitude": 106.800606,
+              "note": ""
+            },
+            {
+              "name": "Sukaresmi",
+              "code": null,
+              "latitude": null,
+              "longitude": null,
+              "note": "No id.wikipedia station article exists (article title missing), so no 3-letter code could be verified."
+            },
+            {
+              "name": "Bogor",
+              "code": "BOO",
+              "latitude": -6.594078,
+              "longitude": 106.790822,
+              "note": "Eastern terminus of the Bogor line. Interchange: Transjakarta Corridor 1."
+            }
+          ],
+          "sources": [
+            "https://id.wikipedia.org/wiki/KRL_Commuter_Line",
+            "https://id.wikipedia.org/wiki/KAI_Commuter",
+            "https://id.wikipedia.org/wiki/Commuter_Line_Bogor",
+            "https://id.wikipedia.org/wiki/Commuter_Line_Cikarang",
+            "https://id.wikipedia.org/wiki/Commuter_Line_Rangkasbitung",
+            "https://id.wikipedia.org/wiki/Commuter_Line_Tangerang",
+            "https://id.wikipedia.org/wiki/Commuter_Line_Tanjung_Priok",
+            "https://www.kai.id/",
+            "https://commuterline.id/"
+          ]
+        },
+        {
+          "code": "Bb",
+          "name": "Commuter Line Bogor - Nambo shuttle",
+          "operator": "PT Kereta Api Indonesia (Persero) / KAI Commuter",
+          "lengthKm": 51.0,
+          "status": "operating (shuttle to Nambo since 28 May 2022)",
+          "corridorType": "commuter-rail",
+          "stations": [
+            {
+              "name": "Citayam",
+              "code": "CTA",
+              "latitude": -6.448794,
+              "longitude": 106.802412,
+              "note": "Branch point for the Nambo shuttle (permitted shuttle only)."
+            },
+            {
+              "name": "Pondok Rajeg",
+              "code": "PDRG",
+              "latitude": -6.4608,
+              "longitude": 106.82422,
+              "note": "Nambo shuttle."
+            },
+            {
+              "name": "Cibinong",
+              "code": "CBN",
+              "latitude": -6.464222,
+              "longitude": 106.85253,
+              "note": "Nambo shuttle."
+            },
+            {
+              "name": "Gunung Putri",
+              "code": "GPI",
+              "latitude": -6.47175,
+              "longitude": 106.888444,
+              "note": "Nambo shuttle."
+            },
+            {
+              "name": "Nambo",
+              "code": "NMO",
+              "latitude": -6.4662,
+              "longitude": 106.9062,
+              "note": "Eastern terminus of the Nambo shuttle."
+            }
+          ],
+          "sources": [
+            "https://id.wikipedia.org/wiki/KRL_Commuter_Line",
+            "https://id.wikipedia.org/wiki/KAI_Commuter",
+            "https://id.wikipedia.org/wiki/Commuter_Line_Bogor",
+            "https://id.wikipedia.org/wiki/Commuter_Line_Cikarang",
+            "https://id.wikipedia.org/wiki/Commuter_Line_Rangkasbitung",
+            "https://id.wikipedia.org/wiki/Commuter_Line_Tangerang",
+            "https://id.wikipedia.org/wiki/Commuter_Line_Tanjung_Priok",
+            "https://www.kai.id/",
+            "https://commuterline.id/"
+          ]
+        },
+        {
+          "code": "C",
+          "name": "Commuter Line Cikarang (Loop Line)",
+          "operator": "PT Kereta Api Indonesia (Persero) / KAI Commuter",
+          "lengthKm": 87.4,
+          "status": "operating (Kampung Bandan-Cikarang, and Angke-Cikarang since 28 May 2022)",
+          "corridorType": "commuter-rail",
+          "stations": [
+            {
+              "name": "Pondok Jati",
+              "code": "POK",
+              "latitude": -6.209172,
+              "longitude": 106.862273,
+              "note": "First station of the Loop (Lingkar) numbering. The C01-C14 chain is served as a one-way loop that closes through Cawang."
+            },
+            {
+              "name": "Kramat",
+              "code": "KMT",
+              "latitude": -6.193803,
+              "longitude": 106.856531,
+              "note": "Interchange: LRT Jakarta (Matraman station, nearby)."
+            },
+            {
+              "name": "Gang Sentiong",
+              "code": "GST",
+              "latitude": -6.18602,
+              "longitude": 106.850658,
+              "note": ""
+            },
+            {
+              "name": "Pasar Senen",
+              "code": "PSE",
+              "latitude": -6.173611,
+              "longitude": 106.844167,
+              "note": "Interchange: Transjakarta Corridors 2 and 14, Senen bus terminal. Only northbound (Kampung Bandan) trains stop here."
+            },
+            {
+              "name": "Kemayoran",
+              "code": "KMO",
+              "latitude": -6.16167,
+              "longitude": 106.841,
+              "note": ""
+            },
+            {
+              "name": "Rajawali",
+              "code": "RJW",
+              "latitude": -6.14505,
+              "longitude": 106.836698,
+              "note": ""
+            },
+            {
+              "name": "Kampung Bandan",
+              "code": "KPB",
+              "latitude": -6.1325,
+              "longitude": 106.829,
+              "note": "Interchange: Tanjung Priok line. Transjakarta Corridors 5 and 10H."
+            },
+            {
+              "name": "Angke",
+              "code": "AK",
+              "latitude": -6.14417,
+              "longitude": 106.801,
+              "note": "Only some half-racket journeys stop here."
+            },
+            {
+              "name": "Duri",
+              "code": "DU",
+              "latitude": -6.156302,
+              "longitude": 106.801063,
+              "note": "Interchange: Commuter Line Tangerang and Commuter Line Soekarno-Hatta."
+            },
+            {
+              "name": "Tanah Abang",
+              "code": "THB",
+              "latitude": -6.18556,
+              "longitude": 106.811,
+              "note": "Interchange: Commuter Line Rangkasbitung; Transjakarta Corridors 1 and 3; Tanah Abang bus terminal."
+            },
+            {
+              "name": "BNI City",
+              "code": "SUDB",
+              "latitude": -6.201657,
+              "longitude": 106.819848,
+              "note": "Interchange: Commuter Line Soekarno-Hatta, MRT Jakarta (Dukuh Atas BNI), LRT Jabodebek (Dukuh Atas), Transjakarta."
+            },
+            {
+              "name": "Sudirman",
+              "code": "SUD",
+              "latitude": -6.202437,
+              "longitude": 106.823335,
+              "note": "Interchange: Commuter Line Soekarno-Hatta, MRT Jakarta (Dukuh Atas BNI), LRT Jabodebek (Dukuh Atas), Transjakarta."
+            },
+            {
+              "name": "Manggarai",
+              "code": "MRI",
+              "latitude": -6.2099,
+              "longitude": 106.85,
+              "note": "Interchange: Commuter Line Bogor, Commuter Line Soekarno-Hatta, LRT Jakarta, Transjakarta."
+            },
+            {
+              "name": "Matraman",
+              "code": "MTR",
+              "latitude": -6.212563,
+              "longitude": 106.859825,
+              "note": "Interchange: LRT Jakarta (Matraman station)."
+            },
+            {
+              "name": "Jatinegara",
+              "code": "JNG",
+              "latitude": -6.215,
+              "longitude": 106.87,
+              "note": "Interchange: Transjakarta Corridors 1, 3, 5, 6 and 9; Jatinegara bus terminal; most long-distance trains."
+            },
+            {
+              "name": "Klender",
+              "code": "KLD",
+              "latitude": -6.213333,
+              "longitude": 106.899722,
+              "note": "Interchange: Transjakarta Corridor 11 (Flyover Klender)."
+            },
+            {
+              "name": "Buaran",
+              "code": "BUA",
+              "latitude": -6.215583,
+              "longitude": 106.923215,
+              "note": ""
+            },
+            {
+              "name": "Klender Baru",
+              "code": "KLDB",
+              "latitude": -6.217647,
+              "longitude": 106.940122,
+              "note": ""
+            },
+            {
+              "name": "Cakung",
+              "code": "CUK",
+              "latitude": -6.219031,
+              "longitude": 106.952433,
+              "note": "Interchange: MRT Jakarta Outer Ring Line (planned)."
+            },
+            {
+              "name": "Kranji",
+              "code": "KRI",
+              "latitude": -6.224512,
+              "longitude": 106.979846,
+              "note": ""
+            },
+            {
+              "name": "Bekasi",
+              "code": "BKS",
+              "latitude": -6.2359,
+              "longitude": 106.999,
+              "note": "Interchange: Transjakarta Corridor 1 and Transjabodetabek."
+            },
+            {
+              "name": "Bekasi Timur",
+              "code": "BKST",
+              "latitude": -6.246888,
+              "longitude": 107.018111,
+              "note": ""
+            },
+            {
+              "name": "Tambun",
+              "code": "TB",
+              "latitude": -6.25861,
+              "longitude": 107.056,
+              "note": ""
+            },
+            {
+              "name": "Cibitung",
+              "code": "CIT",
+              "latitude": -6.261879,
+              "longitude": 107.083664,
+              "note": ""
+            },
+            {
+              "name": "Metland Telagamurni",
+              "code": "TLM",
+              "latitude": -6.257417,
+              "longitude": 107.111125,
+              "note": ""
+            },
+            {
+              "name": "Cikarang",
+              "code": "CKR",
+              "latitude": -6.255393,
+              "longitude": 107.145129,
+              "note": "Eastern terminus of the Cikarang line. Interchange: Transjakarta W1; MRT East-West Line (planned)."
+            }
+          ],
+          "sources": [
+            "https://id.wikipedia.org/wiki/KRL_Commuter_Line",
+            "https://id.wikipedia.org/wiki/KAI_Commuter",
+            "https://id.wikipedia.org/wiki/Commuter_Line_Bogor",
+            "https://id.wikipedia.org/wiki/Commuter_Line_Cikarang",
+            "https://id.wikipedia.org/wiki/Commuter_Line_Rangkasbitung",
+            "https://id.wikipedia.org/wiki/Commuter_Line_Tangerang",
+            "https://id.wikipedia.org/wiki/Commuter_Line_Tanjung_Priok",
+            "https://www.kai.id/",
+            "https://commuterline.id/"
+          ]
+        },
+        {
+          "code": "R",
+          "name": "Commuter Line Rangkasbitung",
+          "operator": "PT Kereta Api Indonesia (Occurs) / KAI Commuter",
+          "lengthKm": 72.8,
+          "status": "operating (Tanah Abang-Rangkasbitung)",
+          "corridorType": "commuter-rail",
+          "stations": [
+            {
+              "name": "Tanah Abang",
+              "code": "THB",
+              "latitude": -6.18556,
+              "longitude": 106.811,
+              "note": "Interchange: Commuter Line Cikarang; Transjakarta."
+            },
+            {
+              "name": "Palmerah",
+              "code": "PLM",
+              "latitude": -6.207366,
+              "longitude": 106.797471,
+              "note": ""
+            },
+            {
+              "name": "Kebayoran",
+              "code": "KBY",
+              "latitude": -6.237228,
+              "longitude": 106.782537,
+              "note": ""
+            },
+            {
+              "name": "Pondok Ranji",
+              "code": "PDJ",
+              "latitude": -6.276595,
+              "longitude": 106.744651,
+              "note": ""
+            },
+            {
+              "name": "Jurangmangu",
+              "code": "JMU",
+              "latitude": -6.288612,
+              "longitude": 106.729154,
+              "note": ""
+            },
+            {
+              "name": "Sudimara",
+              "code": "SDM",
+              "latitude": -6.29672,
+              "longitude": 106.713,
+              "note": ""
+            },
+            {
+              "name": "Rawa Buntu",
+              "code": "RU",
+              "latitude": -6.315037,
+              "longitude": 106.676157,
+              "note": "id.wikipedia article title is 'Stasiun Rawa Buntu'; code field 'RU'."
+            },
+            {
+              "name": "Serpong",
+              "code": "SRP",
+              "latitude": -6.320145,
+              "longitude": 106.665149,
+              "note": ""
+            },
+            {
+              "name": "Cisauk",
+              "code": "CSK",
+              "latitude": -6.32484,
+              "longitude": 106.63877,
+              "note": ""
+            },
+            {
+              "name": "Cicayur",
+              "code": "CC",
+              "latitude": -6.329547,
+              "longitude": 106.616759,
+              "note": ""
+            },
+            {
+              "name": "Jatake",
+              "code": "JTK",
+              "latitude": -6.334755,
+              "longitude": 106.606389,
+              "note": ""
+            },
+            {
+              "name": "Parung Panjang",
+              "code": "PRP",
+              "latitude": -6.344154,
+              "longitude": 106.568659,
+              "note": ""
+            },
+            {
+              "name": "Lumpang Parayasa",
+              "code": null,
+              "latitude": -6.351688,
+              "longitude": 106.542496,
+              "note": "No 3-letter code published."
+            },
+            {
+              "name": "Cilejit",
+              "code": "CJT",
+              "latitude": -6.354368,
+              "longitude": 106.509581,
+              "note": ""
+            },
+            {
+              "name": "Daru",
+              "code": "DAR",
+              "latitude": -6.338054,
+              "longitude": 106.49246,
+              "note": ""
+            },
+            {
+              "name": "Tenjo",
+              "code": "TEJ",
+              "latitude": -6.327256,
+              "longitude": 106.461359,
+              "note": ""
+            },
+            {
+              "name": "Tigaraksa Podomoro",
+              "code": null,
+              "latitude": null,
+              "longitude": null,
+              "note": "id.wikipedia article exists but has no 3-letter code and no coordinate."
+            },
+            {
+              "name": "Tigaraksa",
+              "code": "TGS",
+              "latitude": -6.328333,
+              "longitude": 106.434722,
+              "note": ""
+            },
+            {
+              "name": "Cikoya",
+              "code": "CKY",
+              "latitude": -6.335561,
+              "longitude": 106.411791,
+              "note": ""
+            },
+            {
+              "name": "Maja",
+              "code": "MJ",
+              "latitude": -6.332312,
+              "longitude": 106.396561,
+              "note": ""
+            },
+            {
+              "name": "Citeras",
+              "code": "CTR",
+              "latitude": -6.334939,
+              "longitude": 106.330502,
+              "note": ""
+            },
+            {
+              "name": "Rangkasbitung",
+              "code": "RK",
+              "latitude": -6.35266,
+              "longitude": 106.25153,
+              "note": "Eastern terminus of the Rangkasbitung line."
+            }
+          ],
+          "sources": [
+            "https://id.wikipedia.org/wiki/KRL_Commuter_Line",
+            "https://id.wikipedia.org/wiki/KAI_Commuter",
+            "https://id.wikipedia.org/wiki/Commuter_Line_Bogor",
+            "https://id.wikipedia.org/wiki/Commuter_Line_Cikarang",
+            "https://id.wikipedia.org/wiki/Commuter_Line_Rangkasbitung",
+            "https://id.wikipedia.org/wiki/Commuter_Line_Tangerang",
+            "https://id.wikipedia.org/wiki/Commuter_Line_Tanjung_Priok",
+            "https://www.kai.id/",
+            "https://commuterline.id/"
+          ]
+        },
+        {
+          "code": "T",
+          "name": "Commuter Line Tangerang",
+          "operator": "PT Kereta Api Indonesia (Persero) / KAI Commuter",
+          "lengthKm": 19.3,
+          "status": "operating (Duri-Tangerang)",
+          "corridorType": "commuter-rail",
+          "stations": [
+            {
+              "name": "Duri",
+              "code": "DU",
+              "latitude": -6.156302,
+              "longitude": 106.801063,
+              "note": "Interchange: Commuter Line Cikarang and Commuter Line Soekarno-Hatta."
+            },
+            {
+              "name": "Grogol",
+              "code": "GRG",
+              "latitude": -6.162027,
+              "longitude": 106.789372,
+              "note": ""
+            },
+            {
+              "name": "Pesing",
+              "code": "PSG",
+              "latitude": -6.161266,
+              "longitude": 106.771467,
+              "note": ""
+            },
+            {
+              "name": "Taman Kota",
+              "code": "TKO",
+              "latitude": -6.158651,
+              "longitude": 106.75651,
+              "note": ""
+            },
+            {
+              "name": "Bojong Indah",
+              "code": "BOI",
+              "latitude": -6.159824,
+              "longitude": 106.737007,
+              "note": ""
+            },
+            {
+              "name": "Rawa Buaya",
+              "code": "RW",
+              "latitude": -6.16269,
+              "longitude": 106.723159,
+              "note": ""
+            },
+            {
+              "name": "Kalideres",
+              "code": "KDS",
+              "latitude": -6.165817,
+              "longitude": 106.704642,
+              "note": ""
+            },
+            {
+              "name": "Poris",
+              "code": "PI",
+              "latitude": -6.169939,
+              "longitude": 106.680006,
+              "note": ""
+            },
+            {
+              "name": "Tanah Tinggi",
+              "code": "TTI",
+              "latitude": -6.175453,
+              "longitude": 106.645491,
+              "note": ""
+            },
+            {
+              "name": "Tangerang",
+              "code": "TNG",
+              "latitude": -6.17694,
+              "longitude": 106.633,
+              "note": "Eastern terminus of the Tangerang line. id.wikipedia table gives the code as T11; the KAI code field is not published on a station article. Interchange: Transjakarta / Trans Tangerang."
+            }
+          ],
+          "sources": [
+            "https://id.wikipedia.org/wiki/KRL_Commuter_Line",
+            "https://id.wikipedia.org/wiki/KAI_Commuter",
+            "https://id.wikipedia.org/wiki/Commuter_Line_Bogor",
+            "https://id.wikipedia.org/wiki/Commuter_Line_Cikarang",
+            "https://id.wikipedia.org/wiki/Commuter_Line_Rangkasbitung",
+            "https://id.wikipedia.org/wiki/Commuter_Line_Tangerang",
+            "https://id.wikipedia.org/wiki/Commuter_Line_Tanjung_Priok",
+            "https://www.kai.id/",
+            "https://commuterline.id/"
+          ]
+        },
+        {
+          "code": "TP",
+          "name": "Commuter Line Tanjung Priok",
+          "operator": "PT Kereta Api Indonesia (Persero) / KAI Commuter",
+          "lengthKm": 8.1,
+          "status": "operating (Jakarta Kota-Tanjung Priok; full service since 22 December 2015)",
+          "corridorType": "commuter-rail",
+          "stations": [
+            {
+              "name": "Jakarta Kota",
+              "code": "JAKK",
+              "latitude": -6.137579,
+              "longitude": 106.814634,
+              "note": "Interchange: Commuter Line Bogor; Transjakarta."
+            },
+            {
+              "name": "Kampung Bandan",
+              "code": "KPB",
+              "latitude": -6.1325,
+              "longitude": 106.829,
+              "note": "Interchange: Commuter Line Cikarang; Transjakarta."
+            },
+            {
+              "name": "Ancol",
+              "code": "AC",
+              "latitude": -6.127987,
+              "longitude": 106.845137,
+              "note": "Interchange: Transjakarta Corridor 5, 12; MRT Jakarta Phase 2B (planned)."
+            },
+            {
+              "name": "Jakarta International Stadium",
+              "code": "JIS",
+              "latitude": -6.123017,
+              "longitude": 106.860396,
+              "note": "Interchange: Transjakarta Corridor 14; Jakarta International Stadium (JIEP)."
+            },
+            {
+              "name": "Tanjung Priok",
+              "code": "TPK",
+              "latitude": -6.11111,
+              "longitude": 106.881,
+              "note": "Eastern terminus of the Tanjung Priok line; port area."
+            }
+          ],
+          "sources": [
+            "https://id.wikipedia.org/wiki/KRL_Commuter_Line",
+            "https://id.wikipedia.org/wiki/KAI_Commuter",
+            "https://id.wikipedia.org/wiki/Commuter_Line_Bogor",
+            "https://id.wikipedia.org/wiki/Commuter_Line_Cikarang",
+            "https://id.wikipedia.org/wiki/Commuter_Line_Rangkasbitung",
+            "https://id.wikipedia.org/wiki/Commuter_Line_Tangerang",
+            "https://id.wikipedia.org/wiki/Commuter_Line_Tanjung_Priok",
+            "https://www.kai.id/",
+            "https://commuterline.id/"
+          ]
+        }
+      ]
+    }
+  ],
+  "notes": [
+    "Research snapshot date: 2026-10-20 (Asia/Jakarta). All statuses and opening dates reflect sources published up to that date.",
+    "IMPORTANT CORRECTION to the brief: the MRT Jakarta East-West Line is NOT in passenger service. As of 2026-10-20 the only operating MRT line is the North-South Line Phase 1 (13 stations, 15.7 km). The official MRT Jakarta project page describes the East-West Line as 'Fase 1 Tahap 1' (Phase 1 Stage 1) = Tomang-Medan Satria, 24.5 km, with groundbreaking on 11 September 2024. 'Jakarta International Stadium' and 'Kota Intan' in the brief are LRT Jakarta / planned-LRT names, not MRT Jakarta East-West Line stations.",
+    "IMPORTANT CORRECTION to the brief: there is no MRT Jakarta 'Phase 1.5 (Bundaran HI - Ancol)'. The extension north of Bundaran HI is Phase 2A (7 underground stations: Thamrin, Monas, Harmoni, Sawah Besar, Mangga Besar, Glodok, Kota; segment 1 target 2027, segment 2 target 2029) followed by Phase 2B (Kota-Ancol Barat).",
+    "IMPORTANT CORRECTION to the brief: LRT Jakarta is a single elevated line with 11 stations over 12.2 km (Kelapa Gading - Manggarai), not 13 stations over 5.1 km. The original 5.8 km / 6-station operation (Pegangsaan Dua/Kelapa Gading - Velodrome) has been in commercial service since 1 December 2019; the Phase 1B extension to Manggarai was inaugurated by President Prabowo Subianto on 16 September 2026.",
+    "IMPORTANT CORRECTION to the brief: LRT Jabodebek has 18 stations in Phase 1 (not 31), on two lines that share a common Dukuh Atas-Cawang trunk: Cibubur Line (Dukuh Atas-Harjamukti, 25.94 km) and Bekasi Line (Dukuh Atas-Jati Mulya, 29.54 km). Both opened on 28 August 2023. There is no 'Cawang-Depok Baru' or 'Cawang-Cibubur' branch pair.",
+    "IMPORTANT CORRECTION to the brief: the KRL 'Cibubur Line' is the former name of the Commuter Line Bogor. The KRL Lingkar (loop) route was reduced to five Jabodetabek lines after the 28 May 2022 restructuring. The Tanjung Priok Line runs Jakarta Kota - Kampung Bandan - Ancol - Jakarta International Stadium - Tanjung Priok.",
+    "Station codes: MRT Jakarta uses 3-letter codes (LBB, FTM, CPR, HJN, BLA, BLM, SSM, SNY, IST, BNH, STB, DKA, BHI). LRT Jakarta uses S-01..S-11 with 3-letter abbreviations. LRT Jabodebek uses 3-letter codes (DKA, SET, RAS, KUA, CKK, CIL, CWG, TMI, KAM, CRC, HAR, HAL, JBU, CK1, CK2, BEK, JTM). KAI uses 3-letter codes (JAKK, MGI, TPK, CW, ...). Indonesian Wikipedia additionally carries an 'NSnn' sequence for the MRT North-South Line and JakRSN badges (B/C/R/T/TP/A prefixes for KRL lines, M for MRT, S for LRT Jakarta, CB/BK for LRT Jabodebek, EW for the MRT East-West Line). Both are recorded in the note fields.",
+    "Coordinates are WGS84 decimal degrees taken from the Wikipedia infobox {{coord}} template where available, otherwise from the Wikidata P625 claim. Coordinates are null where no verifiable value could be found; no coordinate is estimated. Planned / not-yet-built stations (MRT Phase 2A/2B, MRT East-West Line) therefore have null coordinates.",
+    "No official GTFS feed was found for any of the four operators. See the report for every API endpoint that was tested.",
+    "The LRT Jakarta live-schedule API (https://lrtjakarta.co.id/api/schedule/live) and the LRT Jakarta /schedule page are the only machine-readable real-time endpoints found. They require no authentication."
+  ]
+}
