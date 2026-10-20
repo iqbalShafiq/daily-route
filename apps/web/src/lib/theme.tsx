@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { createContext, useContext, useEffect, useMemo, useState, type ReactNode } from "react";
 
 /**
  * The theme.
@@ -6,6 +6,10 @@ import { useEffect, useState } from "react";
  * The interface follows the system preference until the reader chooses
  * otherwise. The choice is stored, and applied as `data-theme` on the root
  * element, which is what the CSS custom properties key off.
+ *
+ * The theme is a context rather than a hook with local state: the header
+ * toggles it and the map follows it, and those are two different parts of
+ * the tree.
  */
 
 export type Theme = "light" | "dark";
@@ -47,7 +51,14 @@ export const themeBootstrapScript = `
 })();
 `;
 
-export function useTheme(): { theme: Theme; toggle: () => void } {
+type ThemeContextValue = {
+  theme: Theme;
+  toggle: () => void;
+};
+
+const ThemeContext = createContext<ThemeContextValue | null>(null);
+
+export function ThemeProvider({ children }: { children: ReactNode }) {
   const [theme, setTheme] = useState<Theme>(() => readStoredTheme() ?? systemTheme());
 
   useEffect(() => {
@@ -56,8 +67,22 @@ export function useTheme(): { theme: Theme; toggle: () => void } {
     window.localStorage.setItem(STORAGE_KEY, theme);
   }, [theme]);
 
-  return {
-    theme,
-    toggle: () => setTheme((current) => (current === "dark" ? "light" : "dark")),
-  };
+  const value = useMemo<ThemeContextValue>(
+    () => ({
+      theme,
+      toggle: () => setTheme((current) => (current === "dark" ? "light" : "dark")),
+    }),
+    [theme],
+  );
+
+  return <ThemeContext.Provider value={value}>{children}</ThemeContext.Provider>;
+}
+
+/** The current theme and the switch that changes it. */
+export function useTheme(): ThemeContextValue {
+  const context = useContext(ThemeContext);
+  if (!context) {
+    throw new Error("useTheme must be used inside a ThemeProvider");
+  }
+  return context;
 }

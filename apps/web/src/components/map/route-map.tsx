@@ -55,13 +55,19 @@ export function RouteMap({ routes, markers, theme, className, onMarkerClick }: R
     onMarkerClickRef.current = onMarkerClick;
   }, [onMarkerClick]);
 
+  // The latest data and theme, so a style reload can repaint them without
+  // the effect that triggered the reload having to know about them.
+  const routesRef = useRef(routes);
+  const markersRef = useRef(markers);
+  const themeRef = useRef(theme);
+
   // --- Create the map once ---------------------------------------------
   useEffect(() => {
     if (!containerRef.current || mapRef.current) return;
 
     const map = new MapLibreMap({
       container: containerRef.current,
-      style: mapStyleFor(theme),
+      style: mapStyleFor(themeRef.current),
       center: [JAKARTA_VIEW.center.longitude, JAKARTA_VIEW.center.latitude],
       zoom: JAKARTA_VIEW.zoom,
       attributionControl: { compact: true },
@@ -70,10 +76,17 @@ export function RouteMap({ routes, markers, theme, className, onMarkerClick }: R
 
     map.addControl(new NavigationControl({ showCompass: false }), "top-right");
 
-    map.on("load", () => {
+    // The style is the only thing that is reloaded, and every reload wipes
+    // the layers this component owns. One handler puts them back and
+    // repaints whatever the latest data is.
+    const onStyleReady = (): void => {
       addRouteLayers(map);
       addMarkerLayers(map);
-    });
+      syncRoutes(map, routesRef.current);
+      syncMarkers(map, markersRef.current);
+    };
+
+    map.on("load", onStyleReady);
 
     mapRef.current = map;
 
@@ -81,25 +94,27 @@ export function RouteMap({ routes, markers, theme, className, onMarkerClick }: R
       map.remove();
       mapRef.current = null;
     };
-    // The map is created once; theme and data are applied by the effects below.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   // --- Follow the theme -------------------------------------------------
   useEffect(() => {
     const map = mapRef.current;
     if (!map) return;
+    if (themeRef.current === theme) return;
+
+    themeRef.current = theme;
     map.setStyle(mapStyleFor(theme));
     map.once("styledata", () => {
       addRouteLayers(map);
       addMarkerLayers(map);
-      syncRoutes(map, routes);
-      syncMarkers(map, markers);
+      syncRoutes(map, routesRef.current);
+      syncMarkers(map, markersRef.current);
     });
-  }, [theme, routes, markers]);
+  }, [theme]);
 
   // --- Draw the routes --------------------------------------------------
   useEffect(() => {
+    routesRef.current = routes;
     const map = mapRef.current;
     if (!map || !map.isStyleLoaded()) return;
     syncRoutes(map, routes);
@@ -107,6 +122,7 @@ export function RouteMap({ routes, markers, theme, className, onMarkerClick }: R
 
   // --- Draw the markers -------------------------------------------------
   useEffect(() => {
+    markersRef.current = markers;
     const map = mapRef.current;
     if (!map || !map.isStyleLoaded()) return;
     syncMarkers(map, markers);

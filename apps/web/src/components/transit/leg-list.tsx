@@ -90,9 +90,15 @@ function LegRow({ leg, last }: { leg: ItineraryLeg; last: boolean }) {
         </div>
 
         <p className="mt-0.5 flex items-center gap-1.5 text-[13px] text-ink-2">
-          <span className="truncate">{leg.fromName}</span>
-          <ArrowRight aria-hidden className="size-3 shrink-0 text-ink-3" />
-          <span className="truncate">{leg.toName}</span>
+          {leg.fromName === leg.toName ? (
+            <span className="truncate">Transfer di {leg.fromName}</span>
+          ) : (
+            <>
+              <span className="truncate">{leg.fromName}</span>
+              <ArrowRight aria-hidden className="size-3 shrink-0 text-ink-3" />
+              <span className="truncate">{leg.toName}</span>
+            </>
+          )}
         </p>
 
         {leg.stops.length > 2 ? (

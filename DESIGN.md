@@ -193,7 +193,7 @@ Base UI's tooltip, wrapped. Required for every icon-only control. Delay
 MapLibre GL JS with OpenFreeMap tiles: no key, no quota, no cookie, and
 the attribution is rendered by MapLibre as the licence requires.
 
-- The light theme uses the `positron` style, the dark theme `fiord`.
+- The light theme uses the `positron` style, the dark theme `dark`.
 - The main route is a 5 px line with a 9 px white casing, so it stays
   legible over any map background.
 - An alternative route is a 4 px dashed line in `warn`.
@@ -201,6 +201,8 @@ the attribution is rendered by MapLibre as the licence requires.
   stops small dark dots.
 - The map fits the route when a route exists and shows Greater Jakarta
   otherwise.
+- The theme is one context shared by the header and the page, so the
+  switch in the header changes the map as well.
 - The legend sits at the bottom left in a translucent surface with a blur,
   and it never intercepts a pointer.
 
