@@ -4,7 +4,13 @@ import { dirname, resolve } from "node:path";
 import { loadCurated, type CuratedDocument } from "../curated.js";
 import { loadOfficialRoutes, OFFICIAL_ROUTES_PATH } from "../official.js";
 import { mergeNetwork } from "../merge.js";
-import { fetchNodes, fetchRouteRelations, fetchUnlinkedRailStations, toOsmRoute } from "../osm.js";
+import {
+  fetchNodes,
+  fetchRouteRelations,
+  fetchUnlinkedRailStations,
+  fetchWayTags,
+  toOsmRoute,
+} from "../osm.js";
 import type { SystemId } from "../classify.js";
 import { readCache, writeCache } from "../cache.js";
 import { loadFareRules, type FaresDocument } from "../fares.js";
@@ -71,8 +77,26 @@ async function main(): Promise<void> {
   const nodeMap = new Map(nodes.map((node) => [node.id, node]));
   console.log(`  ${nodeMap.size} nodes`);
 
+  console.log("· fetching the names of the roads");
+  const wayIds = relations.flatMap((relation) =>
+    (relation.members ?? [])
+      .filter((member) => member.type === "way")
+      .map((member) => member.ref),
+  );
+  let wayTags = await readCache<{ id: number; name: string; highway: string | null; ref: string | null }[]>(
+    "way-tags",
+    cacheOptions,
+  );
+  if (!wayTags) {
+    const fetched = await fetchWayTags(wayIds);
+    wayTags = [...fetched.entries()].map(([id, tags]) => ({ id, ...tags }));
+    await writeCache("way-tags", wayTags, cacheOptions);
+  }
+  const wayTagMap = new Map(wayTags.map((tags) => [tags.id, tags]));
+  console.log(`  ${wayTagMap.size} named roads`);
+
   const osmRoutes = relations
-    .map((relation) => toOsmRoute(relation, nodeMap))
+    .map((relation) => toOsmRoute(relation, nodeMap, wayTagMap))
     .filter((route): route is NonNullable<typeof route> => route !== null);
   console.log(`  ${osmRoutes.length} usable routes`);
 

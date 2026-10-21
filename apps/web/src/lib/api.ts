@@ -47,6 +47,8 @@ export type StationSummary = {
   isInterchange: boolean;
   /** How many lines serve the station. */
   lineCount?: number;
+  /** The road the station stands on, when it is known. */
+  street?: string | null;
   score?: number;
   /** The parts of the name that matched the query. */
   matchedRanges?: MatchedRange[];
@@ -192,8 +194,26 @@ export type StationDetail = {
   interchangeWith: { id: string; name: string; systemId: string }[];
 };
 
+/** The walk from the reader's place to the stop that serves it. */
+export type WalkRoute = {
+  stationId: string;
+  stationName: string;
+  stationLatitude: number;
+  stationLongitude: number;
+  straightDistanceKm: number;
+  distanceKm: number;
+  durationMinutes: number;
+  steps: { instruction: string; street: string | null; distanceKm: number }[];
+  geometry: { latitude: number; longitude: number }[];
+};
+
 export const api = {
   health: () => request<{ status: string; agent: boolean; model: string }>("/health"),
+
+  walk: (coordinates: { latitude: number; longitude: number }) =>
+    request<WalkRoute>(
+      `/walk?latitude=${coordinates.latitude}&longitude=${coordinates.longitude}`,
+    ),
 
   systems: () => request<SystemSummary[]>("/systems"),
 

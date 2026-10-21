@@ -294,6 +294,9 @@ export function PlaceInput({
                       {suggestion.lineCount ? (
                         <span>· {suggestion.lineCount} garis</span>
                       ) : null}
+                      {suggestion.street ? (
+                        <span className="truncate">· {suggestion.street}</span>
+                      ) : null}
                       {!confident ? (
                         <span className="rounded bg-surface-3 px-1.5 py-px text-[10px]">
                           kurang yakin

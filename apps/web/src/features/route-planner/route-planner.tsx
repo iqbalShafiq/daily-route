@@ -6,11 +6,12 @@ import { EmptyState, Spinner } from "../../components/ui/feedback.js";
 import { Tab, Tabs } from "../../components/ui/tabs.js";
 import { DisruptionBanner } from "../../components/transit/disruption-banner.js";
 import { LegList } from "../../components/transit/leg-list.js";
-import type { Itinerary, PlanResult } from "../../lib/api.js";
+import type { Itinerary, PlanResult, WalkRoute } from "../../lib/api.js";
 import { formatDistance, formatDuration, formatTimestamp } from "../../lib/format.js";
 
 import { PlaceInput } from "./place-input.js";
 import type { UsePlanResult } from "./use-plan.js";
+import { WalkPanel } from "./walk-panel.js";
 
 /**
  * The route planner.
@@ -42,6 +43,7 @@ export function RoutePlanner({
   activeLeg,
   onLegHover,
   onLegSelect,
+  onWalkReady,
 }: {
   origin: string;
   destination: string;
@@ -54,6 +56,7 @@ export function RoutePlanner({
   activeLeg?: string | null | undefined;
   onLegHover?: ((legId: string | null) => void) | undefined;
   onLegSelect?: ((legId: string) => void) | undefined;
+  onWalkReady?: ((walk: WalkRoute) => void) | undefined;
 }) {
   const data: PlanResult | undefined = plan.data;
   const itineraries = data?.itineraries ?? [];
@@ -68,6 +71,18 @@ export function RoutePlanner({
           title="Cari rute"
           description="Transjakarta, MRT, LRT Jakarta, LRT Jabodebek, dan KRL."
         />
+
+        {onWalkReady ? (
+          <div className="px-4 pb-3">
+            <WalkPanel
+              onWalk={(walk) => {
+                // The walk leads to the stop the journey starts from.
+                onOriginChange(walk.stationName);
+                onWalkReady(walk);
+              }}
+            />
+          </div>
+        ) : null}
 
         <form
           onSubmit={(event) => {
@@ -116,7 +131,7 @@ export function RoutePlanner({
         </form>
       </Card>
 
-      {plan.isPending && !data ? (
+      {plan.isFetching && !data ? (
         <Card>
           <div className="flex items-center justify-center px-4 py-10">
             <Spinner label="Menghitung rute…" />

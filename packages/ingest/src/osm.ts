@@ -24,6 +24,8 @@ export type OsmStop = {
   tags: Record<string, string>;
   wikidata: string | null;
   wikipedia: string | null;
+  /** The road the stop stands on, e.g. "Jalan Sabang". */
+  street: string | null;
 };
 
 export type OsmRoute = {
@@ -81,6 +83,47 @@ export async function fetchRouteRelations(): Promise<OverpassElement[]> {
 }
 
 /**
+/**
+ * The names of the roads of a list of ways.
+ *
+ * The route relations carry the geometry of the roads the vehicles drive
+ * on, but not the names of those roads. The name of the road a stop
+ * stands on is the address a rider needs when they are looking for the
+ * stop, so it is fetched here.
+ */
+export async function fetchWayTags(wayIds: readonly number[]): Promise<Map<number, WayTags>> {
+  const map = new Map<number, WayTags>();
+  const unique = [...new Set(wayIds)];
+  const chunkSize = 1500;
+  for (let index = 0; index < unique.length; index += chunkSize) {
+    const chunk = unique.slice(index, index + chunkSize);
+    if (chunk.length === 0) continue;
+    const elements = await overpass(
+      `[out:json][timeout:280];way(id:${chunk.join(",")});out tags;`,
+      { attemptsPerEndpoint: 3 },
+    );
+    for (const element of elements) {
+      const tags = element.tags ?? {};
+      const name = tags["name"] ?? tags["name:en"] ?? null;
+      if (!name) continue;
+      map.set(element.id, {
+        name,
+        highway: tags["highway"] ?? null,
+        ref: tags["ref"] ?? null,
+      });
+    }
+  }
+  return map;
+}
+
+/** The tags of a road that say where it is. */
+export type WayTags = {
+  name: string;
+  highway: string | null;
+  ref: string | null;
+};
+
+/**
  * Fetch the nodes of a list of ids.
  *
  * Overpass accepts many ids in one statement; the chunk size keeps the
@@ -126,6 +169,7 @@ function platformMembers(relation: OverpassElement): number[] {
 export function toOsmRoute(
   relation: OverpassElement,
   nodes: Map<number, OverpassElement>,
+  wayTags: Map<number, WayTags> = new Map(),
 ): OsmRoute | null {
   const tags = relation.tags ?? {};
   const systemId = systemForRelation(tags);
@@ -160,6 +204,7 @@ export function toOsmRoute(
       tags: nodeTags,
       wikidata: nodeTags["wikidata"] ?? null,
       wikipedia: nodeTags["wikipedia"] ?? null,
+      street: null,
     });
   });
 
@@ -171,18 +216,38 @@ export function toOsmRoute(
   const stopOffsets = new Map<number, number>();
   const stopByNodeId = new Map(resolved.map((stop) => [stop.nodeId, stop]));
 
+  /*
+   * The road every stretch of the path belongs to.
+   *
+   * The path is stitched from the ways of the relation, and every way is
+   * a road with a name. Remembering which way covers which part of the
+   * path is what tells the reader the address of a stop.
+   */
+  const wayAtIndex: (number | null)[] = [];
+
   for (const member of relation.members ?? []) {
     if (member.type === "way" && member.geometry && member.geometry.length > 0) {
+      const before = polyline.length;
       appendWay(
         polyline,
         member.geometry.map((point) => ({ latitude: point.lat, longitude: point.lon })),
       );
+      for (let index = before; index < polyline.length; index += 1) wayAtIndex[index] = member.ref;
       continue;
     }
     if (member.type === "node" && member.role === "stop") {
       if (!stopByNodeId.has(member.ref)) continue;
       stopOffsets.set(member.ref, Math.max(0, polyline.length - 1));
     }
+  }
+
+  // Every stop is given the name of the road the path runs on there.
+  for (const stop of resolved) {
+    const offset = stopOffsets.get(stop.nodeId);
+    if (offset === undefined) continue;
+    const wayId = wayAtIndex[Math.min(offset, wayAtIndex.length - 1)] ?? null;
+    const tags = wayId === null ? undefined : wayTags.get(wayId);
+    stop.street = tags?.name ?? null;
   }
 
   return {

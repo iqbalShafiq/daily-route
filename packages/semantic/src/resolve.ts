@@ -18,6 +18,8 @@ export type PlaceCandidate = {
   isInterchange: boolean;
   /** How many lines serve the station. */
   lineCount: number;
+  /** The road the station stands on, when it is known. */
+  street: string | null;
   aliases: string[];
   /** The blended score in `[0, 1]`. */
   score: number;
@@ -114,6 +116,7 @@ export class PlaceResolver {
         longitude: stations.longitude,
         isInterchange: stations.isInterchange,
         lineCount: stations.lineCount,
+        street: sql<string | null>`${stations.metadata} ->> 'street'`,
         aliases: stations.aliases,
         lexical: sql<number>`GREATEST(
           similarity(${stations.searchText}, ${query}),
@@ -155,6 +158,7 @@ export class PlaceResolver {
             longitude: stations.longitude,
             isInterchange: stations.isInterchange,
             lineCount: stations.lineCount,
+            street: sql<string | null>`${stations.metadata} ->> 'street'`,
             aliases: stations.aliases,
             vector: sql<number>`1 - (${stationEmbeddings.embedding} <=> ${vectorLiteral}::vector)`,
           })
@@ -207,6 +211,7 @@ export class PlaceResolver {
         longitude: row.longitude,
         isInterchange: row.isInterchange,
         lineCount: row.lineCount,
+        street: row.street ?? null,
         aliases,
         score,
         signals: { vector, lexical, exact },

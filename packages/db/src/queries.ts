@@ -145,6 +145,8 @@ export async function searchStationsLexical(
       longitude: stations.longitude,
       isInterchange: stations.isInterchange,
       aliases: stations.aliases,
+      /** The road the station stands on, when it is known. */
+      street: sql<string | null>`${stations.metadata} ->> 'street'`,
       systemName: systems.name,
       systemMode: systems.mode,
       similarity: sql<number>`GREATEST(

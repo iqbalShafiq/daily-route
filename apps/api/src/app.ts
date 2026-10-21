@@ -3,6 +3,7 @@ import express, { type Express } from "express";
 import type { ApiDeps } from "./deps.js";
 import { createAgentRouter } from "./routes/agent.js";
 import { createRoutesRouter } from "./routes/routes.js";
+import { createWalkRouter } from "./routes/walk.js";
 import { createTransitRouter } from "./routes/transit.js";
 
 /**
@@ -40,6 +41,7 @@ export function createApp(deps: ApiDeps): Express {
 
   app.use("/api", createTransitRouter(deps));
   app.use("/api/routes", createRoutesRouter(deps));
+  app.use("/api/walk", createWalkRouter(deps));
   app.use("/api/agent", createAgentRouter(deps));
 
   app.use((_request, response) => {

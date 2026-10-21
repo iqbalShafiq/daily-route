@@ -6,6 +6,7 @@ import { legIdOf } from "../components/transit/leg-list.js";
 import { ChatPanel } from "../features/chat/chat-panel.js";
 import { RoutePlanner } from "../features/route-planner/route-planner.js";
 import { usePlan } from "../features/route-planner/use-plan.js";
+import type { WalkRoute } from "../lib/api.js";
 import { Tab, Tabs } from "../components/ui/tabs.js";
 import { cn } from "../lib/cn.js";
 import { MODE_WIDTH, SERVICE_CLASS_COLOR, type ServiceClass } from "../lib/format.js";
@@ -24,6 +25,11 @@ export function PlannerPage() {
   const [submitted, setSubmitted] = useState<{ origin: string; destination: string } | null>(null);
   const [activeIndex, setActiveIndex] = useState(0);
   const [view, setView] = useState("route");
+  /**
+   * The walk from the reader's place to the stop the journey starts
+   * from. It is drawn on the map as the first part of the journey.
+   */
+  const [walk, setWalk] = useState<WalkRoute | null>(null);
   const { theme } = useTheme();
 
   const plan = usePlan(
@@ -64,6 +70,23 @@ export function PlannerPage() {
         kind: leg.kind,
         label: leg.kind === "walk" ? "Jalan kaki" : (leg.lineName ?? leg.lineCode ?? ""),
         order: index + 1,
+      });
+    }
+
+    /*
+     * The walk comes first: it is how the journey begins, and it is the
+     * part the reader has to do on foot.
+     */
+    if (walk) {
+      legs.unshift({
+        id: "walk-from-here",
+        coordinates: walk.geometry,
+        color: "var(--ink-3)",
+        width: 3,
+        kind: "walk",
+        label: `Berjalan ke ${walk.stationName}`,
+        order: 0,
+        dashed: true,
       });
     }
 
@@ -143,7 +166,7 @@ export function PlannerPage() {
     }
 
     return { legs, markers };
-  }, [plan.data, activeIndex, activeLeg]);
+  }, [plan.data, activeIndex, activeLeg, walk]);
 
   return (
     <div
@@ -183,6 +206,12 @@ export function PlannerPage() {
               activeLeg={activeLeg}
               onLegHover={setActiveLeg}
               onLegSelect={setActiveLeg}
+              onWalkReady={(next) => {
+                setWalk(next);
+                setOrigin(next.stationName);
+                setActiveIndex(0);
+                setSubmitted({ origin: next.stationName, destination: destination.trim() });
+              }}
             />
           ) : (
             <ChatPanel />

@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-10-21T04:20:05.831Z",
+  "generatedAt": "2026-10-21T04:55:21.134Z",
   "sources": [
     "OpenStreetMap (ODbL) via the Overpass API — station coordinates, route relations and stop order",
     "research/data/transjakarta.json — official corridor names, operators, service hours and stop lists",
@@ -10616,7 +10616,8 @@
         "osmNodeId": 11367374783,
         "wikidata": null,
         "wikipedia": null,
-        "routeRefs": []
+        "routeRefs": [],
+        "street": "Jalan Terminal Kampung Rambutan"
       }
     },
     {
@@ -10636,7 +10637,8 @@
         "osmNodeId": 11367374782,
         "wikidata": null,
         "wikipedia": null,
-        "routeRefs": []
+        "routeRefs": [],
+        "street": "Jalan Terminal Kampung Rambutan"
       }
     },
     {
@@ -10656,7 +10658,8 @@
         "osmNodeId": 11246216730,
         "wikidata": null,
         "wikipedia": null,
-        "routeRefs": []
+        "routeRefs": [],
+        "street": "Jalan Terminal Kampung Rambutan"
       }
     },
     {
@@ -10678,7 +10681,8 @@
         "osmNodeId": 4445992775,
         "wikidata": null,
         "wikipedia": null,
-        "routeRefs": []
+        "routeRefs": [],
+        "street": "Jalan Terminal Kampung Rambutan"
       }
     },
     {
@@ -10698,7 +10702,8 @@
         "osmNodeId": 11446059221,
         "wikidata": null,
         "wikipedia": null,
-        "routeRefs": []
+        "routeRefs": [],
+        "street": "Jalan Terminal Kampung Rambutan"
       }
     },
     {
@@ -10718,7 +10723,8 @@
         "osmNodeId": 3415432459,
         "wikidata": null,
         "wikipedia": null,
-        "routeRefs": []
+        "routeRefs": [],
+        "street": "Jalan Terminal Kampung Rambutan"
       }
     },
     {
@@ -10753,7 +10759,8 @@
         "osmNodeId": 11367104796,
         "wikidata": null,
         "wikipedia": null,
-        "routeRefs": []
+        "routeRefs": [],
+        "street": "Jalan Terminal Kampung Rambutan"
       }
     },
     {
@@ -10773,7 +10780,8 @@
         "osmNodeId": 11367104787,
         "wikidata": null,
         "wikipedia": null,
-        "routeRefs": []
+        "routeRefs": [],
+        "street": "Jalan Terminal Kampung Rambutan"
       }
     },
     {
@@ -10793,7 +10801,8 @@
         "osmNodeId": 11367104781,
         "wikidata": null,
         "wikipedia": null,
-        "routeRefs": []
+        "routeRefs": [],
+        "street": "Jalan Terminal Kampung Rambutan"
       }
     },
     {
@@ -10813,7 +10822,8 @@
         "osmNodeId": 5041493904,
         "wikidata": null,
         "wikipedia": null,
-        "routeRefs": []
+        "routeRefs": [],
+        "street": "Jalan Terminal Kampung Rambutan"
       }
     },
     {
@@ -10833,7 +10843,8 @@
         "osmNodeId": 5156497938,
         "wikidata": null,
         "wikipedia": null,
-        "routeRefs": []
+        "routeRefs": [],
+        "street": "Jalan Terminal Kampung Rambutan"
       }
     },
     {
@@ -10868,7 +10879,8 @@
         "osmNodeId": 10147881977,
         "wikidata": null,
         "wikipedia": null,
-        "routeRefs": []
+        "routeRefs": [],
+        "street": "Jalan Terminal Kampung Rambutan"
       }
     },
     {
@@ -11737,7 +11749,8 @@
         "osmNodeId": 11451968190,
         "wikidata": null,
         "wikipedia": null,
-        "routeRefs": []
+        "routeRefs": [],
+        "street": "Tanjung Priok"
       }
     },
     {
@@ -11757,7 +11770,8 @@
         "osmNodeId": 11452147523,
         "wikidata": null,
         "wikipedia": null,
-        "routeRefs": []
+        "routeRefs": [],
+        "street": "Tanjung Priok"
       }
     },
     {
@@ -11777,7 +11791,8 @@
         "osmNodeId": 11452164279,
         "wikidata": null,
         "wikipedia": null,
-        "routeRefs": []
+        "routeRefs": [],
+        "street": "Tanjung Priok"
       }
     },
     {
@@ -11797,7 +11812,8 @@
         "osmNodeId": 4271177306,
         "wikidata": null,
         "wikipedia": null,
-        "routeRefs": []
+        "routeRefs": [],
+        "street": "Tanjung Priok"
       }
     },
     {
@@ -11817,7 +11833,8 @@
         "osmNodeId": 11455985825,
         "wikidata": null,
         "wikipedia": null,
-        "routeRefs": []
+        "routeRefs": [],
+        "street": "Tanjung Priok"
       }
     },
     {
@@ -11837,7 +11854,8 @@
         "osmNodeId": 11455985831,
         "wikidata": null,
         "wikipedia": null,
-        "routeRefs": []
+        "routeRefs": [],
+        "street": "Tanjung Priok"
       }
     },
     {
@@ -11857,7 +11875,8 @@
         "osmNodeId": 4271177303,
         "wikidata": null,
         "wikipedia": null,
-        "routeRefs": []
+        "routeRefs": [],
+        "street": "Tanjung Priok"
       }
     },
     {
@@ -11877,7 +11896,8 @@
         "osmNodeId": 11499678434,
         "wikidata": null,
         "wikipedia": null,
-        "routeRefs": []
+        "routeRefs": [],
+        "street": "Tanjung Priok"
       }
     },
     {
@@ -11897,7 +11917,8 @@
         "osmNodeId": 11499678450,
         "wikidata": null,
         "wikipedia": null,
-        "routeRefs": []
+        "routeRefs": [],
+        "street": "Tanjung Priok"
       }
     },
     {
@@ -11917,7 +11938,8 @@
         "osmNodeId": 11499678464,
         "wikidata": null,
         "wikipedia": null,
-        "routeRefs": []
+        "routeRefs": [],
+        "street": "Tanjung Priok"
       }
     },
     {
@@ -11937,7 +11959,8 @@
         "osmNodeId": 11501531355,
         "wikidata": null,
         "wikipedia": null,
-        "routeRefs": []
+        "routeRefs": [],
+        "street": "Tanjung Priok"
       }
     },
     {
@@ -11957,7 +11980,8 @@
         "osmNodeId": 11501531365,
         "wikidata": null,
         "wikipedia": null,
-        "routeRefs": []
+        "routeRefs": [],
+        "street": "Tanjung Priok"
       }
     },
     {
@@ -11977,7 +12001,8 @@
         "osmNodeId": 4541302308,
         "wikidata": null,
         "wikipedia": null,
-        "routeRefs": []
+        "routeRefs": [],
+        "street": "Tanjung Priok"
       }
     },
     {
@@ -11997,7 +12022,8 @@
         "osmNodeId": 11501802994,
         "wikidata": null,
         "wikipedia": null,
-        "routeRefs": []
+        "routeRefs": [],
+        "street": "Tanjung Priok"
       }
     },
     {
@@ -12017,7 +12043,8 @@
         "osmNodeId": 11501799142,
         "wikidata": null,
         "wikipedia": null,
-        "routeRefs": []
+        "routeRefs": [],
+        "street": "Tanjung Priok"
       }
     },
     {
@@ -12037,7 +12064,8 @@
         "osmNodeId": 11501621017,
         "wikidata": null,
         "wikipedia": null,
-        "routeRefs": []
+        "routeRefs": [],
+        "street": "Tanjung Priok"
       }
     },
     {
@@ -12072,7 +12100,8 @@
         "osmNodeId": 11501548538,
         "wikidata": null,
         "wikipedia": null,
-        "routeRefs": []
+        "routeRefs": [],
+        "street": "Tanjung Priok"
       }
     },
     {
@@ -12092,7 +12121,8 @@
         "osmNodeId": 11452147540,
         "wikidata": null,
         "wikipedia": null,
-        "routeRefs": []
+        "routeRefs": [],
+        "street": "Tanjung Priok"
       }
     },
     {
@@ -12397,7 +12427,8 @@
         "osmNodeId": 11364666128,
         "wikidata": null,
         "wikipedia": null,
-        "routeRefs": []
+        "routeRefs": [],
+        "street": "Tanjung Priok"
       }
     },
     {
@@ -12417,7 +12448,8 @@
         "osmNodeId": 11364666079,
         "wikidata": null,
         "wikipedia": null,
-        "routeRefs": []
+        "routeRefs": [],
+        "street": "Tanjung Priok"
       }
     },
     {
@@ -12437,7 +12469,8 @@
         "osmNodeId": 6752669788,
         "wikidata": null,
         "wikipedia": null,
-        "routeRefs": []
+        "routeRefs": [],
+        "street": "Tanjung Priok"
       }
     },
     {
@@ -12457,7 +12490,8 @@
         "osmNodeId": 6749941305,
         "wikidata": null,
         "wikipedia": null,
-        "routeRefs": []
+        "routeRefs": [],
+        "street": "Tanjung Priok"
       }
     },
     {
@@ -12477,7 +12511,8 @@
         "osmNodeId": 11364666308,
         "wikidata": null,
         "wikipedia": null,
-        "routeRefs": []
+        "routeRefs": [],
+        "street": "Tanjung Priok"
       }
     },
     {
@@ -12497,7 +12532,8 @@
         "osmNodeId": 7564546197,
         "wikidata": null,
         "wikipedia": null,
-        "routeRefs": []
+        "routeRefs": [],
+        "street": "Tanjung Priok"
       }
     },
     {
@@ -12517,7 +12553,8 @@
         "osmNodeId": 11452292946,
         "wikidata": null,
         "wikipedia": null,
-        "routeRefs": []
+        "routeRefs": [],
+        "street": "Tanjung Priok"
       }
     },
     {
@@ -12537,7 +12574,8 @@
         "osmNodeId": 3415431052,
         "wikidata": null,
         "wikipedia": null,
-        "routeRefs": []
+        "routeRefs": [],
+        "street": "Tanjung Priok"
       }
     },
     {
@@ -12557,7 +12595,8 @@
         "osmNodeId": 6749677482,
         "wikidata": null,
         "wikipedia": null,
-        "routeRefs": []
+        "routeRefs": [],
+        "street": "Tanjung Priok"
       }
     },
     {
@@ -12592,7 +12631,8 @@
         "osmNodeId": 6749713918,
         "wikidata": null,
         "wikipedia": null,
-        "routeRefs": []
+        "routeRefs": [],
+        "street": "Tanjung Priok"
       }
     },
     {
@@ -12612,7 +12652,8 @@
         "osmNodeId": 11364666327,
         "wikidata": null,
         "wikipedia": null,
-        "routeRefs": []
+        "routeRefs": [],
+        "street": "Tanjung Priok"
       }
     },
     {
@@ -13431,7 +13472,8 @@
         "osmNodeId": 11649440866,
         "wikidata": null,
         "wikipedia": null,
-        "routeRefs": []
+        "routeRefs": [],
+        "street": "Jalan Medan Merdeka Selatan"
       }
     },
     {
@@ -13451,7 +13493,8 @@
         "osmNodeId": 11649440868,
         "wikidata": null,
         "wikipedia": null,
-        "routeRefs": []
+        "routeRefs": [],
+        "street": "Jalan Medan Merdeka Selatan"
       }
     },
     {
@@ -13471,7 +13514,8 @@
         "osmNodeId": 11649463370,
         "wikidata": null,
         "wikipedia": null,
-        "routeRefs": []
+        "routeRefs": [],
+        "street": "Jalan Medan Merdeka Selatan"
       }
     },
     {
@@ -13491,7 +13535,8 @@
         "osmNodeId": 4273569132,
         "wikidata": null,
         "wikipedia": null,
-        "routeRefs": []
+        "routeRefs": [],
+        "street": "Jalan Medan Merdeka Selatan"
       }
     },
     {
@@ -13511,7 +13556,8 @@
         "osmNodeId": 11653123074,
         "wikidata": null,
         "wikipedia": null,
-        "routeRefs": []
+        "routeRefs": [],
+        "street": "Jalan Medan Merdeka Selatan"
       }
     },
     {
@@ -13531,7 +13577,8 @@
         "osmNodeId": 11653123077,
         "wikidata": null,
         "wikipedia": null,
-        "routeRefs": []
+        "routeRefs": [],
+        "street": "Jalan Medan Merdeka Selatan"
       }
     },
     {
@@ -13551,7 +13598,8 @@
         "osmNodeId": 11653123080,
         "wikidata": null,
         "wikipedia": null,
-        "routeRefs": []
+        "routeRefs": [],
+        "street": "Jalan Medan Merdeka Selatan"
       }
     },
     {
@@ -13571,7 +13619,8 @@
         "osmNodeId": 11653123081,
         "wikidata": null,
         "wikipedia": null,
-        "routeRefs": []
+        "routeRefs": [],
+        "street": "Jalan Medan Merdeka Selatan"
       }
     },
     {
@@ -13591,7 +13640,8 @@
         "osmNodeId": 11653123083,
         "wikidata": null,
         "wikipedia": null,
-        "routeRefs": []
+        "routeRefs": [],
+        "street": "Jalan Medan Merdeka Selatan"
       }
     },
     {
@@ -13611,7 +13661,8 @@
         "osmNodeId": 11653123085,
         "wikidata": null,
         "wikipedia": null,
-        "routeRefs": []
+        "routeRefs": [],
+        "street": "Jalan Medan Merdeka Selatan"
       }
     },
     {
@@ -13631,7 +13682,8 @@
         "osmNodeId": 11653123087,
         "wikidata": null,
         "wikipedia": null,
-        "routeRefs": []
+        "routeRefs": [],
+        "street": "Jalan Medan Merdeka Selatan"
       }
     },
     {
@@ -13651,7 +13703,8 @@
         "osmNodeId": 11653123098,
         "wikidata": null,
         "wikipedia": null,
-        "routeRefs": []
+        "routeRefs": [],
+        "street": "Jalan Medan Merdeka Selatan"
       }
     },
     {
@@ -13671,7 +13724,8 @@
         "osmNodeId": 11653123102,
         "wikidata": null,
         "wikipedia": null,
-        "routeRefs": []
+        "routeRefs": [],
+        "street": "Jalan Medan Merdeka Selatan"
       }
     },
     {
@@ -13691,7 +13745,8 @@
         "osmNodeId": 11741906326,
         "wikidata": null,
         "wikipedia": null,
-        "routeRefs": []
+        "routeRefs": [],
+        "street": "Jalan Medan Merdeka Selatan"
       }
     },
     {
@@ -13711,7 +13766,8 @@
         "osmNodeId": 11741906328,
         "wikidata": null,
         "wikipedia": null,
-        "routeRefs": []
+        "routeRefs": [],
+        "street": "Jalan Medan Merdeka Selatan"
       }
     },
     {
@@ -13731,7 +13787,8 @@
         "osmNodeId": 11741906330,
         "wikidata": null,
         "wikipedia": null,
-        "routeRefs": []
+        "routeRefs": [],
+        "street": "Jalan Medan Merdeka Selatan"
       }
     },
     {
@@ -13751,7 +13808,8 @@
         "osmNodeId": 11741906334,
         "wikidata": null,
         "wikipedia": null,
-        "routeRefs": []
+        "routeRefs": [],
+        "street": "Jalan Medan Merdeka Selatan"
       }
     },
     {
@@ -13771,7 +13829,8 @@
         "osmNodeId": 11741906337,
         "wikidata": null,
         "wikipedia": null,
-        "routeRefs": []
+        "routeRefs": [],
+        "street": "Jalan Medan Merdeka Selatan"
       }
     },
     {
@@ -13791,7 +13850,8 @@
         "osmNodeId": 11741906340,
         "wikidata": null,
         "wikipedia": null,
-        "routeRefs": []
+        "routeRefs": [],
+        "street": "Jalan Medan Merdeka Selatan"
       }
     },
     {
@@ -13811,7 +13871,8 @@
         "osmNodeId": 11741906342,
         "wikidata": null,
         "wikipedia": null,
-        "routeRefs": []
+        "routeRefs": [],
+        "street": "Jalan Medan Merdeka Selatan"
       }
     },
     {
@@ -13831,7 +13892,8 @@
         "osmNodeId": 11741906349,
         "wikidata": null,
         "wikipedia": null,
-        "routeRefs": []
+        "routeRefs": [],
+        "street": "Jalan Medan Merdeka Selatan"
       }
     },
     {
@@ -13851,7 +13913,8 @@
         "osmNodeId": 11741906352,
         "wikidata": null,
         "wikipedia": null,
-        "routeRefs": []
+        "routeRefs": [],
+        "street": "Jalan Medan Merdeka Selatan"
       }
     },
     {
@@ -13961,7 +14024,8 @@
         "osmNodeId": 11644825346,
         "wikidata": null,
         "wikipedia": null,
-        "routeRefs": []
+        "routeRefs": [],
+        "street": "Jalan Tentara Pelajar"
       }
     },
     {
@@ -13981,7 +14045,8 @@
         "osmNodeId": 11644825348,
         "wikidata": null,
         "wikipedia": null,
-        "routeRefs": []
+        "routeRefs": [],
+        "street": "Jalan Tentara Pelajar"
       }
     },
     {
@@ -14001,7 +14066,8 @@
         "osmNodeId": 11644825350,
         "wikidata": null,
         "wikipedia": null,
-        "routeRefs": []
+        "routeRefs": [],
+        "street": "Jalan Tentara Pelajar"
       }
     },
     {
@@ -14021,7 +14087,8 @@
         "osmNodeId": 11645478173,
         "wikidata": null,
         "wikipedia": null,
-        "routeRefs": []
+        "routeRefs": [],
+        "street": "Jalan Tentara Pelajar"
       }
     },
     {
@@ -14041,7 +14108,8 @@
         "osmNodeId": 11642086736,
         "wikidata": null,
         "wikipedia": null,
-        "routeRefs": []
+        "routeRefs": [],
+        "street": "Jalan Tentara Pelajar"
       }
     },
     {
@@ -15116,7 +15184,8 @@
         "osmNodeId": 6315654295,
         "wikidata": null,
         "wikipedia": null,
-        "routeRefs": []
+        "routeRefs": [],
+        "street": "Jalan Jatibaru Raya"
       }
     },
     {
@@ -15136,7 +15205,8 @@
         "osmNodeId": 11644785258,
         "wikidata": null,
         "wikipedia": null,
-        "routeRefs": []
+        "routeRefs": [],
+        "street": "Jalan Jatibaru Raya"
       }
     },
     {
@@ -15156,7 +15226,8 @@
         "osmNodeId": 11642134275,
         "wikidata": null,
         "wikipedia": null,
-        "routeRefs": []
+        "routeRefs": [],
+        "street": "Jalan Jatibaru Raya"
       }
     },
     {
@@ -15176,7 +15247,8 @@
         "osmNodeId": 11642134274,
         "wikidata": null,
         "wikipedia": null,
-        "routeRefs": []
+        "routeRefs": [],
+        "street": "Jalan Jatibaru Raya"
       }
     },
     {
@@ -15196,7 +15268,8 @@
         "osmNodeId": 11644785259,
         "wikidata": null,
         "wikipedia": null,
-        "routeRefs": []
+        "routeRefs": [],
+        "street": "Jalan Jatibaru Raya"
       }
     },
     {
@@ -15216,7 +15289,8 @@
         "osmNodeId": 11644785261,
         "wikidata": null,
         "wikipedia": null,
-        "routeRefs": []
+        "routeRefs": [],
+        "street": "Jalan Jatibaru Raya"
       }
     },
     {
@@ -15236,7 +15310,8 @@
         "osmNodeId": 11644785264,
         "wikidata": null,
         "wikipedia": null,
-        "routeRefs": []
+        "routeRefs": [],
+        "street": "Jalan Jatibaru Raya"
       }
     },
     {
@@ -15256,7 +15331,8 @@
         "osmNodeId": 11644785262,
         "wikidata": null,
         "wikipedia": null,
-        "routeRefs": []
+        "routeRefs": [],
+        "street": "Jalan Jatibaru Raya"
       }
     },
     {
@@ -15276,7 +15352,8 @@
         "osmNodeId": 11644785266,
         "wikidata": null,
         "wikipedia": null,
-        "routeRefs": []
+        "routeRefs": [],
+        "street": "Jalan Jatibaru Raya"
       }
     },
     {
@@ -20296,7 +20373,8 @@
         "osmNodeId": 11959734423,
         "wikidata": null,
         "wikipedia": null,
-        "routeRefs": []
+        "routeRefs": [],
+        "street": "Puri Molek Barat"
       }
     },
     {
@@ -20316,7 +20394,8 @@
         "osmNodeId": 11959734424,
         "wikidata": null,
         "wikipedia": null,
-        "routeRefs": []
+        "routeRefs": [],
+        "street": "Puri Molek Barat"
       }
     },
     {
@@ -20336,7 +20415,8 @@
         "osmNodeId": 11959734425,
         "wikidata": null,
         "wikipedia": null,
-        "routeRefs": []
+        "routeRefs": [],
+        "street": "Puri Molek Barat"
       }
     },
     {
@@ -20356,7 +20436,8 @@
         "osmNodeId": 11959734426,
         "wikidata": null,
         "wikipedia": null,
-        "routeRefs": []
+        "routeRefs": [],
+        "street": "Puri Molek Barat"
       }
     },
     {
@@ -20376,7 +20457,8 @@
         "osmNodeId": 11959734429,
         "wikidata": null,
         "wikipedia": null,
-        "routeRefs": []
+        "routeRefs": [],
+        "street": "Puri Molek Barat"
       }
     },
     {
@@ -20396,7 +20478,8 @@
         "osmNodeId": 11959734430,
         "wikidata": null,
         "wikipedia": null,
-        "routeRefs": []
+        "routeRefs": [],
+        "street": "Puri Molek Barat"
       }
     },
     {
@@ -20416,7 +20499,8 @@
         "osmNodeId": 11959734432,
         "wikidata": null,
         "wikipedia": null,
-        "routeRefs": []
+        "routeRefs": [],
+        "street": "Puri Molek Barat"
       }
     },
     {
@@ -20436,7 +20520,8 @@
         "osmNodeId": 11959734433,
         "wikidata": null,
         "wikipedia": null,
-        "routeRefs": []
+        "routeRefs": [],
+        "street": "Puri Molek Barat"
       }
     },
     {
@@ -20456,7 +20541,8 @@
         "osmNodeId": 11959734434,
         "wikidata": null,
         "wikipedia": null,
-        "routeRefs": []
+        "routeRefs": [],
+        "street": "Puri Molek Barat"
       }
     },
     {
@@ -20476,7 +20562,8 @@
         "osmNodeId": 11959734435,
         "wikidata": null,
         "wikipedia": null,
-        "routeRefs": []
+        "routeRefs": [],
+        "street": "Puri Molek Barat"
       }
     },
     {
@@ -20496,7 +20583,8 @@
         "osmNodeId": 11959734436,
         "wikidata": null,
         "wikipedia": null,
-        "routeRefs": []
+        "routeRefs": [],
+        "street": "Puri Molek Barat"
       }
     },
     {
@@ -20516,7 +20604,8 @@
         "osmNodeId": 11959734437,
         "wikidata": null,
         "wikipedia": null,
-        "routeRefs": []
+        "routeRefs": [],
+        "street": "Puri Molek Barat"
       }
     },
     {
@@ -20536,7 +20625,8 @@
         "osmNodeId": 11959734438,
         "wikidata": null,
         "wikipedia": null,
-        "routeRefs": []
+        "routeRefs": [],
+        "street": "Puri Molek Barat"
       }
     },
     {
@@ -20556,7 +20646,8 @@
         "osmNodeId": 11959734439,
         "wikidata": null,
         "wikipedia": null,
-        "routeRefs": []
+        "routeRefs": [],
+        "street": "Puri Molek Barat"
       }
     },
     {
@@ -20576,7 +20667,8 @@
         "osmNodeId": 11959734441,
         "wikidata": null,
         "wikipedia": null,
-        "routeRefs": []
+        "routeRefs": [],
+        "street": "Puri Molek Barat"
       }
     },
     {
@@ -20596,7 +20688,8 @@
         "osmNodeId": 11959734442,
         "wikidata": null,
         "wikipedia": null,
-        "routeRefs": []
+        "routeRefs": [],
+        "street": "Puri Molek Barat"
       }
     },
     {
@@ -20616,7 +20709,8 @@
         "osmNodeId": 11959734447,
         "wikidata": null,
         "wikipedia": null,
-        "routeRefs": []
+        "routeRefs": [],
+        "street": "Puri Molek Barat"
       }
     },
     {
@@ -20636,7 +20730,8 @@
         "osmNodeId": 367789691,
         "wikidata": null,
         "wikipedia": null,
-        "routeRefs": []
+        "routeRefs": [],
+        "street": "Puri Molek Barat"
       }
     },
     {
@@ -20656,7 +20751,8 @@
         "osmNodeId": 11959734448,
         "wikidata": null,
         "wikipedia": null,
-        "routeRefs": []
+        "routeRefs": [],
+        "street": "Puri Molek Barat"
       }
     },
     {
@@ -20676,7 +20772,8 @@
         "osmNodeId": 11959734449,
         "wikidata": null,
         "wikipedia": null,
-        "routeRefs": []
+        "routeRefs": [],
+        "street": "Puri Molek Barat"
       }
     },
     {
@@ -20696,7 +20793,8 @@
         "osmNodeId": 11959734450,
         "wikidata": null,
         "wikipedia": null,
-        "routeRefs": []
+        "routeRefs": [],
+        "street": "Puri Molek Barat"
       }
     },
     {
@@ -21421,7 +21519,8 @@
         "osmNodeId": 11652299421,
         "wikidata": null,
         "wikipedia": null,
-        "routeRefs": []
+        "routeRefs": [],
+        "street": "Jalan Manggarai Utara I"
       }
     },
     {
@@ -21441,7 +21540,8 @@
         "osmNodeId": 11652299422,
         "wikidata": null,
         "wikipedia": null,
-        "routeRefs": []
+        "routeRefs": [],
+        "street": "Jalan Manggarai Utara I"
       }
     },
     {
@@ -21461,7 +21561,8 @@
         "osmNodeId": 11652299423,
         "wikidata": null,
         "wikipedia": null,
-        "routeRefs": []
+        "routeRefs": [],
+        "street": "Jalan Manggarai Utara I"
       }
     },
     {
@@ -21481,7 +21582,8 @@
         "osmNodeId": 11652299431,
         "wikidata": null,
         "wikipedia": null,
-        "routeRefs": []
+        "routeRefs": [],
+        "street": "Jalan Manggarai Utara I"
       }
     },
     {
@@ -21501,7 +21603,8 @@
         "osmNodeId": 11652299433,
         "wikidata": null,
         "wikipedia": null,
-        "routeRefs": []
+        "routeRefs": [],
+        "street": "Jalan Manggarai Utara I"
       }
     },
     {
@@ -21521,7 +21624,8 @@
         "osmNodeId": 11652339738,
         "wikidata": null,
         "wikipedia": null,
-        "routeRefs": []
+        "routeRefs": [],
+        "street": "Jalan Manggarai Utara I"
       }
     },
     {
@@ -21541,7 +21645,8 @@
         "osmNodeId": 8549036186,
         "wikidata": null,
         "wikipedia": null,
-        "routeRefs": []
+        "routeRefs": [],
+        "street": "Jalan Manggarai Utara I"
       }
     },
     {
@@ -21561,7 +21666,8 @@
         "osmNodeId": 11652339740,
         "wikidata": null,
         "wikipedia": null,
-        "routeRefs": []
+        "routeRefs": [],
+        "street": "Jalan Manggarai Utara I"
       }
     },
     {
@@ -21581,7 +21687,8 @@
         "osmNodeId": 11652339742,
         "wikidata": null,
         "wikipedia": null,
-        "routeRefs": []
+        "routeRefs": [],
+        "street": "Jalan Manggarai Utara I"
       }
     },
     {
@@ -21601,7 +21708,8 @@
         "osmNodeId": 7290812421,
         "wikidata": null,
         "wikipedia": null,
-        "routeRefs": []
+        "routeRefs": [],
+        "street": "Jalan Manggarai Utara I"
       }
     },
     {
@@ -21621,7 +21729,8 @@
         "osmNodeId": 11652339746,
         "wikidata": null,
         "wikipedia": null,
-        "routeRefs": []
+        "routeRefs": [],
+        "street": "Jalan Manggarai Utara I"
       }
     },
     {
@@ -21641,7 +21750,8 @@
         "osmNodeId": 11652339749,
         "wikidata": null,
         "wikipedia": null,
-        "routeRefs": []
+        "routeRefs": [],
+        "street": "Jalan Manggarai Utara I"
       }
     },
     {
@@ -21661,7 +21771,8 @@
         "osmNodeId": 11652339750,
         "wikidata": null,
         "wikipedia": null,
-        "routeRefs": []
+        "routeRefs": [],
+        "street": "Jalan Manggarai Utara I"
       }
     },
     {
@@ -21681,7 +21792,8 @@
         "osmNodeId": 11652339751,
         "wikidata": null,
         "wikipedia": null,
-        "routeRefs": []
+        "routeRefs": [],
+        "street": "Jalan Manggarai Utara I"
       }
     },
     {
@@ -21701,7 +21813,8 @@
         "osmNodeId": 11652339752,
         "wikidata": null,
         "wikipedia": null,
-        "routeRefs": []
+        "routeRefs": [],
+        "street": "Jalan Manggarai Utara I"
       }
     },
     {
@@ -21721,7 +21834,8 @@
         "osmNodeId": 11652866522,
         "wikidata": null,
         "wikipedia": null,
-        "routeRefs": []
+        "routeRefs": [],
+        "street": "Jalan Manggarai Utara I"
       }
     },
     {
@@ -21741,7 +21855,8 @@
         "osmNodeId": 11652866524,
         "wikidata": null,
         "wikipedia": null,
-        "routeRefs": []
+        "routeRefs": [],
+        "street": "Jalan Manggarai Utara I"
       }
     },
     {
@@ -21761,7 +21876,8 @@
         "osmNodeId": 11652866525,
         "wikidata": null,
         "wikipedia": null,
-        "routeRefs": []
+        "routeRefs": [],
+        "street": "Jalan Manggarai Utara I"
       }
     },
     {
@@ -21781,7 +21897,8 @@
         "osmNodeId": 11652866528,
         "wikidata": null,
         "wikipedia": null,
-        "routeRefs": []
+        "routeRefs": [],
+        "street": "Jalan Manggarai Utara I"
       }
     },
     {
@@ -21801,7 +21918,8 @@
         "osmNodeId": 11652866530,
         "wikidata": null,
         "wikipedia": null,
-        "routeRefs": []
+        "routeRefs": [],
+        "street": "Jalan Manggarai Utara I"
       }
     },
     {
@@ -21821,7 +21939,8 @@
         "osmNodeId": 11652866531,
         "wikidata": null,
         "wikipedia": null,
-        "routeRefs": []
+        "routeRefs": [],
+        "street": "Jalan Manggarai Utara I"
       }
     },
     {
@@ -21841,7 +21960,8 @@
         "osmNodeId": 6784550475,
         "wikidata": null,
         "wikipedia": null,
-        "routeRefs": []
+        "routeRefs": [],
+        "street": "Jalan Manggarai Utara I"
       }
     },
     {
@@ -21861,7 +21981,8 @@
         "osmNodeId": 11652866534,
         "wikidata": null,
         "wikipedia": null,
-        "routeRefs": []
+        "routeRefs": [],
+        "street": "Jalan Manggarai Utara I"
       }
     },
     {
@@ -21881,7 +22002,8 @@
         "osmNodeId": 11652866535,
         "wikidata": null,
         "wikipedia": null,
-        "routeRefs": []
+        "routeRefs": [],
+        "street": "Jalan Manggarai Utara I"
       }
     },
     {
@@ -21901,7 +22023,8 @@
         "osmNodeId": 11652866537,
         "wikidata": null,
         "wikipedia": null,
-        "routeRefs": []
+        "routeRefs": [],
+        "street": "Jalan Manggarai Utara I"
       }
     },
     {
@@ -21921,7 +22044,8 @@
         "osmNodeId": 11652866540,
         "wikidata": null,
         "wikipedia": null,
-        "routeRefs": []
+        "routeRefs": [],
+        "street": "Jalan Manggarai Utara I"
       }
     },
     {
@@ -21941,7 +22065,8 @@
         "osmNodeId": 11652866543,
         "wikidata": null,
         "wikipedia": null,
-        "routeRefs": []
+        "routeRefs": [],
+        "street": "Jalan Manggarai Utara I"
       }
     },
     {
@@ -21961,7 +22086,8 @@
         "osmNodeId": 11652866544,
         "wikidata": null,
         "wikipedia": null,
-        "routeRefs": []
+        "routeRefs": [],
+        "street": "Jalan Manggarai Utara I"
       }
     },
     {
@@ -21981,7 +22107,8 @@
         "osmNodeId": 11652866546,
         "wikidata": null,
         "wikipedia": null,
-        "routeRefs": []
+        "routeRefs": [],
+        "street": "Jalan Manggarai Utara I"
       }
     },
     {
@@ -22001,7 +22128,8 @@
         "osmNodeId": 11652866548,
         "wikidata": null,
         "wikipedia": null,
-        "routeRefs": []
+        "routeRefs": [],
+        "street": "Jalan Manggarai Utara I"
       }
     },
     {
@@ -22021,7 +22149,8 @@
         "osmNodeId": 11652866555,
         "wikidata": null,
         "wikipedia": null,
-        "routeRefs": []
+        "routeRefs": [],
+        "street": "Jalan Manggarai Utara I"
       }
     },
     {
@@ -22041,7 +22170,8 @@
         "osmNodeId": 11653188713,
         "wikidata": null,
         "wikipedia": null,
-        "routeRefs": []
+        "routeRefs": [],
+        "street": "Jalan Manggarai Utara I"
       }
     },
     {
@@ -22061,7 +22191,8 @@
         "osmNodeId": 11668873149,
         "wikidata": null,
         "wikipedia": null,
-        "routeRefs": []
+        "routeRefs": [],
+        "street": "Jalan Manggarai Utara I"
       }
     },
     {
@@ -22081,7 +22212,8 @@
         "osmNodeId": 11668873154,
         "wikidata": null,
         "wikipedia": null,
-        "routeRefs": []
+        "routeRefs": [],
+        "street": "Jalan Manggarai Utara I"
       }
     },
     {
@@ -22101,7 +22233,8 @@
         "osmNodeId": 11668873157,
         "wikidata": null,
         "wikipedia": null,
-        "routeRefs": []
+        "routeRefs": [],
+        "street": "Jalan Manggarai Utara I"
       }
     },
     {
@@ -22121,7 +22254,8 @@
         "osmNodeId": 11668873155,
         "wikidata": null,
         "wikipedia": null,
-        "routeRefs": []
+        "routeRefs": [],
+        "street": "Jalan Manggarai Utara I"
       }
     },
     {
@@ -22141,7 +22275,8 @@
         "osmNodeId": 11691659232,
         "wikidata": null,
         "wikipedia": null,
-        "routeRefs": []
+        "routeRefs": [],
+        "street": "Jalan Manggarai Utara I"
       }
     },
     {
@@ -22161,7 +22296,8 @@
         "osmNodeId": 11691659233,
         "wikidata": null,
         "wikipedia": null,
-        "routeRefs": []
+        "routeRefs": [],
+        "street": "Jalan Manggarai Utara I"
       }
     },
     {
@@ -22181,7 +22317,8 @@
         "osmNodeId": 11691659234,
         "wikidata": null,
         "wikipedia": null,
-        "routeRefs": []
+        "routeRefs": [],
+        "street": "Jalan Manggarai Utara I"
       }
     },
     {
@@ -22201,7 +22338,8 @@
         "osmNodeId": 11691659235,
         "wikidata": null,
         "wikipedia": null,
-        "routeRefs": []
+        "routeRefs": [],
+        "street": "Jalan Manggarai Utara I"
       }
     },
     {
@@ -22221,7 +22359,8 @@
         "osmNodeId": 11691659236,
         "wikidata": null,
         "wikipedia": null,
-        "routeRefs": []
+        "routeRefs": [],
+        "street": "Jalan Manggarai Utara I"
       }
     },
     {
@@ -22241,7 +22380,8 @@
         "osmNodeId": 6770905055,
         "wikidata": null,
         "wikipedia": null,
-        "routeRefs": []
+        "routeRefs": [],
+        "street": "Jalan Manggarai Utara I"
       }
     },
     {
@@ -22261,7 +22401,8 @@
         "osmNodeId": 6770905118,
         "wikidata": null,
         "wikipedia": null,
-        "routeRefs": []
+        "routeRefs": [],
+        "street": "Jalan Manggarai Utara I"
       }
     },
     {
@@ -22281,7 +22422,8 @@
         "osmNodeId": 10078203473,
         "wikidata": null,
         "wikipedia": null,
-        "routeRefs": []
+        "routeRefs": [],
+        "street": "Jalan Manggarai Utara I"
       }
     },
     {
@@ -22301,7 +22443,8 @@
         "osmNodeId": 6770905189,
         "wikidata": null,
         "wikipedia": null,
-        "routeRefs": []
+        "routeRefs": [],
+        "street": "Jalan Manggarai Utara I"
       }
     },
     {
@@ -22666,7 +22809,8 @@
         "osmNodeId": 11746760781,
         "wikidata": null,
         "wikipedia": null,
-        "routeRefs": []
+        "routeRefs": [],
+        "street": "Jalan Pemuda"
       }
     },
     {
@@ -22686,7 +22830,8 @@
         "osmNodeId": 11746760775,
         "wikidata": null,
         "wikipedia": null,
-        "routeRefs": []
+        "routeRefs": [],
+        "street": "Jalan Pemuda"
       }
     },
     {
@@ -22706,7 +22851,8 @@
         "osmNodeId": 11746760773,
         "wikidata": null,
         "wikipedia": null,
-        "routeRefs": []
+        "routeRefs": [],
+        "street": "Jalan Pemuda"
       }
     },
     {
@@ -22726,7 +22872,8 @@
         "osmNodeId": 11746746467,
         "wikidata": null,
         "wikipedia": null,
-        "routeRefs": []
+        "routeRefs": [],
+        "street": "Jalan Pemuda"
       }
     },
     {
@@ -22746,7 +22893,8 @@
         "osmNodeId": 11746746464,
         "wikidata": null,
         "wikipedia": null,
-        "routeRefs": []
+        "routeRefs": [],
+        "street": "Jalan Pemuda"
       }
     },
     {
@@ -22766,7 +22914,8 @@
         "osmNodeId": 11746746460,
         "wikidata": null,
         "wikipedia": null,
-        "routeRefs": []
+        "routeRefs": [],
+        "street": "Jalan Pemuda"
       }
     },
     {
@@ -22786,7 +22935,8 @@
         "osmNodeId": 11746746456,
         "wikidata": null,
         "wikipedia": null,
-        "routeRefs": []
+        "routeRefs": [],
+        "street": "Jalan Pemuda"
       }
     },
     {
@@ -22806,7 +22956,8 @@
         "osmNodeId": 11746746452,
         "wikidata": null,
         "wikipedia": null,
-        "routeRefs": []
+        "routeRefs": [],
+        "street": "Jalan Pemuda"
       }
     },
     {
@@ -22826,7 +22977,8 @@
         "osmNodeId": 11746746448,
         "wikidata": null,
         "wikipedia": null,
-        "routeRefs": []
+        "routeRefs": [],
+        "street": "Jalan Pemuda"
       }
     },
     {
@@ -22846,7 +22998,8 @@
         "osmNodeId": 316412085,
         "wikidata": null,
         "wikipedia": null,
-        "routeRefs": []
+        "routeRefs": [],
+        "street": "Jalan Pemuda"
       }
     },
     {
@@ -22866,7 +23019,8 @@
         "osmNodeId": 11746746439,
         "wikidata": null,
         "wikipedia": null,
-        "routeRefs": []
+        "routeRefs": [],
+        "street": "Jalan Pemuda"
       }
     },
     {
@@ -22886,7 +23040,8 @@
         "osmNodeId": 11746746436,
         "wikidata": null,
         "wikipedia": null,
-        "routeRefs": []
+        "routeRefs": [],
+        "street": "Jalan Pemuda"
       }
     },
     {
@@ -22906,7 +23061,8 @@
         "osmNodeId": 315208157,
         "wikidata": null,
         "wikipedia": null,
-        "routeRefs": []
+        "routeRefs": [],
+        "street": "Jalan Pemuda"
       }
     },
     {
@@ -22926,7 +23082,8 @@
         "osmNodeId": 11645610217,
         "wikidata": null,
         "wikipedia": null,
-        "routeRefs": []
+        "routeRefs": [],
+        "street": "Jalan Pemuda"
       }
     },
     {
@@ -22946,7 +23103,8 @@
         "osmNodeId": 11645610216,
         "wikidata": null,
         "wikipedia": null,
-        "routeRefs": []
+        "routeRefs": [],
+        "street": "Jalan Pemuda"
       }
     },
     {
@@ -22966,7 +23124,8 @@
         "osmNodeId": 11645610214,
         "wikidata": null,
         "wikipedia": null,
-        "routeRefs": []
+        "routeRefs": [],
+        "street": "Jalan Pemuda"
       }
     },
     {
@@ -22986,7 +23145,8 @@
         "osmNodeId": 11645610208,
         "wikidata": null,
         "wikipedia": null,
-        "routeRefs": []
+        "routeRefs": [],
+        "street": "Jalan Pemuda"
       }
     },
     {
@@ -23006,7 +23166,8 @@
         "osmNodeId": 11645610205,
         "wikidata": null,
         "wikipedia": null,
-        "routeRefs": []
+        "routeRefs": [],
+        "street": "Jalan Pemuda"
       }
     },
     {
@@ -23026,7 +23187,8 @@
         "osmNodeId": 11294810304,
         "wikidata": null,
         "wikipedia": null,
-        "routeRefs": []
+        "routeRefs": [],
+        "street": "Jalan Pemuda"
       }
     },
     {
@@ -23046,7 +23208,8 @@
         "osmNodeId": 11645610200,
         "wikidata": null,
         "wikipedia": null,
-        "routeRefs": []
+        "routeRefs": [],
+        "street": "Jalan Pemuda"
       }
     },
     {
@@ -23066,7 +23229,8 @@
         "osmNodeId": 4513408273,
         "wikidata": null,
         "wikipedia": null,
-        "routeRefs": []
+        "routeRefs": [],
+        "street": "Jalan Pemuda"
       }
     },
     {
@@ -23086,7 +23250,8 @@
         "osmNodeId": 11958396139,
         "wikidata": null,
         "wikipedia": null,
-        "routeRefs": []
+        "routeRefs": [],
+        "street": "Jalan Pemuda"
       }
     },
     {
@@ -23106,7 +23271,8 @@
         "osmNodeId": 11645818280,
         "wikidata": null,
         "wikipedia": null,
-        "routeRefs": []
+        "routeRefs": [],
+        "street": "Jalan Pemuda"
       }
     },
     {
@@ -23126,7 +23292,8 @@
         "osmNodeId": 11622998029,
         "wikidata": null,
         "wikipedia": null,
-        "routeRefs": []
+        "routeRefs": [],
+        "street": "Jalan Pemuda"
       }
     },
     {
@@ -25961,7 +26128,8 @@
         "osmNodeId": 11652108107,
         "wikidata": null,
         "wikipedia": null,
-        "routeRefs": []
+        "routeRefs": [],
+        "street": "Jalan Kyai Haji Mas Mansyur"
       }
     },
     {
@@ -25981,7 +26149,8 @@
         "osmNodeId": 6504209853,
         "wikidata": null,
         "wikipedia": null,
-        "routeRefs": []
+        "routeRefs": [],
+        "street": "Jalan Kyai Haji Mas Mansyur"
       }
     },
     {
@@ -26001,7 +26170,8 @@
         "osmNodeId": 11652108095,
         "wikidata": null,
         "wikipedia": null,
-        "routeRefs": []
+        "routeRefs": [],
+        "street": "Jalan Kyai Haji Mas Mansyur"
       }
     },
     {
@@ -26021,7 +26191,8 @@
         "osmNodeId": 11652108104,
         "wikidata": null,
         "wikipedia": null,
-        "routeRefs": []
+        "routeRefs": [],
+        "street": "Jalan Kyai Haji Mas Mansyur"
       }
     },
     {
@@ -26041,7 +26212,8 @@
         "osmNodeId": 11652108102,
         "wikidata": null,
         "wikipedia": null,
-        "routeRefs": []
+        "routeRefs": [],
+        "street": "Jalan Kyai Haji Mas Mansyur"
       }
     },
     {
@@ -26061,7 +26233,8 @@
         "osmNodeId": 11652108100,
         "wikidata": null,
         "wikipedia": null,
-        "routeRefs": []
+        "routeRefs": [],
+        "street": "Jalan Kyai Haji Mas Mansyur"
       }
     },
     {
@@ -26081,7 +26254,8 @@
         "osmNodeId": 11652108099,
         "wikidata": null,
         "wikipedia": null,
-        "routeRefs": []
+        "routeRefs": [],
+        "street": "Jalan Kyai Haji Mas Mansyur"
       }
     },
     {
@@ -26101,7 +26275,8 @@
         "osmNodeId": 11652108097,
         "wikidata": null,
         "wikipedia": null,
-        "routeRefs": []
+        "routeRefs": [],
+        "street": "Jalan Kyai Haji Mas Mansyur"
       }
     },
     {
@@ -26121,7 +26296,8 @@
         "osmNodeId": 11652063691,
         "wikidata": null,
         "wikipedia": null,
-        "routeRefs": []
+        "routeRefs": [],
+        "street": "Jalan Kyai Haji Mas Mansyur"
       }
     },
     {
@@ -26141,7 +26317,8 @@
         "osmNodeId": 11652063694,
         "wikidata": null,
         "wikipedia": null,
-        "routeRefs": []
+        "routeRefs": [],
+        "street": "Jalan Kyai Haji Mas Mansyur"
       }
     },
     {
@@ -26161,7 +26338,8 @@
         "osmNodeId": 11652063687,
         "wikidata": null,
         "wikipedia": null,
-        "routeRefs": []
+        "routeRefs": [],
+        "street": "Jalan Kyai Haji Mas Mansyur"
       }
     },
     {
@@ -26181,7 +26359,8 @@
         "osmNodeId": 11652063682,
         "wikidata": null,
         "wikipedia": null,
-        "routeRefs": []
+        "routeRefs": [],
+        "street": "Jalan Kyai Haji Mas Mansyur"
       }
     },
     {
@@ -26201,7 +26380,8 @@
         "osmNodeId": 11652063680,
         "wikidata": null,
         "wikipedia": null,
-        "routeRefs": []
+        "routeRefs": [],
+        "street": "Jalan Kyai Haji Mas Mansyur"
       }
     },
     {
@@ -26221,7 +26401,8 @@
         "osmNodeId": 11652063677,
         "wikidata": null,
         "wikipedia": null,
-        "routeRefs": []
+        "routeRefs": [],
+        "street": "Jalan Kyai Haji Mas Mansyur"
       }
     },
     {
@@ -26241,7 +26422,8 @@
         "osmNodeId": 11652063672,
         "wikidata": null,
         "wikipedia": null,
-        "routeRefs": []
+        "routeRefs": [],
+        "street": "Jalan Kyai Haji Mas Mansyur"
       }
     },
     {
@@ -26261,7 +26443,8 @@
         "osmNodeId": 11650528834,
         "wikidata": null,
         "wikipedia": null,
-        "routeRefs": []
+        "routeRefs": [],
+        "street": "Jalan Kyai Haji Mas Mansyur"
       }
     },
     {
@@ -26281,7 +26464,8 @@
         "osmNodeId": 11650528832,
         "wikidata": null,
         "wikipedia": null,
-        "routeRefs": []
+        "routeRefs": [],
+        "street": "Jalan Kyai Haji Mas Mansyur"
       }
     },
     {
@@ -26301,7 +26485,8 @@
         "osmNodeId": 11956298140,
         "wikidata": null,
         "wikipedia": null,
-        "routeRefs": []
+        "routeRefs": [],
+        "street": "Jalan Kyai Haji Mas Mansyur"
       }
     },
     {
@@ -26321,7 +26506,8 @@
         "osmNodeId": 11650528830,
         "wikidata": null,
         "wikipedia": null,
-        "routeRefs": []
+        "routeRefs": [],
+        "street": "Jalan Kyai Haji Mas Mansyur"
       }
     },
     {
@@ -26341,7 +26527,8 @@
         "osmNodeId": 11650528822,
         "wikidata": null,
         "wikipedia": null,
-        "routeRefs": []
+        "routeRefs": [],
+        "street": "Jalan Kyai Haji Mas Mansyur"
       }
     },
     {
@@ -26361,7 +26548,8 @@
         "osmNodeId": 11650528820,
         "wikidata": null,
         "wikipedia": null,
-        "routeRefs": []
+        "routeRefs": [],
+        "street": "Jalan Kyai Haji Mas Mansyur"
       }
     },
     {
@@ -28521,7 +28709,8 @@
         "osmNodeId": 11652050757,
         "wikidata": null,
         "wikipedia": null,
-        "routeRefs": []
+        "routeRefs": [],
+        "street": "Jalan K. Haji Abdul Syafi'ie"
       }
     },
     {
@@ -28586,7 +28775,8 @@
         "osmNodeId": 11652050768,
         "wikidata": null,
         "wikipedia": null,
-        "routeRefs": []
+        "routeRefs": [],
+        "street": "Jalan Kyai Haji Mas Mansyur"
       }
     },
     {
@@ -29126,7 +29316,8 @@
         "osmNodeId": 11956298109,
         "wikidata": null,
         "wikipedia": null,
-        "routeRefs": []
+        "routeRefs": [],
+        "street": "Jalan Galunggung"
       }
     },
     {
@@ -29146,7 +29337,8 @@
         "osmNodeId": 11956298111,
         "wikidata": null,
         "wikipedia": null,
-        "routeRefs": []
+        "routeRefs": [],
+        "street": "Jalan Galunggung"
       }
     },
     {
@@ -29166,7 +29358,8 @@
         "osmNodeId": 11956298117,
         "wikidata": null,
         "wikipedia": null,
-        "routeRefs": []
+        "routeRefs": [],
+        "street": "Jalan Galunggung"
       }
     },
     {
@@ -29186,7 +29379,8 @@
         "osmNodeId": 11956298119,
         "wikidata": null,
         "wikipedia": null,
-        "routeRefs": []
+        "routeRefs": [],
+        "street": "Jalan Galunggung"
       }
     },
     {
@@ -29206,7 +29400,8 @@
         "osmNodeId": 11956298123,
         "wikidata": null,
         "wikipedia": null,
-        "routeRefs": []
+        "routeRefs": [],
+        "street": "Jalan Galunggung"
       }
     },
     {
@@ -29226,7 +29421,8 @@
         "osmNodeId": 11956298129,
         "wikidata": null,
         "wikipedia": null,
-        "routeRefs": []
+        "routeRefs": [],
+        "street": "Jalan Galunggung"
       }
     },
     {
@@ -29246,7 +29442,8 @@
         "osmNodeId": 11956298132,
         "wikidata": null,
         "wikipedia": null,
-        "routeRefs": []
+        "routeRefs": [],
+        "street": "Jalan Galunggung"
       }
     },
     {
@@ -29701,7 +29898,8 @@
         "osmNodeId": 11666657629,
         "wikidata": null,
         "wikipedia": null,
-        "routeRefs": []
+        "routeRefs": [],
+        "street": "Jalan Pasar Minggu Raya"
       }
     },
     {
@@ -29721,7 +29919,8 @@
         "osmNodeId": 11666657630,
         "wikidata": null,
         "wikipedia": null,
-        "routeRefs": []
+        "routeRefs": [],
+        "street": "Jalan Pasar Minggu Raya"
       }
     },
     {
@@ -29741,7 +29940,8 @@
         "osmNodeId": 11666657637,
         "wikidata": null,
         "wikipedia": null,
-        "routeRefs": []
+        "routeRefs": [],
+        "street": "Jalan Pasar Minggu Raya"
       }
     },
     {
@@ -29761,7 +29961,8 @@
         "osmNodeId": 11666657639,
         "wikidata": null,
         "wikipedia": null,
-        "routeRefs": []
+        "routeRefs": [],
+        "street": "Jalan Pasar Minggu Raya"
       }
     },
     {
@@ -29781,7 +29982,8 @@
         "osmNodeId": 11681599450,
         "wikidata": null,
         "wikipedia": null,
-        "routeRefs": []
+        "routeRefs": [],
+        "street": "Jalan Pasar Minggu Raya"
       }
     },
     {
@@ -29801,7 +30003,8 @@
         "osmNodeId": 11681599452,
         "wikidata": null,
         "wikipedia": null,
-        "routeRefs": []
+        "routeRefs": [],
+        "street": "Jalan Pasar Minggu Raya"
       }
     },
     {
@@ -29821,7 +30024,8 @@
         "osmNodeId": 11253869940,
         "wikidata": null,
         "wikipedia": null,
-        "routeRefs": []
+        "routeRefs": [],
+        "street": "Jalan Pasar Minggu Raya"
       }
     },
     {
@@ -29841,7 +30045,8 @@
         "osmNodeId": 11681599457,
         "wikidata": null,
         "wikipedia": null,
-        "routeRefs": []
+        "routeRefs": [],
+        "street": "Jalan Pasar Minggu Raya"
       }
     },
     {
@@ -29861,7 +30066,8 @@
         "osmNodeId": 11682580155,
         "wikidata": null,
         "wikipedia": null,
-        "routeRefs": []
+        "routeRefs": [],
+        "street": "Jalan Pasar Minggu Raya"
       }
     },
     {
@@ -29881,7 +30087,8 @@
         "osmNodeId": 11682580159,
         "wikidata": null,
         "wikipedia": null,
-        "routeRefs": []
+        "routeRefs": [],
+        "street": "Jalan Pasar Minggu Raya"
       }
     },
     {
@@ -29901,7 +30108,8 @@
         "osmNodeId": 11682580163,
         "wikidata": null,
         "wikipedia": null,
-        "routeRefs": []
+        "routeRefs": [],
+        "street": "Jalan Pasar Minggu Raya"
       }
     },
     {
@@ -29921,7 +30129,8 @@
         "osmNodeId": 11682580168,
         "wikidata": null,
         "wikipedia": null,
-        "routeRefs": []
+        "routeRefs": [],
+        "street": "Jalan Pasar Minggu Raya"
       }
     },
     {
@@ -29941,7 +30150,8 @@
         "osmNodeId": 11682583172,
         "wikidata": null,
         "wikipedia": null,
-        "routeRefs": []
+        "routeRefs": [],
+        "street": "Jalan Pasar Minggu Raya"
       }
     },
     {
@@ -29961,7 +30171,8 @@
         "osmNodeId": 11682583177,
         "wikidata": null,
         "wikipedia": null,
-        "routeRefs": []
+        "routeRefs": [],
+        "street": "Jalan Pasar Minggu Raya"
       }
     },
     {
@@ -29981,7 +30192,8 @@
         "osmNodeId": 11682583181,
         "wikidata": null,
         "wikipedia": null,
-        "routeRefs": []
+        "routeRefs": [],
+        "street": "Jalan Pasar Minggu Raya"
       }
     },
     {
@@ -30001,7 +30213,8 @@
         "osmNodeId": 11682583183,
         "wikidata": null,
         "wikipedia": null,
-        "routeRefs": []
+        "routeRefs": [],
+        "street": "Jalan Pasar Minggu Raya"
       }
     },
     {
@@ -30021,7 +30234,8 @@
         "osmNodeId": 11682583189,
         "wikidata": null,
         "wikipedia": null,
-        "routeRefs": []
+        "routeRefs": [],
+        "street": "Jalan Pasar Minggu Raya"
       }
     },
     {
@@ -30041,7 +30255,8 @@
         "osmNodeId": 11682583191,
         "wikidata": null,
         "wikipedia": null,
-        "routeRefs": []
+        "routeRefs": [],
+        "street": "Jalan Pasar Minggu Raya"
       }
     },
     {
@@ -30061,7 +30276,8 @@
         "osmNodeId": 11682583196,
         "wikidata": null,
         "wikipedia": null,
-        "routeRefs": []
+        "routeRefs": [],
+        "street": "Jalan Pasar Minggu Raya"
       }
     },
     {
@@ -30081,7 +30297,8 @@
         "osmNodeId": 11682583200,
         "wikidata": null,
         "wikipedia": null,
-        "routeRefs": []
+        "routeRefs": [],
+        "street": "Jalan Pasar Minggu Raya"
       }
     },
     {
@@ -30101,7 +30318,8 @@
         "osmNodeId": 11682583202,
         "wikidata": null,
         "wikipedia": null,
-        "routeRefs": []
+        "routeRefs": [],
+        "street": "Jalan Pasar Minggu Raya"
       }
     },
     {
@@ -30121,7 +30339,8 @@
         "osmNodeId": 11682583204,
         "wikidata": null,
         "wikipedia": null,
-        "routeRefs": []
+        "routeRefs": [],
+        "street": "Jalan Pasar Minggu Raya"
       }
     },
     {
@@ -30141,7 +30360,8 @@
         "osmNodeId": 11509111273,
         "wikidata": null,
         "wikipedia": null,
-        "routeRefs": []
+        "routeRefs": [],
+        "street": "Jalan Pasar Minggu Raya"
       }
     },
     {
@@ -30161,7 +30381,8 @@
         "osmNodeId": 11682583210,
         "wikidata": null,
         "wikipedia": null,
-        "routeRefs": []
+        "routeRefs": [],
+        "street": "Jalan Pasar Minggu Raya"
       }
     },
     {
@@ -30181,7 +30402,8 @@
         "osmNodeId": 11682583213,
         "wikidata": null,
         "wikipedia": null,
-        "routeRefs": []
+        "routeRefs": [],
+        "street": "Jalan Pasar Minggu Raya"
       }
     },
     {
@@ -30201,7 +30423,8 @@
         "osmNodeId": 11682583219,
         "wikidata": null,
         "wikipedia": null,
-        "routeRefs": []
+        "routeRefs": [],
+        "street": "Jalan Pasar Minggu Raya"
       }
     },
     {
@@ -30221,7 +30444,8 @@
         "osmNodeId": 11684516957,
         "wikidata": null,
         "wikipedia": null,
-        "routeRefs": []
+        "routeRefs": [],
+        "street": "Jalan Pasar Minggu Raya"
       }
     },
     {
@@ -33192,7 +33416,8 @@
         "osmNodeId": 11689920567,
         "wikidata": null,
         "wikipedia": null,
-        "routeRefs": []
+        "routeRefs": [],
+        "street": "Jalan Gerbang 1 TMII"
       }
     },
     {
@@ -33212,7 +33437,8 @@
         "osmNodeId": 309505066,
         "wikidata": null,
         "wikipedia": null,
-        "routeRefs": []
+        "routeRefs": [],
+        "street": "Jalan Gerbang 1 TMII"
       }
     },
     {
@@ -33232,7 +33458,8 @@
         "osmNodeId": 11689922270,
         "wikidata": null,
         "wikipedia": null,
-        "routeRefs": []
+        "routeRefs": [],
+        "street": "Jalan Gerbang 1 TMII"
       }
     },
     {
@@ -33252,7 +33479,8 @@
         "osmNodeId": 11689922272,
         "wikidata": null,
         "wikipedia": null,
-        "routeRefs": []
+        "routeRefs": [],
+        "street": "Jalan Gerbang 1 TMII"
       }
     },
     {
@@ -33272,7 +33500,8 @@
         "osmNodeId": 309508378,
         "wikidata": null,
         "wikipedia": null,
-        "routeRefs": []
+        "routeRefs": [],
+        "street": "Jalan Gerbang 1 TMII"
       }
     },
     {
@@ -33292,7 +33521,8 @@
         "osmNodeId": 11689922275,
         "wikidata": null,
         "wikipedia": null,
-        "routeRefs": []
+        "routeRefs": [],
+        "street": "Jalan Gerbang 1 TMII"
       }
     },
     {
@@ -33312,7 +33542,8 @@
         "osmNodeId": 11689922277,
         "wikidata": null,
         "wikipedia": null,
-        "routeRefs": []
+        "routeRefs": [],
+        "street": "Jalan Gerbang 1 TMII"
       }
     },
     {
@@ -33332,7 +33563,8 @@
         "osmNodeId": 11689922279,
         "wikidata": null,
         "wikipedia": null,
-        "routeRefs": []
+        "routeRefs": [],
+        "street": "Jalan Gerbang 1 TMII"
       }
     },
     {
@@ -33352,7 +33584,8 @@
         "osmNodeId": 11689922281,
         "wikidata": null,
         "wikipedia": null,
-        "routeRefs": []
+        "routeRefs": [],
+        "street": "Jalan Gerbang 1 TMII"
       }
     },
     {
@@ -33372,7 +33605,8 @@
         "osmNodeId": 11689922283,
         "wikidata": null,
         "wikipedia": null,
-        "routeRefs": []
+        "routeRefs": [],
+        "street": "Jalan Gerbang 1 TMII"
       }
     },
     {
@@ -33392,7 +33626,8 @@
         "osmNodeId": 11689922285,
         "wikidata": null,
         "wikipedia": null,
-        "routeRefs": []
+        "routeRefs": [],
+        "street": "Jalan Gerbang 1 TMII"
       }
     },
     {
@@ -33412,7 +33647,8 @@
         "osmNodeId": 11689922287,
         "wikidata": null,
         "wikipedia": null,
-        "routeRefs": []
+        "routeRefs": [],
+        "street": "Jalan Gerbang 1 TMII"
       }
     },
     {
@@ -33432,7 +33668,8 @@
         "osmNodeId": 11689922289,
         "wikidata": null,
         "wikipedia": null,
-        "routeRefs": []
+        "routeRefs": [],
+        "street": "Jalan Gerbang 1 TMII"
       }
     },
     {
@@ -33452,7 +33689,8 @@
         "osmNodeId": 11689922291,
         "wikidata": null,
         "wikipedia": null,
-        "routeRefs": []
+        "routeRefs": [],
+        "street": "Jalan Gerbang 1 TMII"
       }
     },
     {
@@ -33472,7 +33710,8 @@
         "osmNodeId": 11691482535,
         "wikidata": null,
         "wikipedia": null,
-        "routeRefs": []
+        "routeRefs": [],
+        "street": "Jalan Gerbang 1 TMII"
       }
     },
     {
@@ -33492,7 +33731,8 @@
         "osmNodeId": 11691482540,
         "wikidata": null,
         "wikipedia": null,
-        "routeRefs": []
+        "routeRefs": [],
+        "street": "Jalan Gerbang 1 TMII"
       }
     },
     {
@@ -33512,7 +33752,8 @@
         "osmNodeId": 11691482542,
         "wikidata": null,
         "wikipedia": null,
-        "routeRefs": []
+        "routeRefs": [],
+        "street": "Jalan Gerbang 1 TMII"
       }
     },
     {
@@ -33532,7 +33773,8 @@
         "osmNodeId": 11691482544,
         "wikidata": null,
         "wikipedia": null,
-        "routeRefs": []
+        "routeRefs": [],
+        "street": "Jalan Gerbang 1 TMII"
       }
     },
     {
@@ -33552,7 +33794,8 @@
         "osmNodeId": 11691482545,
         "wikidata": null,
         "wikipedia": null,
-        "routeRefs": []
+        "routeRefs": [],
+        "street": "Jalan Gerbang 1 TMII"
       }
     },
     {
@@ -34717,7 +34960,8 @@
         "osmNodeId": 11622102242,
         "wikidata": null,
         "wikipedia": null,
-        "routeRefs": []
+        "routeRefs": [],
+        "street": "Jalan D. I. Panjaitan"
       }
     },
     {
@@ -34737,7 +34981,8 @@
         "osmNodeId": 6552167776,
         "wikidata": null,
         "wikipedia": null,
-        "routeRefs": []
+        "routeRefs": [],
+        "street": "Jalan D. I. Panjaitan"
       }
     },
     {
@@ -34757,7 +35002,8 @@
         "osmNodeId": 11662373373,
         "wikidata": null,
         "wikipedia": null,
-        "routeRefs": []
+        "routeRefs": [],
+        "street": "Jalan D. I. Panjaitan"
       }
     },
     {
@@ -34777,7 +35023,8 @@
         "osmNodeId": 11662373380,
         "wikidata": null,
         "wikipedia": null,
-        "routeRefs": []
+        "routeRefs": [],
+        "street": "Jalan D. I. Panjaitan"
       }
     },
     {
@@ -34797,7 +35044,8 @@
         "osmNodeId": 11662373383,
         "wikidata": null,
         "wikipedia": null,
-        "routeRefs": []
+        "routeRefs": [],
+        "street": "Jalan D. I. Panjaitan"
       }
     },
     {
@@ -35162,7 +35410,8 @@
         "osmNodeId": 11756936780,
         "wikidata": null,
         "wikipedia": null,
-        "routeRefs": []
+        "routeRefs": [],
+        "street": "Jalan Teuku Nyak Arief"
       }
     },
     {
@@ -35182,7 +35431,8 @@
         "osmNodeId": 11756936783,
         "wikidata": null,
         "wikipedia": null,
-        "routeRefs": []
+        "routeRefs": [],
+        "street": "Jalan Teuku Nyak Arief"
       }
     },
     {
@@ -35202,7 +35452,8 @@
         "osmNodeId": 11756936787,
         "wikidata": null,
         "wikipedia": null,
-        "routeRefs": []
+        "routeRefs": [],
+        "street": "Jalan Teuku Nyak Arief"
       }
     },
     {
@@ -35222,7 +35473,8 @@
         "osmNodeId": 11756936793,
         "wikidata": null,
         "wikipedia": null,
-        "routeRefs": []
+        "routeRefs": [],
+        "street": "Jalan Teuku Nyak Arief"
       }
     },
     {
@@ -35242,7 +35494,8 @@
         "osmNodeId": 11756936799,
         "wikidata": null,
         "wikipedia": null,
-        "routeRefs": []
+        "routeRefs": [],
+        "street": "Jalan Teuku Nyak Arief"
       }
     },
     {
@@ -35262,7 +35515,8 @@
         "osmNodeId": 11756936805,
         "wikidata": null,
         "wikipedia": null,
-        "routeRefs": []
+        "routeRefs": [],
+        "street": "Jalan Teuku Nyak Arief"
       }
     },
     {
@@ -35282,7 +35536,8 @@
         "osmNodeId": 11756936811,
         "wikidata": null,
         "wikipedia": null,
-        "routeRefs": []
+        "routeRefs": [],
+        "street": "Jalan Teuku Nyak Arief"
       }
     },
     {
@@ -35302,7 +35557,8 @@
         "osmNodeId": 11756936815,
         "wikidata": null,
         "wikipedia": null,
-        "routeRefs": []
+        "routeRefs": [],
+        "street": "Jalan Teuku Nyak Arief"
       }
     },
     {
@@ -35322,7 +35578,8 @@
         "osmNodeId": 11756936818,
         "wikidata": null,
         "wikipedia": null,
-        "routeRefs": []
+        "routeRefs": [],
+        "street": "Jalan Teuku Nyak Arief"
       }
     },
     {
@@ -35342,7 +35599,8 @@
         "osmNodeId": 11756936823,
         "wikidata": null,
         "wikipedia": null,
-        "routeRefs": []
+        "routeRefs": [],
+        "street": "Jalan Teuku Nyak Arief"
       }
     },
     {
@@ -35362,7 +35620,8 @@
         "osmNodeId": 11756936825,
         "wikidata": null,
         "wikipedia": null,
-        "routeRefs": []
+        "routeRefs": [],
+        "street": "Jalan Teuku Nyak Arief"
       }
     },
     {
@@ -35382,7 +35641,8 @@
         "osmNodeId": 11756936841,
         "wikidata": null,
         "wikipedia": null,
-        "routeRefs": []
+        "routeRefs": [],
+        "street": "Jalan Teuku Nyak Arief"
       }
     },
     {
@@ -35402,7 +35662,8 @@
         "osmNodeId": 11756936843,
         "wikidata": null,
         "wikipedia": null,
-        "routeRefs": []
+        "routeRefs": [],
+        "street": "Jalan Teuku Nyak Arief"
       }
     },
     {
@@ -35422,7 +35683,8 @@
         "osmNodeId": 11756936845,
         "wikidata": null,
         "wikipedia": null,
-        "routeRefs": []
+        "routeRefs": [],
+        "street": "Jalan Teuku Nyak Arief"
       }
     },
     {
@@ -35442,7 +35704,8 @@
         "osmNodeId": 11756936848,
         "wikidata": null,
         "wikipedia": null,
-        "routeRefs": []
+        "routeRefs": [],
+        "street": "Jalan Teuku Nyak Arief"
       }
     },
     {
@@ -35462,7 +35725,8 @@
         "osmNodeId": 11756936850,
         "wikidata": null,
         "wikipedia": null,
-        "routeRefs": []
+        "routeRefs": [],
+        "street": "Jalan Teuku Nyak Arief"
       }
     },
     {
@@ -35482,7 +35746,8 @@
         "osmNodeId": 11756936851,
         "wikidata": null,
         "wikipedia": null,
-        "routeRefs": []
+        "routeRefs": [],
+        "street": "Jalan Teuku Nyak Arief"
       }
     },
     {
@@ -35502,7 +35767,8 @@
         "osmNodeId": 11756936853,
         "wikidata": null,
         "wikipedia": null,
-        "routeRefs": []
+        "routeRefs": [],
+        "street": "Jalan Teuku Nyak Arief"
       }
     },
     {
@@ -36797,7 +37063,8 @@
         "osmNodeId": 11757616862,
         "wikidata": null,
         "wikipedia": null,
-        "routeRefs": []
+        "routeRefs": [],
+        "street": "Jalan Jatibaru Raya"
       }
     },
     {
@@ -36817,7 +37084,8 @@
         "osmNodeId": 11757616864,
         "wikidata": null,
         "wikipedia": null,
-        "routeRefs": []
+        "routeRefs": [],
+        "street": "Jalan Jatibaru Raya"
       }
     },
     {
@@ -36837,7 +37105,8 @@
         "osmNodeId": 11757616865,
         "wikidata": null,
         "wikipedia": null,
-        "routeRefs": []
+        "routeRefs": [],
+        "street": "Jalan Jatibaru Raya"
       }
     },
     {
@@ -36857,7 +37126,8 @@
         "osmNodeId": 11757627971,
         "wikidata": null,
         "wikipedia": null,
-        "routeRefs": []
+        "routeRefs": [],
+        "street": "Jalan Jatibaru Raya"
       }
     },
     {
@@ -36877,7 +37147,8 @@
         "osmNodeId": 11757627974,
         "wikidata": null,
         "wikipedia": null,
-        "routeRefs": []
+        "routeRefs": [],
+        "street": "Jalan Jatibaru Raya"
       }
     },
     {
@@ -36897,7 +37168,8 @@
         "osmNodeId": 11757627976,
         "wikidata": null,
         "wikipedia": null,
-        "routeRefs": []
+        "routeRefs": [],
+        "street": "Jalan Jatibaru Raya"
       }
     },
     {
@@ -36917,7 +37189,8 @@
         "osmNodeId": 11757627978,
         "wikidata": null,
         "wikipedia": null,
-        "routeRefs": []
+        "routeRefs": [],
+        "street": "Jalan Jatibaru Raya"
       }
     },
     {
@@ -36937,7 +37210,8 @@
         "osmNodeId": 11757627981,
         "wikidata": null,
         "wikipedia": null,
-        "routeRefs": []
+        "routeRefs": [],
+        "street": "Jalan Jatibaru Raya"
       }
     },
     {
@@ -36957,7 +37231,8 @@
         "osmNodeId": 11757627982,
         "wikidata": null,
         "wikipedia": null,
-        "routeRefs": []
+        "routeRefs": [],
+        "street": "Jalan Jatibaru Raya"
       }
     },
     {
@@ -36977,7 +37252,8 @@
         "osmNodeId": 11757627985,
         "wikidata": null,
         "wikipedia": null,
-        "routeRefs": []
+        "routeRefs": [],
+        "street": "Jalan Jatibaru Raya"
       }
     },
     {
@@ -36997,7 +37273,8 @@
         "osmNodeId": 11757627990,
         "wikidata": null,
         "wikipedia": null,
-        "routeRefs": []
+        "routeRefs": [],
+        "street": "Jalan Jatibaru Raya"
       }
     },
     {
@@ -37017,7 +37294,8 @@
         "osmNodeId": 11757627991,
         "wikidata": null,
         "wikipedia": null,
-        "routeRefs": []
+        "routeRefs": [],
+        "street": "Jalan Jatibaru Raya"
       }
     },
     {
@@ -37037,7 +37315,8 @@
         "osmNodeId": 11757627992,
         "wikidata": null,
         "wikipedia": null,
-        "routeRefs": []
+        "routeRefs": [],
+        "street": "Jalan Jatibaru Raya"
       }
     },
     {
@@ -37057,7 +37336,8 @@
         "osmNodeId": 11757627995,
         "wikidata": null,
         "wikipedia": null,
-        "routeRefs": []
+        "routeRefs": [],
+        "street": "Jalan Jatibaru Raya"
       }
     },
     {
@@ -37077,7 +37357,8 @@
         "osmNodeId": 11757627997,
         "wikidata": null,
         "wikipedia": null,
-        "routeRefs": []
+        "routeRefs": [],
+        "street": "Jalan Jatibaru Raya"
       }
     },
     {
@@ -37097,7 +37378,8 @@
         "osmNodeId": 5371702391,
         "wikidata": null,
         "wikipedia": null,
-        "routeRefs": []
+        "routeRefs": [],
+        "street": "Jalan Jatibaru Raya"
       }
     },
     {
@@ -37117,7 +37399,8 @@
         "osmNodeId": 11757628000,
         "wikidata": null,
         "wikipedia": null,
-        "routeRefs": []
+        "routeRefs": [],
+        "street": "Jalan Jatibaru Raya"
       }
     },
     {
@@ -37137,7 +37420,8 @@
         "osmNodeId": 11757628001,
         "wikidata": null,
         "wikipedia": null,
-        "routeRefs": []
+        "routeRefs": [],
+        "street": "Jalan Jatibaru Raya"
       }
     },
     {
@@ -43801,7 +44085,8 @@
         "osmNodeId": 1345781659,
         "wikidata": null,
         "wikipedia": null,
-        "routeRefs": []
+        "routeRefs": [],
+        "street": "Jalan Duren Sawit Baru"
       }
     },
     {
@@ -43821,7 +44106,8 @@
         "osmNodeId": 12071972020,
         "wikidata": null,
         "wikipedia": null,
-        "routeRefs": []
+        "routeRefs": [],
+        "street": "Jalan Duren Sawit Baru"
       }
     },
     {
@@ -43841,7 +44127,8 @@
         "osmNodeId": 12033540803,
         "wikidata": null,
         "wikipedia": null,
-        "routeRefs": []
+        "routeRefs": [],
+        "street": "Jalan Duren Sawit Baru"
       }
     },
     {
@@ -46396,7 +46683,8 @@
         "osmNodeId": 11716127462,
         "wikidata": null,
         "wikipedia": null,
-        "routeRefs": []
+        "routeRefs": [],
+        "street": "Jalan Pondok Gede"
       }
     },
     {
@@ -46416,7 +46704,8 @@
         "osmNodeId": 11716127466,
         "wikidata": null,
         "wikipedia": null,
-        "routeRefs": []
+        "routeRefs": [],
+        "street": "Jalan Pondok Gede"
       }
     },
     {
@@ -46436,7 +46725,8 @@
         "osmNodeId": 5013618205,
         "wikidata": null,
         "wikipedia": null,
-        "routeRefs": []
+        "routeRefs": [],
+        "street": "Jalan Pondok Gede"
       }
     },
     {
@@ -46456,7 +46746,8 @@
         "osmNodeId": 11716153973,
         "wikidata": null,
         "wikipedia": null,
-        "routeRefs": []
+        "routeRefs": [],
+        "street": "Jalan Pondok Gede"
       }
     },
     {
@@ -46476,7 +46767,8 @@
         "osmNodeId": 11716153975,
         "wikidata": null,
         "wikipedia": null,
-        "routeRefs": []
+        "routeRefs": [],
+        "street": "Jalan Pondok Gede"
       }
     },
     {
@@ -46496,7 +46788,8 @@
         "osmNodeId": 11716153977,
         "wikidata": null,
         "wikipedia": null,
-        "routeRefs": []
+        "routeRefs": [],
+        "street": "Jalan Pondok Gede"
       }
     },
     {
@@ -46516,7 +46809,8 @@
         "osmNodeId": 11716153979,
         "wikidata": null,
         "wikipedia": null,
-        "routeRefs": []
+        "routeRefs": [],
+        "street": "Jalan Pondok Gede"
       }
     },
     {
@@ -46536,7 +46830,8 @@
         "osmNodeId": 11716153983,
         "wikidata": null,
         "wikipedia": null,
-        "routeRefs": []
+        "routeRefs": [],
+        "street": "Jalan Pondok Gede"
       }
     },
     {
@@ -46556,7 +46851,8 @@
         "osmNodeId": 11716153988,
         "wikidata": null,
         "wikipedia": null,
-        "routeRefs": []
+        "routeRefs": [],
+        "street": "Jalan Pondok Gede"
       }
     },
     {
@@ -46576,7 +46872,8 @@
         "osmNodeId": 11716153992,
         "wikidata": null,
         "wikipedia": null,
-        "routeRefs": []
+        "routeRefs": [],
+        "street": "Jalan Pondok Gede"
       }
     },
     {
@@ -46596,7 +46893,8 @@
         "osmNodeId": 6287544581,
         "wikidata": null,
         "wikipedia": null,
-        "routeRefs": []
+        "routeRefs": [],
+        "street": "Jalan Pondok Gede"
       }
     },
     {
@@ -46616,7 +46914,8 @@
         "osmNodeId": 11716154012,
         "wikidata": null,
         "wikipedia": null,
-        "routeRefs": []
+        "routeRefs": [],
+        "street": "Jalan Pondok Gede"
       }
     },
     {
@@ -46636,7 +46935,8 @@
         "osmNodeId": 11716154015,
         "wikidata": null,
         "wikipedia": null,
-        "routeRefs": []
+        "routeRefs": [],
+        "street": "Jalan Pondok Gede"
       }
     },
     {
@@ -46656,7 +46956,8 @@
         "osmNodeId": 11716154019,
         "wikidata": null,
         "wikipedia": null,
-        "routeRefs": []
+        "routeRefs": [],
+        "street": "Jalan Pondok Gede"
       }
     },
     {
@@ -46676,7 +46977,8 @@
         "osmNodeId": 6786942968,
         "wikidata": null,
         "wikipedia": null,
-        "routeRefs": []
+        "routeRefs": [],
+        "street": "Jalan Pondok Gede"
       }
     },
     {
@@ -46696,7 +46998,8 @@
         "osmNodeId": 11716154025,
         "wikidata": null,
         "wikipedia": null,
-        "routeRefs": []
+        "routeRefs": [],
+        "street": "Jalan Pondok Gede"
       }
     },
     {
@@ -46716,7 +47019,8 @@
         "osmNodeId": 11716154028,
         "wikidata": null,
         "wikipedia": null,
-        "routeRefs": []
+        "routeRefs": [],
+        "street": "Jalan Pondok Gede"
       }
     },
     {
@@ -46736,7 +47040,8 @@
         "osmNodeId": 1477792432,
         "wikidata": null,
         "wikipedia": null,
-        "routeRefs": []
+        "routeRefs": [],
+        "street": "Jalan Pondok Gede"
       }
     },
     {
@@ -46756,7 +47061,8 @@
         "osmNodeId": 7044435773,
         "wikidata": null,
         "wikipedia": null,
-        "routeRefs": []
+        "routeRefs": [],
+        "street": "Jalan Pondok Gede"
       }
     },
     {
@@ -46776,7 +47082,8 @@
         "osmNodeId": 7271396984,
         "wikidata": null,
         "wikipedia": null,
-        "routeRefs": []
+        "routeRefs": [],
+        "street": "Jalan Pondok Gede"
       }
     },
     {
@@ -46796,7 +47103,8 @@
         "osmNodeId": 11716154039,
         "wikidata": null,
         "wikipedia": null,
-        "routeRefs": []
+        "routeRefs": [],
+        "street": "Jalan Pondok Gede"
       }
     },
     {
@@ -46816,7 +47124,8 @@
         "osmNodeId": 11716154043,
         "wikidata": null,
         "wikipedia": null,
-        "routeRefs": []
+        "routeRefs": [],
+        "street": "Jalan Pondok Gede"
       }
     },
     {
@@ -46836,7 +47145,8 @@
         "osmNodeId": 11716154046,
         "wikidata": null,
         "wikipedia": null,
-        "routeRefs": []
+        "routeRefs": [],
+        "street": "Jalan Pondok Gede"
       }
     },
     {
@@ -46856,7 +47166,8 @@
         "osmNodeId": 11716154049,
         "wikidata": null,
         "wikipedia": null,
-        "routeRefs": []
+        "routeRefs": [],
+        "street": "Jalan Pondok Gede"
       }
     },
     {
@@ -46876,7 +47187,8 @@
         "osmNodeId": 1477792295,
         "wikidata": null,
         "wikipedia": null,
-        "routeRefs": []
+        "routeRefs": [],
+        "street": "Jalan Pondok Gede"
       }
     },
     {
@@ -46896,7 +47208,8 @@
         "osmNodeId": 6781942006,
         "wikidata": null,
         "wikipedia": null,
-        "routeRefs": []
+        "routeRefs": [],
+        "street": "Jalan Pondok Gede"
       }
     },
     {
@@ -46916,7 +47229,8 @@
         "osmNodeId": 11715604852,
         "wikidata": null,
         "wikipedia": null,
-        "routeRefs": []
+        "routeRefs": [],
+        "street": "Jalan Pondok Gede"
       }
     },
     {
@@ -46936,7 +47250,8 @@
         "osmNodeId": 11715604856,
         "wikidata": null,
         "wikipedia": null,
-        "routeRefs": []
+        "routeRefs": [],
+        "street": "Jalan Pondok Gede"
       }
     },
     {
@@ -46956,7 +47271,8 @@
         "osmNodeId": 5506903841,
         "wikidata": null,
         "wikipedia": null,
-        "routeRefs": []
+        "routeRefs": [],
+        "street": "Jalan Pondok Gede"
       }
     },
     {
@@ -46976,7 +47292,8 @@
         "osmNodeId": 6786942955,
         "wikidata": null,
         "wikipedia": null,
-        "routeRefs": []
+        "routeRefs": [],
+        "street": "Jalan Pondok Gede"
       }
     },
     {
@@ -46996,7 +47313,8 @@
         "osmNodeId": 5006734161,
         "wikidata": null,
         "wikipedia": null,
-        "routeRefs": []
+        "routeRefs": [],
+        "street": "Jalan Pondok Gede"
       }
     },
     {
@@ -47016,7 +47334,8 @@
         "osmNodeId": 6478633106,
         "wikidata": null,
         "wikipedia": null,
-        "routeRefs": []
+        "routeRefs": [],
+        "street": "Jalan Pondok Gede"
       }
     },
     {
@@ -47036,7 +47355,8 @@
         "osmNodeId": 7026729515,
         "wikidata": null,
         "wikipedia": null,
-        "routeRefs": []
+        "routeRefs": [],
+        "street": "Jalan Pondok Gede"
       }
     },
     {
@@ -47056,7 +47376,8 @@
         "osmNodeId": 11716127447,
         "wikidata": null,
         "wikipedia": null,
-        "routeRefs": []
+        "routeRefs": [],
+        "street": "Jalan Pondok Gede"
       }
     },
     {
@@ -47076,7 +47397,8 @@
         "osmNodeId": 7249176111,
         "wikidata": null,
         "wikipedia": null,
-        "routeRefs": []
+        "routeRefs": [],
+        "street": "Jalan Jatibaru"
       }
     },
     {
@@ -47096,7 +47418,8 @@
         "osmNodeId": 12025238744,
         "wikidata": null,
         "wikipedia": null,
-        "routeRefs": []
+        "routeRefs": [],
+        "street": "Jalan Jatibaru"
       }
     },
     {
@@ -47116,7 +47439,8 @@
         "osmNodeId": 12025238745,
         "wikidata": null,
         "wikipedia": null,
-        "routeRefs": []
+        "routeRefs": [],
+        "street": "Jalan Tanjung Selor"
       }
     },
     {
@@ -47136,7 +47460,8 @@
         "osmNodeId": 12025238742,
         "wikidata": null,
         "wikipedia": null,
-        "routeRefs": []
+        "routeRefs": [],
+        "street": "Jalan Tanjung Selor"
       }
     },
     {
@@ -47156,7 +47481,8 @@
         "osmNodeId": 11954259395,
         "wikidata": null,
         "wikipedia": null,
-        "routeRefs": []
+        "routeRefs": [],
+        "street": "Jalan Jatibaru"
       }
     },
     {
@@ -47191,7 +47517,8 @@
         "osmNodeId": 11770147757,
         "wikidata": null,
         "wikipedia": null,
-        "routeRefs": []
+        "routeRefs": [],
+        "street": "Jalan Jatibaru"
       }
     },
     {
@@ -60320,7 +60647,8 @@
         "osmNodeId": 11754986859,
         "wikidata": null,
         "wikipedia": null,
-        "routeRefs": []
+        "routeRefs": [],
+        "street": "Terminal Muara Angke"
       }
     },
     {
@@ -64114,7 +64442,8 @@
         "osmNodeId": 11455798864,
         "wikidata": null,
         "wikipedia": null,
-        "routeRefs": []
+        "routeRefs": [],
+        "street": "Jalur Kereta Api Jakarta Kota–Bogor"
       }
     },
     {
@@ -64134,7 +64463,8 @@
         "osmNodeId": 116221355,
         "wikidata": null,
         "wikipedia": null,
-        "routeRefs": []
+        "routeRefs": [],
+        "street": "Jalur Kereta Api Jakarta Kota–Bogor"
       }
     },
     {
@@ -64154,7 +64484,8 @@
         "osmNodeId": 11292407283,
         "wikidata": null,
         "wikipedia": null,
-        "routeRefs": []
+        "routeRefs": [],
+        "street": "Jalur Kereta Api Jakarta Kota–Bogor"
       }
     },
     {
@@ -64174,7 +64505,8 @@
         "osmNodeId": 11455860170,
         "wikidata": null,
         "wikipedia": null,
-        "routeRefs": []
+        "routeRefs": [],
+        "street": "Jalur Kereta Api Jakarta Kota–Bogor"
       }
     },
     {
@@ -64209,7 +64541,8 @@
         "osmNodeId": 116221571,
         "wikidata": null,
         "wikipedia": null,
-        "routeRefs": []
+        "routeRefs": [],
+        "street": "Jalur Kereta Api Jakarta Kota–Bogor"
       }
     },
     {
@@ -64229,7 +64562,8 @@
         "osmNodeId": 316168385,
         "wikidata": null,
         "wikipedia": null,
-        "routeRefs": []
+        "routeRefs": [],
+        "street": "Jalur Kereta Api Jakarta Kota–Bogor"
       }
     },
     {
@@ -64251,7 +64585,8 @@
         "osmNodeId": 10313753488,
         "wikidata": null,
         "wikipedia": null,
-        "routeRefs": []
+        "routeRefs": [],
+        "street": "Jalur Kereta Api Jakarta Kota–Bogor"
       }
     },
     {
@@ -64271,7 +64606,8 @@
         "osmNodeId": 10067200229,
         "wikidata": null,
         "wikipedia": null,
-        "routeRefs": []
+        "routeRefs": [],
+        "street": "Jalur Kereta Api Jakarta Kota–Bogor"
       }
     },
     {
@@ -64293,7 +64629,8 @@
         "osmNodeId": 10067200227,
         "wikidata": null,
         "wikipedia": null,
-        "routeRefs": []
+        "routeRefs": [],
+        "street": "Jalur Kereta Api Jakarta Kota–Bogor"
       }
     },
     {
@@ -64313,7 +64650,8 @@
         "osmNodeId": 8213948760,
         "wikidata": null,
         "wikipedia": null,
-        "routeRefs": []
+        "routeRefs": [],
+        "street": "Jalur Kereta Api Jakarta Kota–Bogor"
       }
     },
     {
@@ -64333,7 +64671,8 @@
         "osmNodeId": 4881688224,
         "wikidata": null,
         "wikipedia": null,
-        "routeRefs": []
+        "routeRefs": [],
+        "street": "Jalur Kereta Api Jakarta Kota–Bogor"
       }
     },
     {
@@ -64353,7 +64692,8 @@
         "osmNodeId": 10067200224,
         "wikidata": null,
         "wikipedia": null,
-        "routeRefs": []
+        "routeRefs": [],
+        "street": "Jalur Kereta Api Jakarta Kota–Bogor"
       }
     },
     {
@@ -64373,7 +64713,8 @@
         "osmNodeId": 10067200222,
         "wikidata": null,
         "wikipedia": null,
-        "routeRefs": []
+        "routeRefs": [],
+        "street": "Jalur Kereta Api Jakarta Kota–Bogor"
       }
     },
     {
@@ -64393,7 +64734,8 @@
         "osmNodeId": 2351913722,
         "wikidata": null,
         "wikipedia": null,
-        "routeRefs": []
+        "routeRefs": [],
+        "street": "Jalur Kereta Api Jakarta Kota–Bogor"
       }
     },
     {
@@ -64413,7 +64755,8 @@
         "osmNodeId": 10067200220,
         "wikidata": null,
         "wikipedia": null,
-        "routeRefs": []
+        "routeRefs": [],
+        "street": "Jalur Kereta Api Jakarta Kota–Bogor"
       }
     },
     {
@@ -64433,7 +64776,8 @@
         "osmNodeId": 10067200219,
         "wikidata": null,
         "wikipedia": null,
-        "routeRefs": []
+        "routeRefs": [],
+        "street": "Jalur Kereta Api Jakarta Kota–Bogor"
       }
     },
     {
@@ -64453,7 +64797,8 @@
         "osmNodeId": 10067200218,
         "wikidata": null,
         "wikipedia": null,
-        "routeRefs": []
+        "routeRefs": [],
+        "street": "Jalur Kereta Api Jakarta Kota–Bogor"
       }
     },
     {
@@ -64473,7 +64818,8 @@
         "osmNodeId": 10067200217,
         "wikidata": null,
         "wikipedia": null,
-        "routeRefs": []
+        "routeRefs": [],
+        "street": "Jalur Kereta Api Jakarta Kota–Bogor"
       }
     },
     {
@@ -64493,7 +64839,8 @@
         "osmNodeId": 1642327182,
         "wikidata": null,
         "wikipedia": null,
-        "routeRefs": []
+        "routeRefs": [],
+        "street": "Jalur Kereta Api Jakarta Kota–Bogor"
       }
     },
     {
@@ -64513,7 +64860,8 @@
         "osmNodeId": 7801985487,
         "wikidata": null,
         "wikipedia": null,
-        "routeRefs": []
+        "routeRefs": [],
+        "street": "Jalur Kereta Api Jakarta Kota–Bogor"
       }
     },
     {
@@ -64533,7 +64881,8 @@
         "osmNodeId": 10067186908,
         "wikidata": null,
         "wikipedia": null,
-        "routeRefs": []
+        "routeRefs": [],
+        "street": "Jalur Kereta Api Jakarta Kota–Bogor"
       }
     },
     {
@@ -64553,7 +64902,8 @@
         "osmNodeId": 2751644734,
         "wikidata": null,
         "wikipedia": null,
-        "routeRefs": []
+        "routeRefs": [],
+        "street": "Jalur Kereta Api Jakarta Kota–Bogor"
       }
     },
     {
@@ -64663,7 +65013,8 @@
         "osmNodeId": 10312804311,
         "wikidata": null,
         "wikipedia": null,
-        "routeRefs": []
+        "routeRefs": [],
+        "street": "Jalur Kereta Api Jakarta Kota–Cikampek"
       }
     },
     {
@@ -64685,7 +65036,8 @@
         "osmNodeId": 10312804308,
         "wikidata": null,
         "wikipedia": null,
-        "routeRefs": []
+        "routeRefs": [],
+        "street": "Jalur Kereta Api Jakarta Kota–Cikampek"
       }
     },
     {
@@ -64705,7 +65057,8 @@
         "osmNodeId": 10312804289,
         "wikidata": null,
         "wikipedia": null,
-        "routeRefs": []
+        "routeRefs": [],
+        "street": "Jalur Kereta Api Jakarta Kota–Cikampek"
       }
     },
     {
@@ -64727,7 +65080,8 @@
         "osmNodeId": 4919247182,
         "wikidata": null,
         "wikipedia": null,
-        "routeRefs": []
+        "routeRefs": [],
+        "street": "Jalur Kereta Api Jakarta Kota–Cikampek"
       }
     },
     {
@@ -64747,7 +65101,8 @@
         "osmNodeId": 10312804287,
         "wikidata": null,
         "wikipedia": null,
-        "routeRefs": []
+        "routeRefs": [],
+        "street": "Jalur Kereta Api Jakarta Kota–Cikampek"
       }
     },
     {
@@ -64767,7 +65122,8 @@
         "osmNodeId": 4919287671,
         "wikidata": null,
         "wikipedia": null,
-        "routeRefs": []
+        "routeRefs": [],
+        "street": "Jalur Kereta Api Jakarta Kota–Cikampek"
       }
     },
     {
@@ -64787,7 +65143,8 @@
         "osmNodeId": 5579655825,
         "wikidata": null,
         "wikipedia": null,
-        "routeRefs": []
+        "routeRefs": [],
+        "street": "Jalur Kereta Api Jakarta Kota–Cikampek"
       }
     },
     {
@@ -64807,7 +65164,8 @@
         "osmNodeId": 10312804279,
         "wikidata": null,
         "wikipedia": null,
-        "routeRefs": []
+        "routeRefs": [],
+        "street": "Jalur Kereta Api Jakarta Kota–Cikampek"
       }
     },
     {
@@ -64827,7 +65185,8 @@
         "osmNodeId": 10313773732,
         "wikidata": null,
         "wikipedia": null,
-        "routeRefs": []
+        "routeRefs": [],
+        "street": "Jalur Kereta Api Jakarta Kota–Cikampek"
       }
     },
     {
@@ -64847,7 +65206,8 @@
         "osmNodeId": 10312804276,
         "wikidata": null,
         "wikipedia": null,
-        "routeRefs": []
+        "routeRefs": [],
+        "street": "Jalur Kereta Api Jakarta Kota–Cikampek"
       }
     },
     {
@@ -64870,7 +65230,8 @@
         "osmNodeId": 10312804214,
         "wikidata": null,
         "wikipedia": null,
-        "routeRefs": []
+        "routeRefs": [],
+        "street": "Jalur Kereta Api Jakarta Kota–Cikampek"
       }
     },
     {
@@ -64893,7 +65254,8 @@
         "osmNodeId": 3863039605,
         "wikidata": null,
         "wikipedia": null,
-        "routeRefs": []
+        "routeRefs": [],
+        "street": "Jalur Kereta Api Jakarta Kota–Cikampek"
       }
     },
     {
@@ -64915,7 +65277,8 @@
         "osmNodeId": 9939917857,
         "wikidata": null,
         "wikipedia": null,
-        "routeRefs": []
+        "routeRefs": [],
+        "street": "Jalur Kereta Api Jakarta Kota–Cikampek"
       }
     },
     {
@@ -64935,7 +65298,8 @@
         "osmNodeId": 7116275930,
         "wikidata": null,
         "wikipedia": null,
-        "routeRefs": []
+        "routeRefs": [],
+        "street": "Jalur Kereta Api Jakarta Kota–Cikampek"
       }
     },
     {
@@ -64957,7 +65321,8 @@
         "osmNodeId": 8431213256,
         "wikidata": null,
         "wikipedia": null,
-        "routeRefs": []
+        "routeRefs": [],
+        "street": "Jalur Kereta Api Jakarta Kota–Cikampek"
       }
     },
     {
@@ -64977,7 +65342,8 @@
         "osmNodeId": 7071978905,
         "wikidata": null,
         "wikipedia": null,
-        "routeRefs": []
+        "routeRefs": [],
+        "street": "Jalur Kereta Api Jakarta Kota–Cikampek"
       }
     },
     {
@@ -64997,7 +65363,8 @@
         "osmNodeId": 3865048772,
         "wikidata": null,
         "wikipedia": null,
-        "routeRefs": []
+        "routeRefs": [],
+        "street": "Jalur Kereta Api Jakarta Kota–Cikampek"
       }
     },
     {
@@ -65017,7 +65384,8 @@
         "osmNodeId": 10312804321,
         "wikidata": null,
         "wikipedia": null,
-        "routeRefs": []
+        "routeRefs": [],
+        "street": "Jalur Kereta Api Jakarta Kota–Cikampek"
       }
     },
     {
@@ -65037,7 +65405,8 @@
         "osmNodeId": 3865048818,
         "wikidata": null,
         "wikipedia": null,
-        "routeRefs": []
+        "routeRefs": [],
+        "street": "Jalur Kereta Api Jakarta Kota–Cikampek"
       }
     },
     {
@@ -65057,7 +65426,8 @@
         "osmNodeId": 3469731308,
         "wikidata": null,
         "wikipedia": null,
-        "routeRefs": []
+        "routeRefs": [],
+        "street": "Jalur Kereta Api Jakarta Kota–Cikampek"
       }
     },
     {
@@ -65077,7 +65447,8 @@
         "osmNodeId": 10312804317,
         "wikidata": null,
         "wikipedia": null,
-        "routeRefs": []
+        "routeRefs": [],
+        "street": "Jalur Kereta Api Jakarta Kota–Cikampek"
       }
     },
     {
@@ -65097,7 +65468,8 @@
         "osmNodeId": 10312804523,
         "wikidata": null,
         "wikipedia": null,
-        "routeRefs": []
+        "routeRefs": [],
+        "street": "Jalur Kereta Api Jakarta Kota–Cikampek"
       }
     },
     {
@@ -65117,7 +65489,8 @@
         "osmNodeId": 11741981519,
         "wikidata": null,
         "wikipedia": null,
-        "routeRefs": []
+        "routeRefs": [],
+        "street": "Jalur Kereta Api Jakarta Kota–Cikampek"
       }
     },
     {
@@ -65137,7 +65510,8 @@
         "osmNodeId": 10312804533,
         "wikidata": null,
         "wikipedia": null,
-        "routeRefs": []
+        "routeRefs": [],
+        "street": "Jalur Kereta Api Jakarta Kota–Cikampek"
       }
     },
     {
@@ -65172,7 +65546,8 @@
         "osmNodeId": 3863495300,
         "wikidata": null,
         "wikipedia": null,
-        "routeRefs": []
+        "routeRefs": [],
+        "street": "Jalur Kereta Api Tanah Abang–Merak"
       }
     },
     {
@@ -65192,7 +65567,8 @@
         "osmNodeId": 10312804538,
         "wikidata": null,
         "wikipedia": null,
-        "routeRefs": []
+        "routeRefs": [],
+        "street": "Jalur Kereta Api Tanah Abang–Merak"
       }
     },
     {
@@ -65212,7 +65588,8 @@
         "osmNodeId": 5310717729,
         "wikidata": null,
         "wikipedia": null,
-        "routeRefs": []
+        "routeRefs": [],
+        "street": "Jalur Kereta Api Tanah Abang–Merak"
       }
     },
     {
@@ -65232,7 +65609,8 @@
         "osmNodeId": 10312804543,
         "wikidata": null,
         "wikipedia": null,
-        "routeRefs": []
+        "routeRefs": [],
+        "street": "Jalur Kereta Api Tanah Abang–Merak"
       }
     },
     {
@@ -65252,7 +65630,8 @@
         "osmNodeId": 10312804545,
         "wikidata": null,
         "wikipedia": null,
-        "routeRefs": []
+        "routeRefs": [],
+        "street": "Jalur Kereta Api Tanah Abang–Merak"
       }
     },
     {
@@ -65272,7 +65651,8 @@
         "osmNodeId": 5459506705,
         "wikidata": null,
         "wikipedia": null,
-        "routeRefs": []
+        "routeRefs": [],
+        "street": "Jalur Kereta Api Tanah Abang–Merak"
       }
     },
     {
@@ -65292,7 +65672,8 @@
         "osmNodeId": 10312804547,
         "wikidata": null,
         "wikipedia": null,
-        "routeRefs": []
+        "routeRefs": [],
+        "street": "Jalur Kereta Api Tanah Abang–Merak"
       }
     },
     {
@@ -65312,7 +65693,8 @@
         "osmNodeId": 10312804549,
         "wikidata": null,
         "wikipedia": null,
-        "routeRefs": []
+        "routeRefs": [],
+        "street": "Jalur Kereta Api Tanah Abang–Merak"
       }
     },
     {
@@ -65332,7 +65714,8 @@
         "osmNodeId": 10312804550,
         "wikidata": null,
         "wikipedia": null,
-        "routeRefs": []
+        "routeRefs": [],
+        "street": "Jalur Kereta Api Tanah Abang–Merak"
       }
     },
     {
@@ -65352,7 +65735,8 @@
         "osmNodeId": 13507290039,
         "wikidata": null,
         "wikipedia": null,
-        "routeRefs": []
+        "routeRefs": [],
+        "street": "Jalur Kereta Api Tanah Abang–Merak"
       }
     },
     {
@@ -65402,7 +65786,8 @@
         "osmNodeId": 10312804553,
         "wikidata": null,
         "wikipedia": null,
-        "routeRefs": []
+        "routeRefs": [],
+        "street": "Jalur Kereta Api Tanah Abang–Merak"
       }
     },
     {
@@ -65422,7 +65807,8 @@
         "osmNodeId": 3869816738,
         "wikidata": null,
         "wikipedia": null,
-        "routeRefs": []
+        "routeRefs": [],
+        "street": "Jalur Kereta Api Tanah Abang–Merak"
       }
     },
     {
@@ -65442,7 +65828,8 @@
         "osmNodeId": 9654944261,
         "wikidata": null,
         "wikipedia": null,
-        "routeRefs": []
+        "routeRefs": [],
+        "street": "Jalur Kereta Api Tanah Abang–Merak"
       }
     },
     {
@@ -65477,7 +65864,8 @@
         "osmNodeId": 10312804555,
         "wikidata": null,
         "wikipedia": null,
-        "routeRefs": []
+        "routeRefs": [],
+        "street": "Jalur Kereta Api Tanah Abang–Merak"
       }
     },
     {
@@ -65512,7 +65900,8 @@
         "osmNodeId": 10312804559,
         "wikidata": null,
         "wikipedia": null,
-        "routeRefs": []
+        "routeRefs": [],
+        "street": "Jalur Kereta Api Tanah Abang–Merak"
       }
     },
     {
@@ -65532,7 +65921,8 @@
         "osmNodeId": 10312804561,
         "wikidata": null,
         "wikipedia": null,
-        "routeRefs": []
+        "routeRefs": [],
+        "street": "Jalur Kereta Api Tanah Abang–Merak"
       }
     },
     {
@@ -65567,7 +65957,8 @@
         "osmNodeId": 10312804552,
         "wikidata": null,
         "wikipedia": null,
-        "routeRefs": []
+        "routeRefs": [],
+        "street": "Jalur Kereta Api Tanah Abang–Merak"
       }
     },
     {
@@ -65587,7 +65978,8 @@
         "osmNodeId": 11612644500,
         "wikidata": null,
         "wikipedia": null,
-        "routeRefs": []
+        "routeRefs": [],
+        "street": "Jalur Kereta Api Duri–Tangerang"
       }
     },
     {
@@ -65607,7 +65999,8 @@
         "osmNodeId": 410949033,
         "wikidata": null,
         "wikipedia": null,
-        "routeRefs": []
+        "routeRefs": [],
+        "street": "Jalur Kereta Api Duri–Tangerang"
       }
     },
     {
@@ -65627,7 +66020,8 @@
         "osmNodeId": 11612644517,
         "wikidata": null,
         "wikipedia": null,
-        "routeRefs": []
+        "routeRefs": [],
+        "street": "Jalur Kereta Api Duri–Tangerang"
       }
     },
     {
@@ -65647,7 +66041,8 @@
         "osmNodeId": 11623547244,
         "wikidata": null,
         "wikipedia": null,
-        "routeRefs": []
+        "routeRefs": [],
+        "street": "Jalur Kereta Api Duri–Tangerang"
       }
     },
     {
@@ -65667,7 +66062,8 @@
         "osmNodeId": 12454442581,
         "wikidata": null,
         "wikipedia": null,
-        "routeRefs": []
+        "routeRefs": [],
+        "street": "Jalur Kereta Api Duri–Tangerang"
       }
     },
     {
@@ -65687,7 +66083,8 @@
         "osmNodeId": 11623566195,
         "wikidata": null,
         "wikipedia": null,
-        "routeRefs": []
+        "routeRefs": [],
+        "street": "Jalur Kereta Api Duri–Tangerang"
       }
     },
     {
@@ -65707,7 +66104,8 @@
         "osmNodeId": 316738994,
         "wikidata": null,
         "wikipedia": null,
-        "routeRefs": []
+        "routeRefs": [],
+        "street": "Jalur Kereta Api Duri–Tangerang"
       }
     },
     {
@@ -65727,7 +66125,8 @@
         "osmNodeId": 11623566246,
         "wikidata": null,
         "wikipedia": null,
-        "routeRefs": []
+        "routeRefs": [],
+        "street": "Jalur Kereta Api Duri–Tangerang"
       }
     },
     {
@@ -65762,7 +66161,8 @@
         "osmNodeId": 11623566243,
         "wikidata": null,
         "wikipedia": null,
-        "routeRefs": []
+        "routeRefs": [],
+        "street": "Jalur Kereta Api Duri–Tangerang"
       }
     },
     {
@@ -65782,7 +66182,8 @@
         "osmNodeId": 1674167280,
         "wikidata": null,
         "wikipedia": null,
-        "routeRefs": []
+        "routeRefs": [],
+        "street": "Jalur Kereta Api Jakarta Kota–Tanjung Priuk"
       }
     },
     {
@@ -65804,7 +66205,8 @@
         "osmNodeId": 13923399593,
         "wikidata": null,
         "wikipedia": null,
-        "routeRefs": []
+        "routeRefs": [],
+        "street": "Jalur Kereta Api Jakarta Kota–Tanjung Priuk"
       }
     },
     {
@@ -65899,7 +66301,8 @@
         "osmNodeId": 11662288190,
         "wikidata": null,
         "wikipedia": null,
-        "routeRefs": []
+        "routeRefs": [],
+        "street": "Jalan Raden Ajeng Kartini"
       }
     },
     {
@@ -66139,7 +66542,8 @@
         "osmNodeId": 11725097341,
         "wikidata": null,
         "wikipedia": null,
-        "routeRefs": []
+        "routeRefs": [],
+        "street": "Jalan Pusdika"
       }
     },
     {
@@ -66159,7 +66563,8 @@
         "osmNodeId": 12031164674,
         "wikidata": null,
         "wikipedia": null,
-        "routeRefs": []
+        "routeRefs": [],
+        "street": "Jalan Pusdika"
       }
     },
     {
@@ -66179,7 +66584,8 @@
         "osmNodeId": 12031164676,
         "wikidata": null,
         "wikipedia": null,
-        "routeRefs": []
+        "routeRefs": [],
+        "street": "Jalan Pusdika"
       }
     },
     {
@@ -66199,7 +66605,8 @@
         "osmNodeId": 12031164677,
         "wikidata": null,
         "wikipedia": null,
-        "routeRefs": []
+        "routeRefs": [],
+        "street": "Jalan Pusdika"
       }
     },
     {
@@ -66219,7 +66626,8 @@
         "osmNodeId": 12031297564,
         "wikidata": null,
         "wikipedia": null,
-        "routeRefs": []
+        "routeRefs": [],
+        "street": "Jalan Pusdika"
       }
     },
     {
@@ -66239,7 +66647,8 @@
         "osmNodeId": 5665300208,
         "wikidata": null,
         "wikipedia": null,
-        "routeRefs": []
+        "routeRefs": [],
+        "street": "Jalan Pusdika"
       }
     },
     {
@@ -66259,7 +66668,8 @@
         "osmNodeId": 12031514928,
         "wikidata": null,
         "wikipedia": null,
-        "routeRefs": []
+        "routeRefs": [],
+        "street": "Jalan Pusdika"
       }
     },
     {
@@ -66279,7 +66689,8 @@
         "osmNodeId": 12031514947,
         "wikidata": null,
         "wikipedia": null,
-        "routeRefs": []
+        "routeRefs": [],
+        "street": "Jalan Pusdika"
       }
     },
     {
@@ -66299,7 +66710,8 @@
         "osmNodeId": 12031514948,
         "wikidata": null,
         "wikipedia": null,
-        "routeRefs": []
+        "routeRefs": [],
+        "street": "Jalan Pusdika"
       }
     },
     {
@@ -66319,7 +66731,8 @@
         "osmNodeId": 12031514949,
         "wikidata": null,
         "wikipedia": null,
-        "routeRefs": []
+        "routeRefs": [],
+        "street": "Jalan Pusdika"
       }
     },
     {
@@ -66339,7 +66752,8 @@
         "osmNodeId": 11694908682,
         "wikidata": null,
         "wikipedia": null,
-        "routeRefs": []
+        "routeRefs": [],
+        "street": "Jalan Letnan Jenderal MT Haryono"
       }
     },
     {
@@ -66359,7 +66773,8 @@
         "osmNodeId": 11694908702,
         "wikidata": null,
         "wikipedia": null,
-        "routeRefs": []
+        "routeRefs": [],
+        "street": "Jalan Letnan Jenderal MT Haryono"
       }
     },
     {
@@ -66379,7 +66794,8 @@
         "osmNodeId": 11694908706,
         "wikidata": null,
         "wikipedia": null,
-        "routeRefs": []
+        "routeRefs": [],
+        "street": "Jalan Letnan Jenderal MT Haryono"
       }
     },
     {
@@ -66399,7 +66815,8 @@
         "osmNodeId": 11694908709,
         "wikidata": null,
         "wikipedia": null,
-        "routeRefs": []
+        "routeRefs": [],
+        "street": "Jalan Letnan Jenderal MT Haryono"
       }
     },
     {
@@ -66419,7 +66836,8 @@
         "osmNodeId": 11694908714,
         "wikidata": null,
         "wikipedia": null,
-        "routeRefs": []
+        "routeRefs": [],
+        "street": "Jalan Letnan Jenderal MT Haryono"
       }
     },
     {
@@ -66439,7 +66857,8 @@
         "osmNodeId": 11694908718,
         "wikidata": null,
         "wikipedia": null,
-        "routeRefs": []
+        "routeRefs": [],
+        "street": "Jalan Letnan Jenderal MT Haryono"
       }
     },
     {
@@ -66459,7 +66878,8 @@
         "osmNodeId": 11694908720,
         "wikidata": null,
         "wikipedia": null,
-        "routeRefs": []
+        "routeRefs": [],
+        "street": "Jalan Letnan Jenderal MT Haryono"
       }
     },
     {
@@ -66479,7 +66899,8 @@
         "osmNodeId": 11694908722,
         "wikidata": null,
         "wikipedia": null,
-        "routeRefs": []
+        "routeRefs": [],
+        "street": "Jalan Letnan Jenderal MT Haryono"
       }
     },
     {
@@ -66499,7 +66920,8 @@
         "osmNodeId": 11694908724,
         "wikidata": null,
         "wikipedia": null,
-        "routeRefs": []
+        "routeRefs": [],
+        "street": "Jalan Letnan Jenderal MT Haryono"
       }
     },
     {
@@ -66519,7 +66941,8 @@
         "osmNodeId": 11694908730,
         "wikidata": null,
         "wikipedia": null,
-        "routeRefs": []
+        "routeRefs": [],
+        "street": "Jalan Letnan Jenderal MT Haryono"
       }
     },
     {
@@ -66539,7 +66962,8 @@
         "osmNodeId": 11694908734,
         "wikidata": null,
         "wikipedia": null,
-        "routeRefs": []
+        "routeRefs": [],
+        "street": "Jalan Letnan Jenderal MT Haryono"
       }
     },
     {
@@ -66601,7 +67025,8 @@
         "osmNodeId": 11770147753,
         "wikidata": null,
         "wikipedia": null,
-        "routeRefs": []
+        "routeRefs": [],
+        "street": "Jalan Medan Merdeka Selatan"
       }
     },
     {
@@ -67061,7 +67486,8 @@
         "osmNodeId": 12029496549,
         "wikidata": null,
         "wikipedia": null,
-        "routeRefs": []
+        "routeRefs": [],
+        "street": "Jalan Terminal Kampung Rambutan"
       }
     },
     {
@@ -67081,7 +67507,8 @@
         "osmNodeId": 12029496550,
         "wikidata": null,
         "wikipedia": null,
-        "routeRefs": []
+        "routeRefs": [],
+        "street": "Jalan Terminal Kampung Rambutan"
       }
     },
     {
@@ -67101,7 +67528,8 @@
         "osmNodeId": 12029496551,
         "wikidata": null,
         "wikipedia": null,
-        "routeRefs": []
+        "routeRefs": [],
+        "street": "Jalan Terminal Kampung Rambutan"
       }
     },
     {
@@ -67121,7 +67549,8 @@
         "osmNodeId": 12029496552,
         "wikidata": null,
         "wikipedia": null,
-        "routeRefs": []
+        "routeRefs": [],
+        "street": "Jalan Terminal Kampung Rambutan"
       }
     },
     {
@@ -67141,7 +67570,8 @@
         "osmNodeId": 12029496553,
         "wikidata": null,
         "wikipedia": null,
-        "routeRefs": []
+        "routeRefs": [],
+        "street": "Jalan Terminal Kampung Rambutan"
       }
     },
     {
@@ -67161,7 +67591,8 @@
         "osmNodeId": 12029496554,
         "wikidata": null,
         "wikipedia": null,
-        "routeRefs": []
+        "routeRefs": [],
+        "street": "Jalan Terminal Kampung Rambutan"
       }
     },
     {
@@ -67181,7 +67612,8 @@
         "osmNodeId": 12029496556,
         "wikidata": null,
         "wikipedia": null,
-        "routeRefs": []
+        "routeRefs": [],
+        "street": "Jalan Terminal Kampung Rambutan"
       }
     },
     {
@@ -67201,7 +67633,8 @@
         "osmNodeId": 12029496557,
         "wikidata": null,
         "wikipedia": null,
-        "routeRefs": []
+        "routeRefs": [],
+        "street": "Jalan Terminal Kampung Rambutan"
       }
     },
     {
@@ -67221,7 +67654,8 @@
         "osmNodeId": 12029496558,
         "wikidata": null,
         "wikipedia": null,
-        "routeRefs": []
+        "routeRefs": [],
+        "street": "Jalan Terminal Kampung Rambutan"
       }
     },
     {
@@ -67241,7 +67675,8 @@
         "osmNodeId": 12029496559,
         "wikidata": null,
         "wikipedia": null,
-        "routeRefs": []
+        "routeRefs": [],
+        "street": "Jalan Terminal Kampung Rambutan"
       }
     },
     {
@@ -67261,7 +67696,8 @@
         "osmNodeId": 12029496560,
         "wikidata": null,
         "wikipedia": null,
-        "routeRefs": []
+        "routeRefs": [],
+        "street": "Jalan Terminal Kampung Rambutan"
       }
     },
     {
@@ -67281,7 +67717,8 @@
         "osmNodeId": 5504611861,
         "wikidata": null,
         "wikipedia": null,
-        "routeRefs": []
+        "routeRefs": [],
+        "street": "Jalan Terminal Kampung Rambutan"
       }
     },
     {
@@ -67301,7 +67738,8 @@
         "osmNodeId": 12563565467,
         "wikidata": null,
         "wikipedia": null,
-        "routeRefs": []
+        "routeRefs": [],
+        "street": "Jalan Terminal Kampung Rambutan"
       }
     },
     {
@@ -68014,7 +68452,8 @@
         "osmNodeId": 12959623388,
         "wikidata": null,
         "wikipedia": null,
-        "routeRefs": []
+        "routeRefs": [],
+        "street": "Jalan Mayor Jenderal Sutoyo"
       }
     },
     {
@@ -68034,7 +68473,8 @@
         "osmNodeId": 12959623387,
         "wikidata": null,
         "wikipedia": null,
-        "routeRefs": []
+        "routeRefs": [],
+        "street": "Jalan Mayor Jenderal Sutoyo"
       }
     },
     {
@@ -68054,7 +68494,8 @@
         "osmNodeId": 12959623386,
         "wikidata": null,
         "wikipedia": null,
-        "routeRefs": []
+        "routeRefs": [],
+        "street": "Jalan Mayor Jenderal Sutoyo"
       }
     },
     {
@@ -68074,7 +68515,8 @@
         "osmNodeId": 5506920038,
         "wikidata": null,
         "wikipedia": null,
-        "routeRefs": []
+        "routeRefs": [],
+        "street": "Jalan Mayor Jenderal Sutoyo"
       }
     },
     {

@@ -589,6 +589,21 @@ export function humanizeName(value: string): string {
  * the sign leaves out spaces: "SimpangBuaran" is "Simpang Buaran". The
  * key therefore ignores them.
  */
+/**
+ * The name of the road, when it is a road and not the name of a line.
+ *
+ * The way a bus drives on is sometimes the busway itself, and its name
+ * is the corridor: "Transjakarta Busway Koridor 1". That is not the
+ * address of a stop, so it is left out.
+ */
+function streetOf(name: string | null | undefined): string | null {
+  if (!name) return null;
+  if (/busway|koridor|commuter|\bLRT\b|\bKRL\b|\bMRT\b|\bline\b|j\/l|rail/i.test(name)) {
+    return null;
+  }
+  return name;
+}
+
 function nameKey(name: string): string {
   return canonicalKey(name).replace(/\s+/g, "");
 }
@@ -830,6 +845,7 @@ function buildStops(input: {
             wikidata: match.wikidata,
             wikipedia: match.wikipedia,
             routeRefs: match.routeRefs,
+            ...(streetOf(match.street) ? { street: streetOf(match.street) as string } : {}),
           }
         : {},
     });
@@ -871,6 +887,7 @@ function buildStops(input: {
         wikidata: osmStop.wikidata,
         wikipedia: osmStop.wikipedia,
         routeRefs: osmStop.routeRefs,
+        ...(streetOf(osmStop.street) ? { street: streetOf(osmStop.street) as string } : {}),
       },
     });
 

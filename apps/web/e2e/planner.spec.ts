@@ -149,3 +149,23 @@ test.describe("route planner", () => {
     expect(overflow).toBeLessThanOrEqual(1);
   });
 });
+
+test.describe("walking from the reader's place", () => {
+  test.use({
+    permissions: ["geolocation"],
+    geolocation: { latitude: -6.1952, longitude: 106.8211 },
+  });
+
+  test("finds the stop to walk to and the way there", async ({ page }) => {
+    await page.goto("/");
+
+    await page.getByRole("button", { name: /Gunakan posisi saya/ }).click();
+
+    // The walk names the stop, the distance and the streets on the way.
+    await expect(page.getByText(/Berjalan .* ke /).first()).toBeVisible({ timeout: 30_000 });
+    await expect(page.getByText(/Jalan|Boulevard|Gang|Tol /).first()).toBeVisible({ timeout: 30_000 });
+
+    // The journey starts from that stop.
+    await expect(page.getByLabel("Dari")).toHaveValue(/.+/);
+  });
+});

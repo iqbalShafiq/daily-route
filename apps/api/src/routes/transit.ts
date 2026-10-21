@@ -124,6 +124,7 @@ export function createTransitRouter(deps: ApiDeps): Router {
         longitude: candidate.longitude,
         isInterchange: candidate.isInterchange,
         lineCount: candidate.lineCount,
+        street: candidate.street ?? null,
         score: Number(candidate.score.toFixed(3)),
         matchedRanges: candidate.matchedRanges,
       })),
