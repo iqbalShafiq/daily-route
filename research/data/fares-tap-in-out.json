@@ -1,0 +1,831 @@
+{
+  "schemaVersion": "1.0.0",
+  "asOf": "2026-10-21",
+  "inForceOn": "2026-10-21",
+  "timezone": "Asia/Jakarta",
+  "currency": "IDR",
+  "scope": "Aturan tarif Transjakarta terkait tap in / tap out, transfer antar bus, integrasi tarif JakLingko (multimoda dan internal Transjakarta), serta status perubahan tarif 1 Januari 2027.",
+  "legend": {
+    "status": {
+      "official": "Ditetapkan oleh operator, Pemerintah Provinsi DKI Jakarta, atau dokumen resmi (Kepgub / SKB / website operator).",
+      "officialOperatorChannel": "Dinyatakan resmi oleh kanal resmi operator (akun media sosial resmi), bukan dokumen tertulis.",
+      "proposal": "Usulan, belum diputuskan dan belum berlaku.",
+      "operatorPractice": "Perilaku operasional yang dinyatakan operator lewat kanal resmi tetapi tidak dirumuskan sebagai dokumen aturan.",
+      "communityClaim": "Pernyataan dari komunitas pengguna, tanpa dukungan sumber resmi."
+    },
+    "confidence": {
+      "high": "Ada kutipan langsung dari sumber primer, atau beberapa sumber independen yang saling menguatkan.",
+      "medium": "Hanya satu sumber, atau sumber sekunder yang bisa dipercaya tetapi tidak ada kutipan primer.",
+      "low": "Indikasi lemah, berlawanan antar sumber, atau extrapolasi."
+    },
+    "effectType": {
+      "fullFare": "Aturan penuh: penumpang membayar tarif penuh moda tersebut.",
+      "additionalCharge": "Biaya tambahan di atas tarif moda yang dipakai.",
+      "cap": "Plafon: tarif tidak boleh melebihi angka ini untuk periode yang ditentukan.",
+      "exempt": "Gratis bagi penumpang.",
+      "notCovered": "Moda atau keadaan ini tidak termasuk dalam skema apa pun dan ditagih secara terpisah.",
+      "noEffect": "Aturan administratif tanpa efek langsung pada harga."
+    }
+  },
+  "rules": [
+    {
+      "id": "tj-flat-fare-per-boarding",
+      "name": "Transjakarta - tarif flat per boarding",
+      "operator": "transjakarta",
+      "modes": ["transjakarta-brt", "transjakarta-non-brt", "transjakarta-transjabodetabek"],
+      "status": "official",
+      "confidence": "high",
+      "effectiveFrom": "2005-01-01",
+      "effectiveFromNote": "Angka Rp3.500 sudah berlaku sejak 2005 (naik dari Rp2.000 pada 2004). Tahun 2005 adalah angka tahun yang disebut pemberita, bukan tanggal penetapan sehari.",
+      "conditions": {
+        "days": "any",
+        "dayRule": "Berlaku setiap hari, termasuk akhir pekan dan hari libur nasional.",
+        "timeWindows": [
+          { "from": "05:00", "to": "07:00", "amount": 2000, "label": "Tarif ekonomis / pagi hari", "anchor": "tapIn" },
+          { "from": "07:01", "to": "04:59", "amount": 3500, "label": "Tarif reguler", "anchor": "tapIn" }
+        ],
+        "networkNote": "Tarif sama untuk BRT, non-BRT (Metrotrans / Minitrans / AMARI), bus keojo hunian rusun, dan Transjabodetabek.",
+        "requiresTapIn": true,
+        "requiresTapOut": true,
+        "minBalanceIdr": 5000,
+        "oneCardOnePassenger": true,
+        "maxFareIdr": 3500
+      },
+      "effect": {
+        "type": "fullFare",
+        "amounts": { "regular": 3500, "earlyMorning": 2000 },
+        "chargedAt": "tapOut",
+        "bandAnchor": "tapIn",
+        "bandAnchorConfidence": "medium",
+        "onMissingTapOut": "Tarif tetap sama (Rp3.500, atau Rp2.000 bila tap-in terjadi 05.00-07.00). Tidak ada tambahan biaya pada saat itu; penagihan ditunda ke tap-in berikutnya dan kartu terblokir sementara.",
+        "onMissingTapOutDetail": "Transjakarta: kartu akan ter-reset otomatis pada saat tap in di perjalanan berikutnya dengan pemotongan saldo sesuai dengan tarif pada perjalanan sebelumnya (PT Transjakarta, 6 Oktober 2025). JakLingko S&K: Kegagalan melakukan Tap-Out akan mengakibatkan kartu atau tiket Anda dikenakan biaya penalti maksimal rute terjauh saat perjalanan berikutnya."
+      },
+      "sources": [
+        {
+          "url": "https://www.jakarta.go.id/transjakarta",
+          "quote": "Tarif: 1. Tarif ekonomis: Rp 2.000 (Pukul 05.00 - 07.00 WIB) 2. Tarif reguler Transjakarta: Rp3.500 (Pukul 07.01 - 04.59 WIB)",
+          "publisher": "Pemerintah Provinsi DKI Jakarta - Dinas Perhubungan",
+          "publishedAt": "2025-02-10"
+        },
+        {
+          "url": "https://x.com/PT_Transjakarta/status/946911918056280064",
+          "quote": "Yang dimaksud dgn maksimum Rp 5000 per 3 jam adalah terhitung dari tap in pertama sampai dengan tap in terakhir. Jika pelanggan tetap berada di kawasan Transjakarta tanpa tap out, tarif tetap Rp 3500 seperti yg berlaku selama ini",
+          "publisher": "PT Transportasi Jakarta (akun resmi X)",
+          "publishedAt": "2017-12-30"
+        },
+        {
+          "url": "https://transjakarta.co.id/news/transjakarta-modifikasi-rute-sh2-blok-m-bandara-soekarno-hatta-perkuat-konektivitas-dan-kenyamanan-pelanggan",
+          "quote": "Layanan tetap beroperasi setiap hari mulai pukul 05.00 WIB hingga 22.00 WIB untuk kedua arah, dengan tarif Rp3.500.",
+          "publisher": "PT Transportasi Jakarta",
+          "publishedAt": "2026-03-20"
+        }
+      ],
+      "notes": [
+        "Tidak ada aturan diskon harga pada akhir pekan untuk Transjakarta; sumber resmi menyebut tarif Rp3.500 berlaku setiap hari.",
+        "Perbedaan satu menit pada batas 07.00: sumber resmi menulis tarif reguler mulai 07.01, sedangkan implementasi umum memakai window [05:00, 07:00). Konvensi model perlu ditetapkan eksplisit."
+      ]
+    },
+    {
+      "id": "tj-mandatory-tap-in-tap-out",
+      "name": "Transjakarta - wajib tap in dan tap out (satu kartu satu penumpang)",
+      "operator": "transjakarta",
+      "modes": ["transjakarta-brt", "transjakarta-non-brt", "transjakarta-mikrotrans"],
+      "status": "official",
+      "confidence": "high",
+      "effectiveFrom": "2022-10-04",
+      "effectiveFromNote": "PT JakLingko, Transjakarta, MRT Jakarta dan LRT Jakarta menerapkan One Man One Ticket dan kewajiban tap in / tap out sejak Selasa, 4 Oktober 2022, seiring pemberlakuan tarif integrasi.",
+      "conditions": {
+        "days": "any",
+        "tapIn": "Wajib saat memasuki halte (BRT) atau menaiki bus (non-BRT, tap on bus di dalam armada).",
+        "tapOut": "Wajib saat turun di halte tujuan. Pada BRT tap out dilakukan di gate keluar halte tujuan.",
+        "oneCardOnePassenger": true,
+        "cardBlockedOnMissingTapOut": true
+      },
+      "effect": {
+        "type": "noEffect",
+        "note": "Aturan administratif yang menentukan kapan tarif ditagih dan bagaimana kartu disingkirkan dari pemakaian bersama. Tanpa tap out, kartu berada pada status sedang perjalanan."
+      },
+      "sources": [
+        {
+          "url": "https://m.beritajakarta.id/read/109943/pt-jaklingko-terapkan-one-man-one-ticket-dan-kewajiban-tap-in-tap-out",
+          "quote": "PT JakLingko Indonesia bersama Transjakarta, MRT Jakarta dan LRT Jakarta telah melakukan penerapan proses bisnis baru berupa One Man One Ticket dan kewajiban tap in dan tap out bagi seluruh penumpang yang akan melakukan perjalanan dengan menggunakan layanan tersebut.",
+          "publisher": "beritajakarta.id (Portal resmi Pemerintah Provinsi DKI Jakarta)",
+          "publishedAt": "2022-10-05"
+        },
+        {
+          "url": "https://www.jakarta.go.id/transjakarta",
+          "quote": "Saat melakukan perjalanan menggunakan Transjakarta, penumpang wajib melakukan Tap In saat memasuki Halte, dan Tap Out saat di Halte tujuan setelah menyelesaikan perjalanan.",
+          "publisher": "Pemerintah Provinsi DKI Jakarta",
+          "publishedAt": "2025-02-10"
+        },
+        {
+          "url": "https://x.com/PT_Transjakarta/status/1577249359682768896",
+          "quote": "Jika kamu tidak melakukan tap out, kartu kamu akan terblokir dan kamu harus mengatur ulang (reset) kartu kamu dengan cara: 1. Tempelkan kartu pada pintu masuk/keluar (gate) 2. Tempelkan kartu pada mesin kartu dalam bus (TOB)",
+          "publisher": "PT Transportasi Jakarta (akun resmi X)",
+          "publishedAt": "2022-10-04"
+        }
+      ],
+      "notes": ["Mikrotrans juga wajib tap in dan tap out, meskipun gratis."]
+    },
+    {
+      "id": "tj-missing-tap-out-penalty",
+      "name": "Transjakarta - penalti lupa tap out",
+      "operator": "transjakarta",
+      "modes": ["transjakarta-brt", "transjakarta-non-brt"],
+      "status": "official",
+      "confidence": "high",
+      "effectiveFrom": "2022-10-04",
+      "conditions": {
+        "days": "any",
+        "trigger": "Penumpang menyelesaikan perjalanan tanpa tap out.",
+        "immediateEffect": "Kartu terblokir dan tidak bisa tap in lagi sebelum di-reset.",
+        "recovery": "Pada tap in berikutnya kartu di-reset otomatis dan biaya perjalanan sebelumnya dipotong dari saldo.",
+        "minBalanceIdr": 5000,
+        "refundNote": "Tidak ada refund untuk perjalanan yang tidak di-tap out."
+      },
+      "effect": {
+        "type": "fullFare",
+        "amounts": { "penalty": "tarif perjalanan sebelumnya (Transjakarta) atau tarif maksimal rute terjauh (JakLingko S&K)" },
+        "chargedAt": "nextTapIn",
+        "deferred": true,
+        "note": "Untuk Transjakarta flat, penaltinya sama dengan tarif biasa (Rp3.500 atau Rp2.000), sehingga tidak ada biaya tambahan selain penundaan. Untuk moda berbasis jarak seperti MRT (Rp14.000) dan LRT Jakarta (Rp5.000), besaran penalti jauh lebih besar dan inilah sumber keluhan potongan lebih dari Rp10.000."
+      },
+      "sources": [
+        {
+          "url": "https://x.com/PT_Transjakarta/status/1975095888872898629",
+          "quote": "Jika tidak melakukan tap out pada saat menggunakan layanan Transjakarta, maka kartu akan ter-reset otomatis pada saat tap in diperjalanan berikutnya dengan pemotongan saldo sesuai dengan tarif pada perjalanan sebelumnya",
+          "publisher": "PT Transportasi Jakarta (akun resmi X)",
+          "publishedAt": "2025-10-06"
+        },
+        {
+          "url": "https://jaklingkoindonesia.co.id/syarat-dan-ketentuan",
+          "quote": "Kegagalan melakukan Tap-Out akan mengakibatkan kartu/tiket Anda dikenakan biaya penalti maksimal rute terjauh saat perjalanan berikutnya.",
+          "publisher": "PT Jakarta Lingko Indonesia - Syarat & Ketentuan",
+          "publishedAt": null
+        },
+        {
+          "url": "https://news.detik.com/berita/d-6328000/1-kartu-1-penumpang-transj-berlaku-kini-wajib-tap-in-dan-tap-out-halte",
+          "quote": "Reset kartu, pastikan minimal saldo Rp 5000 di dalamnya, kartu akan memotong biaya perjalanan terjauh sebelumnya",
+          "publisher": "detikNews",
+          "publishedAt": "2022-10-04"
+        }
+      ]
+    },
+    {
+      "id": "tj-min-balance",
+      "name": "Transjakarta - saldo minimum kartu fisik",
+      "operator": "transjakarta",
+      "modes": ["transjakarta-brt", "transjakarta-non-brt"],
+      "status": "official",
+      "confidence": "high",
+      "effectiveFrom": "2022-10-04",
+      "conditions": {
+        "days": "any",
+        "minBalanceIdr": 5000,
+        "appliesTo": "Kartu Uang Elektronik bank (e-Money, Flazz, TapCash, Brizzi, JakCard, KMT) dan Kartu JakLingko.",
+        "belowMinimum": "Gerbang tidak terbuka; penumpang tidak dapat naik, kecuali untuk layanan gratis."
+      },
+      "effect": { "type": "noEffect", "note": "Syarat akses, bukan komponen tarif." },
+      "sources": [
+        {
+          "url": "https://megapolitan.kompas.com/read/2022/10/04/19011811/naik-turun-bus-transjakarta-wajib-tap-in-tap-out-agar-kartu-tak-terblokir",
+          "quote": "Pelanggan juga perlu memiliki saldo minimum senilai Rp 5.000 untuk memanfaatkan layanan bus transjakarta. Jika saldo di bawah Rp 5.000, pelanggan tidak dapat menggunakan layanan transjakarta, kecuali untuk layanan gratis.",
+          "publisher": "Kompas.com",
+          "publishedAt": "2022-10-04"
+        },
+        {
+          "url": "https://x.com/PT_Transjakarta/status/1577249359682768896",
+          "quote": "Pastikan saldo minimun kamu Rp 5.000 dan selalu tempelkan kartu kamu saat naik dan turun bus (tap in & tap out di setiap perjalanan yaa!",
+          "publisher": "PT Transportasi Jakarta (akun resmi X)",
+          "publishedAt": "2022-10-04"
+        }
+      ]
+    },
+    {
+      "id": "tj-transfer-is-new-boarding",
+      "name": "Transjakarta - pindah bus berarti tap in baru",
+      "operator": "transjakarta",
+      "modes": ["transjakarta-brt", "transjakarta-non-brt"],
+      "status": "official",
+      "confidence": "high",
+      "effectiveFrom": "2022-10-04",
+      "conditions": {
+        "days": "any",
+        "rule": "Setiap naik bus adalah satu boarding: tap in pada bus yang dinaiki dan tap out pada bus yang diturunkan. Pindah bus berarti satu rangkaian tap in dan tap out tambahan.",
+        "withoutIntegrationScheme": "Setiap boarding ditagih tarif penuh sendiri (Rp3.500 atau Rp2.000).",
+        "withJakLingkoCard": "Boarding-boarding tersebut ditutup oleh skema tarif integrasi internal Transjakarta, lihat integration-transjakarta-only-3h.",
+        "bandAnchor": "tapIn",
+        "distanceNotCharged": true
+      },
+      "effect": {
+        "type": "fullFare",
+        "amounts": { "perBoarding": 3500, "perBoardingEarlyMorning": 2000 },
+        "note": "Tanpa kartu berlogo JakLingko, estimator harus menghitung perjalanan baru untuk setiap bus yang dinaiki. Dengan kartu JakLingko, biaya dibatasi oleh plafon Rp5.000 per 3 jam."
+      },
+      "sources": [
+        {
+          "url": "https://x.com/PT_Transjakarta/status/2020622175766802528",
+          "quote": "Tersedia tarif integrasi maksimal Rp5.000,- (berlaku per 3 jam). Tarif integrasi ini dapat diperoleh dengan menggunakan kartu berlogo JakLingko saat menggunakan layanan BRT maupun Non-BRT. Jangan lupa untuk selalu tap in dan tap out.",
+          "publisher": "PT Transportasi Jakarta (akun resmi X)",
+          "publishedAt": "2026-02-08"
+        },
+        {
+          "url": "https://x.com/PT_Transjakarta/status/2002292728324108671",
+          "quote": "tarif integrasi Rp.5.000,- / 3 jam masih dapat dipakai dengan menggunakan kartu berlogo Jaklingko, dengan tetap melakukan proses tap in",
+          "publisher": "PT Transportasi Jakarta (akun resmi X)",
+          "publishedAt": "2025-12-24"
+        }
+      ],
+      "notes": [
+        "Pindah bus di dalam halte antar koridor BRT tetap dihitung sebagai boarding baru; tidak ada diskon otomatis.",
+        "Mikrotrans: karena tarifnya Rp0, boarding tambahan tidak menambah biaya, tetapi moda Mikrotrans di antara dua moda yang tercakup MEMUTUSKAN skema tarif integrasi multimodal."
+      ]
+    },
+    {
+      "id": "tj-microtrans-free",
+      "name": "Transjakarta Mikrotrans - gratis, wajib tap, tidak masuk skema integrasi",
+      "operator": "transjakarta",
+      "modes": ["transjakarta-mikrotrans"],
+      "status": "official",
+      "confidence": "high",
+      "effectiveFrom": "2022-10-07",
+      "effectiveFromNote": "Mikrotrans JakLingkoTarif resmi pada 7 Oktober 2022 seiring implementasi tarif integrasi dan peluncuran Mikrotrans.",
+      "conditions": {
+        "days": "any",
+        "requiresTapIn": true,
+        "requiresTapOut": true,
+        "inMultimodalScheme": false,
+        "breaksMultimodalScheme": true
+      },
+      "effect": {
+        "type": "exempt",
+        "amounts": { "passengerFare": 0 },
+        "note": "Operator dibayar per jarak tempuh oleh Pemerintah Provinsi DKI Jakarta. Penumpang tidak membayar, tetapi wajib tap untuk pencatatan perjalanan."
+      },
+      "sources": [
+        {
+          "url": "https://jaklingkoindonesia.co.id/faq-tarif-integrasi",
+          "quote": "Semua moda tersebut, BELUM masuk ke dalam skema tarif integrasi. Dan jika moda tersebut terjadi di antara moda TransJakarta, MRTJ atau LRTJ, akan memutus skema tarif integrasi Anda.",
+          "publisher": "PT Jakarta Lingko Indonesia - FAQ Tarif Integrasi",
+          "publishedAt": null
+        },
+        {
+          "url": "https://transjakarta.co.id/layanan/mikrotrans",
+          "quote": "Mikrotrans",
+          "publisher": "PT Transportasi Jakarta",
+          "publishedAt": null
+        }
+      ]
+    },
+    {
+      "id": "tj-royaltrans-excluded",
+      "name": "Royaltrans - produk berbayar terpisah, tidak pernah tercakup integrasi",
+      "operator": "transjakarta",
+      "modes": ["transjakarta-royaltrans"],
+      "status": "official",
+      "confidence": "high",
+      "effectiveFrom": "2018-01-01",
+      "conditions": {
+        "days": "any",
+        "inMultimodalScheme": false,
+        "inTransjakartaIntegrationScheme": false,
+        "amount": 20000
+      },
+      "effect": {
+        "type": "fullFare",
+        "amounts": { "regular": 20000 },
+        "note": "Rp20.000 flat di semua rute Royaltrans, tanpa diskon hari libur. Rute S13 Summarecon Serpong - Tomang dihargai Rp35.000 karena lebih panjang."
+      },
+      "sources": [
+        {
+          "url": "https://news.detik.com/berita/d-6891014/transjakarta-tarif-bus-royaltrans-tetap-rp-20-000",
+          "quote": "Tarif bus Royaltrans tetap Rp20.000",
+          "publisher": "detikNews",
+          "publishedAt": null
+        }
+      ]
+    },
+    {
+      "id": "integration-multimodal-3mode",
+      "name": "Tarif Integrasi Multimodal JakLingko (Transjakarta BRT + MRT Jakarta + LRT Jakarta)",
+      "operator": "jaklingko",
+      "modes": ["transjakarta-brt", "mrt-jakarta", "lrt-jakarta"],
+      "status": "official",
+      "confidence": "high",
+      "effectiveFrom": "2022-08-11",
+      "effectiveFromNote": "Kepgub DKI Jakarta No. 733 Tahun 2022 tentang Besaran Paket Tarif Layanan Angkutan Umum Massal ditandatangani 8 Agustus 2022 dan berlaku sejak ditandatangani; uji coba tarif integrasi dimulai 11 Agustus 2022; implementasi penuh (One Man One Ticket plus tarif integrasi) diluncurkan 7 Oktober 2022.",
+      "conditions": {
+        "days": "any",
+        "dayRule": "TIDAK ADA pembatasan hari. Kepgub 733/2022, FAQ Tarif Integrasi JakLingko 2026, dan Syarat & Ketentuan JakLingko tidak memuat syarat hari kerja maupun akhir pekan. Skema berlaku pada hari kerja, akhir pekan, dan hari libur nasional, sama seperti tarif moda tunggal.",
+        "minimumModes": 2,
+        "minimumModesNote": "Wajib memakai minimal 2 MODA BERBEDA, contoh Transjakarta lalu MRT Jakarta. Pindah dari BRT ke BRT bukan integrasi antarmoda.",
+        "covers": ["transjakarta-brt", "mrt-jakarta", "lrt-jakarta"],
+        "doesNotCover": [
+          "transjakarta-non-brt",
+          "transjakarta-mikrotrans",
+          "transjakarta-royaltrans",
+          "krl-jabodetabek",
+          "lrt-jabodebek",
+          "transjakarta-transjabodetabek"
+        ],
+        "boardingFee": 2500,
+        "perKm": 250,
+        "cap": 10000,
+        "windowMinutes": 180,
+        "windowAnchor": "tapOutToTapOut",
+        "windowAnchorNote": "FAQ JakLingko: jendela waktu 3 jam dihitung mulai dari tap-out perdana hingga tap-out akhir. S&K JakLingko: waktu perpindahan antarmoda tidak melebihi 180 menit sejak tap-out awal. Bank Mandiri menulis waktu tempuh selama 3 jam dengan catatan tidak keluar dari sistem jaklingko sejak pertama kali tap in. Ketiga pernyataan itu tidak identik; model harus memakai asumsi konservatif yaitu tidak keluar dari sistem, dan tidak boleh menganggap sesi integrasi bertahan lebih dari 180 menit.",
+        "requiresSameMedia": true,
+        "requiresSameMediaNote": "Tap in dan tap out harus memakai tiket QR atau kartu yang identik. Menggunakan kartu bank berbeda saat masuk gate transfer memutus integrasi.",
+        "activationRequired": true,
+        "activationNote": "KUE bank harus diaktivasi sebagai Kartu Transportasi JakLingko di Balance Check Terminal di stasiun MRT atau LRT, atau di halte Transjakarta. Tanpa aktivasi, kartu tetap bisa dipakai tetapi tarif reguler yang berlaku.",
+        "acceptedMedia": [
+          "e-Money Mandiri",
+          "Flazz BCA",
+          "TapCash BNI",
+          "Brizzi BRI",
+          "JakCard Bank DKI",
+          "Tiket QR aplikasi JakLingko"
+        ]
+      },
+      "effect": {
+        "type": "cap",
+        "formula": "min(10000, 2500 + 250 * totalDistanceKm)",
+        "amounts": { "boardingFee": 2500, "perKm": 250, "cap": 10000 },
+        "brtInsidePackage": "BRT BUKAN gratis dan BUKAN flat Rp2.500. Biaya awal Rp2.500 adalah boarding fee yang dibayar saat tap in pertama, lalu Rp250 per kilometer untuk seluruh jarak perjalanan integrasi. Jadi kaki BRT ikut menambah tarif sesuai jaraknya.",
+        "brtInsidePackageConfidence": "high",
+        "singleModeBehaviour": "Kalau penumpang hanya memakai SATU moda, tarif integrasi tidak dipakai sama sekali; penumpang membayar tarif reguler moda itu, misalnya Transjakarta BRT Rp3.500.",
+        "overWindowBehaviour": "Melewati 180 menit: sesi integrasi diputus otomatis oleh CCHS; sesi perjalanan baru dimulai dan moda terakhir dihitung ulang pada tarif reguler moda tersebut, ditambah penalti over-stay bila ada.",
+        "exceedingCapNote": "Biaya yang terpotong lebih dari Rp10.000 biasanya terjadi karena: durasi transit antarmoda melebihi 180 menit sejak tap-out awal; memakai kartu bank berbeda saat transfer; lupa tap out pada moda sebelumnya sehingga dikenakan denda default moda tersebut; atau perjalanan hanya satu moda."
+      },
+      "sources": [
+        {
+          "url": "https://jaklingkoindonesia.co.id/faq-tarif-integrasi",
+          "quote": "Saat Anda berpindah moda dalam rentang waktu maksimum 180 menit (3 jam), biaya yang dikenakan berupa tarif dasar awal Rp 2.500 ditambah Rp 250 untuk setiap kilometer berikutnya, dengan batas maksimal tagihan tidak akan melebihi Rp 10.000 per perjalanan.",
+          "publisher": "PT Jakarta Lingko Indonesia - FAQ Tarif Integrasi",
+          "publishedAt": null
+        },
+        {
+          "url": "https://jaklingkoindonesia.co.id/syarat-dan-ketentuan",
+          "quote": "Tarif dasar integrasi dimulai dari boarding fee sebesar Rp 2.500, dengan pertambahan Rp 250 per kilometer berikutnya, hingga mencapai tarif batas maksimal senilai Rp 10.000 untuk seluruh perjalanan multi-moda. Wajib menggunakan minimal 2 moda berbeda (contoh: Transjakarta ke MRT Jakarta).",
+          "publisher": "PT Jakarta Lingko Indonesia - Syarat & Ketentuan",
+          "publishedAt": null
+        },
+        {
+          "url": "https://m.antaranews.com/berita/3051305/anies-tetapkan-tarif-integrasi-untuk-transportasi-massal-rp10000",
+          "quote": "Biaya awal yang ditetapkan adalah Rp2.500 dengan tarif mencapai Rp250 per kilometer. Adapun plafon tarif maksimum sebesar Rp10.000 dengan pembatasan waktu perjalanannya adalah selama 180 menit atau tiga jam.",
+          "publisher": "ANTARA News",
+          "publishedAt": "2022-08-08"
+        },
+        {
+          "url": "https://www.kompas.id/artikel/sistem-tarif-integrasi-diluncurkan",
+          "quote": "Tarif itu hanya berlaku selama 180 menit atau tiga jam perjalanan. Apabila dalam satu kali perjalanan penumpang menghabiskan waktu tempuh lebih dari 180 menit, maka selain dari jumlah maksimum tarif yang dimaksud, akan dihitung paket tarif perjalanan berikutnya.",
+          "publisher": "Kompas.id",
+          "publishedAt": "2022-09-01"
+        },
+        {
+          "url": "https://www.bankmandiri.co.id/en/emoney-tarif-integrasi-di-jaklingko-indonesia",
+          "quote": "Tarif maksimal Rp10 ribu. Waktu tempuh selama 3 jam dengan catatan tidak keluar dari sistem jaklingko sejak pertama kali tap in di mesin jaklingko. Tarif terintegrasi berlaku terhadap perjalanan minimal 2 layanan moda. Bagi pengguna kartu yang hanya menggunakan 1 moda dalam perjalanan, maka akan dikenakan tarif reguler di moda tersebut.",
+          "publisher": "Bank Mandiri - e-Money Tarif Integrasi di Jaklingko Indonesia",
+          "publishedAt": null
+        },
+        {
+          "url": "https://transjakarta.co.id/berita/transjakarta-akselerasi-integrasi-moda-dan-elektrifikasi-armada-demi-mobilitas-berkelanjutan",
+          "quote": "masyarakat juga diuntungkan oleh integrasi tarif lintas moda dengan batas maksimum (plafon) Rp10.000 untuk durasi perjalanan hingga 180 menit",
+          "publisher": "PT Transportasi Jakarta",
+          "publishedAt": "2026-09-07"
+        }
+      ],
+      "notes": [
+        "Sebagian pemberita menulis Kepgub sebagai Nomor 733 Tahun 2022 dan satu artikel Kompas menulis Nomor 773 Tahun 2022. Nomor 733 adalah yang benar, dikutip ANTARA, Kompas.id, dan rm.id.",
+        "Wikipedia Indonesia menulis biaya awal sebagai tarif normal moda pertama, sementara JakLingko menulis flat Rp2.500. Versi operator yang dipakai.",
+        "Per 12 Oktober 2026 MRT Jakarta menghubungkan seluruh KUE bank ke 186 reader JakLingko di 13 stasiun, sehingga integrasi multimodal kini benar-benar operasional di sisi MRT."
+      ]
+    },
+    {
+      "id": "integration-transjakarta-only-3h",
+      "name": "Tarif integrasi internal Transjakarta (maks Rp5.000 per 3 jam)",
+      "operator": "transjakarta",
+      "modes": ["transjakarta-brt", "transjakarta-non-brt"],
+      "status": "officialOperatorChannel",
+      "confidence": "high",
+      "effectiveFrom": null,
+      "effectiveFromNote": "Tanggal mulai berlaku yang presisi tidak ditemukan. Skema sudah ada sekurang-kurangnya sejak 2017 dan masih diumumkan pada 8 Februari 2026. Tanggal penetration tidak ditemukan, jadi TIDAK TERVERIFIKASI.",
+      "conditions": {
+        "days": "any",
+        "dayRule": "TIDAK ADA pembatasan hari pada sumber resmi yang ditemukan; kanal resmi operator menyebut skema tanpa syarat hari.",
+        "cap": 5000,
+        "windowMinutes": 180,
+        "windowAnchor": "tapInToTapIn",
+        "windowAnchorNote": "PT Transjakarta, 30 Desember 2017: terhitung dari tap in pertama sampai dengan tap in terakhir. Video resmi JakLingko: maks. 3 jam dari tap in ke tap in selanjutnya.",
+        "requiresJakLingkoLogoCard": true,
+        "requiresJakLingkoLogoCardNote": "Kanal resmi PT Transjakarta menyebut syaratnya menggunakan kartu berlogo JakLingko. KUE bank biasa yang belum diaktivasi tidak otomatis mendapat skema ini.",
+        "covers": ["transjakarta-brt", "transjakarta-non-brt"],
+        "doesNotCover": ["transjakarta-mikrotrans", "transjakarta-royaltrans"],
+        "allocationRule": "TIDAK TERVERIFIKASI. Cara pembagian Rp5.000 di antara beberapa boarding tidak dirinci sumber resmi 2026. Indikasi lama dari 2017 dan contoh Traveloka: boarding pertama ditagih tarif reguler, boarding berikutnya mengisi sampai plafon Rp5.000.",
+        "stillActive2026": true
+      },
+      "effect": {
+        "type": "cap",
+        "amounts": { "cap": 5000 },
+        "note": "Pindah bus, baik BRT ke BRT, BRT ke non-BRT, maupun non-BRT ke non-BRT, tidak menambah biaya di bawah plafon, bila memakai kartu berlogo JakLingko dan seluruh rangkaian selesai dalam 3 jam."
+      },
+      "sources": [
+        {
+          "url": "https://x.com/PT_Transjakarta/status/2020622175766802528",
+          "quote": "Tersedia tarif integrasi maksimal Rp5.000,- (berlaku per 3 jam). Tarif integrasi ini dapat diperoleh dengan menggunakan kartu berlogo JakLingko saat menggunakan layanan BRT maupun Non-BRT. Jangan lupa untuk selalu tap in dan tap out.",
+          "publisher": "PT Transportasi Jakarta (akun resmi X)",
+          "publishedAt": "2026-02-08"
+        },
+        {
+          "url": "https://x.com/PT_Transjakarta/status/946911918056280064",
+          "quote": "Yang dimaksud dgn maksimum Rp 5000 per 3 jam adalah terhitung dari tap in pertama sampai dengan tap in terakhir.",
+          "publisher": "PT Transportasi Jakarta (akun resmi X)",
+          "publishedAt": "2017-12-30"
+        },
+        {
+          "url": "https://x.com/PT_Transjakarta/status/2002292728324108671",
+          "quote": "tarif integrasi Rp.5.000,- / 3 jam masih dapat dipakai dengan menggunakan kartu berlogo Jaklingko, dengan tetap melakukan proses tap in",
+          "publisher": "PT Transportasi Jakarta (akun resmi X)",
+          "publishedAt": "2025-12-24"
+        },
+        {
+          "url": "https://www.facebook.com/jaklingkoindonesia/videos/tarif-integrasi-always-on-yagunakan-minimal-2-moda-antara-mrt-lrt-jakarta-dan-tj/2717472391954473",
+          "quote": "Tarif Integrasi always ON, ya! Gunakan minimal 2 moda antara MRT, LRT Jakarta, dan TJ BRT. Bisa gunakan kartu (maks. 3 jam dari tap in ke tap in selanjutnya)",
+          "publisher": "PT Jakarta Lingko Indonesia (akun resmi Facebook)",
+          "publishedAt": null
+        }
+      ],
+      "notes": [
+        "Skema ini berbeda dari Tarif Integrasi Multimodal Rp10.000: yang ini hanya menutup perjalanan di dalam jaringan Transjakarta (BRT plus non-BRT) dengan plafon tetap, bukan Rp2.500 plus Rp250 per km.",
+        "Pada 17 Agustus 2026 tarif integrasi dinonaktifkan dan semua perjalanan dibaca sebagai single-mode dengan tarif Rp8 per moda. Itu promosey Independence Day, bukan aturan tetap."
+      ]
+    },
+    {
+      "id": "integration-break-conditions",
+      "name": "Kondisi yang memutus skema tarif integrasi",
+      "operator": "jaklingko",
+      "modes": [],
+      "status": "official",
+      "confidence": "high",
+      "effectiveFrom": "2022-08-11",
+      "conditions": {
+        "days": "any",
+        "breaks": [
+          "Durasi transit antarmoda melebihi 180 menit sejak tap-out awal.",
+          "Menggunakan kartu bank berbeda saat masuk gate transfer antar moda.",
+          "Lupa melakukan tap-out pada moda sebelumnya, sehingga dikenakan denda default moda tersebut.",
+          "Perjalanan hanya menggunakan satu moda, sehingga dikenakan tarif flat atau jarak reguler satu moda.",
+          "Menggunakan moda yang belum masuk skema, misalnya Mikrotrans, non-BRT, atau KRL, di antara dua moda yang tercakup."
+        ]
+      },
+      "effect": {
+        "type": "fullFare",
+        "note": "Ketika skema diputus, mode setelahnya ditagih pada tarif reguler mode tersebut dan plafon integrasi tidak lagi berlaku."
+      },
+      "sources": [
+        {
+          "url": "https://jaklingkoindonesia.co.id/faq-tarif-integrasi",
+          "quote": "Durasi transit antarmoda melebihi 180 menit sejak tap-out awal. Menggunakan kartu bank berbeda saat masuk gate transfer antar moda. Lupa melakukan tap-out pada moda sebelumnya, sehingga dikenakan denda default moda tersebut. Perjalanan hanya menggunakan satu moda (tidak terjadi integrasi antarmoda, sehingga dikenakan tarif flat/jarak reguler satu moda).",
+          "publisher": "PT Jakarta Lingko Indonesia - FAQ Tarif Integrasi",
+          "publishedAt": null
+        },
+        {
+          "url": "https://jaklingkoindonesia.co.id/faq-tarif-integrasi",
+          "quote": "Semua moda tersebut, BELUM masuk ke dalam skema tarif integrasi. Dan jika moda tersebut terjadi di antara moda TransJakarta, MRTJ atau LRTJ, akan memutus skema tarif integrasi Anda.",
+          "publisher": "PT Jakarta Lingko Indonesia - FAQ Tarif Integrasi",
+          "publishedAt": null
+        }
+      ]
+    },
+    {
+      "id": "krl-not-integrated",
+      "name": "KRL Jabodetabek - tarif tidak terintegrasi",
+      "operator": "kci",
+      "modes": ["krl-jabodetabek"],
+      "status": "official",
+      "confidence": "high",
+      "effectiveFrom": "2022-08-11",
+      "conditions": {
+        "days": "any",
+        "inMultimodalScheme": false,
+        "inTransjakartaIntegrationScheme": false,
+        "ticketCanBeBoughtInJakLingkoApp": true,
+        "ticketCanBeBoughtInJakLingkoAppNote": "Tiket KRL (ABT QR atau Pay-As-You-Go) bisa dibeli di aplikasi JakLingko, dan KRL Access QR bisa dipakai di Transjakarta, MRT Jakarta, LRT Jakarta, dan LRT Jabodebek, tetapi tarif KRL itu sendiri tidak terintegrasi."
+      },
+      "effect": {
+        "type": "notCovered",
+        "note": "Pindah dari atau ke KRL selalu menambah tarif penuh KRL yang baru."
+      },
+      "sources": [
+        {
+          "url": "https://jaklingkoindonesia.co.id/faq-tarif-integrasi",
+          "quote": "Cakupan Moda: 3 Operator. Integrasi resmi Transjakarta BRT koridor, MRT Jakarta, dan LRT Jakarta.",
+          "publisher": "PT Jakarta Lingko Indonesia - FAQ Tarif Integrasi",
+          "publishedAt": null
+        },
+        {
+          "url": "https://id.wikipedia.org/w/index.php?title=KRL_Commuter_Line&action=raw",
+          "quote": "penetapan tarif di KRL Commuter Line masih belum terintegrasi dan menggunakan tarif umum yang berlaku saat ini",
+          "publisher": "Wikipedia Bahasa Indonesia",
+          "publishedAt": null
+        }
+      ]
+    },
+    {
+      "id": "lrt-jabodebek-not-integrated",
+      "name": "LRT Jabodebek - tarif sendiri, ada pembedaan hari kerja versus akhir pekan",
+      "operator": "lrt-jabodebek",
+      "modes": ["lrt-jabodebek"],
+      "status": "official",
+      "confidence": "high",
+      "effectiveFrom": "2023-11-01",
+      "effectiveFromNote": "Kepmenhub KM 67/2023 sebagaimana diubah KM 70/2024.",
+      "conditions": {
+        "days": "any",
+        "inMultimodalScheme": false,
+        "peakWindows": ["06:00-08:59", "16:00-19:59"],
+        "peakDays": "Senin-Jumat, di luar hari libur nasional",
+        "peakCap": 20000,
+        "offPeakCap": 10000,
+        "weekendCap": 10000,
+        "weekendCapNote": "Sabtu, Minggu, dan hari libur nasional memakai plafon Rp10.000. INILAH pembedaan hari kerja dan akhir pekan yang sah di jaringan Jakarta, bukan pada skema integrasi JakLingko.",
+        "base": 5000,
+        "baseKm": 1,
+        "perKm": 700,
+        "minBalanceIdr": 10000
+      },
+      "effect": {
+        "type": "fullFare",
+        "amounts": { "base": 5000, "perKm": 700, "peakCap": 20000, "offPeakCap": 10000 },
+        "note": "Setiap perpindahan mode dari atau ke LRT Jabodebek menambah tarif penuh LRT Jabodebek."
+      },
+      "sources": [
+        {
+          "url": "https://lrtjabodebek.kai.id/informasi-tarif",
+          "quote": "Tarif maksimum jam sibuk Rp20.000; tarif maksimum di luar jam sibuk Rp10.000",
+          "publisher": "PT LRT Jabodebek (KAI)",
+          "publishedAt": null
+        },
+        {
+          "url": "https://lrtjabodebek.kai.id/metode-pembayaran",
+          "quote": "minimum saldo kartu Rp10.000",
+          "publisher": "PT LRT Jabodebek (KAI)",
+          "publishedAt": null
+        }
+      ]
+    }
+  ],
+  "pendingChanges": [
+    {
+      "id": "fare-2027-date-and-scope",
+      "name": "Penyesuaian tarif 1 Januari 2027 - tanggal dan cakupan operator",
+      "status": "official",
+      "confidence": "high",
+      "effectiveFrom": "2027-01-01",
+      "announcedAt": "2026-09-29",
+      "conditions": {
+        "operatorsInScope": [
+          "transjakarta-brt",
+          "transjakarta-non-brt",
+          "transjakarta-transjabodetabek",
+          "transjakarta-mikrotrans"
+        ],
+        "operatorsNotInScope": ["mrt-jakarta", "lrt-jakarta"],
+        "scopeNote": "Gubernur menyatakan langsung: tarif yang akan mengalami penyesuaian adalah tarif untuk TransJakarta dan TransJabodetabek (30 September 2026), dan Mikrotrans diatur bersamaan dengan Transjakarta, Transjabodetabek, Mikrotrans, Jaklingko karena satu rumpun, mulai efektif 1 Januari. Untuk MRT dan LRT: untuk MRT, LRT akan diatur kemudian. Jadi TIDAK ikut 1 Januari 2027.",
+        "conflictingSources": "Kompas.com (30 September 2026) dan Kompas.id menulis penyesuaian 1 Januari 2027 juga mencakup LRT Jakarta, dan judul Kompas TV menyebut Transjakarta, LRT hingg MRT. Ini BERBEDA dengan kutipan langsung gubernur. Verdict: MRT Jakarta TIDAK ikut (kutipanuela gubernur eksplisit); LRT Jakarta BERBEDA dan tidak tegas.",
+        "freeGroups": "Penerima tarif gratis diperluas dari 15 menjadi 21 golongan, mulai 1 Januari 2027.",
+        "amountsAnnounced": false
+      },
+      "effect": {
+        "type": "fullFare",
+        "note": "Besaran tarif baru BELUM diumumkan per 21 Oktober 2026. Angka Rp5.000 adalah usulan Dewan Transportasi Kota Jakarta (DTKJ), bukan keputusan pemerintah.",
+        "amounts": null
+      },
+      "sources": [
+        {
+          "url": "https://www.metrotvnews.com/read/kWDCmYyM-tarif-transjakarta-naik-januari-2027-mrt-lrt-menyusul",
+          "quote": "Jadi tarif yang akan mengalami penyesuaian adalah tarif untuk TransJakarta dan TransJabodetabek. Mikrotrans diatur bersamaan dengan kan itu satu rumpun Transjakarta, Transjabodetabek, Mikrotrans, Jaklingko itu kan satu rumpun jadi itu diatur bersamaan akan diumumkan angkanya berapa tapi mulai efektif 1 Januari. Sedangkan untuk MRT, LRT akan diatur kemudian.",
+          "publisher": "Metro TV News",
+          "publishedAt": "2026-09-30"
+        },
+        {
+          "url": "https://www.cnnindonesia.com/nasional/20260929181611-20-1409653/tarif-transjakarta-dan-transjabodetabek-bakal-naik-1-januari-2027",
+          "quote": "Dengan jujur saya harus mengatakan, 1 Januari juga akan ada beberapa penyesuaian tarif harga untuk TransJakarta maupun TransJabodetabek. Bahkan nanti per 1 Januari kami akan melakukan perluasan dari 15 golongan menjadi 21 golongan.",
+          "publisher": "CNN Indonesia",
+          "publishedAt": "2026-09-29"
+        },
+        {
+          "url": "https://mediaindonesia.com/megapolitan/939059/tarif-transjakarta-dan-transjabodetabek-disesuaikan-mulai-1-januari-2027",
+          "quote": "Dengan jujur saya harus mengatakan, 1 Januari juga akan ada beberapa penyesuaian tarif harga untuk TransJakarta maupun TransJabodetabek.",
+          "publisher": "Media Indonesia",
+          "publishedAt": "2026-09-29"
+        },
+        {
+          "url": "https://www.antaranews.com/berita/5768293/tarif-transjakarta-2027-jadi-rp5000-ini-fakta-terbarunya",
+          "quote": "Hingga 1 Oktober 2026, Pemerintah Provinsi DKI Jakarta belum mengumumkan angka resmi tarif baru. Jadi, angka Rp5.000 yang belakangan ramai disebut belum menjadi tarif yang dipastikan berlaku.",
+          "publisher": "ANTARA News",
+          "publishedAt": "2026-10-02"
+        },
+        {
+          "url": "https://jakartaglobe.id/news/jakarta-to-raise-transjakarta-fares-from-january-2027",
+          "quote": "The new Transjakarta fares have yet to be announced. It also remains unclear whether the increase will follow a recommendation from the Jakarta Transportation Council (DTKJ), which has proposed raising the Transjakarta fare to Rp5,000 and the Transjabodetabek fare to Rp10,000.",
+          "publisher": "The Jakarta Globe",
+          "publishedAt": "2026-09-29"
+        }
+      ]
+    },
+    {
+      "id": "dtkj-proposal-2027",
+      "name": "Usulan DTKJ untuk tarif 2027 - BELUM berlaku",
+      "status": "proposal",
+      "confidence": "high",
+      "proposedAt": "2026-07-03",
+      "conditions": {
+        "days": "any",
+        "proposalShape": "Dua kelompok tarif saja, berbasis waktu tiga jam, bukan per perjalanan.",
+        "withinJakarta": {
+          "amount": 5000,
+          "durationMinutes": 180,
+          "covers": ["transjakarta-brt", "transjakarta-non-brt", "transjakarta-mikrotrans"],
+          "note": "Termasuk Mikrotrans yang selama ini gratis."
+        },
+        "transjabodetabek": {
+          "amount": 10000,
+          "durationMinutes": 180,
+          "note": "Termasuk layanan ke bandara."
+        },
+        "microtrans": {
+          "amount": 2000,
+          "durationMinutes": 180,
+          "note": "Usulan terpisah 7 Juli 2026 agar Mikrotrans tidak lagi gratis.",
+          "alternativeReading": "Beberapa pemberita menulis Mikrotrans ikut dalam paket Rp5.000, bukan Rp2.000 terpisah."
+        },
+        "subscriptionProposal": {
+          "amount": 200000,
+          "period": "per bulan",
+          "note": "Usulan paket langganan, diklaim hemat 20 persen. Usulan, bukan keputusan."
+        }
+      },
+      "effect": {
+        "type": "fullFare",
+        "note": "TIDAK berlaku per 21 Oktober 2026. Angka ini tidak boleh dipakai sebagai tarif aktif.",
+        "amounts": { "withinJakarta": 5000, "transjabodetabek": 10000, "microtrans": 2000 }
+      },
+      "sources": [
+        {
+          "url": "https://www.gridoto.com/read/224393148/persiapan-tarif-transjakarta-diusulkan-naik-jadi-rp-5-ribu-jaklingko-ikut-berbayar",
+          "quote": "usulan tersebut disampaikan Ketua DTKJ periode 2026-2029, Sugihardjo. Sekarang yang diusulkan DTKJ tarifnya itu disederhanakan menjadi hanya dua kelompok. Jadi gabungan Mikrotrans terus apa lagi, BRT, non-BRT itu satu tarif. Jadi hanya ada dua kelompok tarif.",
+          "publisher": "GridOto.com",
+          "publishedAt": "2026-07-04"
+        },
+        {
+          "url": "https://www.antaranews.com/berita/5768293/tarif-transjakarta-2027-jadi-rp5000-ini-fakta-terbarunya",
+          "quote": "Angka Rp5.000 memang sempat muncul dalam pembahasan tarif Transjakarta. Namun, angka tersebut merupakan usulan Dewan Transportasi Kota Jakarta (DTKJ), bukan keputusan akhir Pemerintah Provinsi DKI Jakarta.",
+          "publisher": "ANTARA News",
+          "publishedAt": "2026-10-02"
+        }
+      ]
+    },
+    {
+      "id": "transbandara-2026-15k",
+      "name": "Transbandara Blok M - Bandara Soekarno-Hatta Rp15.000, sudah berlaku dan terpisah dari tarif 2027",
+      "status": "official",
+      "confidence": "high",
+      "effectiveFrom": "2026-09-01",
+      "conditions": {
+        "days": "any",
+        "legalBasis": "Kepgub DKI Jakarta Nomor 685 Tahun 2026",
+        "amount": 15000
+      },
+      "effect": {
+        "type": "fullFare",
+        "amounts": { "regular": 15000 }
+      },
+      "sources": [
+        {
+          "url": "https://jdih.jakarta.go.id/link/download-fulltext/15051",
+          "quote": "Kepgub Nomor 685 Tahun 2026",
+          "publisher": "JDIH Provinsi DKI Jakarta",
+          "publishedAt": null
+        }
+      ]
+    }
+  ],
+  "unverified": [
+    {
+      "item": "Batas waktu maksimum perjalanan tanpa tap out untuk satu perjalanan Transjakarta biasa, misalnya 2 jam 30 menit versus 3 jam",
+      "verdict": "TIDAK TERVERIFIKASI",
+      "detail": "Tidak ditemukan sumber resmi yang menetapkan batas jam untuk perjalanan Transjakarta biasa yang tidak di-tap out. Yang ada hanya batas 180 menit untuk skema tarif integrasi yang berbeda sifatnya, penalti tap out terlupa, dan penalti over-stay area berbayar LRT Jakarta Rp5.000 setelah 2 jam yang merupakan aturan operatornya sendiri dan tidak berlaku untuk Transjakarta.",
+      "consequenceForModel": "Jangan mengarang batas jam untuk Transjakarta. Perlakukan perjalanan tanpa tap out sebagai tarif reguler yang ditagih saat tap in berikutnya."
+    },
+    {
+      "item": "Batas jumlah perjalanan per hari per kartu",
+      "verdict": "TIDAK TERVERIFIKASI",
+      "detail": "Tidak ditemukan sumber resmi yang menetapkan batas jumlah perjalanan harian. Yang ada adalah aturan satu kartu satu penumpang (One Man One Ticket, 4 Oktober 2022) dan larangan tap kartu yang sama untuk dua orang berturut-turut di gerbang yang sama.",
+      "consequenceForModel": "Jangan memodelkan daily trip cap untuk kartu fisik."
+    },
+    {
+      "item": "Jeda minimum 10 menit antara tap out dan tap in berikutnya",
+      "verdict": "TIDAK TERVERIFIKASI",
+      "detail": "Hanya muncul sebagai klaim anggota komunitas di grup Facebook pengguna, tanpa dukungan operator.",
+      "consequenceForModel": "Jangan memodelkan cooldown pada kartu."
+    },
+    {
+      "item": "Cara pembagian biaya di dalam plafon Rp5.000 per 3 jam skema internal Transjakarta",
+      "verdict": "TIDAK TERVERIFIKASI",
+      "detail": "Sumber resmi 2026 hanya menyebut tarif integrasi maksimal Rp5.000 berlaku per 3 jam. Indikasi lama dari 2017 dan contoh Traveloka: boarding pertama ditagih tarif reguler Rp3.500, boarding berikutnya mengisi kekurangannya sampai Rp5.000, setelah itu Rp0. Tidak ada pernyataan resmi 2026 yang mengunci model ini.",
+      "consequenceForModel": "Gunakan model boarding pertama tarif reguler dan berikutnya top-up sampai plafon dengan confidence rendah, atau tunda sampai ada sumber resmi."
+    },
+    {
+      "item": "Apakah tarif integrasi multimodal hanya berlaku pada hari kerja",
+      "verdict": "TERTOLAK - TIDAK ADA DASAR",
+      "detail": "Keyakinan awal bahwa tarif integrasi Rp2.500 hanya berlaku hari kerja TIDAK didukung sumber mana pun. Kepgub 733/2022 sebagai dasar hukum, FAQ Tarif Integrasi JakLingko 2026, dan Syarat & Ketentuan JakLingko tidak memuat syarat hari kerja. Satu-satunya pembedaan hari kerja dan akhir pekan yang sah di jaringan ini adalah LRT Jabodebek, plafon Rp20.000 jam sibuk versus Rp10.000 akhir pekan dan hari libur.",
+      "consequenceForModel": "Jangan pernah menambahkan syarat hari pada skema integrasi."
+    },
+    {
+      "item": "Tanggal mulai berlaku yang presis skema tarif integrasi internal Transjakarta Rp5.000 per 3 jam",
+      "verdict": "TIDAK TERVERIFIKASI",
+      "detail": "Skema ini sudah ada pada 2017 dan masih diumumkan pada 8 Februari 2026, tetapi tanggal mulai berlakunya tidak ditemukan.",
+      "consequenceForModel": "Catat effectiveFrom sebagai null."
+    },
+    {
+      "item": "Apakah LRT Jakarta ikut kenaikan tarif 1 Januari 2027",
+      "verdict": "BERBEDA / TIDAK TEPAS",
+      "detail": "Kutipan langsung gubernur pada 30 September 2026: untuk MRT, LRT akan diatur kemudian. Kompas.com dan Kompas.id menulis LRT Jakarta termasuk penyesuaian 1 Januari 2027. Sumber primer menang.",
+      "consequenceForModel": "Terapkan tarif LRT Jakarta yang sekarang sampai ada Ketetapan Gubernur atau Kepgub baru."
+    },
+    {
+      "item": "Angka tarif baru Transjakarta, Transjabodetabek, dan Mikrotrans untuk 1 Januari 2027",
+      "verdict": "BELUM DIUMUMKAN",
+      "detail": "ANTARA pada 2 Oktober 2026 menulis: hingga 1 Oktober 2026 Pemerintah Provinsi DKI Jakarta belum mengumumkan angka resmi tarif baru. Tidak ada angka resmi sampai 21 Oktober 2026.",
+      "consequenceForModel": "Simpan sebagai pendingChange dengan amount null dan effectiveFrom 2027-01-01. Jangan memakai angka usulan DTKJ sebagai tarif aktif."
+    },
+    {
+      "item": "Apakah penalti lupa tap out pada skema multimodal besarnya tarif perjalanan sebelumnya atau tarif maksimal rute terjauh",
+      "verdict": "BERBEDA ANTAR SUMBER",
+      "detail": "PT Transjakarta dan detikNews menyebut biaya perjalanan sebelumnya, sedangkan Syarat & Ketentuan JakLingko menyebut biaya penalti maksimal rute terjauh. Untuk Transjakarta flat hasilnya sama, Rp3.500. Untuk MRT maksimumnya Rp14.000 dan untuk LRT Jakarta Rp5.000.",
+      "consequenceForModel": "Terapkan angka yang lebih besar sebagai kasus terburuk dan nyatakan sebagai catatan, bukan angka tarif."
+    }
+  ],
+  "modelImpact": {
+    "summary": "Aturan yang mengubah model tarif aplikasi Daily Route, urut dari dampak terbesar.",
+    "changes": [
+      {
+        "id": "C1",
+        "change": "Perjalanan Transjakarta yang memuat lebih dari satu bus dalam 3 jam tidak lagi selalu biaya penuh per bus. Dengan kartu berlogo JakLingko, biaya perjalanan tersebut dibatasi Rp5.000.",
+        "modelImpact": "Tambah skema integrasi transjakarta-only dengan plafon Rp5.000, window 180 menit, anchor tap-in ke tap-in, covers BRT plus non-BRT.",
+        "affects": ["packages/transit/src/fare.ts", "research/data/fares.json"],
+        "severity": "high"
+      },
+      {
+        "id": "C2",
+        "change": "Skema multimodal Rp10.000 hanya berlaku bila perjalanan memakai minimal 2 MODA BERBEDA. Pindah BRT ke BRT tidak pernah masuk skema itu.",
+        "modelImpact": "Tambah syarat minimumModes 2 dan pengujian mode berbeda, bukan sekadar jumlah kendaraan, pada logika integrasi.",
+        "affects": ["packages/transit/src/fare.ts"],
+        "severity": "high"
+      },
+      {
+        "id": "C3",
+        "change": "Kaki BRT di dalam paket multimodal bukan gratis dan bukan flat Rp2.500. Biaya Rp2.500 hanya boarding fee, lalu Rp250 per km untuk SELURUH jarak.",
+        "modelImpact": "Rumus integrasi multimodal harus min(10000, 2500 + 250 * totalDistanceKm) dengan totalDistanceKm menjumlahkan semua kaki, bukan hanya kaki selain BRT.",
+        "affects": ["packages/transit/src/fare.ts", "research/data/fares.json"],
+        "severity": "high"
+      },
+      {
+        "id": "C4",
+        "change": "Transjakarta non-BRT dan Mikrotrans berada di luar skema multimodal dan MEMUTUSKANNYA di antara dua moda yang tercakup.",
+        "modelImpact": "Daftar covers integrasi multimodal tetap BRT plus MRT plus LRT Jakarta saja, dan aplikasi harus memberi catatan bila ada kaki non-BRT atau Mikrotrans di tengah.",
+        "affects": ["packages/transit/src/fare.ts", "research/data/fares.json"],
+        "severity": "medium"
+      },
+      {
+        "id": "C5",
+        "change": "Pindah bus adalah boarding baru dengan tarif baru. Tidak ada diskon otomatis untuk BRT ke BRT tanpa skema integrasi.",
+        "modelImpact": "transferRule Transjakarta pada fares.json harus menyatakan flat fare per boarding dan pindah bus tetap dihitung perjalanan baru. Kalimat kedua sedang hilang.",
+        "affects": ["research/data/fares.json"],
+        "severity": "medium"
+      },
+      {
+        "id": "C6",
+        "change": "Tidak ada batas jam untuk perjalanan Transjakarta tanpa tap out. Tarif tetap Rp3.500 atau Rp2.000, penagihan ditunda ke tap-in berikutnya, kartu sempat terblokir.",
+        "modelImpact": "Jangan memodelkan penalti atau batas jam pada perjalanan Transjakarta. Cukup tulis catatan tap out wajib, kalau lupa kartu diblokir dan biaya ditarik di perjalanan berikutnya.",
+        "affects": ["packages/transit/src/fare.ts", "research/data/fares.json"],
+        "severity": "medium"
+      },
+      {
+        "id": "C7",
+        "change": "Tarif 2027: tanggal dan cakupan operator sudah pasti, besarannya belum. Yang berubah 1 Januari 2027 adalah Transjakarta, Transjabodetabek, dan Mikrotrans sekalian. MRT dan LRT diatur terpisah.",
+        "modelImpact": "fares.json harus punya entri pendingChange dengan effectiveFrom 2027-01-01, amount null, dan catatan tidak berlaku sebelum tanggal tersebut. Angka DTKJ Rp5.000, Rp10.000, dan Rp2.000 hanya boleh disimpan sebagai usulan.",
+        "affects": ["research/data/fares.json"],
+        "severity": "medium"
+      },
+      {
+        "id": "C8",
+        "change": "Batas jam pagi: sumber resmi menulis tarif reguler mulai 07.01, implementasi umum memakai window 05.00 sampai 07.00.",
+        "modelImpact": "Tetapkan konvensi eksplisit di model. Perbedaan enam puluh detik.",
+        "affects": ["packages/transit/src/fare.ts"],
+        "severity": "low"
+      }
+    ]
+  }
+}

@@ -284,19 +284,23 @@ export function mergeNetwork(options: MergeOptions): TransitNetworkFile {
     // The path of the line. The curated report owns the order of the
     // stops, so the path of the relation is flipped when the two
     // disagree.
-    const secondary = osmRoutes?.[1];
     const forwardPolyline =
       primary && primary.polyline.length > 1
         ? directionMatches(primary, curatedStations[0])
           ? primary.polyline
           : reversePolyline(primary.polyline)
         : [];
-    const backwardPolyline =
-      secondary && secondary.polyline.length > 1
-        ? directionMatches(secondary, curatedStations[curatedStations.length - 1])
-          ? secondary.polyline
-          : reversePolyline(secondary.polyline)
-        : reversePolyline(forwardPolyline);
+
+    /*
+     * The other direction is the same road, the other way round.
+     *
+     * The second relation of the operator may trace a slightly different
+     * path, and its stop positions do not line up with the ones the
+     * report gives, which leaves the path unable to say where the stops
+     * are. Reversing the forward path keeps the two directions exact
+     * mirrors of each other, the way the stops are.
+     */
+    const backwardPolyline = reversePolyline(forwardPolyline);
 
     const forward = buildStops({
       systemId,
@@ -307,16 +311,30 @@ export function mergeNetwork(options: MergeOptions): TransitNetworkFile {
       knownStations: [...stations.values()],
       polyline: forwardPolyline,
     });
+    /*
+     * The stops follow the road.
+     *
+     * The report owns the name of a stop and, where it is right, the
+     * order. But the order it gives cannot always be right, and a stop
+     * that the road passes thirty kilometres away is a stop of another
+     * line. The path the vehicle drives is the evidence that settles
+     * both: the stops are placed where the road reaches them.
+     */
+    const ordered =
+      forwardPolyline.length > 1
+        ? [...forward].sort((a, b) => (a.osmPosition ?? 0) - (b.osmPosition ?? 0))
+        : forward;
+
     // The other direction is the same line travelled backwards, so the
     // two lists are exact mirrors of each other.
-    const backward = [...forward].reverse();
+    const backward = [...ordered].reverse();
 
     if (primary && primary.polyline.length > 1) {
       const forwardGeometry = buildLineGeometry({
         lineId,
         direction: "forward",
         polyline: forwardPolyline,
-        stops: forward,
+        stops: ordered,
       });
       const backwardGeometry = buildLineGeometry({
         lineId,
@@ -329,7 +347,7 @@ export function mergeNetwork(options: MergeOptions): TransitNetworkFile {
       lineGeometries.push(forwardGeometry, backwardGeometry);
     }
 
-    pushStops(lineStops, lineId, forward, "forward");
+    pushStops(lineStops, lineId, ordered, "forward");
     pushStops(lineStops, lineId, backward, "backward");
   }
 
@@ -381,17 +399,30 @@ export function mergeNetwork(options: MergeOptions): TransitNetworkFile {
       curatedStations: [],
       osmStops: primary.stops,
       ensureStation,
+      polyline: primary.polyline,
     });
+
+    /*
+     * A line no report covers takes its order from the path.
+     *
+     * The members of a relation are not always in the order the vehicle
+     * meets them: a stop that belongs to another street can sit in the
+     * middle of the list. The path is the truth, because the vehicle
+     * follows the road, so the stops are sorted by where the path
+     * reaches them.
+     */
+    const ordered = [...forward].sort(
+      (a, b) => (a.osmPosition ?? 0) - (b.osmPosition ?? 0),
+    );
+
     // The opposite direction is the same line travelled backwards. A
     // relation may list the stops in any order, so the mirror of the
     // forward list is the one that is certainly right.
-    const backward = [...forward].reverse();
+    const backward = [...ordered].reverse();
 
     if (primary.polyline.length > 1) {
-      const backwardPolyline =
-        osmRoutes[1] && osmRoutes[1].polyline.length > 1
-          ? osmRoutes[1].polyline
-          : reversePolyline(primary.polyline);
+      // The other direction is the same road, the other way round.
+      const backwardPolyline = reversePolyline(primary.polyline);
 
       const forwardGeometry = buildLineGeometry({
         lineId,
@@ -410,7 +441,7 @@ export function mergeNetwork(options: MergeOptions): TransitNetworkFile {
       lineGeometries.push(forwardGeometry, backwardGeometry);
     }
 
-    pushStops(lineStops, lineId, forward, "forward");
+    pushStops(lineStops, lineId, ordered, "forward");
     pushStops(lineStops, lineId, backward, "backward");
   }
 
@@ -759,6 +790,7 @@ function buildStops(input: {
       ? nearestIndexOnPolyline(polyline, { latitude, longitude })
       : 0;
 
+
   for (const curatedStation of curatedStations) {
     const candidates = osmByName.get(curatedStation.name.trim().toLowerCase()) ?? [];
     const match = candidates.find((candidate) => !usedOsm.has(candidate.nodeId));
@@ -769,9 +801,16 @@ function buildStops(input: {
       match ??
       extraByName.get(curatedStation.name.trim().toLowerCase()) ??
       knownByName.get(nameKey(curatedStation.name));
-    const latitude = curatedStation.latitude ?? known?.latitude ?? null;
-    const longitude = curatedStation.longitude ?? known?.longitude ?? null;
+    /*
+     * OpenStreetMap owns the place. Its stop node sits on the road the
+     * vehicle drives on, which is what the line drawn on the map has to
+     * follow. The report's own coordinates are used when no relation
+     * names the stop.
+     */
+    const latitude = match?.latitude ?? curatedStation.latitude ?? known?.latitude ?? null;
+    const longitude = match?.longitude ?? curatedStation.longitude ?? known?.longitude ?? null;
     if (latitude === null || longitude === null) continue;
+
 
     const stationId = ensureStation({
       systemId,
@@ -804,7 +843,7 @@ function buildStops(input: {
       longitude,
       code: curatedStation.code ?? match?.code ?? null,
       distanceFromOriginKm: null,
-      ...(match ? { osmPosition: placeOnPath(latitude, longitude) } : {}),
+      osmPosition: placeOnPath(latitude, longitude),
     });
   }
 
@@ -813,6 +852,12 @@ function buildStops(input: {
   // line, because that would send the rider the wrong way round.
   const leftovers = osmStops.filter((osmStop) => !usedOsm.has(osmStop.nodeId));
 
+  /*
+   * A stop that lies far from the relation's own path is a stop of
+   * another line that was attached to this relation by mistake. Keeping
+   * it would send the rider to a place the vehicle never goes, so it is
+   * left out.
+   */
   for (const osmStop of leftovers) {
     const stationId = ensureStation({
       systemId,
