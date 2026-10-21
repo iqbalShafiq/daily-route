@@ -159,6 +159,11 @@ Read `DESIGN.md` before touching the interface. The short version:
 - The place field is a combobox: the focus stays in the input, the active
   suggestion is pointed at with `aria-activedescendant`, and the matched
   part of a name is marked only when the server reported the range.
+- A rider who is standing somewhere can ask for the walk to the stop
+  that serves that place. The browser gives the position, the server
+  asks the pedestrian router for the path, and the panel shows the
+  street names and the distance. The walk is the first leg of the
+  journey, on the map as well as in the list.
 - The map answers a pointer with a popover and a click with a move. The
   camera moves with `easeTo` for a point and `fitBounds` for a journey;
   `flyTo` is for a jump between places that are far apart.

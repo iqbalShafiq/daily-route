@@ -265,6 +265,17 @@ The rules of the interaction are written down in
 - The width of a line carries the mode as well as its colour, so the route
   is readable for a reader who cannot tell the colours apart.
 
+## Walking from where the reader is
+
+The walk is part of the journey, not a separate feature. The panel says
+which stop to walk to, how far it is along the footpaths, and which
+street to follow at every turn. The path is drawn on the map as the
+first leg, in the same dashed style as the walk between two vehicles.
+
+The router is asked on the server. A straight line from the reader to the
+stop is not a walk: the busway, the flyover and the river decide which
+way a person can actually go.
+
 ## The place field
 
 The field offers the stations that match what is written in it. The rules
