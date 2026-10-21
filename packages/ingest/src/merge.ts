@@ -1,4 +1,12 @@
-import { canonicalKey, haversineKm } from "@daily-route/transit";
+import {
+  canonicalKey,
+  haversineKm,
+  tokenize,
+  type Coordinate,
+  type FareRules,
+  type LineGeometry,
+} from "@daily-route/transit";
+import { buildLineGeometry } from "./geometry.js";
 
 import { classifyTransjakartaRoute, railServiceClass, SYSTEMS, type SystemId } from "./classify.js";
 import { normalizeRouteCode, type CuratedLine } from "./curated.js";
@@ -69,6 +77,10 @@ export type TransitNetworkFile = {
   stations: NetworkStation[];
   lineStops: NetworkLineStop[];
   stationGroups: NetworkStationGroup[];
+  /** The real path of every line, per direction. */
+  lineGeometries: LineGeometry[];
+  /** The published tariffs, shaped for the fare engine. */
+  fareRules: FareRules;
   notes: string[];
 };
 
@@ -134,6 +146,8 @@ type MergedStop = {
 
 export type MergeOptions = {
   curated: CuratedLine[];
+  /** The published tariffs, shaped for the fare engine. */
+  fareRules: FareRules;
   osmRoutes: OsmRoute[];
   /** Extra stations that no route relation references. */
   extraStations?: {
@@ -152,6 +166,7 @@ export function mergeNetwork(options: MergeOptions): TransitNetworkFile {
   const stations = new Map<string, NetworkStation>();
   const lines = new Map<string, NetworkLine>();
   const lineStops: NetworkLineStop[] = [];
+  const lineGeometries: LineGeometry[] = [];
 
   const ensureStation = (input: {
     systemId: SystemId;
@@ -265,6 +280,36 @@ export function mergeNetwork(options: MergeOptions): TransitNetworkFile {
       ensureStation,
     });
 
+    // The path of the line. The curated report owns the order of the stops,
+    // so the path of the relation is flipped when the two disagree.
+    if (primary && primary.polyline.length > 1) {
+      const forwardPolyline = directionMatches(primary, curatedStations[0])
+        ? primary.polyline
+        : reversePolyline(primary.polyline);
+      const secondary = osmRoutes?.[1];
+      const backwardPolyline = secondary
+        ? directionMatches(secondary, curatedStations[curatedStations.length - 1])
+          ? secondary.polyline
+          : reversePolyline(secondary.polyline)
+        : reversePolyline(forwardPolyline);
+
+      const forwardGeometry = buildLineGeometry({
+        lineId,
+        direction: "forward",
+        polyline: forwardPolyline,
+        stops: forward,
+      });
+      const backwardGeometry = buildLineGeometry({
+        lineId,
+        direction: "backward",
+        polyline: backwardPolyline,
+        stops: backward,
+      });
+      applyStopDistances(forward, forwardGeometry.stopDistancesKm);
+      applyStopDistances(backward, backwardGeometry.stopDistancesKm);
+      lineGeometries.push(forwardGeometry, backwardGeometry);
+    }
+
     pushStops(lineStops, lineId, forward, "forward");
     pushStops(lineStops, lineId, backward, "backward");
   }
@@ -324,6 +369,29 @@ export function mergeNetwork(options: MergeOptions): TransitNetworkFile {
       ensureStation,
     });
 
+    if (primary.polyline.length > 1) {
+      const backwardPolyline =
+        osmRoutes[1] && osmRoutes[1].polyline.length > 1
+          ? osmRoutes[1].polyline
+          : reversePolyline(primary.polyline);
+
+      const forwardGeometry = buildLineGeometry({
+        lineId,
+        direction: "forward",
+        polyline: primary.polyline,
+        stops: forward,
+      });
+      const backwardGeometry = buildLineGeometry({
+        lineId,
+        direction: "backward",
+        polyline: backwardPolyline,
+        stops: backward,
+      });
+      applyStopDistances(forward, forwardGeometry.stopDistancesKm);
+      applyStopDistances(backward, backwardGeometry.stopDistancesKm);
+      lineGeometries.push(forwardGeometry, backwardGeometry);
+    }
+
     pushStops(lineStops, lineId, forward, "forward");
     pushStops(lineStops, lineId, backward, "backward");
   }
@@ -361,8 +429,49 @@ export function mergeNetwork(options: MergeOptions): TransitNetworkFile {
     stations: [...stations.values()],
     lineStops,
     stationGroups,
+    lineGeometries,
+    fareRules: options.fareRules,
     notes: options.notes ?? [],
   };
+}
+
+/**
+ * Write the distance travelled onto every stop of a line.
+ *
+ * The distance comes from the real path of the line, so two stops that are
+ * 800 metres apart on the map are 1.1 kilometres apart on the road.
+ */
+function applyStopDistances(stops: MergedStop[], distances: readonly number[]): void {
+  stops.forEach((stop, index) => {
+    const distance = distances[index];
+    if (distance === undefined) return;
+    stop.distanceFromOriginKm = distance;
+  });
+}
+
+/** A polyline, the other way round. */
+function reversePolyline(points: readonly Coordinate[]): Coordinate[] {
+  return [...points].reverse();
+}
+
+/**
+ * Whether a relation travels in the same direction as a station.
+ *
+ * The curated report and the OpenStreetMap relation do not always agree
+ * about which end of the line is the start, and the path has to follow
+ * the order of the stops it belongs to.
+ */
+function directionMatches(
+  route: { stops: { latitude: number; longitude: number }[] },
+  station: { latitude: number | null; longitude: number | null } | undefined,
+): boolean {
+  const first = route.stops[0];
+  const last = route.stops[route.stops.length - 1];
+  if (!station || !first || !last) return true;
+  if (station.latitude === null || station.longitude === null) return true;
+
+  const target = { latitude: station.latitude, longitude: station.longitude };
+  return haversineKm(target, first) <= haversineKm(target, last) * 1.05;
 }
 
 /** Find OSM routes of a system whose name matches a curated line name. */
@@ -664,47 +773,198 @@ function pushStops(
  * place a rider can change vehicles at.
  */
 export function buildStationGroups(stations: readonly NetworkStation[]): NetworkStationGroup[] {
-  const HUB_RADIUS_KM = 0.25;
-  const groups: NetworkStationGroup[] = [];
-  const assigned = new Set<string>();
+  /**
+   * Two stations of different systems are one place when their names say so
+   * and they are close enough to walk between.
+   */
+  const NAME_RADIUS_KM = 0.4;
+  /**
+   * When the report says two places are an interchange, the walk between
+   * them is longer than a name match allows: the Dukuh Atas transport hub
+   * links a station underground, a bus stop above it and a train station
+   * 500 metres away.
+   */
+  const ALIAS_RADIUS_KM = 1.2;
+  /**
+   * A hub is one place, so its stations are never spread over the city.
+   */
+  const HUB_SPREAD_KM = 0.6;
 
+  const byId = new Map(stations.map((station) => [station.id, station]));
+
+  // The candidates are found with a grid, so that a city of three thousand
+  // stations does not have to be compared three million times.
+  const CELL_DEGREES = 0.01;
+  const grid = new Map<string, NetworkStation[]>();
   for (const station of stations) {
-    if (assigned.has(station.id)) continue;
-    const members = stations.filter(
-      (candidate) =>
-        candidate.id !== station.id &&
-        candidate.systemId !== station.systemId &&
-        !assigned.has(candidate.id) &&
-        haversineKm(station, candidate) <= HUB_RADIUS_KM &&
-        namesMatch(station.name, candidate.name),
-    );
-    if (members.length === 0) continue;
+    const key = cellKey(station.latitude, station.longitude);
+    const list = grid.get(key) ?? [];
+    list.push(station);
+    grid.set(key, list);
+  }
 
-    const stationIds = [station.id, ...members.map((member) => member.id)];
-    for (const id of stationIds) assigned.add(id);
+  // Every pair of stations that says it is the same place.
+  const links: { a: string; b: string; distanceKm: number }[] = [];
+  for (const station of stations) {
+    for (const candidate of nearbyStations(station, grid, CELL_DEGREES)) {
+      if (candidate.id === station.id) continue;
+      if (candidate.systemId === station.systemId) continue;
+
+      const strength = matchStrength(station, candidate);
+      if (strength === "none") continue;
+
+      const limit = strength === "alias" ? ALIAS_RADIUS_KM : NAME_RADIUS_KM;
+      const distanceKm = haversineKm(station, candidate);
+      if (distanceKm > limit) continue;
+
+      links.push({ a: station.id, b: candidate.id, distanceKm });
+    }
+  }
+
+  // The closest pairs join first, and two groups only join when the result
+  // is still one place: every station of the group has to be within reach
+  // of every other one.
+  links.sort((left, right) => left.distanceKm - right.distanceKm);
+
+  const clusters = new Map<string, string[]>();
+  const findCluster = (id: string): string[] => {
+    const existing = clusters.get(id);
+    if (existing) return existing;
+    const fresh = [id];
+    clusters.set(id, fresh);
+    return fresh;
+  };
+
+  for (const link of links) {
+    const clusterA = findCluster(link.a);
+    const clusterB = findCluster(link.b);
+    if (clusterA === clusterB) continue;
+
+    const merged = [...clusterA, ...clusterB];
+    if (!isOnePlace(merged, byId, HUB_SPREAD_KM)) continue;
+
+    for (const id of clusterA) clusters.set(id, merged);
+    for (const id of clusterB) clusters.set(id, merged);
+  }
+
+  const groups: NetworkStationGroup[] = [];
+  const seen = new Set<string>();
+  for (const members of clusters.values()) {
+    const first = members[0];
+    if (!first) continue;
+    const key = [...members].sort().join("|");
+    if (seen.has(key)) continue;
+    seen.add(key);
+    if (members.length < 2) continue;
+
+    const name = byId.get(first);
+    if (!name) continue;
     groups.push({
-      id: slugify(`${station.name}-${station.systemId}`),
-      name: station.name,
-      latitude: station.latitude,
-      longitude: station.longitude,
-      stationIds,
+      id: slugify(`${name.name}-${name.systemId}`),
+      name: name.name,
+      latitude: name.latitude,
+      longitude: name.longitude,
+      stationIds: members,
     });
   }
 
   return groups;
 }
 
-/**
- * Compare two station names, ignoring operator prefixes and suffixes.
- *
- * Containment is what makes this work: "Bundaran HI ASTRA" (Transjakarta)
- * and "Bundaran HI Bank Jakarta" (MRT) are one place, and "Stasiun MRT
- * Lebak Bulus" and "Lebak Bulus Bank Syariah Indonesia" are one place too.
- */
-function namesMatch(a: string, b: string): boolean {
-  const keyA = canonicalKey(a);
-  const keyB = canonicalKey(b);
-  if (keyA.length === 0 || keyB.length === 0) return false;
-  if (keyA === keyB) return true;
-  return keyA.includes(keyB) || keyB.includes(keyA);
+/** Whether a set of stations is one place a rider can walk through. */
+function isOnePlace(
+  members: readonly string[],
+  byId: Map<string, NetworkStation>,
+  spreadKm: number,
+): boolean {
+  for (const member of members) {
+    const station = byId.get(member);
+    if (!station) continue;
+    for (const other of members) {
+      if (other === member) continue;
+      const target = byId.get(other);
+      if (!target) continue;
+      if (haversineKm(station, target) > spreadKm) return false;
+    }
+  }
+  return true;
 }
+
+/** The grid cell a coordinate falls into. */
+function cellKey(latitude: number, longitude: number): string {
+  const row = Math.floor(latitude / 0.01);
+  const column = Math.floor(longitude / 0.01);
+  return `${row}:${column}`;
+}
+
+/** The stations in the cells around a station. */
+function nearbyStations(
+  station: NetworkStation,
+  grid: Map<string, NetworkStation[]>,
+  cellDegrees: number,
+): NetworkStation[] {
+  const row = Math.floor(station.latitude / cellDegrees);
+  const column = Math.floor(station.longitude / cellDegrees);
+  const nearby: NetworkStation[] = [];
+
+  for (let rowOffset = -1; rowOffset <= 1; rowOffset += 1) {
+    for (let columnOffset = -1; columnOffset <= 1; columnOffset += 1) {
+      const list = grid.get(`${row + rowOffset}:${column + columnOffset}`);
+      if (list) nearby.push(...list);
+    }
+  }
+
+  return nearby;
+}
+
+/**
+ * How strongly two station names say they are the same place.
+ *
+ * `name` is a match on the names themselves, `alias` a match through the
+ * interchange notes of the research report, and `none` no match at all.
+ */
+function matchStrength(
+  a: NetworkStation,
+  b: NetworkStation,
+): "name" | "alias" | "none" {
+  const keyA = canonicalKey(a.name);
+  const keyB = canonicalKey(b.name);
+  if (keyA.length === 0 || keyB.length === 0) return "none";
+
+  if (keyA === keyB) return "name";
+  if (keyA.includes(keyB) || keyB.includes(keyA)) return "name";
+
+  // The operator names a station after what stands next to it, so the same
+  // place is often two names that share their distinctive words: "Bundaran
+  // HI Bank Jakarta" and "Bundaran HI ASTRA".
+  if (sharedWords(a.name, b.name) >= 2) return "name";
+
+  // The report names the other place outright: "Dukuh Atas LRT station",
+  // "BNI City". The alias has to be that place, not merely share a word
+  // with it, or every station of a corridor joins one hub.
+  for (const alias of [...a.aliases, ...b.aliases]) {
+    const key = canonicalKey(alias);
+    if (key.length === 0) continue;
+    if (key === keyA) return "alias";
+    if (key === keyB) return "alias";
+  }
+
+  return "none";
+}
+
+/**
+ * The distinctive words two names share.
+ *
+ * The words that only say what kind of place it is are not distinctive.
+ */
+function sharedWords(a: string, b: string): number {
+  const wordsA = new Set(tokenize(a));
+  const wordsB = new Set(tokenize(b));
+  let shared = 0;
+  for (const word of wordsA) {
+    if (word.length < 3) continue;
+    if (wordsB.has(word)) shared += 1;
+  }
+  return shared;
+}
+

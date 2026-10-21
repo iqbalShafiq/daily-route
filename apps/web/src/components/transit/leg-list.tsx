@@ -90,8 +90,14 @@ function LegRow({ leg, last }: { leg: ItineraryLeg; last: boolean }) {
         </div>
 
         <p className="mt-0.5 flex items-center gap-1.5 text-[13px] text-ink-2">
-          {leg.fromName === leg.toName ? (
-            <span className="truncate">Transfer di {leg.fromName}</span>
+          {isWalk ? (
+            <span className="truncate">{walkDescription(leg)}</span>
+          ) : leg.changedFrom ? (
+            <span className="truncate">
+              Ganti dari {leg.changedFrom} di {leg.changedAt}
+            </span>
+          ) : leg.fromName === leg.toName ? (
+            <span className="truncate">Berhenti di {leg.fromName}</span>
           ) : (
             <>
               <span className="truncate">{leg.fromName}</span>
@@ -117,12 +123,36 @@ function LegRow({ leg, last }: { leg: ItineraryLeg; last: boolean }) {
           </details>
         ) : (
           <p className="mt-1 text-[12px] text-ink-3">
-            {isWalk ? "Transfer" : `${leg.stops.length} halte · ${formatDistance(leg.distanceKm)}`}
+            {isWalk
+              ? formatDistance(leg.distanceKm)
+              : `${leg.stops.length} halte · ${formatDistance(leg.distanceKm)}`}
           </p>
         )}
       </div>
     </li>
   );
+}
+
+/**
+ * What a walk on the way is for.
+ *
+ * Walking to the first vehicle and walking from the last one are part of
+ * the journey. Only the walk in between asks the rider to change vehicle,
+ * and only that one is worth naming.
+ */
+function walkDescription(leg: ItineraryLeg): string {
+  switch (leg.walkReason) {
+    case "access":
+      return `Berjalan kaki ke halte ${leg.toName}`;
+    case "egress":
+      return `Berjalan kaki dari halte ${leg.fromName}`;
+    case "transfer":
+      return leg.nextLineName
+        ? `Pindah ke ${leg.nextLineName} di ${leg.fromName}`
+        : `Pindah kendaraan di ${leg.fromName}`;
+    default:
+      return `${leg.fromName} → ${leg.toName}`;
+  }
 }
 
 function ChevronSmall() {

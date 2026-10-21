@@ -10,7 +10,7 @@ await page.evaluate(() => {
 await page.getByLabel("Dari").fill("Dukuh Atas");
 await page.getByLabel("Ke").fill("Cawang");
 await page.getByRole("button", { name: "Tampilkan rute" }).click();
-await page.getByText(/transfer/).first().waitFor({ timeout: 30_000 });
+await page.getByText("Perkiraan tarif").first().waitFor({ timeout: 30_000 });
 await page.waitForTimeout(3000);
 await page.screenshot({ path: "../../research/screenshots/planner-dark.png" });
 await browser.close();

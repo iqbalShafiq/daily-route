@@ -11,6 +11,7 @@
  */
 
 import { haversineKm, walkingMinutes } from "./geo.js";
+import { geometryKey, sliceGeometry, type LineGeometry } from "./geometry.js";
 import type {
   Direction,
   Itinerary,
@@ -30,6 +31,14 @@ export type TransitNetwork = {
   stations: readonly Station[];
   lineStops: readonly LineStop[];
   stationGroups: readonly StationGroup[];
+  /**
+   * The real path of every line, per direction.
+   *
+   * The planner uses it for two things: the distance between two stops is
+   * the distance along the road, not through the walls, and the line drawn
+   * on the map follows the road the vehicle drives on.
+   */
+  geometries?: readonly LineGeometry[];
 };
 
 /**
@@ -47,6 +56,21 @@ const AVERAGE_SPEED_KMH: Readonly<Record<TransitMode, number>> = {
 };
 
 /**
+ * The average wait for a vehicle, in minutes.
+ *
+ * Half the headway is the expectation a rider plans around. It is also
+ * what keeps the planner from hopping from one bus to the next to shave a
+ * minute off the ride: every new vehicle means another wait.
+ */
+const AVERAGE_WAIT_MINUTES: Readonly<Record<TransitMode, number>> = {
+  bus: 5,
+  minibus: 4,
+  tram: 6,
+  metro: 3,
+  rail: 6,
+};
+
+/**
  * Straight lines are shorter than the roads and rails between two points.
  * This factor converts a direct distance into a plausible travelled distance.
  */
@@ -57,6 +81,18 @@ const HEURISTIC_SPEED_KMH = 45;
 
 /** Extra minutes a rider pays for each change of vehicle. */
 const DEFAULT_TRANSFER_PENALTY_MINUTES = 3;
+
+/**
+ * What one kilometre less is worth, in minutes.
+ *
+ * The journey is judged on time first, and on distance second. A rider
+ * accepts a slightly longer ride for a route that is shorter and needs
+ * fewer changes, but not one that is half an hour faster in the other
+ * direction. At the average speed of a city bus, a kilometre is worth
+ * about three minutes, so this weight breaks the near-ties without
+ * overruling a genuinely faster route.
+ */
+const DISTANCE_WEIGHT_MINUTES_PER_KM = 0.4;
 
 /** Minutes spent at each intermediate stop. */
 const DWELL_MINUTES = 0.6;
@@ -78,12 +114,19 @@ type Edge = {
   serviceClass: ServiceClass | null;
   /** Extra cost applied only when the edge is chosen by the search. */
   penaltyMinutes: number;
+  /** The position of the stop on the line, for a ride. */
+  fromPosition: number | null;
+  toPosition: number | null;
 };
 
 export type Graph = {
   stations: Map<string, Station>;
   lines: Map<string, Line>;
   adjacency: Map<string, Edge[]>;
+  /** The stops of every line, per direction, in order. */
+  stopsByLine: StopsByLine;
+  /** The real path of every line, per direction. */
+  geometries: Map<string, LineGeometry>;
 };
 
 export type RouteOptions = {
@@ -123,6 +166,10 @@ export function buildGraph(network: TransitNetwork): Graph {
   };
 
   const stopsByLine = groupStopsByLine(network.lineStops);
+  const geometries = new Map<string, LineGeometry>();
+  for (const geometry of network.geometries ?? []) {
+    geometries.set(geometryKey(geometry.lineId, geometry.direction), geometry);
+  }
 
   for (const [lineId, stops] of stopsByLine) {
     const line = lines.get(lineId);
@@ -131,8 +178,22 @@ export function buildGraph(network: TransitNetwork): Graph {
     const forward = stops.forward;
     const backward = stops.backward.length > 0 ? stops.backward : [...forward].reverse();
 
-    connectStops(push, stations, line, forward, "forward");
-    connectStops(push, stations, line, backward, "backward");
+    connectStops(
+      push,
+      stations,
+      line,
+      forward,
+      "forward",
+      geometries.get(geometryKey(line.id, "forward")),
+    );
+    connectStops(
+      push,
+      stations,
+      line,
+      backward,
+      "backward",
+      geometries.get(geometryKey(line.id, "backward")),
+    );
   }
 
   for (const group of network.stationGroups) {
@@ -154,12 +215,14 @@ export function buildGraph(network: TransitNetwork): Graph {
           mode: null,
           serviceClass: null,
           penaltyMinutes: 0,
+          fromPosition: null,
+          toPosition: null,
         });
       }
     }
   }
 
-  return { stations, lines, adjacency };
+  return { stations, lines, adjacency, stopsByLine, geometries };
 }
 
 type StopsByLine = Map<string, { forward: LineStop[]; backward: LineStop[] }>;
@@ -188,6 +251,7 @@ function connectStops(
   line: Line,
   stops: readonly LineStop[],
   direction: Direction,
+  geometry: LineGeometry | undefined,
 ): void {
   for (let index = 0; index < stops.length - 1; index += 1) {
     const current = stops[index];
@@ -198,7 +262,7 @@ function connectStops(
     const to = stations.get(next.stationId);
     if (!from || !to) continue;
 
-    const distanceKm = segmentDistanceKm(from, to, current, next);
+    const distanceKm = segmentDistanceKm(from, to, current, next, geometry);
     const speed = AVERAGE_SPEED_KMH[line.mode];
     const rideMinutes = (distanceKm / speed) * 60;
     const durationMinutes = Math.max(1, rideMinutes + DWELL_MINUTES);
@@ -214,6 +278,8 @@ function connectStops(
       mode: line.mode,
       serviceClass: line.serviceClass,
       penaltyMinutes: 0,
+      fromPosition: current.position,
+      toPosition: next.position,
     });
   }
 }
@@ -229,7 +295,10 @@ function segmentDistanceKm(
   to: Station,
   current: LineStop,
   next: LineStop,
+  geometry: LineGeometry | undefined,
 ): number {
+  // The distance published with the stop list is the distance along the
+  // road, so it is the one a rider actually travels.
   if (
     current.distanceFromOriginKm !== null &&
     next.distanceFromOriginKm !== null &&
@@ -239,6 +308,37 @@ function segmentDistanceKm(
     const delta = Math.abs(next.distanceFromOriginKm - current.distanceFromOriginKm);
     if (delta > 0) return delta;
   }
+
+  // A line with a known path can still be measured along it.
+  if (geometry) {
+    const points = geometry.coordinates;
+    const fromOffset = geometry.stopOffsets[current.position - 1];
+    const toOffset = geometry.stopOffsets[next.position - 1];
+    if (fromOffset !== undefined && toOffset !== undefined && toOffset > fromOffset) {
+      const slice = points.slice(fromOffset * 2, (toOffset + 1) * 2);
+      let distance = 0;
+      for (let index = 0; index + 3 < slice.length; index += 2) {
+        const longitudeA = slice[index];
+        const latitudeA = slice[index + 1];
+        const longitudeB = slice[index + 2];
+        const latitudeB = slice[index + 3];
+        if (
+          longitudeA === undefined ||
+          latitudeA === undefined ||
+          longitudeB === undefined ||
+          latitudeB === undefined
+        ) {
+          continue;
+        }
+        distance += haversineKm(
+          { latitude: latitudeA, longitude: longitudeA },
+          { latitude: latitudeB, longitude: longitudeB },
+        );
+      }
+      if (distance > 0) return distance;
+    }
+  }
+
   return haversineKm(from, to) * DETOUR_FACTOR;
 }
 
@@ -276,6 +376,12 @@ function search(
     [originId, { previous: null, edge: null }],
   ]);
   const transfersUsed = new Map<string, number>([[originId, 0]]);
+  // Whether the rider has already been on a vehicle. The walk to the first
+  // vehicle is not a change of vehicle, and neither is the walk at the end.
+  const hasRidden = new Map<string, boolean>([[originId, false]]);
+  // The line the rider is on, so that staying on the same vehicle costs
+  // nothing extra and boarding another one costs the wait.
+  const currentLine = new Map<string, string | null>([[originId, null]]);
 
   const frontier: SearchNode[] = [
     {
@@ -302,14 +408,27 @@ function search(
       if (options.blockedStationIds.has(edge.to)) continue;
       if (edge.lineId !== null && options.blockedLineIds.has(edge.lineId)) continue;
 
-      const isTransfer = edge.kind === "walk";
+      const isWalk = edge.kind === "walk";
+      const ridden = hasRidden.get(current.id) ?? false;
       const usedTransfers = transfersUsed.get(current.id) ?? 0;
-      const nextTransfers = isTransfer ? usedTransfers + 1 : usedTransfers;
+      // A walk counts as a change of vehicle only when the rider has been
+      // on one already and will board another one.
+      const nextTransfers = isWalk && ridden ? usedTransfers + 1 : usedTransfers;
       if (options.maxTransfers !== null && nextTransfers > options.maxTransfers) continue;
 
       const linePenalty = edge.lineId ? (options.linePenalties.get(edge.lineId) ?? 0) : 0;
-      const transferPenalty = isTransfer ? options.transferPenaltyMinutes : 0;
-      const cost = current.cost + edge.durationMinutes + linePenalty + transferPenalty;
+      const transferPenalty =
+        isWalk && ridden ? options.transferPenaltyMinutes : 0;
+      // Boarding a different vehicle means waiting for it.
+      const boarded = edge.kind === "ride" && edge.lineId !== currentLine.get(current.id);
+      const wait = boarded && edge.mode ? AVERAGE_WAIT_MINUTES[edge.mode] : 0;
+      const cost =
+        current.cost +
+        edge.durationMinutes +
+        edge.distanceKm * DISTANCE_WEIGHT_MINUTES_PER_KM +
+        linePenalty +
+        transferPenalty +
+        wait;
 
       const knownCost = bestCost.get(edge.to);
       if (knownCost !== undefined && cost >= knownCost) continue;
@@ -317,6 +436,8 @@ function search(
       bestCost.set(edge.to, cost);
       bestPath.set(edge.to, { previous: current.id, edge });
       transfersUsed.set(edge.to, nextTransfers);
+      hasRidden.set(edge.to, ridden || edge.kind === "ride");
+      currentLine.set(edge.to, edge.kind === "ride" ? edge.lineId : null);
 
       const target = stations.get(edge.to);
       if (!target) continue;
@@ -407,7 +528,7 @@ export function planRoutes(
     itineraries.push(itinerary);
 
     for (const lineId of linesUsedBy(itinerary)) {
-      linePenalties.set(lineId, (linePenalties.get(lineId) ?? 0) + 25);
+      linePenalties.set(lineId, (linePenalties.get(lineId) ?? 0) + 15);
     }
   }
 
@@ -448,7 +569,6 @@ function toItinerary(graph: Graph, result: SearchResult): Itinerary {
         currentLeg.durationMinutes = Math.round(currentLeg.durationMinutes + edge.durationMinutes);
         currentLeg.distanceKm += edge.distanceKm;
         currentLeg.stops.push(stopOf(to, currentLeg.stops.length));
-        currentLeg.coordinates.push({ latitude: to.latitude, longitude: to.longitude });
       } else {
         currentLeg = {
           kind: "ride",
@@ -468,6 +588,11 @@ function toItinerary(graph: Graph, result: SearchResult): Itinerary {
             { latitude: from.latitude, longitude: from.longitude },
             { latitude: to.latitude, longitude: to.longitude },
           ],
+          walkReason: null,
+          nextLineName: null,
+          waitMinutes: 0,
+          changedFrom: null,
+          changedAt: null,
         };
         legs.push(currentLeg);
       }
@@ -492,13 +617,91 @@ function toItinerary(graph: Graph, result: SearchResult): Itinerary {
         { latitude: from.latitude, longitude: from.longitude },
         { latitude: to.latitude, longitude: to.longitude },
       ],
+      walkReason: null,
+      nextLineName: null,
+      waitMinutes: 0,
+      changedFrom: null,
+      changedAt: null,
     };
     legs.push(currentLeg);
   }
 
+  // The path of a ride is the road the vehicle drives on, not a line
+  // between the stops.
+  for (const leg of legs) {
+    if (leg.kind !== "ride" || !leg.lineId) continue;
+    const geometry = graph.geometries.get(geometryKey(leg.lineId, "forward"));
+    const direction = directionOfLeg(graph, leg);
+    const path = direction ? graph.geometries.get(geometryKey(leg.lineId, direction)) : geometry;
+    if (!path) continue;
+
+    const positions = positionsOfLeg(graph, leg, direction);
+    if (!positions) continue;
+
+    const slice = sliceGeometry(path, positions.from, positions.to);
+    if (slice.length >= 2) {
+      leg.coordinates = slice.map((point) => ({
+        latitude: point.latitude,
+        longitude: point.longitude,
+      }));
+    }
+  }
+
+  // Boarding a vehicle means waiting for it. Staying on the same one does
+  // not, which is why a rider who can stay on board is favoured.
+  legs.forEach((leg, index) => {
+    if (leg.kind !== "ride") return;
+    const previous = legs[index - 1];
+    const continues = previous?.kind === "ride" && previous.lineId === leg.lineId;
+    if (continues) return;
+    leg.waitMinutes = AVERAGE_WAIT_MINUTES[leg.mode as TransitMode] ?? 0;
+    leg.durationMinutes += leg.waitMinutes;
+  });
+
+  // A change of vehicle is a change of vehicle whether the rider walks to
+  // the next stop or the next bus stops at the same place.
+  let previousRide: ItineraryLeg | null = null;
+  for (const leg of legs) {
+    if (leg.kind !== "ride") continue;
+    if (previousRide && previousRide.lineId !== leg.lineId) {
+      leg.changedFrom = previousRide.lineName ?? previousRide.lineCode;
+      leg.changedAt = leg.fromName;
+    }
+    previousRide = leg;
+  }
+
+  // A walk is a change of vehicle only when it sits between two vehicles.
+  // The walk to the first vehicle and the walk after the last one are
+  // part of the journey, not a transfer.
+  legs.forEach((leg, index) => {
+    if (leg.kind !== "walk") return;
+    const previous = legs[index - 1];
+    const next = legs[index + 1];
+    if (!previous || !next) {
+      leg.walkReason = index === 0 ? "access" : "egress";
+      return;
+    }
+    if (previous.kind === "ride" && next.kind === "ride") {
+      leg.walkReason = "transfer";
+      leg.nextLineName = next.lineName ?? next.lineCode;
+    } else {
+      leg.walkReason = index === 0 ? "access" : "egress";
+    }
+  });
+
   const coordinates = legs.flatMap((leg) => leg.coordinates);
   const durationMinutes = Math.round(legs.reduce((total, leg) => total + leg.durationMinutes, 0));
-  const transferCount = legs.filter((leg) => leg.kind === "walk").length;
+  // Every change of vehicle counts, whether the rider walks to the next
+  // stop or the next bus stops at the same place.
+  const transferCount = legs.filter((leg) => leg.changedFrom !== null).length;
+  const distanceKm = legs.reduce((total, leg) => total + leg.distanceKm, 0);
+  const walkingKm = legs
+    .filter((leg) => leg.kind === "walk")
+    .reduce((total, leg) => total + leg.distanceKm, 0);
+  const cost =
+    durationMinutes +
+    distanceKm * DISTANCE_WEIGHT_MINUTES_PER_KM +
+    transferCount * DEFAULT_TRANSFER_PENALTY_MINUTES;
 
   return {
     originStationId: result.stationIds[0] ?? "",
@@ -508,7 +711,45 @@ function toItinerary(graph: Graph, result: SearchResult): Itinerary {
     legs,
     coordinates,
     warnings: [],
+    distanceKm: Number(distanceKm.toFixed(2)),
+    walkingKm: Number(walkingKm.toFixed(2)),
+    cost: Number(cost.toFixed(1)),
   };
+}
+
+/** The direction a ride leg travels in. */
+function directionOfLeg(graph: Graph, leg: ItineraryLeg): "forward" | "backward" {
+  const stops = graph.stopsByLine.get(leg.lineId ?? "");
+  if (!stops) return "forward";
+
+  const forward = stops.forward.findIndex((stop) => stop.stationId === leg.fromStationId);
+  const backward = stops.backward.findIndex((stop) => stop.stationId === leg.fromStationId);
+  if (forward === -1 && backward === -1) return "forward";
+  if (forward === -1) return "backward";
+  if (backward === -1) return "forward";
+  return forward <= backward ? "forward" : "backward";
+}
+
+/**
+ * The position of the boarding and the alighting stop on the line.
+ *
+ * The positions are the ones the planner used, so the slice of the path
+ * matches the ride exactly.
+ */
+function positionsOfLeg(
+  graph: Graph,
+  leg: ItineraryLeg,
+  direction: "forward" | "backward",
+): { from: number; to: number } | null {
+  const stops = graph.stopsByLine.get(leg.lineId ?? "");
+  if (!stops) return null;
+
+  const list = direction === "forward" ? stops.forward : stops.backward;
+  const from = list.findIndex((stop) => stop.stationId === leg.fromStationId);
+  const to = list.findIndex((stop) => stop.stationId === leg.toStationId);
+  if (from === -1 || to === -1) return null;
+
+  return { from: from + 1, to: to + 1 };
 }
 
 function stopOf(station: Station, position: number): ItineraryStop {

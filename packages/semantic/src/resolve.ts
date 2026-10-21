@@ -90,6 +90,8 @@ export class PlaceResolver {
       ? sql`${stations.systemId} = ${options.systemId}`
       : sql`TRUE`;
 
+    const aliasPattern = `%${query}%`;
+
     const lexicalRows = await this.#db
       .select({
         id: stations.id,
@@ -114,7 +116,16 @@ export class PlaceResolver {
           systemFilter,
           // The parentheses matter: without them the OR escapes the AND and
           // the system filter no longer applies.
-          sql`(${stations.searchText} % ${query} OR similarity(${stations.name}, ${query}) > 0.08)`,
+          //
+          // The aliases are searched as well: a rider asks for the name of
+          // the place they know, and the report often knows that place
+          // under another name ("Bundaran HI / Grand Indonesia").
+          sql`(${stations.searchText} % ${query}
+            OR similarity(${stations.name}, ${query}) > 0.08
+            OR EXISTS (
+              SELECT 1 FROM jsonb_array_elements_text(${stations.aliases}) AS alias
+              WHERE alias ILIKE ${aliasPattern} OR alias % ${query}
+            ))`,
         ),
       )
       .orderBy(desc(sql`GREATEST(similarity(${stations.searchText}, ${query}), similarity(${stations.name}, ${query}))`))

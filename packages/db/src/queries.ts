@@ -1,10 +1,12 @@
 import { and, asc, desc, eq, gte, inArray, isNull, or, sql } from "drizzle-orm";
 
-import type { TransitNetwork } from "@daily-route/transit";
+import type { FareRules, TransitNetwork } from "@daily-route/transit";
 
 import type { Database } from "./client.js";
 import {
   disruptions,
+  fareRules,
+  lineGeometry,
   lineStops,
   lines,
   stationGroupMembers,
@@ -23,12 +25,13 @@ import {
 
 /** Load the whole routable network in one round trip. */
 export async function loadNetwork(db: Database): Promise<TransitNetwork> {
-  const [lineRows, stationRows, stopRows, groupRows, memberRows] = await Promise.all([
+  const [lineRows, stationRows, stopRows, groupRows, memberRows, geometryRows] = await Promise.all([
     db.select().from(lines).orderBy(asc(lines.systemId), asc(lines.code)),
     db.select().from(stations).orderBy(asc(stations.systemId), asc(stations.name)),
     db.select().from(lineStops).orderBy(asc(lineStops.lineId), asc(lineStops.position)),
     db.select().from(stationGroups),
     db.select().from(stationGroupMembers),
+    db.select().from(lineGeometry),
   ]);
 
   const membersByGroup = new Map<string, string[]>();
@@ -39,6 +42,13 @@ export async function loadNetwork(db: Database): Promise<TransitNetwork> {
   }
 
   return {
+    geometries: geometryRows.map((row) => ({
+      lineId: row.lineId,
+      direction: row.direction === "backward" ? "backward" : "forward",
+      coordinates: (row.geometry as number[]) ?? [],
+      stopOffsets: (row.stopOffsets as number[]) ?? [],
+      lengthKm: row.lengthKm,
+    })),
     lines: lineRows.map((row) => ({
       id: row.id,
       systemId: row.systemId,
@@ -295,4 +305,17 @@ export async function countOrphanStations(db: Database): Promise<number> {
     .from(stations)
     .where(isNull(stations.id));
   return rows[0]?.count ?? 0;
+}
+
+/**
+ * The fare rules in force.
+ *
+ * The table holds one row. A missing row means the snapshot was loaded
+ * without the fares, which the caller reports rather than guesses around.
+ */
+export async function loadFareRules(db: Database): Promise<FareRules | null> {
+  const rows = await db.select().from(fareRules).limit(1);
+  const row = rows[0];
+  if (!row) return null;
+  return row.rules as FareRules;
 }

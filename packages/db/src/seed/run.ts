@@ -1,11 +1,13 @@
 import { readFile } from "node:fs/promises";
 import { resolve } from "node:path";
 
-import { buildSearchDocument } from "@daily-route/transit";
+import { buildSearchDocument, type FareRules } from "@daily-route/transit";
 import { drizzle } from "drizzle-orm/postgres-js";
 import postgres from "postgres";
 
 import {
+  fareRules,
+  lineGeometry,
   lineStops,
   lines,
   stationGroupMembers,
@@ -79,6 +81,14 @@ type Snapshot = {
     longitude: number;
     stationIds: string[];
   }[];
+  lineGeometries: {
+    lineId: string;
+    direction: "forward" | "backward";
+    coordinates: number[];
+    stopOffsets: number[];
+    lengthKm: number;
+  }[];
+  fareRules: FareRules;
 };
 
 async function main(): Promise<void> {
@@ -96,7 +106,7 @@ async function main(): Promise<void> {
     `TRUNCATE TABLE
        social_posts, news_items, disruptions, agent_messages, agent_sessions,
        route_plans, station_embeddings, station_group_members, station_groups,
-       line_stops, stations, lines, systems
+       line_geometry, line_stops, stations, lines, systems, fare_rules
      RESTART IDENTITY CASCADE`,
   );
 
@@ -167,6 +177,31 @@ async function main(): Promise<void> {
       .onConflictDoNothing();
   }
 
+  console.log(`· inserting ${snapshot.lineGeometries.length} route geometries`);
+  for (let index = 0; index < snapshot.lineGeometries.length; index += chunk) {
+    const slice = snapshot.lineGeometries.slice(index, index + chunk);
+    await db
+      .insert(lineGeometry)
+      .values(
+        slice.map((geometry) => ({
+          lineId: geometry.lineId,
+          direction: geometry.direction,
+          geometry: geometry.coordinates,
+          stopOffsets: geometry.stopOffsets,
+          lengthKm: geometry.lengthKm,
+          pointCount: Math.floor(geometry.coordinates.length / 2),
+        })),
+      )
+      .onConflictDoNothing();
+  }
+
+  console.log("· inserting the fare rules");
+  await db.insert(fareRules).values({
+    id: "current",
+    rules: snapshot.fareRules,
+    updatedAt: new Date(),
+  });
+
   console.log(`· inserting ${snapshot.stationGroups.length} interchange hubs`);
   await db.insert(stationGroups).values(
     snapshot.stationGroups.map((group) => ({
@@ -187,6 +222,8 @@ async function main(): Promise<void> {
     UNION ALL SELECT 'lines', count(*)::int FROM lines
     UNION ALL SELECT 'stations', count(*)::int FROM stations
     UNION ALL SELECT 'line_stops', count(*)::int FROM line_stops
+    UNION ALL SELECT 'line_geometry', count(*)::int FROM line_geometry
+    UNION ALL SELECT 'fare_rules', count(*)::int FROM fare_rules
     UNION ALL SELECT 'station_groups', count(*)::int FROM station_groups
     UNION ALL SELECT 'station_group_members', count(*)::int FROM station_group_members
     ORDER BY table_name

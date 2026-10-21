@@ -23,7 +23,8 @@ export type ServiceClass =
   | "non-brt"
   | "rapid-transit"
   | "lrt"
-  | "commuter-rail";
+  | "commuter-rail"
+  | "royaltrans";
 
 export type LineStatus = "operating" | "planned" | "suspended" | "closed";
 
@@ -152,6 +153,22 @@ export type ItineraryLeg = {
   distanceKm: number;
   stops: ItineraryStop[];
   coordinates: { latitude: number; longitude: number }[];
+  /**
+   * What this walk is for.
+   *
+   * `access` is the walk to the first vehicle, `egress` the walk after the
+   * last one, and `transfer` a change of vehicle. Only a transfer asks the
+   * rider to do something.
+   */
+  walkReason: "access" | "egress" | "transfer" | null;
+  /** The line the rider takes after this walk, for a transfer. */
+  nextLineName: string | null;
+  /** The average wait for the vehicle, for a ride. */
+  waitMinutes: number;
+  /** The line the rider was on before this one, when they have to change. */
+  changedFrom: string | null;
+  /** Where the rider changes vehicle. */
+  changedAt: string | null;
 };
 
 export type Itinerary = {
@@ -162,4 +179,15 @@ export type Itinerary = {
   legs: ItineraryLeg[];
   coordinates: { latitude: number; longitude: number }[];
   warnings: string[];
+  /** The distance the whole journey covers, along the roads. */
+  distanceKm: number;
+  /** The distance the rider covers on foot. */
+  walkingKm: number;
+  /**
+   * The planner's own score for this journey.
+   *
+   * Time, distance and the inconvenience of every change, in one number.
+   * The lower the better, and it is what the alternatives are ranked by.
+   */
+  cost: number;
 };

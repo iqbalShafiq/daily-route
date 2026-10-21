@@ -7,7 +7,7 @@ import { Tab, Tabs } from "../../components/ui/tabs.js";
 import { DisruptionBanner } from "../../components/transit/disruption-banner.js";
 import { LegList } from "../../components/transit/leg-list.js";
 import type { PlanResult } from "../../lib/api.js";
-import { formatDuration } from "../../lib/format.js";
+import { formatDistance, formatDuration } from "../../lib/format.js";
 
 import { PlaceInput } from "./place-input.js";
 import type { UsePlanResult } from "./use-plan.js";
@@ -155,12 +155,39 @@ export function RoutePlanner({
           {current ? (
             <Card>
               <CardHeader
-                title={`${formatDuration(current.durationMinutes)} · ${current.transferCount} transfer`}
+                title={[
+                  formatDuration(current.durationMinutes),
+                  formatDistance(current.distanceKm),
+                  current.transferCount > 0
+                    ? `${current.transferCount} kali pindah`
+                    : "tanpa pindah",
+                ].join(" · ")}
                 description={`${data.origin.name} → ${data.destination.name}`}
               />
               <div className="border-t border-line">
                 <LegList legs={current.legs} />
               </div>
+              {current.fare.available && current.fare.label ? (
+                <div className="border-t border-line px-4 py-3">
+                  <div className="flex items-baseline justify-between gap-3">
+                    <span className="text-[13px] text-ink-2">Perkiraan tarif</span>
+                    <span className="text-sm font-semibold tabular-nums text-ink">
+                      {current.fare.label}
+                    </span>
+                  </div>
+                  {current.fare.breakdown.map((item, index) => (
+                    <p key={index} className="mt-1 text-[12px] text-ink-3">
+                      {item.label}
+                      {item.detail ? ` · ${item.detail}` : ""}
+                    </p>
+                  ))}
+                  {current.fare.notes.map((note, index) => (
+                    <p key={index} className="mt-1 text-[12px] text-ink-3">
+                      {note}
+                    </p>
+                  ))}
+                </div>
+              ) : null}
             </Card>
           ) : null}
 

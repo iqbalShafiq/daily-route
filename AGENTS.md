@@ -52,7 +52,7 @@ packages/
   config/   Shared tsconfig and ESLint configuration
   env/      The one place that validates the environment
   db/       Drizzle schema, queries, migrations, seed
-  transit/  Pure domain: graph, A* planner, geo, text normalisation
+  transit/  Pure domain: graph, A* planner, geo, fares, text normalisation
   semantic/ Embedding providers and the place resolver
   agent/    Anvia agent, tools, classifier, monitor, X and Tavily clients
   ingest/   OpenStreetMap extraction and the curated/OSM merge
@@ -75,7 +75,12 @@ TypeScript with no framework and no database — keep it that way.
   at import time, and no module keeps a module-level singleton connection.
 - **The graph is the truth.** The model may name a place; the resolver
   decides which station that name refers to; the planner decides the route.
-  Never let the model produce a station id, a coordinate or a duration.
+  Never let the model produce a station id, a coordinate, a duration or a
+  fare.
+- The planner judges a journey on **time, distance and the number of
+  changes together**, and the waiting time for a new vehicle is part of
+  it. The best route is the one with the lowest cost, not the one with the
+  fewest kilometres.
 - **No fallback that invents data.** When a provider is missing, the feature
   reports the missing cause and the rest of the application keeps working.
   A deterministic stand-in is acceptable only when it is *labelled* as such
@@ -90,9 +95,10 @@ TypeScript with no framework and no database — keep it that way.
 `data/transit-network.json` is committed and is the input of the seed. It is
 produced by `pnpm data:ingest`, which merges two sources:
 
-- **OpenStreetMap** (ODbL) for coordinates, route relations and stop order;
+- **OpenStreetMap** (ODbL) for coordinates, route relations, stop order and
+  the **path every vehicle travels** (the way members of a route relation);
 - **`research/data/*.json`** for the official line names, operators, service
-  classes, stop lists and interchange notes.
+  classes, stop lists, interchange notes and the **published fares**.
 
 Rules for the merge, in priority order:
 
@@ -103,8 +109,16 @@ Rules for the merge, in priority order:
    the brand outright ("Minitrans 1M", "Metrotrans 5F").
 4. A station of a line that is not open yet never becomes routable. The
    research notes mark those stations; `isPlanned()` reads the marker.
-5. A station of a different system within 250 m with a matching name is the
-   same interchange, and becomes a `station_group`.
+5. A station of a different system with a matching name, within 400 m, or
+   with an alias the report gives as an interchange, within 1.2 km, is the
+   same place. The stations of one hub are never spread over more than
+   600 m, so a hub is always one place a rider can walk through.
+
+The path of a line is stitched from the way members of its relation,
+simplified to three metres, and stored per direction with the index of
+every stop along it. The planner measures the distance between two stops
+**along that path**, so the time it estimates is the time the vehicle
+needs, and the line drawn on the map follows the road.
 
 When you change the pipeline, re-run `pnpm data:ingest && pnpm db:seed &&
 pnpm data:embed`, and check `data/transit-network.json` in the diff. A
@@ -122,6 +136,10 @@ shrinking station count is a red flag, not a cleanup.
   unavailable instead of calling something that always fails.
 - The disruption classifier returns a structured record. The station ids in
   that record are produced by the resolver, not by the model.
+- The route tool answers with a **verdict**: `terbuka`, `terhalang` or
+  `tidak-diketahui`, plus the fare and the distance. The instructions tell
+  the model to lead with the obstruction when there is one, and to mention
+  a change of vehicle only when there is one.
 - Instructions describe **behaviour**, not permissions. The tool layer is
   the wall.
 

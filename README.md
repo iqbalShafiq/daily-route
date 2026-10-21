@@ -14,12 +14,18 @@ dan satu asisten yang menjawab dalam bahasa Indonesia.
 
 1. **Cari rute** — masukkan asal dan tujuan dengan bebas ("Bundaran HI",
    "stasiun Grand Indonesia", "halte dekat Monas"), dapatkan itinerary per
-   segmen, jumlah transfer, dan peta rutenya.
+   segmen, jarak, perkiraan tarif, dan peta rutenya. Rute yang dipilih
+   adalah yang paling efektif: cepat, jaraknya masuk akal, dan sesedikit
+   mungkin perpindahan. Peta mengikuti jalan sungguhan, bukan garis lurus
+   antar halte.
 2. **Perhatikan gangguan** — pengalihan rute, penutupan halte, dan
    keterlambatan yang diumumkan operator diambil dari akun X resmi mereka
    dan dari berita, lalu dicocokkan dengan rute yang sedang dilihat.
 3. **Tanya asisten** — asisten menjawab pertanyaan rute, memanggil alat
    yang sama dengan perencana, dan menyebutkan sumber setiap gangguan.
+   Alat rute mengembalikan vonis: jalurnya terbuka, terhalang, atau belum
+   ada kabar. Kalau terhalang, hambatannya disebut lebih dulu, lalu rute
+   alternatifnya.
 
 ## Arsitektur
 
@@ -91,6 +97,8 @@ Tidak ada GTFS publik untuk operator-operator ini. Yang dipakai adalah:
 | `research/data/transjakarta.json` | nama koridor resmi, operator, jam layanan, daftar halte | riset |
 | `research/data/rail-jakarta.json` | nama dan kode stasiun MRT, LRT, KRL | riset |
 | `research/transjakarta.md`, `research/rail-jakarta.md` | laporan lengkap dengan rujukan | riset |
+| `research/data/fares.json` | tarif resmi semua operator dan tiket integrasi | riset |
+| `research/fares.md` | laporan tarif lengkap dengan rujukan | riset |
 
 Snapshot gabungan disimpan di `data/transit-network.json` dan ikut
 di-commit, sehingga seed selalu reproducible. Perbarui dengan:
@@ -100,10 +108,18 @@ pnpm data:ingest          # jalankan ulang pipeline (raw OSM di-cache di data/ra
 pnpm db:seed && pnpm data:embed
 ```
 
-Snapshot terakhir: **228 lintasan, 3.114 stasiun, 10.138 urutan halte, 50 simpul
-transit** — mencakup 215 rute Transjakarta (BRT, Metrotrans, Royaltrans,
-Minitrans, Mikrotrans) dan 13 lintasan rel (MRT, LRT Jakarta, LRT Jabodebek,
-KRL).
+Snapshot terakhir: **228 lintasan, 3.114 stasiun, 10.140 urutan halte, 59 simpul
+transit, 322 arah rute** — mencakup 215 rute Transjakarta (BRT, Metrotrans,
+Royaltrans, Minitrans, Mikrotrans) dan 13 lintasan rel (MRT, LRT Jakarta, LRT
+Jabodebek, KRL). Jarak antar halte dihitung sepanjang jalur kendaraan
+melewati, bukan melalui dinding, jadi perkiraan waktunya realistis.
+
+Tarif yang dipakai: Jakpro Rp 3.500 (Rp 2.000 pukul 05.00–07.00), Mikrotrans
+gratis, Royaltrans Rp 20.000, MRT Rp 3.000 + Rp 1.000 per stasiun (maks.
+Rp 14.000), LRT Jakarta Rp 5.000, LRT Jabodebek Rp 5.000 + Rp 700/km (maks.
+Rp 20.000), KRL Rp 3.000 untuk 25 km pertama lalu Rp 1.000 tiap 10 km. Tiket
+Integrasi Multimodal JakLingko (Rp 2.500 + Rp 250/km, maks. Rp 10.000)
+ditawarkan kalau perjalanannya memakai BRT, MRT, dan LRT Jakarta saja.
 
 ## Skema database
 
@@ -111,6 +127,11 @@ KRL).
 yang menyatukan stasiun berbeda sistem pada satu simpul transit. Located
 di `packages/db/src/schema.ts`; migrasi Drizzle ada di
 `packages/db/drizzle/`.
+
+`line_geometry` menyimpan jalur asli tiap lintasan per arah, lengkap
+dengan posisi tiap halte di sepanjang jalur itu. `fare_rules` menyimpan
+tarif yang berlaku, sehingga tarif adalah data, bukan konstanta di dalam
+kode.
 
 `station_embeddings` memakai pgvector (768 dimensi) dan `pg_trgm` untuk
 pencarian nama. Ekstensi dibuat di migrasi pertama.

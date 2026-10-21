@@ -91,12 +91,45 @@ export type ItineraryLeg = {
   durationMinutes: number;
   distanceKm: number;
   stops: LegStop[];
+  /** What a walk is for: to the first vehicle, to the last one, or a change. */
+  walkReason: "access" | "egress" | "transfer" | null;
+  /** The line the rider takes after this walk, for a change of vehicle. */
+  nextLineName: string | null;
+  /** The average wait for the vehicle, for a ride. */
+  waitMinutes: number;
+  /** The line the rider was on before this one, when they have to change. */
+  changedFrom: string | null;
+  /** Where the rider changes vehicle. */
+  changedAt: string | null;
+};
+
+export type FareBreakdownItem = {
+  label: string;
+  amountIdr: number;
+  detail?: string;
+};
+
+export type FareQuote = {
+  /** Whether the snapshot carries the published tariffs. */
+  available: boolean;
+  totalIdr: number | null;
+  label: string | null;
+  breakdown: FareBreakdownItem[];
+  notes: string[];
 };
 
 export type Itinerary = {
   durationMinutes: number;
   transferCount: number;
+  /** The distance of the whole journey, along the roads. */
+  distanceKm: number;
+  /** The distance the rider covers on foot. */
+  walkingKm: number;
+  /** The planner's score: time, distance and changes in one number. */
+  cost: number;
   lines: string[];
+  /** What the journey costs. */
+  fare: FareQuote;
   legs: ItineraryLeg[];
   geometry: { latitude: number; longitude: number }[];
 };

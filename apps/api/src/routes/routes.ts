@@ -4,11 +4,17 @@ import { z } from "zod";
 import { listActiveDisruptions } from "@daily-route/db";
 import { PLACE_CONFIDENCE_THRESHOLD } from "@daily-route/semantic";
 import {
+  FARE_OPERATOR_LABELS,
+  fareOperatorFor,
   linesUsedBy,
   matchDisruptions,
   planRoutes,
+  quoteFare,
   removesService,
+  formatRupiah,
   type Disruption,
+  type FareRules,
+  type Itinerary,
 } from "@daily-route/transit";
 
 import type { ApiDeps } from "../deps.js";
@@ -78,6 +84,9 @@ export function createRoutesRouter(deps: ApiDeps): Router {
         })
       : [];
 
+    const fareRules = (await deps.cache.get()).fareRules;
+    const quotedAt = new Date();
+
     response.json({
       origin: {
         text: origin,
@@ -100,7 +109,11 @@ export function createRoutesRouter(deps: ApiDeps): Router {
       itineraries: itineraries.map((itinerary) => ({
         durationMinutes: itinerary.durationMinutes,
         transferCount: itinerary.transferCount,
+        distanceKm: itinerary.distanceKm,
+        walkingKm: itinerary.walkingKm,
+        cost: itinerary.cost,
         lines: linesUsedBy(itinerary),
+        fare: fareOf(itinerary, fareRules, quotedAt),
         legs: itinerary.legs.map((leg) => ({
           kind: leg.kind,
           mode: leg.mode,
@@ -114,6 +127,11 @@ export function createRoutesRouter(deps: ApiDeps): Router {
           toName: leg.toName,
           durationMinutes: leg.durationMinutes,
           distanceKm: Number(leg.distanceKm.toFixed(2)),
+          walkReason: leg.walkReason,
+          nextLineName: leg.nextLineName,
+          waitMinutes: leg.waitMinutes,
+          changedFrom: leg.changedFrom,
+          changedAt: leg.changedAt,
           stops: leg.stops.map((stop) => ({
             stationId: stop.stationId,
             name: stop.name,
@@ -126,7 +144,11 @@ export function createRoutesRouter(deps: ApiDeps): Router {
       alternatives: alternatives.map((itinerary) => ({
         durationMinutes: itinerary.durationMinutes,
         transferCount: itinerary.transferCount,
+        distanceKm: itinerary.distanceKm,
+        walkingKm: itinerary.walkingKm,
+        cost: itinerary.cost,
         lines: linesUsedBy(itinerary),
+        fare: fareOf(itinerary, fareRules, quotedAt),
         geometry: itinerary.coordinates,
         legs: itinerary.legs.map((leg) => ({
           kind: leg.kind,
@@ -200,5 +222,49 @@ function summarize(
     affectedLineIds: disruption.affectedLineIds,
     publishedAt: disruption.publishedAt,
     impact,
+  };
+}
+
+/**
+ * The price of a journey.
+ *
+ * The rules live in the database, next to the network they belong to, and
+ * the moment of the day decides the hours the operators charge less.
+ */
+function fareOf(itinerary: Itinerary, rules: FareRules | null, at: Date) {
+  if (!rules) {
+    return {
+      available: false,
+      totalIdr: null,
+      label: null,
+      breakdown: [],
+      notes: ["Tarif belum tersedia di data jaringan."],
+    };
+  }
+
+  const quote = quoteFare({
+    at,
+    rules,
+    labels: FARE_OPERATOR_LABELS,
+    legs: itinerary.legs.map((leg) => ({
+      kind: leg.kind,
+      operator:
+        leg.kind === "ride" && leg.lineId
+          ? fareOperatorFor({
+              systemId: leg.lineId.split(":")[0] ?? "",
+              serviceClass: leg.serviceClass,
+            })
+          : null,
+      distanceKm: leg.distanceKm,
+      stopCount: leg.stops.length,
+    })),
+  });
+
+  return {
+    available: true,
+    totalIdr: quote.totalIdr,
+    label: formatRupiah(quote.totalIdr),
+    breakdown: quote.breakdown,
+    notes: quote.notes,
   };
 }

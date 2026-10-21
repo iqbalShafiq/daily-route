@@ -17,7 +17,7 @@ await page.goto(url, { waitUntil: "networkidle" });
 await page.getByLabel("Dari").fill("Bundaran HI");
 await page.getByLabel("Ke").fill("Kelapa Gading");
 await page.getByRole("button", { name: "Tampilkan rute" }).click();
-await page.getByText(/transfer/).first().waitFor({ timeout: 30_000 });
+await page.getByText("Perkiraan tarif").first().waitFor({ timeout: 30_000 });
 await page.waitForTimeout(2500);
 await page.screenshot({ path: output, fullPage: false });
 
@@ -26,7 +26,7 @@ await mobile.goto(url, { waitUntil: "networkidle" });
 await mobile.getByLabel("Dari").fill("Senen");
 await mobile.getByLabel("Ke").fill("Cawang");
 await mobile.getByRole("button", { name: "Tampilkan rute" }).click();
-await mobile.getByText(/transfer/).first().waitFor({ timeout: 30_000 });
+await mobile.getByText("Perkiraan tarif").first().waitFor({ timeout: 30_000 });
 await mobile.waitForTimeout(2500);
 await mobile.screenshot({ path: output.replace(/\.png$/, "-mobile.png") });
 

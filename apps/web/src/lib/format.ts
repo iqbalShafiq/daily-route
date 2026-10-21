@@ -14,7 +14,8 @@ export type ServiceClass =
   | "non-brt"
   | "rapid-transit"
   | "lrt"
-  | "commuter-rail";
+  | "commuter-rail"
+  | "royaltrans";
 
 /** The label a rider would use for a mode. */
 export const MODE_LABEL: Record<TransitMode, string> = {
@@ -34,6 +35,7 @@ export const SERVICE_CLASS_LABEL: Record<ServiceClass, string> = {
   "rapid-transit": "MRT",
   lrt: "LRT",
   "commuter-rail": "KRL",
+  "royaltrans": "Royaltrans",
 };
 
 /**
@@ -59,6 +61,7 @@ export const SERVICE_CLASS_COLOR: Record<ServiceClass, string> = {
   "rapid-transit": "var(--mode-metro)",
   lrt: "var(--mode-tram)",
   "commuter-rail": "var(--mode-rail)",
+  "royaltrans": "var(--mode-royaltrans, var(--mode-bus))",
 };
 
 /** `95` becomes "1 jam 35 mnt"; `8` becomes "8 mnt". */
@@ -80,7 +83,8 @@ export function formatMinutesLong(minutes: number): string {
 export function formatDistance(kilometers: number): string {
   if (kilometers < 1) return `${Math.round(kilometers * 1000)} m`;
   const value = Math.round(kilometers * 10) / 10;
-  return `${value} km`;
+  // Indonesian notation: the decimal separator is a comma.
+  return `${value.toLocaleString("id-ID")} km`;
 }
 
 /** An ISO timestamp as a local clock time. */

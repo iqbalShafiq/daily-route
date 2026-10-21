@@ -2,9 +2,14 @@ import { createTool } from "@anvia/core/tool";
 import { z } from "zod";
 
 import {
+  FARE_OPERATOR_LABELS,
+  fareOperatorFor,
+  formatRupiah,
   matchDisruptions,
   planRoutes,
+  quoteFare,
   removesService,
+  type FareRules,
   type Itinerary,
 } from "@daily-route/transit";
 
@@ -98,11 +103,35 @@ export type RouteToolOutput = {
   tujuan: { text: string; stationId: string | null; name: string | null };
   rute: RouteSummary[];
   gangguan: DisruptionSummary[];
+  /**
+   * Whether the recommended route is open.
+   *
+   * This is the question the rider is really asking, so it is answered
+   * plainly: the route is open, it is obstructed, or nothing is known
+   * about it.
+   */
+  status: "terbuka" | "terhalang" | "tidak-diketahui";
+  /** Why the route is obstructed, when it is. */
+  hambatan: string[];
   catatan: string[];
+};
+
+type FareSummary = {
+  total: number;
+  label: string;
+  rincian: { label: string; jumlah: number }[];
 };
 
 type RouteSummary = {
   durasiMenit: number;
+  /** The distance of the whole journey, along the roads. */
+  jarakKm: number;
+  /** The distance the rider covers on foot. */
+  jarakJalanKakiKm: number;
+  /** The planner's score: time, distance and changes in one number. */
+  skor: number;
+  /** What the journey costs. */
+  tarif: { total: number; label: string; rincian: { label: string; jumlah: number }[] };
   jumlahTransfer: number;
   legs: {
     jenis: "walk" | "ride";
@@ -116,6 +145,14 @@ type RouteSummary = {
     durasiMenit: number;
     jarakKm: number;
     halte: string[];
+    /** Why this leg is a walk: to the first vehicle, to the last, or a change. */
+    alasanJalanKaki: "access" | "egress" | "transfer" | null;
+    /** The line the rider was on before, when they have to change vehicle. */
+    gantiDari: string | null;
+    /** Where the rider changes vehicle. */
+    gantiDi: string | null;
+    /** The average wait for this vehicle. */
+    tungguMenit: number;
   }[];
   peringatan: string[];
 };
@@ -140,7 +177,7 @@ export function createRouteTool(context: TransitAgentContext, cache: NetworkCach
       "Bila ada penutupan atau pengalihan, rute alternatif ikut dikembalikan.",
     inputSchema: routeSchema,
     execute: async (args): Promise<RouteToolOutput> => {
-      const [{ network, disruptions }, originCandidates, destinationCandidates] = await Promise.all([
+      const [{ network, disruptions, fareRules }, originCandidates, destinationCandidates] = await Promise.all([
         cache.get(),
         context.resolver.resolve(args.asal, { limit: 5 }),
         context.resolver.resolve(args.tujuan, { limit: 5 }),
@@ -166,6 +203,8 @@ export function createRouteTool(context: TransitAgentContext, cache: NetworkCach
           },
           rute: [],
           gangguan: [],
+          status: "tidak-diketahui",
+          hambatan: [],
           catatan: [
             !origin || origin.score < PLACE_CONFIDENCE_THRESHOLD
               ? `Tidak menemukan tempat asal "${args.asal}". Minta pengguna memberi nama yang lebih spesifik.`
@@ -184,6 +223,8 @@ export function createRouteTool(context: TransitAgentContext, cache: NetworkCach
           tujuan: { text: args.tujuan, stationId: destination.stationId, name: destination.name },
           rute: [],
           gangguan: [],
+          status: "tidak-diketahui",
+          hambatan: [],
           catatan: ["Tidak ada rute terhubung antara kedua tempat pada jaringan yang tersedia."],
         };
       }
@@ -195,6 +236,8 @@ export function createRouteTool(context: TransitAgentContext, cache: NetworkCach
           tujuan: { text: args.tujuan, stationId: destination.stationId, name: destination.name },
           rute: [],
           gangguan: [],
+          status: "tidak-diketahui",
+          hambatan: [],
           catatan: ["Rute tidak dapat dihitung."],
         };
       }
@@ -202,7 +245,9 @@ export function createRouteTool(context: TransitAgentContext, cache: NetworkCach
       const matches = matchDisruptions(primary, disruptions);
       const blocking = matches.filter((match) => removesService(match.disruption));
 
-      const summaries: RouteSummary[] = routes.map((route) => summarize(route));
+      const summaries: RouteSummary[] = routes.map((route) =>
+        summarize(route, fareOf(route, fareRules)),
+      );
 
       // A closure on the primary route invalidates it: the alternative is
       // recomputed without the blocked line and stops.
@@ -220,7 +265,7 @@ export function createRouteTool(context: TransitAgentContext, cache: NetworkCach
         });
         for (const alternative of alternatives) {
           summaries.push({
-            ...summarize(alternative),
+            ...summarize(alternative, fareOf(alternative, fareRules)),
             peringatan: ["Rute alternatif — jalur utama sedang dialihkan atau ditutup."],
           });
         }
@@ -229,20 +274,47 @@ export function createRouteTool(context: TransitAgentContext, cache: NetworkCach
         );
       }
 
+      // The verdict the rider is really asking for: is the way open?
+      const obstructions = matches
+        .filter((match) => removesService(match.disruption))
+        .map((match) => {
+          const affected = match.lineIds
+            .map((lineId) => primary.legs.find((leg) => leg.lineId === lineId)?.lineName)
+            .filter((name): name is string => Boolean(name));
+          const where = affected.length > 0 ? affected.join(", ") : "rute utama";
+          return `${match.disruption.title} — ${where}. Sumber: ${match.disruption.source}.`;
+        });
+
+      if (obstructions.length > 0) {
+        notes.unshift(
+          "Rute utama terhalang. Jelaskan hambatannya, lalu tawarkan rute alternatif yang tidak terpengaruh.",
+        );
+      } else if (matches.length > 0) {
+        notes.unshift(
+          "Ada gangguan yang tercatat pada rute, tetapi tidak menutup jalurnya. Sebutkan, dan tetap tunjukkan rute utama.",
+        );
+      }
+
       return {
         asal: { text: args.asal, stationId: origin.stationId, name: origin.name },
         tujuan: { text: args.tujuan, stationId: destination.stationId, name: destination.name },
         rute: summaries,
         gangguan: matches.map((match) => summarizeDisruption(match, primary)),
+        status: obstructions.length > 0 ? "terhalang" : "terbuka",
+        hambatan: obstructions,
         catatan: notes,
       };
     },
   });
 }
 
-function summarize(itinerary: Itinerary): RouteSummary {
+function summarize(itinerary: Itinerary, fare: FareSummary): RouteSummary {
   return {
     durasiMenit: itinerary.durationMinutes,
+    jarakKm: itinerary.distanceKm,
+    jarakJalanKakiKm: itinerary.walkingKm,
+    skor: itinerary.cost,
+    tarif: fare,
     jumlahTransfer: itinerary.transferCount,
     legs: itinerary.legs.map((leg) => ({
       jenis: leg.kind,
@@ -256,8 +328,46 @@ function summarize(itinerary: Itinerary): RouteSummary {
       durasiMenit: leg.durationMinutes,
       jarakKm: Number(leg.distanceKm.toFixed(2)),
       halte: leg.stops.map((stop) => stop.name),
+      alasanJalanKaki: leg.walkReason,
+      gantiDari: leg.changedFrom,
+      gantiDi: leg.changedAt,
+      tungguMenit: leg.waitMinutes,
     })),
     peringatan: itinerary.warnings,
+  };
+}
+
+/** The price of a journey, in the shape the model reads it. */
+function fareOf(itinerary: Itinerary, rules: FareRules | null): FareSummary {
+  if (!rules) {
+    return { total: 0, label: "tidak diketahui", rincian: [] };
+  }
+
+  const quote = quoteFare({
+    at: new Date(),
+    rules,
+    labels: FARE_OPERATOR_LABELS,
+    legs: itinerary.legs.map((leg) => ({
+      kind: leg.kind,
+      operator:
+        leg.kind === "ride" && leg.lineId
+          ? fareOperatorFor({
+              systemId: leg.lineId.split(":")[0] ?? "",
+              serviceClass: leg.serviceClass,
+            })
+          : null,
+      distanceKm: leg.distanceKm,
+      stopCount: leg.stops.length,
+    })),
+  });
+
+  return {
+    total: quote.totalIdr,
+    label: formatRupiah(quote.totalIdr),
+    rincian: quote.breakdown.map((item) => ({
+      label: item.label,
+      jumlah: item.amountIdr,
+    })),
   };
 }
 

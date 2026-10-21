@@ -140,7 +140,7 @@ export type TransjakartaClass = {
 const TRANSAKARTA_CLASSES: readonly { pattern: RegExp; brand: string; serviceClass: ServiceClass }[] = [
   { pattern: /^mikrotrans/i, brand: "Mikrotrans", serviceClass: "feeder" },
   { pattern: /^metrotrans/i, brand: "Metrotrans", serviceClass: "non-brt" },
-  { pattern: /^royaltrans/i, brand: "Royaltrans", serviceClass: "non-brt" },
+  { pattern: /^royaltrans/i, brand: "Royaltrans", serviceClass: "royaltrans" },
   { pattern: /^minitrans/i, brand: "Minitrans", serviceClass: "minitrans" },
   { pattern: /^amari/i, brand: "Amari", serviceClass: "non-brt" },
   { pattern: /^bus wisata/i, brand: "Bus Wisata", serviceClass: "non-brt" },

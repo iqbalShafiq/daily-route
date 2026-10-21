@@ -183,6 +183,18 @@ Base UI's tooltip, wrapped. Required for every icon-only control. Delay
   and its code, the boarding and alighting stops, and the duration on the
   right. The full stop list is a `<details>` element, because the rider
   usually wants the shape of the journey, not every halte.
+- **The itinerary header** — `durasi · jarak · jumlah perpindahan`, for
+  example "58 mnt · 15,2 km · 2 kali pindah". When the journey needs no
+  change of vehicle it says "tanpa pindah", so the rider is never told to
+  change when there is nothing to change.
+- **The fare block** — under the leg list: the amount, then the operator
+  that charges it, and the note about a combined ticket when there is one.
+  A fare that no operator has published is not shown at all.
+- **A walk says what it is for** — "Berjalan kaki ke halte X" for the walk
+  to the first vehicle, "Berjalan kaki dari halte X" for the walk after
+  the last one, and "Pindah ke [line] di [tempat]" for the walk in
+  between. A ride that follows another vehicle says "Ganti dari [line]".
+  Only the middle one asks anything of the rider.
 - **Disruption banner** — a tinted panel above the itinerary, with the
   severity, the kind, how long ago it was published, and a link to the
   source.
@@ -195,7 +207,9 @@ the attribution is rendered by MapLibre as the licence requires.
 
 - The light theme uses the `positron` style, the dark theme `dark`.
 - The main route is a 5 px line with a 9 px white casing, so it stays
-  legible over any map background.
+  legible over any map background. It follows the real path of the
+  vehicles, taken from the road and rail geometry of the route relations,
+  not a straight line between the stops.
 - An alternative route is a 4 px dashed line in `warn`.
 - The origin is a jade circle, the destination a blue one, the intermediate
   stops small dark dots.

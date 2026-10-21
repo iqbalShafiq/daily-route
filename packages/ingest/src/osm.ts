@@ -1,5 +1,6 @@
 import { bboxClause, overpass, type OverpassElement } from "./overpass.js";
 import { systemForRelation, type SystemId } from "./classify.js";
+import { appendWay, type Coordinate } from "./geometry.js";
 
 /**
  * Extraction of the transit network from OpenStreetMap.
@@ -40,21 +41,43 @@ export type OsmRoute = {
   colour: string | null;
   operator: string | null;
   stops: OsmStop[];
+  /** The path the vehicles travel, in order. */
+  polyline: Coordinate[];
+  /** The index in the polyline of every stop, by OpenStreetMap node id. */
+  stopOffsets: Map<number, number>;
 };
 
-/** Relations for every system this platform covers. */
-const ROUTE_QUERY = `[out:json][timeout:280];
+/**
+ * The route relations of every system this platform covers.
+ *
+ * The query asks for the geometry (`out geom`), because the ways of a
+ * relation are what the vehicles actually travel on. The bus relations are
+ * fetched separately from the rail ones: the bus payload is large, and two
+ * smaller responses are more reliable than one big one.
+ */
+const ROUTE_QUERIES = [
+  `[out:json][timeout:280];
+relation["type"="route"]["route"="bus"]["network"~"Transjakarta|Trans Jakarta"]${bboxClause()};
+out geom;`,
+  `[out:json][timeout:280];
 (
-  relation["type"="route"]["route"="bus"]["network"~"Transjakarta|Trans Jakarta"]${bboxClause()};
   relation["type"="route"]["route"="subway"]${bboxClause()};
   relation["type"="route"]["route"="light_rail"]${bboxClause()};
   relation["type"="route"]["route"="train"]["network"~"KAI|KAI Commuter"]${bboxClause()};
 );
-out body;`;
+out geom;`,
+];
 
-/** Fetch every route relation of interest. */
+/** The text the route-relation cache is named after. */
+export const ROUTE_QUERY_FINGERPRINT = ROUTE_QUERIES.join("\n");
+
+/** Fetch every route relation of interest, with its geometry. */
 export async function fetchRouteRelations(): Promise<OverpassElement[]> {
-  return overpass(ROUTE_QUERY, { attemptsPerEndpoint: 3 });
+  const elements: OverpassElement[] = [];
+  for (const query of ROUTE_QUERIES) {
+    elements.push(...(await overpass(query, { attemptsPerEndpoint: 3 })));
+  }
+  return elements;
 }
 
 /**
@@ -140,6 +163,28 @@ export function toOsmRoute(
     });
   });
 
+  // The members are walked in order, because that order is the path: the
+  // ways are the road, and a stop member says where along it the vehicle
+  // stops. Walking them together yields the polyline and the offset of
+  // every stop in one pass.
+  const polyline: Coordinate[] = [];
+  const stopOffsets = new Map<number, number>();
+  const stopByNodeId = new Map(resolved.map((stop) => [stop.nodeId, stop]));
+
+  for (const member of relation.members ?? []) {
+    if (member.type === "way" && member.geometry && member.geometry.length > 0) {
+      appendWay(
+        polyline,
+        member.geometry.map((point) => ({ latitude: point.lat, longitude: point.lon })),
+      );
+      continue;
+    }
+    if (member.type === "node" && member.role === "stop") {
+      if (!stopByNodeId.has(member.ref)) continue;
+      stopOffsets.set(member.ref, Math.max(0, polyline.length - 1));
+    }
+  }
+
   return {
     relationId: relation.id,
     systemId,
@@ -152,6 +197,8 @@ export function toOsmRoute(
     colour: tags["colour"] ?? null,
     operator: tags["operator"] ?? null,
     stops: resolved,
+    polyline,
+    stopOffsets,
   };
 }
 

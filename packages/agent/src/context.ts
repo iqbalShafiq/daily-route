@@ -1,7 +1,7 @@
 import type { Database } from "@daily-route/db";
-import { listActiveDisruptions, loadNetwork } from "@daily-route/db";
+import { listActiveDisruptions, loadFareRules, loadNetwork } from "@daily-route/db";
 import type { PlaceResolver } from "@daily-route/semantic";
-import type { Disruption, TransitNetwork } from "@daily-route/transit";
+import type { Disruption, FareRules, TransitNetwork } from "@daily-route/transit";
 
 /**
  * The runtime context the agent's tools work against.
@@ -20,6 +20,8 @@ export type TransitAgentContext = {
 type CacheEntry = {
   network: TransitNetwork;
   disruptions: Disruption[];
+  /** The published tariffs, when the snapshot carries them. */
+  fareRules: FareRules | null;
   loadedAt: number;
 };
 
@@ -61,9 +63,10 @@ export class NetworkCache {
   }
 
   async #load(): Promise<CacheEntry> {
-    const [network, disruptionRows] = await Promise.all([
+    const [network, disruptionRows, fareRules] = await Promise.all([
       loadNetwork(this.#context.db),
       listActiveDisruptions(this.#context.db, { limit: 200 }),
+      loadFareRules(this.#context.db),
     ]);
 
     const disruptions: Disruption[] = disruptionRows.map((row) => ({
@@ -88,6 +91,6 @@ export class NetworkCache {
       affectedLineIds: (row.affectedLineIds as string[]) ?? [],
     }));
 
-    return { network, disruptions, loadedAt: Date.now() };
+    return { network, disruptions, fareRules, loadedAt: Date.now() };
   }
 }

@@ -31,6 +31,8 @@ export type OverpassElement = {
     role: string;
     lat?: number;
     lon?: number;
+    /** The geometry of a way member, present when the query asks for it. */
+    geometry?: { lat: number; lon: number }[];
   }[];
   tags?: Record<string, string>;
 };
@@ -138,4 +140,19 @@ export const JAKARTA_BBOX = {
 
 export function bboxClause(bbox = JAKARTA_BBOX): string {
   return `(${bbox.south},${bbox.west},${bbox.north},${bbox.east})`;
+}
+
+/**
+ * A short, stable fingerprint of a query.
+ *
+ * The cache is named after the query, so a changed query is fetched again
+ * instead of quietly reusing the answer to a different question.
+ */
+export function queryFingerprint(query: string): string {
+  let hash = 0x811c9dc5;
+  for (let index = 0; index < query.length; index += 1) {
+    hash ^= query.charCodeAt(index);
+    hash = Math.imul(hash, 0x01000193) >>> 0;
+  }
+  return hash.toString(36);
 }

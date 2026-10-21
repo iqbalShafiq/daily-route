@@ -24,11 +24,32 @@ test.describe("route planner", () => {
     await page.getByRole("button", { name: "Tampilkan rute" }).click();
 
     // The itinerary arrives with a duration and at least one leg.
-    await expect(page.getByText(/transfer/).first()).toBeVisible({ timeout: 30_000 });
+    await expect(page.getByText("Perkiraan tarif")).toBeVisible({ timeout: 30_000 });
     await expect(page.getByText(/Kelapa Gading/i).first()).toBeVisible();
 
     // The route is drawn on the map.
     await expect(page.locator("canvas.maplibregl-canvas").first()).toBeVisible();
+  });
+
+  test("shows the distance, the fare and what a transfer means", async ({ page }) => {
+    await page.goto("/");
+
+    await page.getByLabel("Dari").fill("Bundaran HI");
+    await page.getByLabel("Ke").fill("Kelapa Gading");
+    await page.getByRole("button", { name: "Tampilkan rute" }).click();
+
+    await expect(page.getByText("Perkiraan tarif")).toBeVisible({ timeout: 30_000 });
+
+    // The header says how long the journey is, how far it is, and how many
+    // changes of vehicle it takes.
+    await expect(page.getByText(/\d+ mnt · [\d,]+ km · \d+ kali pindah/)).toBeVisible();
+
+    // The fare is an amount in rupiah.
+    await expect(page.getByText(/Rp \d/)).toBeVisible();
+
+    // A change of vehicle names the line the rider takes next, and a walk
+    // says what it is for.
+    await expect(page.getByText(/Pindah ke |Ganti dari /).first()).toBeVisible();
   });
 
   test("offers station suggestions while typing", async ({ page }) => {

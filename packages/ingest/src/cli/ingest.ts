@@ -1,4 +1,4 @@
-import { mkdir, writeFile } from "node:fs/promises";
+import { mkdir, readFile, writeFile } from "node:fs/promises";
 import { dirname, resolve } from "node:path";
 
 import { loadCurated, type CuratedDocument } from "../curated.js";
@@ -6,6 +6,9 @@ import { mergeNetwork } from "../merge.js";
 import { fetchNodes, fetchRouteRelations, fetchUnlinkedRailStations, toOsmRoute } from "../osm.js";
 import type { SystemId } from "../classify.js";
 import { readCache, writeCache } from "../cache.js";
+import { loadFareRules, type FaresDocument } from "../fares.js";
+import { queryFingerprint } from "../overpass.js";
+import { ROUTE_QUERY_FINGERPRINT } from "../osm.js";
 import type { OverpassElement } from "../overpass.js";
 
 /**
@@ -43,10 +46,11 @@ async function main(): Promise<void> {
   }
 
   console.log("· fetching route relations from OpenStreetMap");
-  let relations = await readCache<OverpassElement[]>("route-relations", cacheOptions);
+  const relationsCache = `route-relations-${queryFingerprint(ROUTE_QUERY_FINGERPRINT)}`;
+  let relations = await readCache<OverpassElement[]>(relationsCache, cacheOptions);
   if (!relations) {
     relations = await fetchRouteRelations();
-    await writeCache("route-relations", relations, cacheOptions);
+    await writeCache(relationsCache, relations, cacheOptions);
   }
   console.log(`  ${relations.length} relations`);
 
@@ -93,11 +97,21 @@ async function main(): Promise<void> {
     .filter((entry): entry is NonNullable<typeof entry> => entry !== null);
   console.log(`  ${extraStations.length} stations`);
 
+  console.log("· loading the fare rules");
+  const fareDocument = JSON.parse(
+    await readFile(`${ROOT}/research/data/fares.json`, "utf8"),
+  ) as FaresDocument;
+  const fareRules = loadFareRules(fareDocument);
+  console.log(
+    `  ${Object.keys(fareRules.modes).length} operator rules, ${fareRules.integrations.length} combined tickets`,
+  );
+
   console.log("· merging");
   const network = mergeNetwork({
     curated: curated.lines,
     osmRoutes,
     extraStations,
+    fareRules,
     notes: curated.notes,
   });
 

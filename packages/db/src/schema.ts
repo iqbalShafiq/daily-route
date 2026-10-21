@@ -105,6 +105,46 @@ export const stations = pgTable(
   ],
 );
 
+/**
+ * The real path of a line, per direction.
+ *
+ * The geometry is the flat list of coordinates the vehicles travel, and
+ * `stop_offsets` says where every stop sits along it. The planner slices
+ * this path per leg, so the line drawn on the map is the road the bus
+ * actually drives on.
+ */
+export const lineGeometry = pgTable(
+  "line_geometry",
+  {
+    lineId: text("line_id")
+      .notNull()
+      .references(() => lines.id, { onDelete: "cascade" }),
+    direction: text("direction").notNull().default("forward"),
+    /** Flat `[longitude, latitude, …]` pairs. */
+    geometry: jsonb("geometry").notNull(),
+    /** The index in `geometry` of every stop, parallel to the line's stops. */
+    stopOffsets: jsonb("stop_offsets").notNull().default(sql`'[]'::jsonb`),
+    lengthKm: real("length_km").notNull(),
+    pointCount: integer("point_count").notNull(),
+  },
+  (table) => [
+    primaryKey({ columns: [table.lineId, table.direction] }),
+  ],
+);
+
+/**
+ * The published tariffs.
+ *
+ * There is one row: the rules in force today. The table exists so that
+ * the fares, like the rest of the network, are data the application reads
+ * rather than constants it carries.
+ */
+export const fareRules = pgTable("fare_rules", {
+  id: text("id").primaryKey(),
+  rules: jsonb("rules").notNull(),
+  updatedAt: timestamp("updated_at").notNull(),
+});
+
 export const lineStops = pgTable(
   "line_stops",
   {
