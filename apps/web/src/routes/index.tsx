@@ -1,4 +1,4 @@
-import { X } from "lucide-react";
+import { MessageSquare, Moon, Sun, X } from "lucide-react";
 import { useMemo, useState } from "react";
 
 import { RouteMap, type MapLeg, type MapMarker } from "../components/map/route-map.js";
@@ -13,6 +13,8 @@ import { Button } from "../components/ui/button.js";
 import { cn } from "../lib/cn.js";
 import { MODE_WIDTH, SERVICE_CLASS_COLOR, type ServiceClass } from "../lib/format.js";
 import { useTheme } from "../lib/theme.js";
+import { useQuery } from "@tanstack/react-query";
+import { Tooltip } from "../components/ui/tooltip.js";
 
 /**
  * The planner page.
@@ -32,7 +34,15 @@ export function PlannerPage() {
    * from. It is drawn on the map as the first part of the journey.
    */
   const [walk, setWalk] = useState<PositionPlan | null>(null);
-  const { theme } = useTheme();
+  const { theme, toggle: toggleTheme } = useTheme();
+
+  const health = useQuery({
+    queryKey: ["health"],
+    queryFn: api.health,
+    refetchInterval: 60_000,
+    retry: false,
+  });
+  const agentReady = health.data?.agent === true;
 
   const plan = usePlan(
     submitted?.origin ?? "",
@@ -207,6 +217,67 @@ export function PlannerPage() {
       </div>
 
       {/*
+       * The controls of the window.
+       *
+       * They sit in the top right corner, in the space the zoom control
+       * used to have, and the zoom moved to the bottom right. The
+       * assistant, the state of the model and the theme are one row:
+       * three small things that belong to the window, not to a bar.
+       */}
+      <div className="pointer-events-none absolute top-3 right-3 z-30 flex items-center gap-2">
+        <Tooltip label={view === "chat" ? "Tutup asisten" : "Tanya asisten"}>
+          <Button
+            variant="secondary"
+            size="icon"
+            aria-label={view === "chat" ? "Tutup asisten" : "Tanya asisten"}
+            onClick={() => setView(view === "chat" ? "route" : "chat")}
+            className="pointer-events-auto border-line bg-surface/90 shadow-raised backdrop-blur"
+          >
+            {view === "chat" ? (
+              <X aria-hidden className="size-4" />
+            ) : (
+              <MessageSquare aria-hidden className="size-4" />
+            )}
+          </Button>
+        </Tooltip>
+
+        <Tooltip
+          label={
+            agentReady
+              ? `Asisten aktif${health.data?.model ? `, model ${health.data.model}` : ""}`
+              : "Asisten belum aktif: belum ada kunci model"
+          }
+        >
+          <span
+            aria-label={agentReady ? "Asisten aktif" : "Asisten belum aktif"}
+            className="pointer-events-auto flex size-9 cursor-default items-center justify-center rounded-lg border border-line bg-surface/90 text-ink-3 shadow-raised backdrop-blur"
+          >
+            <span
+              aria-hidden
+              className="size-2 rounded-full"
+              style={{ backgroundColor: agentReady ? "var(--accent)" : "var(--warn)" }}
+            />
+          </span>
+        </Tooltip>
+
+        <Tooltip label={theme === "dark" ? "Mode terang" : "Mode gelap"}>
+          <Button
+            variant="secondary"
+            size="icon"
+            onClick={toggleTheme}
+            aria-label="Ganti tema"
+            className="pointer-events-auto border-line bg-surface/90 shadow-raised backdrop-blur"
+          >
+            {theme === "dark" ? (
+              <Sun aria-hidden className="size-4" />
+            ) : (
+              <Moon aria-hidden className="size-4" />
+            )}
+          </Button>
+        </Tooltip>
+      </div>
+
+      {/*
        * The controls float on the map.
        *
        * On a wide screen the search card sits in the top left corner and
@@ -217,11 +288,11 @@ export function PlannerPage() {
        */}
       <div
         className={cn(
-          "pointer-events-none absolute inset-0 col-start-1 row-start-1 z-20 flex flex-col justify-between p-3",
+          "pointer-events-none absolute inset-0 col-start-1 row-start-1 z-20 flex flex-col justify-between p-3 pt-16 lg:pt-3",
           "lg:right-auto lg:w-[400px] lg:justify-start lg:gap-4 lg:p-4",
         )}
       >
-        <div className="pointer-events-auto mr-12 lg:shrink-0 lg:mr-0">
+        <div className="pointer-events-auto lg:shrink-0">
           <RouteSearch
             className="shadow-pop"
             origin={origin}
@@ -265,7 +336,6 @@ export function PlannerPage() {
               });
             }}
             walk={walk}
-            onOpenAssistant={() => setView("chat")}
           />
         </div>
 
@@ -286,6 +356,11 @@ export function PlannerPage() {
                 setOrigin(name);
                 setSubmitted({ origin: name, destination: destination.trim() });
               }}
+              onRetry={() => {
+                setSubmitted((current) =>
+                  current ? { ...current } : null,
+                );
+              }}
             />
           </div>
         ) : null}
@@ -294,15 +369,6 @@ export function PlannerPage() {
           <div className="pointer-events-auto absolute inset-x-3 bottom-3 top-16 z-40 lg:left-auto lg:right-4 lg:w-[400px]">
             <div className="relative h-full">
               <ChatPanel />
-              <Button
-                variant="secondary"
-                size="icon"
-                aria-label="Tutup asisten"
-                onClick={() => setView("route")}
-                className="absolute top-3 right-3 z-10 bg-surface/90 shadow-raised backdrop-blur"
-              >
-                <X aria-hidden className="size-4" />
-              </Button>
             </div>
           </div>
         ) : null}

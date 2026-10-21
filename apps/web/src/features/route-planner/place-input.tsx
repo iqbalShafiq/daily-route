@@ -49,6 +49,7 @@ export function PlaceInput({
   invalid,
   autoFocus,
   trailingAction,
+  variant,
 }: {
   label: string;
   value: string;
@@ -60,6 +61,8 @@ export function PlaceInput({
   autoFocus?: boolean | undefined;
   /** A control at the end of the field, such as "use my position". */
   trailingAction?: React.ReactNode | undefined;
+  /** `row` makes the field one line of a larger surface. */
+  variant?: "field" | "row" | undefined;
 }) {
   const [open, setOpen] = useState(false);
   // -1 means the list is open but nothing is selected yet.
@@ -218,6 +221,7 @@ export function PlaceInput({
     <div ref={containerRef} className="relative">
       <Input
         ref={inputRef}
+        variant={variant}
         label={label}
         value={value}
         placeholder={placeholder}
@@ -240,6 +244,7 @@ export function PlaceInput({
           setOpen(true);
         }}
         onFocus={() => setOpen(true)}
+        onBlur={() => setOpen(false)}
         onKeyDown={handleKeyDown}
       />
 
@@ -292,6 +297,7 @@ export function PlaceInput({
                 <button
                   type="button"
                   tabIndex={-1}
+                  onMouseDown={(event) => event.preventDefault()}
                   onMouseEnter={() => setHighlight(index)}
                   onClick={() => choose(suggestion)}
                   className="flex w-full cursor-pointer items-center gap-3 px-3 py-3 text-left transition-colors"

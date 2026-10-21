@@ -131,7 +131,7 @@ test.describe("route planner", () => {
   test("opens the assistant over the map and closes it again", async ({ page }) => {
     await page.goto("/");
 
-    await page.getByRole("button", { name: "Tanya" }).click();
+    await page.getByRole("button", { name: "Tanya asisten" }).click();
     await expect(page.getByRole("heading", { name: "Tanya asisten rute" })).toBeVisible();
 
     await page.getByRole("button", { name: "Tutup asisten" }).click();

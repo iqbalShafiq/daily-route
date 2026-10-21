@@ -5,8 +5,12 @@ import { cn } from "../../lib/cn.js";
 /**
  * The text field.
  *
- * The icon is decorative and the label is always visible, so the field is
- * readable without a placeholder that disappears.
+ * Two shapes. The `field` shape stands on its own: a label above it, a
+ * border around it, the way a form in a page reads. The `row` shape is
+ * one line of a bigger surface: no border, no visible label, the label
+ * kept for the screen reader only. The search on a map is built from
+ * rows, so the two places it holds are one object and not two boxes
+ * inside a box.
  */
 export type InputProps = Omit<InputHTMLAttributes<HTMLInputElement>, "size"> & {
   label: string;
@@ -16,14 +20,36 @@ export type InputProps = Omit<InputHTMLAttributes<HTMLInputElement>, "size"> & {
   /** A short hint under the field. */
   hint?: string | undefined;
   invalid?: boolean | undefined;
+  /** `field` stands alone, `row` is one line of a surface. */
+  variant?: "field" | "row" | undefined;
 };
 
 export const Input = forwardRef<HTMLInputElement, InputProps>(function Input(
-  { className, label, icon, trailing, hint, invalid, id, ...props },
+  { className, label, icon, trailing, hint, invalid, variant = "field", id, ...props },
   ref,
 ) {
   const inputId = id ?? `field-${props.name ?? label.replace(/\s+/g, "-").toLowerCase()}`;
   const describedBy = hint ? `${inputId}-hint` : undefined;
+
+  if (variant === "row") {
+    return (
+      <div className={cn("flex min-w-0 flex-1 items-center gap-3", className)}>
+        <label htmlFor={inputId} className="sr-only">
+          {label}
+        </label>
+        {icon ? <span className="shrink-0 text-ink-3">{icon}</span> : null}
+        <input
+          ref={ref}
+          id={inputId}
+          aria-invalid={invalid || undefined}
+          aria-describedby={describedBy}
+          className="min-w-0 flex-1 bg-transparent text-[15px] text-ink outline-none placeholder:text-ink-3"
+          {...props}
+        />
+        {trailing ? <span className="shrink-0">{trailing}</span> : null}
+      </div>
+    );
+  }
 
   return (
     <div className="flex flex-col gap-2">

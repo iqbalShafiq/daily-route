@@ -1,10 +1,13 @@
-import { Send, Sparkles } from "lucide-react";
+import { useQuery } from "@tanstack/react-query";
+import { PlugZap, Send, Sparkles } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 
 import { Button } from "../../components/ui/button.js";
 import { Card, CardHeader } from "../../components/ui/card.js";
 import { EmptyState, Spinner } from "../../components/ui/feedback.js";
 import { cn } from "../../lib/cn.js";
+
+import { api } from "../../lib/api.js";
 
 import { useChat } from "./use-chat.js";
 
@@ -18,6 +21,18 @@ import { useChat } from "./use-chat.js";
  */
 export function ChatPanel() {
   const { messages, status, error, send } = useChat();
+
+  /*
+   * The state of the assistant is read from the same place the window
+   * reads it, so the chat never promises an answer it cannot give.
+   */
+  const health = useQuery({
+    queryKey: ["health"],
+    queryFn: api.health,
+    refetchInterval: 60_000,
+    retry: false,
+  });
+  const agentReady = health.data?.agent === true;
   const [draft, setDraft] = useState("");
   const scrollRef = useRef<HTMLDivElement | null>(null);
   const inputRef = useRef<HTMLInputElement | null>(null);
@@ -45,11 +60,19 @@ export function ChatPanel() {
 
       <div ref={scrollRef} className="scroll-quiet min-h-0 flex-1 overflow-y-auto px-4">
         {messages.length === 0 ? (
-          <EmptyState
-            icon={<Sparkles aria-hidden className="size-5" />}
-            title="Mulai bertanya"
-            description="Contoh: “Bagaimana cara dari Bundaran HI ke Kelapa Gading?” atau “Apakah koridor 1 sedang dialihkan?”"
-          />
+          agentReady === false ? (
+            <EmptyState
+              icon={<PlugZap aria-hidden className="size-5" />}
+              title="Asisten belum aktif"
+              description="Kunci model belum diisi, jadi asisten tidak bisa menjawab. Rute yang sudah dihitung tetap bisa dibaca di panel Rute."
+            />
+          ) : (
+            <EmptyState
+              icon={<Sparkles aria-hidden className="size-5" />}
+              title="Mulai bertanya"
+              description="Contoh: “Bagaimana cara dari Bundaran HI ke Kelapa Gading?” atau “Apakah koridor 1 sedang dialihkan?”"
+            />
+          )
         ) : (
           <ul className="flex flex-col gap-3 py-3">
             {messages.map((message) => (

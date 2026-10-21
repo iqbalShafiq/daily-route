@@ -1,12 +1,10 @@
-import { Route as RouteIcon } from "lucide-react";
+import { AlertCircle, Route as RouteIcon } from "lucide-react";
 
 import { Button } from "../../components/ui/button.js";
-import { Card } from "../../components/ui/card.js";
-import { EmptyState, Spinner } from "../../components/ui/feedback.js";
 import { DisruptionBanner } from "../../components/transit/disruption-banner.js";
 import { LegList } from "../../components/transit/leg-list.js";
 import { cn } from "../../lib/cn.js";
-import type { Itinerary, PlanResult } from "../../lib/api.js";
+import { ApiError, type Itinerary, type PlanResult } from "../../lib/api.js";
 import { formatDistance, formatDuration, formatTimestamp } from "../../lib/format.js";
 
 import type { UsePlanResult } from "./use-plan.js";
@@ -25,6 +23,7 @@ export function RouteResult({
   onLegSelect,
   onStopHover,
   onExample,
+  onRetry,
   className,
 }: {
   plan: UsePlanResult;
@@ -36,6 +35,8 @@ export function RouteResult({
   onStopHover?: ((stationId: string | null) => void) | undefined;
   /** Put an example place into the origin field. */
   onExample?: ((name: string) => void) | undefined;
+  /** Ask for the answer again. */
+  onRetry?: (() => void) | undefined;
   className?: string;
 }) {
   const data: PlanResult | undefined = plan.data;
@@ -46,55 +47,91 @@ export function RouteResult({
 
   if (plan.isFetching && !data) {
     return (
-      <Card className={className}>
-        <div className="flex items-center justify-center px-4 py-10">
-          <Spinner label="Menghitung rute…" />
+      <div
+        className={cn("rounded-[14px] bg-surface p-4 shadow-pop ring-1 ring-line", className)}
+        aria-busy="true"
+        aria-live="polite"
+      >
+        <p className="sr-only">Menghitung rute…</p>
+        <div className="flex items-baseline gap-3">
+          <span className="h-9 w-32 animate-pulse rounded-md bg-surface-2" />
+          <span className="h-4 w-20 animate-pulse rounded-md bg-surface-2" />
         </div>
-      </Card>
+        <span className="mt-3 block h-3 w-40 animate-pulse rounded-md bg-surface-2" />
+        <div className="mt-4 space-y-3">
+          {[0, 1, 2].map((index) => (
+            <div key={index} className="flex items-center gap-3">
+              <span className="size-7 shrink-0 animate-pulse rounded-full bg-surface-2" />
+              <span className="h-3 flex-1 animate-pulse rounded-md bg-surface-2" />
+            </div>
+          ))}
+        </div>
+      </div>
     );
   }
 
   if (plan.isError) {
     return (
-      <Card className={className}>
-        <EmptyState
-          title="Rute belum bisa dihitung"
-          description="Coba nama halte yang lebih spesifik, misalnya Halte Bundaran HI."
-          action={
-            <Button type="button" variant="secondary" onClick={() => onExample?.("Bundaran HI")}>
-              Pakai Halte Bundaran HI
-            </Button>
-          }
-        />
-      </Card>
+      <div
+        className={cn(
+          "rounded-[14px] bg-surface p-4 shadow-pop ring-1 ring-line",
+          className,
+        )}
+        role="alert"
+      >
+        <p className="flex items-center gap-2 text-[13px] font-semibold text-ink">
+          <AlertCircle aria-hidden className="size-4 shrink-0 text-danger" />
+          Rute belum bisa dihitung
+        </p>
+        <p className="mt-1 text-[13px] leading-[1.5] text-ink-2">
+          {reasonOf(plan.error)}
+        </p>
+        <div className="mt-3 flex flex-wrap items-center gap-2">
+          <Button type="button" variant="secondary" onClick={onRetry}>
+            Coba lagi
+          </Button>
+          <Button
+            type="button"
+            variant="ghost"
+            onClick={() => onExample?.("Bundaran HI")}
+          >
+            Pakai Halte Bundaran HI
+          </Button>
+        </div>
+      </div>
     );
   }
 
   if (data && itineraries.length === 0) {
     return (
-      <Card className={className}>
-        <EmptyState
-          icon={<RouteIcon aria-hidden className="size-5" />}
-          title="Tidak ada perjalanan yang terhubung"
-          description={`Tidak ditemukan perjalanan antara ${data.origin.name} dan ${data.destination.name}. Coba tempat yang lebih umum, seperti halte interchange.`}
-          action={
-            <Button
-              type="button"
-              variant="secondary"
-              onClick={() => onExample?.(data.destination.name)}
-            >
-              Coba lagi dari {data.destination.name}
-            </Button>
-          }
-        />
-      </Card>
+      <div
+        className={cn("rounded-[14px] bg-surface p-4 shadow-pop ring-1 ring-line", className)}
+      >
+        <p className="flex items-center gap-2 text-[13px] font-semibold text-ink">
+          <RouteIcon aria-hidden className="size-4 shrink-0 text-ink-3" />
+          Tidak ada perjalanan yang terhubung
+        </p>
+        <p className="mt-1 text-[13px] leading-[1.5] text-ink-2">
+          Tidak ditemukan perjalanan antara {data.origin.name} dan {data.destination.name}.
+          Coba tempat yang lebih umum, seperti halte yang menjadi simpul.
+        </p>
+        <div className="mt-3 flex flex-wrap items-center gap-2">
+          <Button
+            type="button"
+            variant="secondary"
+            onClick={() => onExample?.(data.destination.name)}
+          >
+            Coba lagi dari {data.destination.name}
+          </Button>
+        </div>
+      </div>
     );
   }
 
   if (!data || !current) return null;
 
   return (
-    <div className={cn("flex flex-col gap-3", className)}>
+    <div className={cn("flex flex-col gap-2", className)}>
       {data.disruptions.length > 0 ? (
         <div className="flex flex-col gap-2">
           {data.disruptions.map((disruption) => (
@@ -111,8 +148,13 @@ export function RouteResult({
        * and what it buys, the way a list of routes does in every map
        * worth using.
        */}
+      <div
+        className="relative overflow-hidden rounded-[14px] bg-surface shadow-pop ring-1 ring-line"
+        aria-live="polite"
+        aria-busy={plan.isFetching}
+      >
       {routes.length > 1 ? (
-        <ul className="flex flex-col gap-1">
+        <ul className="flex flex-col gap-1 px-2 pt-2">
           {routes.slice(0, 3).map((route, index) => {
             const label = labelOfRoute(route, routes, index);
             const chosen = index === activeIndex;
@@ -123,7 +165,7 @@ export function RouteResult({
                   onClick={() => onActiveIndexChange(index)}
                   aria-current={chosen ? "true" : undefined}
                   className={cn(
-                    "flex w-full cursor-pointer items-baseline gap-2 rounded-md bg-surface/90 px-3 py-2 text-left shadow-raised backdrop-blur transition-colors",
+                    "flex w-full cursor-pointer items-baseline gap-2 rounded-xl px-3 py-2 text-left transition-colors",
                     chosen ? "bg-accent-soft" : "hover:bg-surface-2",
                   )}
                 >
@@ -148,18 +190,13 @@ export function RouteResult({
         </ul>
       ) : null}
 
-      <Card
-        className="relative overflow-hidden"
-        aria-live="polite"
-        aria-busy={plan.isFetching}
-      >
         {plan.isPending ? (
           <span
             aria-hidden
             className="absolute inset-x-0 top-0 h-0.5 animate-pulse bg-accent"
           />
         ) : null}
-        <div className="px-4 pt-4 pb-3">
+        <div className={cn("px-4 pt-4 pb-3", routes.length > 1 && "border-t border-line")}>
           <p className="text-[12px] font-semibold uppercase tracking-[0.04em] text-ink-3">
             Perjalanan
           </p>
@@ -208,7 +245,7 @@ export function RouteResult({
             ))}
           </div>
         ) : null}
-      </Card>
+      </div>
 
       {data.disruptions.length === 0 ? (
         <p className="px-1 text-[12px] text-ink-3">
@@ -217,6 +254,26 @@ export function RouteResult({
       ) : null}
     </div>
   );
+}
+
+/**
+ * Why the answer could not be computed.
+ *
+ * The server says what went wrong, and the rider reads it. A name that
+ * was not found and a server that is down are different problems, and
+ * they need different words.
+ */
+function reasonOf(error: unknown): string {
+  if (error instanceof ApiError) {
+    if (error.status === 404) {
+      return "Nama tempatnya tidak ditemukan. Coba nama halte yang lebih spesifik, misalnya Halte Bundaran HI.";
+    }
+    if (error.status >= 500) {
+      return "Server sedang tidak jawaban. Coba lagi sebentar lagi.";
+    }
+    return error.message;
+  }
+  return "Terjadi masalah saat menghitung rute. Coba lagi sebentar lagi.";
 }
 
 /**
