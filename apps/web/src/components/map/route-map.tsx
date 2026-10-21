@@ -139,6 +139,33 @@ export function RouteMap({ legs, markers, theme, className, onMarkerClick }: Rou
       popup = null;
     });
 
+    /*
+     * The line under the pointer.
+     *
+     * The line grows a little and the cursor says it can be pointed at,
+     * so the reader knows the map is not a picture but a thing to be
+     * read.
+     */
+    let hoveredLine: number | string | null = null;
+    map.on("mousemove", ROUTE_LAYER, (event) => {
+      const feature = event.features?.[0];
+      const id = feature?.id;
+      if (id === undefined || id === hoveredLine) return;
+      if (hoveredLine !== null) {
+        map.setFeatureState({ source: SOURCE_ID, id: hoveredLine }, { hover: false });
+      }
+      hoveredLine = id;
+      map.setFeatureState({ source: SOURCE_ID, id }, { hover: true });
+      map.getCanvas().style.cursor = "pointer";
+    });
+    map.on("mouseleave", ROUTE_LAYER, () => {
+      if (hoveredLine !== null) {
+        map.setFeatureState({ source: SOURCE_ID, id: hoveredLine }, { hover: false });
+        hoveredLine = null;
+      }
+      map.getCanvas().style.cursor = "";
+    });
+
     map.on("click", MARKER_HIT_LAYER, (event) => {
       const feature = event.features?.[0];
       if (!feature) return;
@@ -293,15 +320,23 @@ function addRouteLayers(map: MapLibreMap): void {
     type: "line",
     source: SOURCE_ID,
     filter: ["all", ["==", ["get", "variant"], 0], ["==", ["get", "kind"], "ride"]],
+    // The identifier of the feature lets the map remember which leg of
+    // the journey the pointer is over.
+    promoteId: "id",
     layout: { "line-cap": "round", "line-join": "round" },
     paint: {
       "line-color": ["get", "color"],
       // The width carries the mode as well as the colour does, so the
       // route stays readable for a reader who cannot tell the colours
-      // apart.
-      "line-width": ["get", "width"],
+      // apart. The line the pointer is over grows a little.
+      "line-width": [
+        "case",
+        ["boolean", ["feature-state", "hover"], false],
+        ["+", ["get", "width"], 1.5],
+        ["get", "width"],
+      ],
     },
-  });
+  } as never);
 
   // The walk between two vehicles is dashed and thin: it is not a ride,
   // and it should not look like one.

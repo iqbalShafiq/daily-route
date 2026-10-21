@@ -48,7 +48,7 @@ test.describe("route planner", () => {
     await expect(page.getByText(/^[\d,]+ km · \d+ kali pindah$/).first()).toBeVisible();
 
     // The fare is an amount in rupiah.
-    await expect(page.getByText(/Rp \d/)).toBeVisible();
+    await expect(page.getByText(/^Rp [\d.]+$/).first()).toBeVisible();
 
     // A change of vehicle names the line the rider takes next, and a walk
     // says what it is for.

@@ -163,18 +163,51 @@ function LegRow({
         </p>
 
         {leg.stops.length > 2 ? (
-          <details className="group mt-1.5">
-            <summary className="inline-flex cursor-pointer list-none items-center gap-1 text-[12px] text-ink-3 hover:text-ink-2">
+          <details className="group mt-2" open={active}>
+            <summary className="inline-flex cursor-pointer list-none items-center gap-1 rounded text-[12px] text-ink-3 transition-colors hover:text-ink-2">
               <ChevronSmall />
               {leg.stops.length} halte · {formatDistance(leg.distanceKm)}
               {!isWalk && leg.waitMinutes > 0 ? ` · tunggu ±${leg.waitMinutes} mnt` : ""}
             </summary>
-            <ol className="mt-1.5 space-y-1 border-l border-line pl-3">
-              {leg.stops.slice(1, -1).map((stop) => (
-                <li key={stop.stationId} className="text-[12px] text-ink-3">
-                  {stop.name}
-                </li>
-              ))}
+
+            {/*
+             * The stops of the ride, as a line the rider can follow:
+             * the place, the moment the vehicle reaches it, and the
+             * distance from the start. Every stop is a point on the map,
+             * so pointing at one of them lights it up there.
+             */}
+            <ol className="mt-2 space-y-0 border-l border-line pl-0">
+              {leg.stops.map((stop, index) => {
+                const first = index === 0;
+                const last = index === leg.stops.length - 1;
+                const minutes = Math.round((leg.durationMinutes * index) / Math.max(leg.stops.length - 1, 1));
+                return (
+                  <li
+                    key={`${stop.stationId}-${index}`}
+                    className="relative -ml-[5px] flex items-baseline gap-2 py-[3px] pl-3 text-[12px]"
+                  >
+                    <span
+                      aria-hidden
+                      className={cn(
+                        "absolute top-[7px] size-[5px] shrink-0 rounded-full border",
+                        first || last ? "border-transparent" : "border-line",
+                      )}
+                      style={{ backgroundColor: first || last ? color : "var(--surface)", left: -5 }}
+                    />
+                    <span
+                      className={cn(
+                        "min-w-0 flex-1 truncate",
+                        first || last ? "font-medium text-ink" : "text-ink-2",
+                      )}
+                    >
+                      {stop.name}
+                    </span>
+                    <span className="shrink-0 tabular-nums text-ink-3">
+                      {first ? "0" : `${minutes} mnt`}
+                    </span>
+                  </li>
+                );
+              })}
             </ol>
           </details>
         ) : (

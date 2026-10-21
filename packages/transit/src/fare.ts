@@ -331,9 +331,14 @@ export function quoteFare(input: {
   for (const candidate of input.rules.integrations) {
     const covered = rides.every((leg) => leg.operator && candidate.covers.includes(leg.operator));
     if (!covered) continue;
-    // The scheme exists to combine modes, so it is only offered when the
-    // journey really does use more than one vehicle.
-    if (rides.length < 2) continue;
+    /*
+     * The scheme exists to combine modes, not to make one mode cheaper.
+     * Two buses of the same operator are two fares, not one journey
+     * across two modes, so the scheme is only offered when the journey
+     * really does use more than one mode.
+     */
+    const modes = new Set(rides.map((leg) => leg.operator));
+    if (modes.size < 2) continue;
 
     const amount = Math.min(
       candidate.max,
