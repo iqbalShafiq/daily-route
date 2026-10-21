@@ -1,4 +1,5 @@
 import { ArrowRight } from "lucide-react";
+import { useEffect, useState } from "react";
 
 import { cn } from "../../lib/cn.js";
 import {
@@ -11,7 +12,9 @@ import {
 } from "../../lib/format.js";
 import type { ItineraryLeg } from "../../lib/api.js";
 
+import { MarqueeText } from "../ui/marquee-text.js";
 import { ModeIcon } from "./mode-icon.js";
+import { StopPopover } from "./stop-popover.js";
 
 /**
  * The legs of one itinerary.
@@ -41,6 +44,19 @@ export function LegList({
   onStopHover?: ((stationId: string | null) => void) | undefined;
   activeLegId?: string | null | undefined;
 }) {
+  /*
+   * The stop the reader is pointing at. Its card stands beside the
+   * name, and it closes as soon as the list moves under it.
+   */
+  const [pointed, setPointed] = useState<PointedStop | null>(null);
+
+  useEffect(() => {
+    if (!pointed) return;
+    const close = (): void => setPointed(null);
+    window.addEventListener("scroll", close, true);
+    return () => window.removeEventListener("scroll", close, true);
+  }, [pointed]);
+
   if (legs.length === 0) {
     return (
       <p className="px-4 py-3 text-[13px] text-ink-3">
@@ -50,6 +66,7 @@ export function LegList({
   }
 
   return (
+    <>
     <ol className={cn("space-y-0", dense ? "text-[13px]" : "text-[13px]")}>
       {legs.map((leg, index) => (
         <LegRow
@@ -64,11 +81,26 @@ export function LegList({
           active={activeLegId === legIdOf(leg, index)}
           onSelect={onLegSelect}
           onStopHover={onStopHover}
+          onStopEnter={(stationId, name, anchor) => setPointed({ stationId, name, anchor })}
+          onStopLeave={() => setPointed(null)}
         />
       ))}
     </ol>
+    <StopPopover
+      stationId={pointed?.stationId ?? null}
+      name={pointed?.name ?? ""}
+      anchor={pointed?.anchor ?? null}
+    />
+    </>
   );
 }
+
+/** A stop the reader points at, and where its name stands. */
+type PointedStop = {
+  stationId: string;
+  name: string;
+  anchor: DOMRect;
+};
 
 /** The identifier of a leg, shared by the list and the map. */
 export function legIdOf(leg: ItineraryLeg, index: number): string {
@@ -82,6 +114,8 @@ function LegRow({
   active,
   onSelect,
   onStopHover,
+  onStopEnter,
+  onStopLeave,
   previousMode,
   nextMode,
 }: {
@@ -94,6 +128,9 @@ function LegRow({
   nextMode?: string | null | undefined;
   onSelect?: ((legId: string) => void) | undefined;
   onStopHover?: ((stationId: string | null) => void) | undefined;
+  /** The reader points at a stop: its card opens beside the name. */
+  onStopEnter?: ((stationId: string, name: string, anchor: DOMRect) => void) | undefined;
+  onStopLeave?: (() => void) | undefined;
 }) {
   const isWalk = leg.kind === "walk";
   const noun = stopNoun(isWalk ? "walk" : leg.mode);
@@ -131,18 +168,28 @@ function LegRow({
       </div>
 
       <div className="min-w-0 flex-1">
-        <div className="flex flex-wrap items-baseline gap-x-2 gap-y-0.5">
-          <span className="font-medium text-ink">
-            {isWalk ? "Berjalan kaki" : (leg.lineName ?? MODE_LABEL[leg.mode as keyof typeof MODE_LABEL] ?? "Perjalanan")}
-          </span>
+        {/*
+         * The name of the line stands on a line of its own, because it
+         * is the longest thing here and the line is read first. The
+         * kind of vehicle and the time stand below it, where they do
+         * not push the name out of the row.
+         */}
+        <div className="flex items-baseline gap-2">
+          <MarqueeText
+            text={isWalk ? "Berjalan kaki" : (leg.lineName ?? MODE_LABEL[leg.mode as keyof typeof MODE_LABEL] ?? "Perjalanan")}
+            className="min-w-0 flex-1 font-medium text-ink"
+          />
           {!isWalk && leg.lineCode ? (
             <span
-              className="rounded-md px-2 py-px font-mono text-[12px] leading-4 font-medium"
+              className="shrink-0 rounded-md px-2 py-px font-mono text-[12px] leading-4 font-medium"
               style={{ backgroundColor: `color-mix(in oklab, ${color} 12%, transparent)`, color }}
             >
               {leg.lineCode}
             </span>
           ) : null}
+        </div>
+
+        <div className="mt-0.5 flex items-baseline gap-2">
           {!isWalk && leg.serviceClass ? (
             <span className="text-[12px] text-ink-3">
               {SERVICE_CLASS_LABEL[leg.serviceClass as never] ?? leg.serviceClass}
@@ -185,7 +232,7 @@ function LegRow({
              * distance from the start. Every stop is a point on the map,
              * so pointing at one of them lights it up there.
              */}
-            <ol className="mt-2 space-y-0 border-l border-line pl-0">
+            <ol className="mt-2 space-y-0">
               {leg.stops.map((stop, index) => {
                 const first = index === 0;
                 const last = index === leg.stops.length - 1;
@@ -193,26 +240,63 @@ function LegRow({
                 return (
                   <li
                     key={`${stop.stationId}-${index}`}
-                    className="relative -ml-1 flex items-baseline gap-2 rounded-[4px] py-1 pl-3 text-[12px] transition-colors hover:bg-surface-2"
-                    onMouseEnter={() => onStopHover?.(stop.stationId)}
-                    onMouseLeave={() => onStopHover?.(null)}
+                    className="flex items-center gap-2 rounded-[4px] py-1 text-[12px] transition-colors hover:bg-surface-2"
+                    onMouseEnter={(event) => {
+                      onStopHover?.(stop.stationId);
+                      onStopEnter?.(stop.stationId, stop.name, event.currentTarget.getBoundingClientRect());
+                    }}
+                    onMouseLeave={() => {
+                      onStopHover?.(null);
+                      onStopLeave?.();
+                    }}
                   >
+                    {/*
+                     * The dot stands in the line of the text, in the
+                     * middle of it, and it marks the two ends of the
+                     * ride: the place it starts at and the place it
+                     * ends at.
+                     */}
                     <span
                       aria-hidden
                       className={cn(
-                        "absolute top-2 size-[5px] shrink-0 rounded-full border",
+                        "size-[5px] shrink-0 rounded-full border",
                         first || last ? "border-transparent" : "border-line",
                       )}
-                      style={{ backgroundColor: first || last ? color : "var(--surface)", left: -5 }}
+                      style={{ backgroundColor: first || last ? color : "var(--surface)" }}
                     />
-                    <span
-                      className={cn(
-                        "min-w-0 flex-1 truncate",
-                        first || last ? "font-medium text-ink" : "text-ink-2",
-                      )}
+                    {/*
+                     * The name is a button, so that a reader with a
+                     * keyboard can ask what the place is as well, and
+                     * so that a finger can ask it on a phone.
+                     */}
+                    <button
+                      type="button"
+                      aria-label={`Detail ${stop.name}`}
+                      onClick={(event) => {
+                        event.stopPropagation();
+                        onStopEnter?.(
+                          stop.stationId,
+                          stop.name,
+                          event.currentTarget.getBoundingClientRect(),
+                        );
+                      }}
+                      onFocus={(event) => {
+                        onStopEnter?.(
+                          stop.stationId,
+                          stop.name,
+                          event.currentTarget.getBoundingClientRect(),
+                        );
+                      }}
+                      className="min-w-0 flex-1 cursor-pointer text-left"
                     >
-                      {stop.name}
-                    </span>
+                      <MarqueeText
+                        text={stop.name}
+                        className={cn(
+                          "min-w-0 flex-1",
+                          first || last ? "font-medium text-ink" : "text-ink-2",
+                        )}
+                      />
+                    </button>
                     <span className="shrink-0 tabular-nums text-ink-3">
                       {first ? "0" : `${minutes} mnt`}
                     </span>

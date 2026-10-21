@@ -177,6 +177,10 @@ Read `DESIGN.md` before touching the interface. The short version:
 - Motion is short and purposeful: an answer rises into place, a list
   of suggestions opens from its field, and the map moves with `easeTo`
   and `fitBounds`. `prefers-reduced-motion` still turns all of it off.
+- A name that is longer than its line runs instead of being cut into
+  three dots, and it only runs while the reader points at it. The name
+  of a stop is a button: pointing at it, focusing it or touching it
+  opens a card with the details of the place.
 - Full-height regions use `dvh`, never `vh` and never a fixed pixel height.
 - Every asynchronous surface has a loading, an empty and an error state.
 - The place field is a combobox: the focus stays in the input, the active

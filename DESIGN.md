@@ -121,6 +121,17 @@ map. The map owns the window, and the controls float on it.
 - The assistant opens over the map, in a panel on the right on a wide
   screen and over the whole window on a phone. It is a second way into
   the same data, not a separate mode of the page.
+- A leg of the journey reads in two lines: the name of the line stands
+  alone, and the kind of vehicle and the time stand below it, so a long
+  name never pushes the time out of the row.
+- The stops of a ride have no line down the side of them. A dot marks
+  the two ends of the ride and stands in the middle of the line of text
+  it belongs to.
+- A stop name that is longer than its line is not cut into three dots.
+  It runs, the way a headline runs along the bottom of a news broadcast,
+  and it only runs while the reader points at it.
+- Pointing at a stop name opens a card beside it: what kind of place it
+  is, which lines stand there and what can be reached on foot from it.
 - The journey is framed in the room the rider can actually see: beside
   the answer column on a wide screen, between the bar and the answer on
   a phone. The margins are `--map-pad-*` in `styles.css`, and the map

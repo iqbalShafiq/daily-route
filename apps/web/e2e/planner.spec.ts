@@ -128,6 +128,35 @@ test.describe("route planner", () => {
     await expect(page.getByLabel("Ke")).toHaveValue("Senen");
   });
 
+  test("tells what a stop is when the reader points at its name", async ({ page }, testInfo) => {
+    test.skip(testInfo.project.name !== "desktop", "pointing is a pointer thing");
+
+    await page.goto("/");
+
+    await page.getByLabel("Dari").fill("Lebak Bulus");
+    await page.getByLabel("Ke").fill("Kalidores");
+    await page.getByRole("button", { name: "Tampilkan rute" }).click();
+    await expect(page.getByText("Tarif")).toBeVisible();
+
+    // Open the list of stops of every ride.
+    const summaries = page.locator("details summary");
+    for (let index = 0; index < (await summaries.count()); index += 1) {
+      await summaries.nth(index).click();
+      await page.waitForTimeout(120);
+    }
+
+    const name = page.getByRole("button", { name: /^Detail / }).first();
+    // The name stands on one line, however long it is.
+    const box = await name.boundingBox();
+    expect(box?.height ?? 0).toBeLessThan(30);
+
+    await name.hover();
+
+    const card = page.getByRole("dialog");
+    await expect(card).toBeVisible();
+    await expect(card).toContainText("Halte");
+  });
+
   test("opens the assistant over the map and closes it again", async ({ page }) => {
     await page.goto("/");
 

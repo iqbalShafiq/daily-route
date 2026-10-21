@@ -246,6 +246,44 @@
   .list-in {
     animation: list-in 180ms cubic-bezier(0.22, 1, 0.36, 1) both;
   }
+
+  /*
+   * A name that is longer than its line.
+   *
+   * The name runs, the way a headline runs along the bottom of a news
+   * broadcast, and it only runs while the reader points at it. The
+   * track holds the name twice, so the run has no seam.
+   */
+  .marquee {
+    display: block;
+    overflow: hidden;
+    white-space: nowrap;
+  }
+
+  .marquee__track {
+    display: inline-flex;
+    white-space: nowrap;
+    will-change: transform;
+  }
+
+  .marquee__copy {
+    flex-shrink: 0;
+    padding-right: 24px;
+  }
+
+  .marquee--overflow:hover .marquee__track,
+  .marquee--overflow:focus-within .marquee__track {
+    animation: marquee var(--marquee-duration, 0s) linear infinite;
+  }
+}
+
+@keyframes marquee {
+  from {
+    transform: translate3d(0, 0, 0);
+  }
+  to {
+    transform: translate3d(calc(-1 * var(--marquee-copy, 0px)), 0, 0);
+  }
 }
 
 @keyframes rise-in {

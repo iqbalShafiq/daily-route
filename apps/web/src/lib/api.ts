@@ -278,7 +278,11 @@ export const api = {
     );
   },
 
-  station: (id: string) => request<StationDetail>(`/stations/${encodeURIComponent(id)}`),
+  station: (id: string, signal?: AbortSignal) =>
+    request<StationDetail>(
+      `/stations/${encodeURIComponent(id)}`,
+      signal ? { signal } : undefined,
+    ),
 
   plan: (origin: string, destination: string) =>
     request<PlanResult>(
