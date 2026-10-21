@@ -210,6 +210,26 @@ export type WalkRoute = {
 export const api = {
   health: () => request<{ status: string; agent: boolean; model: string }>("/health"),
 
+  planFromPosition: (coordinates: { latitude: number; longitude: number }, destination: string) =>
+    request<{
+      walk: WalkRoute;
+      totalMinutes: number;
+      transferCount: number;
+      destinationStationId: string | null;
+      candidates: {
+        stationId: string;
+        stationName: string;
+        walkDistanceKm: number;
+        walkDurationMinutes: number;
+        totalMinutes: number;
+        transferCount: number;
+        score: number;
+      }[];
+    }>(
+      `/walk/plan?latitude=${coordinates.latitude}&longitude=${coordinates.longitude}` +
+        `&destination=${encodeURIComponent(destination)}`,
+    ),
+
   walk: (coordinates: { latitude: number; longitude: number }) =>
     request<WalkRoute>(
       `/walk?latitude=${coordinates.latitude}&longitude=${coordinates.longitude}`,

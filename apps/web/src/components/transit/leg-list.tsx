@@ -29,14 +29,15 @@ import { ModeIcon } from "./mode-icon.js";
 export function LegList({
   legs,
   dense = false,
-  onLegHover,
   onLegSelect,
+  onStopHover,
   activeLegId,
 }: {
   legs: readonly ItineraryLeg[];
   dense?: boolean;
-  onLegHover?: ((legId: string | null) => void) | undefined;
   onLegSelect?: ((legId: string) => void) | undefined;
+  /** Pointing at a stop in the list points at that stop on the map. */
+  onStopHover?: ((stationId: string | null) => void) | undefined;
   activeLegId?: string | null | undefined;
 }) {
   if (legs.length === 0) {
@@ -56,8 +57,8 @@ export function LegList({
           last={index === legs.length - 1}
           legId={legIdOf(leg, index)}
           active={activeLegId === legIdOf(leg, index)}
-          onHover={onLegHover}
           onSelect={onLegSelect}
+          onStopHover={onStopHover}
         />
       ))}
     </ol>
@@ -74,15 +75,15 @@ function LegRow({
   last,
   legId,
   active,
-  onHover,
   onSelect,
+  onStopHover,
 }: {
   leg: ItineraryLeg;
   last: boolean;
   legId: string;
   active: boolean;
-  onHover?: ((legId: string | null) => void) | undefined;
   onSelect?: ((legId: string) => void) | undefined;
+  onStopHover?: ((stationId: string | null) => void) | undefined;
 }) {
   const isWalk = leg.kind === "walk";
   const color = isWalk
@@ -94,11 +95,8 @@ function LegRow({
     <li
       className={cn(
         "relative flex gap-3 px-4 py-3 transition-colors",
-        active ? "bg-surface-2" : "hover:bg-surface-2/60",
+        active ? "bg-surface-2" : "",
       )}
-      onMouseEnter={() => onHover?.(legId)}
-      onMouseLeave={() => onHover?.(null)}
-      onFocus={() => onHover?.(legId)}
       onClick={() => onSelect?.(legId)}
     >
       <div className="relative flex w-8 shrink-0 flex-col items-center">
@@ -163,7 +161,7 @@ function LegRow({
         </p>
 
         {leg.stops.length > 2 ? (
-          <details className="group mt-2" open={active}>
+          <details className="group mt-2">
             <summary className="inline-flex cursor-pointer list-none items-center gap-1 rounded text-[12px] text-ink-3 transition-colors hover:text-ink-2">
               <ChevronSmall />
               {leg.stops.length} halte · {formatDistance(leg.distanceKm)}
@@ -184,7 +182,9 @@ function LegRow({
                 return (
                   <li
                     key={`${stop.stationId}-${index}`}
-                    className="relative -ml-[5px] flex items-baseline gap-2 py-[3px] pl-3 text-[12px]"
+                    className="relative -ml-[5px] flex items-baseline gap-2 rounded-[4px] py-[3px] pl-3 text-[12px] transition-colors hover:bg-surface-2"
+                    onMouseEnter={() => onStopHover?.(stop.stationId)}
+                    onMouseLeave={() => onStopHover?.(null)}
                   >
                     <span
                       aria-hidden

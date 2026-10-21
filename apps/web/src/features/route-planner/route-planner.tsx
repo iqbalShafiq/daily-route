@@ -1,4 +1,4 @@
-import { ArrowRightLeft, Navigation, Route as RouteIcon } from "lucide-react";
+import { ArrowRightLeft, LocateFixed, Navigation, Route as RouteIcon } from "lucide-react";
 
 import { Button } from "../../components/ui/button.js";
 import { Card, CardHeader } from "../../components/ui/card.js";
@@ -41,9 +41,11 @@ export function RoutePlanner({
   activeIndex,
   onActiveIndexChange,
   activeLeg,
-  onLegHover,
   onLegSelect,
+  onStopHover,
   onWalkReady,
+  onUseMyPosition,
+  walk,
 }: {
   origin: string;
   destination: string;
@@ -54,9 +56,14 @@ export function RoutePlanner({
   activeIndex: number;
   onActiveIndexChange: (index: number) => void;
   activeLeg?: string | null | undefined;
-  onLegHover?: ((legId: string | null) => void) | undefined;
   onLegSelect?: ((legId: string) => void) | undefined;
+  /** Pointing at a stop in the list points at that stop on the map. */
+  onStopHover?: ((stationId: string | null) => void) | undefined;
   onWalkReady?: ((walk: WalkRoute) => void) | undefined;
+  /** Ask the browser where the reader is, and plan from there. */
+  onUseMyPosition?: (() => void) | undefined;
+  /** The walk from the reader's place to the stop, when it is known. */
+  walk?: WalkRoute | null | undefined;
 }) {
   const data: PlanResult | undefined = plan.data;
   const itineraries = data?.itineraries ?? [];
@@ -74,13 +81,7 @@ export function RoutePlanner({
 
         {onWalkReady ? (
           <div className="px-4 pb-3">
-            <WalkPanel
-              onWalk={(walk) => {
-                // The walk leads to the stop the journey starts from.
-                onOriginChange(walk.stationName);
-                onWalkReady(walk);
-              }}
-            />
+            <WalkPanel walk={walk ?? null} />
           </div>
         ) : null}
 
@@ -97,6 +98,17 @@ export function RoutePlanner({
             onValueChange={onOriginChange}
             placeholder="Stasiun, halte, atau landmark"
             icon={<Navigation aria-hidden className="size-4" />}
+            trailingAction={
+              <button
+                type="button"
+                aria-label="Gunakan posisi saya"
+                title="Gunakan posisi saya"
+                onClick={onUseMyPosition}
+                className="flex size-7 cursor-pointer items-center justify-center rounded-md text-ink-3 transition-colors hover:bg-surface-2 hover:text-ink"
+              >
+                <LocateFixed aria-hidden className="size-4" />
+              </button>
+            }
           />
 
           <div className="flex items-center gap-3">
@@ -213,8 +225,8 @@ export function RoutePlanner({
                 <LegList
                   legs={current.legs}
                   activeLegId={activeLeg}
-                  onLegHover={onLegHover}
                   onLegSelect={onLegSelect}
+                  onStopHover={onStopHover}
                 />
               </div>
               <p className="border-t border-line px-4 py-2 text-[11px] text-ink-3">

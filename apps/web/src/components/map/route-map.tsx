@@ -30,6 +30,8 @@ export type MapLeg = {
   color: string;
   /** The width of the line, in pixels. The width carries the mode too. */
   width?: number;
+  /** The station this marker stands for. */
+  stationId?: string;
   /** Whether the reader is pointing at this leg of the journey. */
   highlighted?: boolean;
   /** What the segment is: a ride, or the walk between two vehicles. */
@@ -52,11 +54,15 @@ export type MapMarker = {
   kind: "origin" | "destination" | "stop" | "transfer";
   /** The order of the point in the journey. */
   order?: number | undefined;
+  /** The station the point stands for, so the map can point back at it. */
+  stationId?: string | undefined;
 };
 
 export type RouteMapProps = {
   legs: MapLeg[];
   markers: MapMarker[];
+  /** The stop the reader is pointing at in the list. */
+  highlightedStationId?: string | null | undefined;
   theme: "light" | "dark";
   className?: string;
   /** Called when a marker is clicked, so the interface can show its detail. */
@@ -72,7 +78,14 @@ const SOURCE_ID = "routes";
 const MARKER_SOURCE_ID = "markers";
 const MARKER_HIT_LAYER = "marker-hit";
 
-export function RouteMap({ legs, markers, theme, className, onMarkerClick }: RouteMapProps) {
+export function RouteMap({
+  legs,
+  markers,
+  theme,
+  className,
+  onMarkerClick,
+  highlightedStationId,
+}: RouteMapProps) {
   const containerRef = useRef<HTMLDivElement | null>(null);
   const mapRef = useRef<MapLibreMap | null>(null);
   const onMarkerClickRef = useRef(onMarkerClick);
@@ -242,6 +255,28 @@ export function RouteMap({ legs, markers, theme, className, onMarkerClick }: Rou
     syncMarkers(map, markers);
   }, [markers]);
 
+  /*
+   * The stop the reader is pointing at grows on the map, so the list
+   * and the map point at the same place.
+   */
+  useEffect(() => {
+    const map = mapRef.current;
+    if (!map || !map.getLayer(MARKER_SOURCE_ID)) return;
+    const station = highlightedStationId ?? "";
+    map.setPaintProperty(MARKER_SOURCE_ID, "circle-radius", [
+      "case",
+      ["==", ["get", "stationId"], station],
+      ["match", ["get", "kind"], "origin", 5, "destination", 6.5, "transfer", 4.5, 2.5],
+      6,
+    ]);
+    map.setPaintProperty(MARKER_SOURCE_ID, "circle-stroke-width", [
+      "case",
+      ["==", ["get", "stationId"], station],
+      ["match", ["get", "kind"], "transfer", 2.5, 1.5],
+      3,
+    ]);
+  }, [highlightedStationId, markers]);
+
   return (
     <div
       ref={containerRef}
@@ -392,15 +427,10 @@ function addMarkerLayers(map: MapLibreMap): void {
     source: MARKER_SOURCE_ID,
     paint: {
       "circle-radius": [
-        "match",
-        ["get", "kind"],
-        "origin",
-        5,
-        "destination",
-        6.5,
-        "transfer",
-        4.5,
-        2.5,
+        "case",
+        ["==", ["get", "stationId"], ""],
+        ["match", ["get", "kind"], "origin", 5, "destination", 6.5, "transfer", 4.5, 2.5],
+        6,
       ],
       "circle-color": [
         "match",
@@ -562,6 +592,7 @@ function syncMarkers(map: MapLibreMap, markers: readonly MapMarker[]): void {
         kind: marker.kind,
         label: marker.label,
         detail: marker.detail ?? "",
+        stationId: marker.stationId ?? "",
         order: marker.order ?? 0,
         orderText: marker.order === undefined ? "" : String(marker.order),
       },

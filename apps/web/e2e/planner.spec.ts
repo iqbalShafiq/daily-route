@@ -159,7 +159,7 @@ test.describe("walking from the reader's place", () => {
   test("finds the stop to walk to and the way there", async ({ page }) => {
     await page.goto("/");
 
-    await page.getByRole("button", { name: /Gunakan posisi saya/ }).click();
+    await page.getByRole("button", { name: "Gunakan posisi saya" }).click();
 
     // The walk names the stop, the distance and the streets on the way.
     await expect(page.getByText(/Berjalan .* ke /).first()).toBeVisible({ timeout: 30_000 });

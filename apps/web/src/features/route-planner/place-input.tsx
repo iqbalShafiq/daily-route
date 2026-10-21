@@ -48,6 +48,7 @@ export function PlaceInput({
   icon,
   invalid,
   autoFocus,
+  trailingAction,
 }: {
   label: string;
   value: string;
@@ -57,6 +58,8 @@ export function PlaceInput({
   icon?: React.ReactNode | undefined;
   invalid?: boolean | undefined;
   autoFocus?: boolean | undefined;
+  /** A control at the end of the field, such as "use my position". */
+  trailingAction?: React.ReactNode | undefined;
 }) {
   const [open, setOpen] = useState(false);
   // -1 means the list is open but nothing is selected yet.
@@ -176,7 +179,24 @@ export function PlaceInput({
 
   const trailing = useMemo(
     () =>
-      value.length > 0 ? (
+      trailingAction ? (
+        <span className="flex items-center gap-1">
+          {trailingAction}
+          {value.length > 0 ? (
+            <button
+              type="button"
+              aria-label="Bersihkan"
+              onClick={() => {
+                onValueChange("");
+                setOpen(false);
+              }}
+              className="flex size-6 cursor-pointer items-center justify-center rounded-md text-ink-3 transition-colors hover:bg-surface-2 hover:text-ink"
+            >
+              <X aria-hidden className="size-3.5" />
+            </button>
+          ) : null}
+        </span>
+      ) : value.length > 0 ? (
         <button
           type="button"
           aria-label="Bersihkan"
@@ -191,7 +211,7 @@ export function PlaceInput({
       ) : loading ? (
         <Loader2 aria-hidden className="size-3.5 animate-spin text-ink-3" />
       ) : null,
-    [value, onValueChange, loading],
+    [value, onValueChange, loading, trailingAction],
   );
 
   return (

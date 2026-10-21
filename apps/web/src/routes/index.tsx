@@ -6,6 +6,7 @@ import { legIdOf } from "../components/transit/leg-list.js";
 import { ChatPanel } from "../features/chat/chat-panel.js";
 import { RoutePlanner } from "../features/route-planner/route-planner.js";
 import { usePlan } from "../features/route-planner/use-plan.js";
+import { api } from "../lib/api.js";
 import type { WalkRoute } from "../lib/api.js";
 import { Tab, Tabs } from "../components/ui/tabs.js";
 import { cn } from "../lib/cn.js";
@@ -46,6 +47,8 @@ export function PlannerPage() {
    * lights it up in the list.
    */
   const [activeLeg, setActiveLeg] = useState<string | null>(null);
+  /** The stop the reader is pointing at in the list. */
+  const [hoveredStation, setHoveredStation] = useState<string | null>(null);
 
   const { legs: mapLegs, markers } = useMemo(() => {
     const data = plan.data;
@@ -138,6 +141,7 @@ export function PlannerPage() {
         if (alreadyMarked) continue;
         markers.push({
           id: `${stop.stationId}-${index}`,
+          stationId: stop.stationId,
           latitude: stop.latitude,
           longitude: stop.longitude,
           label: stop.name,
@@ -204,8 +208,30 @@ export function PlannerPage() {
               activeIndex={activeIndex}
               onActiveIndexChange={setActiveIndex}
               activeLeg={activeLeg}
-              onLegHover={setActiveLeg}
               onLegSelect={setActiveLeg}
+              onStopHover={setHoveredStation}
+              walk={walk}
+              onUseMyPosition={async () => {
+                if (typeof navigator === "undefined" || !navigator.geolocation) return;
+                const position = await new Promise<GeolocationPosition | null>((resolve) => {
+                  navigator.geolocation.getCurrentPosition(resolve, () => resolve(null), {
+                    enableHighAccuracy: true,
+                    timeout: 15_000,
+                  });
+                });
+                if (!position) return;
+                const result = await api.planFromPosition(
+                  { latitude: position.coords.latitude, longitude: position.coords.longitude },
+                  destination.trim(),
+                );
+                setWalk(result.walk);
+                setOrigin(result.walk.stationName);
+                setActiveIndex(0);
+                setSubmitted({
+                  origin: result.walk.stationName,
+                  destination: destination.trim(),
+                });
+              }}
               onWalkReady={(next) => {
                 setWalk(next);
                 setOrigin(next.stationName);
@@ -224,6 +250,7 @@ export function PlannerPage() {
           legs={mapLegs}
           markers={markers}
           theme={theme}
+          highlightedStationId={hoveredStation}
           onMarkerClick={(marker) => {
             // A point on the map points at a leg of the journey.
             const primary = plan.data?.itineraries[activeIndex] ?? plan.data?.itineraries[0];

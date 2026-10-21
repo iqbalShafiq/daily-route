@@ -13,6 +13,9 @@
 import { Router } from "express";
 
 import { findStationsNear } from "@daily-route/db";
+import { planRoutes } from "@daily-route/transit";
+
+import type { ApiDeps } from "../deps.js";
 
 export type WalkStep = {
   /** What the reader has to do, in words. */
@@ -142,7 +145,7 @@ function instructionOf(step: {
  * The stop is the one the rider can board from; the walk to it is the
  * first part of the journey.
  */
-export function createWalkRouter(deps: { db: Parameters<typeof findStationsNear>[0] }): Router {
+export function createWalkRouter(deps: ApiDeps): Router {
   const router = Router();
 
   router.get("/", async (request, response) => {
@@ -253,6 +256,121 @@ export function createWalkRouter(deps: { db: Parameters<typeof findStationsNear>
       geometry: walk.geometry,
     };
     response.json(route);
+  });
+
+  /*
+   * The best journey from where the reader is.
+   *
+   * The nearest stop is not always the right one. A stop a little
+   * further away may serve the line that goes straight to the
+   * destination, while the nearest one may only lead the rider the long
+   * way round. Every stop worth considering is therefore tried, the
+   * whole journey is measured, and the best one wins.
+   */
+  router.get("/plan", async (request, response) => {
+    const latitude = Number(request.query["latitude"]);
+    const longitude = Number(request.query["longitude"]);
+    const destination = typeof request.query["destination"] === "string"
+      ? request.query["destination"]
+      : "";
+
+    if (!Number.isFinite(latitude) || !Number.isFinite(longitude)) {
+      response.status(400).json({ error: "Koordinat tidak lengkap" });
+      return;
+    }
+
+    const nearby = await findStationsNear(deps.db, { latitude, longitude }, {
+      radiusKm: 1.2,
+      limit: 8,
+    });
+    if (nearby.length === 0) {
+      response.status(404).json({ error: "Tidak ada halte dalam radius 1,2 km" });
+      return;
+    }
+
+    // A stop that serves more lines is worth a little more walking.
+    const candidates = nearby
+      .map((candidate) => ({
+        candidate,
+        score: candidate.distanceKm - (candidate.isInterchange ? 0.1 : 0),
+      }))
+      .sort((a, b) => a.score - b.score)
+      .slice(0, 4);
+
+    const { network } = await deps.cache.get();
+    const destinationCandidates = destination
+      ? await deps.resolver.resolve(destination, { limit: 3 })
+      : [];
+    const destinationStation = destinationCandidates[0];
+
+    const evaluated = [];
+    for (const entry of candidates) {
+      const walk = await fetchWalkingRoute(
+        { latitude, longitude },
+        { latitude: entry.candidate.latitude, longitude: entry.candidate.longitude },
+      );
+      if (!walk) continue;
+
+      const itineraries = destinationStation
+        ? planRoutes(network, entry.candidate.id, destinationStation.stationId, {
+            maxAlternatives: 1,
+          })
+        : [];
+      const itinerary = itineraries[0];
+
+      // The journey is judged as a whole: the walk, the waiting and the
+      // ride together. A change of vehicle is worth more than a minute
+      // of walking, but not more than a good quarter of an hour.
+      const totalMinutes = (itinerary?.durationMinutes ?? 0) + walk.durationMinutes;
+      const transferCount = itinerary?.transferCount ?? 0;
+      evaluated.push({
+        stationId: entry.candidate.id,
+        stationName: entry.candidate.name,
+        walkDistanceKm: walk.distanceKm,
+        walkDurationMinutes: walk.durationMinutes,
+        totalMinutes,
+        transferCount,
+        score: Math.round(totalMinutes + transferCount * 3),
+        walk,
+        itinerary: itinerary ?? null,
+      });
+    }
+
+    if (evaluated.length === 0) {
+      response.status(503).json({ error: "Rute jalan kaki belum bisa dihitung" });
+      return;
+    }
+
+    evaluated.sort((a, b) => a.score - b.score);
+    const best = evaluated[0];
+    if (!best) {
+      response.status(503).json({ error: "Rute jalan kaki belum bisa dihitung" });
+      return;
+    }
+
+    response.json({
+      walk: {
+        stationId: best.stationId,
+        stationName: best.stationName,
+        stationLatitude: best.walk.geometry[best.walk.geometry.length - 1]?.latitude ?? null,
+        distanceKm: best.walkDistanceKm,
+        durationMinutes: best.walkDurationMinutes,
+        steps: best.walk.steps,
+        geometry: best.walk.geometry,
+      },
+      totalMinutes: best.totalMinutes,
+      transferCount: best.transferCount,
+      candidates: evaluated.map((entry) => ({
+        stationId: entry.stationId,
+        stationName: entry.stationName,
+        walkDistanceKm: entry.walkDistanceKm,
+        walkDurationMinutes: entry.walkDurationMinutes,
+        totalMinutes: entry.totalMinutes,
+        transferCount: entry.transferCount,
+        score: entry.score,
+      })),
+      destinationStationId: destinationStation?.stationId ?? null,
+    });
   });
 
   return router;

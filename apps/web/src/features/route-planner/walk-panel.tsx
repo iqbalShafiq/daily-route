@@ -1,7 +1,7 @@
-import { LocateFixed, Navigation } from "lucide-react";
+import { LocateFixed } from "lucide-react";
 import { useState } from "react";
 
-import { api, ApiError, type WalkRoute } from "../../lib/api.js";
+import type { WalkRoute } from "../../lib/api.js";
 import { cn } from "../../lib/cn.js";
 import { formatDistance } from "../../lib/format.js";
 
@@ -14,53 +14,14 @@ import { formatDistance } from "../../lib/format.js";
  * place, and shows the street names along the way.
  */
 export function WalkPanel({
-  onWalk,
+  walk,
   className,
 }: {
-  onWalk: (walk: WalkRoute) => void;
+  /** The walk the server worked out, when there is one. */
+  walk: WalkRoute | null;
   className?: string;
 }) {
-  const [state, setState] = useState<"idle" | "asking" | "failed">("idle");
-  const [message, setMessage] = useState<string | null>(null);
-  const [walk, setWalk] = useState<WalkRoute | null>(null);
-
-  const locate = async () => {
-    if (typeof navigator === "undefined" || !navigator.geolocation) {
-      setState("failed");
-      setMessage("Perangkat ini tidak dapat menentukan lokasi.");
-      return;
-    }
-    setState("asking");
-    setMessage(null);
-
-    const position = await new Promise<GeolocationPosition | null>((resolve) => {
-      navigator.geolocation.getCurrentPosition(resolve, () => resolve(null), {
-        enableHighAccuracy: true,
-        timeout: 15_000,
-        maximumAge: 30_000,
-      });
-    });
-    if (!position) {
-      setState("failed");
-      setMessage("Lokasi tidak bisa dibaca. Izinkan akses lokasi lalu coba lagi.");
-      return;
-    }
-
-    try {
-      const route = await api.walk({
-        latitude: position.coords.latitude,
-        longitude: position.coords.longitude,
-      });
-      setWalk(route);
-      setState("idle");
-      onWalk(route);
-    } catch (error) {
-      setState("failed");
-      setMessage(
-        error instanceof ApiError ? error.message : "Rute jalan kaki belum bisa dihitung.",
-      );
-    }
-  };
+  const [message] = useState<string | null>(null);
 
   return (
     <div className={cn("rounded-card border border-line bg-surface-2/60 px-3 py-2.5", className)}>
@@ -71,18 +32,14 @@ export function WalkPanel({
             ? `Berjalan ${formatDistance(walk.distanceKm)} ke ${walk.stationName}`
             : "Mulai dari tempat Anda berada?"}
         </p>
-        <button
-          type="button"
-          onClick={locate}
-          disabled={state === "asking"}
-          className="inline-flex cursor-pointer items-center gap-1.5 rounded-md border border-line bg-surface px-2.5 py-1 text-[12px] font-medium text-ink transition-colors hover:bg-surface-3 disabled:cursor-not-allowed disabled:opacity-60"
-        >
-          <Navigation aria-hidden className="size-3.5" />
-          {state === "asking" ? "Mencari…" : walk ? "Ulangi" : "Gunakan posisi saya"}
-        </button>
       </div>
 
       {message ? <p className="mt-1.5 text-[12px] text-danger">{message}</p> : null}
+      {!walk && !message ? (
+        <p className="mt-1.5 text-[12px] text-ink-3">
+          Tekan ikon lokasi di kolom &quot;Dari&quot; untuk mulai dari tempat Anda berada.
+        </p>
+      ) : null}
 
       {walk ? (
         <ol className="mt-2 space-y-1 border-t border-line pt-2">
