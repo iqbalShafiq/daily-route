@@ -166,6 +166,8 @@ export type PlanResult = {
   itineraries: Itinerary[];
   alternatives: Itinerary[];
   disruptions: DisruptionSummary[];
+  /** When the answer was computed, as an ISO timestamp. */
+  computedAt: string;
 };
 
 export type StationDetail = {

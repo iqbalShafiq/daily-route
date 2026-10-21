@@ -1,0 +1,5132 @@
+{
+  "source": "https://smk.transjakarta.co.id/aset/berkas/rute/",
+  "retrievedAt": "2026-10-21",
+  "corridors": [
+    {
+      "code": "B14",
+      "name": "Summarecon Bekasi - Kuningan",
+      "service": "royaltrans",
+      "corridorType": "Royaltrans",
+      "operator": "PT Transportasi Jakarta (Transjakarta)",
+      "status": "operating",
+      "serviceHours": "WD only (weekday), D 06.00-09.00 Summarecon Bekasi, D 16.00-19.00 Kuningan",
+      "officialMapUrl": "https://smk.transjakarta.co.id/aset/berkas/rute/B14-20260720.jpeg",
+      "updatedAt": "2026-06-26",
+      "stations": [
+        {
+          "name": "Summarecon Bekasi",
+          "code": null,
+          "transfers": [],
+          "terminal": true
+        },
+        {
+          "name": "Bandar Djakarta Bekasi",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "RS Mitra Keluarga 2",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Kayuringin 2",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Mall Metropolitan",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Tegal Parang 2",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Bulog",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Kuningan Timur 1",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Patra Kuningan 1",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Patra kuningan 2",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Kuningan 1",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Epicentrum Selatan",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Perpustakaan Jakarta | Nyi Ageng Serang",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "GOR Sumantri 1",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Karet Kuningan 1",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Tugu Insurance",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Pusat Edukasi Anti Korupsi KPK",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Setiabudi Integritas 1",
+          "code": null,
+          "transfers": [],
+          "terminal": true
+        }
+      ],
+      "reverseStops": [
+        {
+          "name": "Summarecon Bekasi",
+          "code": null,
+          "transfers": [],
+          "terminal": true
+        },
+        {
+          "name": "RS Mitra Keluarga 1",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Kuningan Timur 2",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Menara Karya",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Kemenkes 2",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "BNI Syariah",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Kedubes Malaysia",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "GOR Sumantri 2",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Karet Kuningan 2",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Kuningan Madya 2",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Menara Duta",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Setiabudi Integritas 1",
+          "code": null,
+          "transfers": [],
+          "terminal": true
+        }
+      ]
+    },
+    {
+      "code": "B25",
+      "name": "Bekasi - Dukuh Atas",
+      "service": "transjabodetabek",
+      "corridorType": "Transjabodetabek",
+      "operator": "PT Transportasi Jakarta (Transjakarta) + contracted operators",
+      "status": "operating",
+      "serviceHours": "WD+WE, D 05.00-22.00 both directions",
+      "officialMapUrl": "https://smk.transjakarta.co.id/aset/berkas/rute/B25-20260819.jpeg",
+      "updatedAt": "2026-08-17",
+      "notes": "Map header says 'Bekasi - Dukuh Atas' but the last stop printed on the map is 'Galungung' (a terminal shared with corridors 4 and 6). No 'Dukuh Atas' stop is printed.",
+      "stations": [
+        {
+          "name": "Terminal Bekasi",
+          "code": null,
+          "transfers": [],
+          "terminal": true
+        },
+        {
+          "name": "Sbr. GOR Betos Cut Mutia",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Melati Cut Mutia",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Sbr. Unisma",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Cut Mutia 3",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Sbr. Cut Mutia 5",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Cut Mutia 4",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Simpang Rw. Panjang Ahmad Yani",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Sbr. Simpang",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Pekayon Ahmad Yani",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Mega Mall Bekasi",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Jln. Lele Kayuringin",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Rumah Sakit Kayuringin Kalimalang",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Jln. Satria Raya",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Ruko Jakasampurna",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Grand Kota Bintang",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Flyover Jatinegara",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Stasiun Jatinegara",
+          "code": null,
+          "transfers": [
+            "KCI"
+          ]
+        },
+        {
+          "name": "Jatinegara",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Kampung Melayu",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Matraman Baru",
+          "code": null,
+          "transfers": [
+            "5",
+            "5C",
+            "7U"
+          ]
+        },
+        {
+          "name": "Timur St. Manggarai",
+          "code": null,
+          "transfers": [
+            "4B",
+            "6M"
+          ]
+        },
+        {
+          "name": "Plaza St. Manggarai",
+          "code": null,
+          "transfers": [
+            "4B",
+            "6M"
+          ]
+        },
+        {
+          "name": "Manggarai Temporer 1",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Pasar Rumput",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Halimun",
+          "code": null,
+          "transfers": [
+            "4",
+            "4D",
+            "6M"
+          ]
+        },
+        {
+          "name": "Galungung",
+          "code": null,
+          "transfers": [
+            "4",
+            "6"
+          ],
+          "terminal": true
+        }
+      ],
+      "reverseStops": [
+        {
+          "name": "Terminal Bekasi",
+          "code": null,
+          "transfers": [],
+          "terminal": true
+        },
+        {
+          "name": "GOR Betos Cut Mutia",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Rawa Baru Cut Mutia",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Unisma",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Sbr. Cut Mutia 3",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Cut Mutia 5",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Cut Mutia 6",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Pekayon Ahmad Yani",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Simpang Pekayon Ahmad Yani",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Bekasi Barat",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Mall Metropolitan",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Jln. Villa Utama",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Halte Grand",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Jln. Chandrabaga",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Jembatan Chandrabaga",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Jln. Borobudur Malabar",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Pedati Prumpung",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Stasiun Jatinegara",
+          "code": null,
+          "transfers": [
+            "KCI"
+          ]
+        },
+        {
+          "name": "Jatinegara",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Kampung Melayu",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Matraman Baru",
+          "code": null,
+          "transfers": [
+            "5",
+            "5C",
+            "7U"
+          ]
+        },
+        {
+          "name": "Timur St. Manggarai",
+          "code": null,
+          "transfers": [
+            "4B",
+            "6M"
+          ]
+        },
+        {
+          "name": "Plaza St. Manggarai",
+          "code": null,
+          "transfers": [
+            "4B",
+            "6M"
+          ]
+        },
+        {
+          "name": "Manggarai Temporer 2",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Pasar Rumput",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Halimun",
+          "code": null,
+          "transfers": [
+            "4",
+            "4D",
+            "6M"
+          ]
+        },
+        {
+          "name": "Galungung",
+          "code": null,
+          "transfers": [
+            "4",
+            "6"
+          ],
+          "terminal": true
+        }
+      ]
+    },
+    {
+      "code": "B51",
+      "name": "Cikarang - Cawang",
+      "service": "transjabodetabek",
+      "corridorType": "Transjabodetabek",
+      "operator": "PT Transportasi Jakarta (Transjakarta) + contracted operators",
+      "status": "operating",
+      "serviceHours": "WD+WE, D 05.00-22.00 both directions",
+      "officialMapUrl": "https://smk.transjakarta.co.id/aset/berkas/rute/B51-20260608.jpeg",
+      "updatedAt": "2026-06-02",
+      "stations": [
+        {
+          "name": "Hollywood Junction",
+          "code": null,
+          "transfers": [],
+          "terminal": true
+        },
+        {
+          "name": "Kasuari",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Living Plaza Cikarang",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Jln. Industri Raya 1",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Cafe Walk",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Cawang Sentral 2",
+          "code": null,
+          "transfers": [],
+          "note": "Penaikan"
+        }
+      ],
+      "reverseStops": [
+        {
+          "name": "Hollywood Junction",
+          "code": null,
+          "transfers": [],
+          "terminal": true
+        },
+        {
+          "name": "Kedasih",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Boulevard Arcade",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Jln. Industri Raya 2",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Cafe Walk",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Pool Taksi Cawang",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Cawang Sentral 1",
+          "code": null,
+          "transfers": [],
+          "note": "Penurunan"
+        }
+      ]
+    },
+    {
+      "code": "BW2",
+      "name": "Monas Explorer",
+      "service": "wisata",
+      "corridorType": "Wisata",
+      "operator": "PT Transportasi Jakarta (Transjakarta)",
+      "status": "operating",
+      "serviceHours": "WD+WE, D 10.00-17.00 both directions",
+      "officialMapUrl": "https://smk.transjakarta.co.id/aset/berkas/rute/BW2-20250430.jpg",
+      "updatedAt": "2024-12-18",
+      "notes": "Loop route: the map closes back onto IRTI, so the stops are listed once.",
+      "stations": [
+        {
+          "name": "IRTI",
+          "code": null,
+          "transfers": [
+            "1P",
+            "1T",
+            "BW1",
+            "BW4"
+          ],
+          "terminal": true
+        },
+        {
+          "name": "Monas 3",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Monas 2",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Monas 1",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Juanda Istiqlal",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Gambir 2",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Tugu Tani 2",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "DPRD DKI Jakarta",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Perpustakaan Nasional",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Balai Kota 1",
+          "code": null,
+          "transfers": []
+        }
+      ]
+    },
+    {
+      "code": "D31",
+      "name": "Cinere - Kuningan",
+      "service": "royaltrans",
+      "corridorType": "Royaltrans",
+      "operator": "PT Transportasi Jakarta (Transjakarta)",
+      "status": "operating",
+      "serviceHours": "WD only (weekday), AM 05.55-07.55 Cinere, PM 16.00-18.25 Kuningan",
+      "officialMapUrl": "https://smk.transjakarta.co.id/aset/berkas/rute/D31-20261012.jpeg",
+      "updatedAt": "2026-06-26",
+      "notes": "Royaltrans map: the blue diamond marks 'Penaikan' (boarding) and the green circle marks 'Penurunan' (alighting). Those markers are not corridor transfers.",
+      "stations": [
+        {
+          "name": "South City Cinere",
+          "code": null,
+          "transfers": [],
+          "terminal": true
+        },
+        {
+          "name": "Gerbang South City Cinere",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "SPBU Limo Cinere",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Polsek Cinere",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Sbr. Bukit Cinere Indah",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Jln. H. Jaeran Cinere",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "SDN Cinere 01 02",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Jln. Cinere Raya 2",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Jln. Bumi Daya Raya",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Sbr. Bumi Pusaka Cinere",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Sbr. Grand Lovina Residence",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Kantor Lurah Gandul",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Gerbang Tol Brigif",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Patra Kuningan 1",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Patra Kuningan 2",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Kuningan 1",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Epicentrum Selatan",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "GOR Sumantri 1",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Karet Kuningan 1",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Tugu Insurance",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Pusat Edukasi Anti Korupsi KPK",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Setiabudi Integritas 1",
+          "code": null,
+          "transfers": [],
+          "terminal": true
+        }
+      ],
+      "reverseStops": [
+        {
+          "name": "South City Cinere",
+          "code": null,
+          "transfers": [],
+          "terminal": true
+        },
+        {
+          "name": "Honda",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Mega Cinere",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Gerbang Tol Brigif",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Menara Karya",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Kemenkes 1",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Kemenkes 2",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "BNI Syariah",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Kedubes Malaysia",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "GOR Sumantri 2",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Karet Kuningan 2",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Kuningan Madya 2",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Menara Duta",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Setiabudi Integritas 1",
+          "code": null,
+          "transfers": [],
+          "terminal": true
+        }
+      ]
+    },
+    {
+      "code": "D32",
+      "name": "Cinere - Bundaran Senayan",
+      "service": "royaltrans",
+      "corridorType": "Royaltrans",
+      "operator": "PT Transportasi Jakarta (Transjakarta)",
+      "status": "operating",
+      "serviceHours": "WD only (weekday), AM 06.15-06.50 Cinere, PM 17.15-18.00 Bundaran senayan",
+      "officialMapUrl": "https://smk.transjakarta.co.id/aset/berkas/rute/D32-20260618.jpg",
+      "updatedAt": "2026-06-17",
+      "stations": [
+        {
+          "name": "South City Cinere",
+          "code": null,
+          "transfers": [],
+          "terminal": true
+        },
+        {
+          "name": "Sbr. Bukit Cinere Indah",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Kantor Lurah Gandul",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Gerbang Tol Brigif",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "GBK Pintu 7",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Gelora Bung Karno 2",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Bundaran Senayan 2",
+          "code": null,
+          "transfers": [],
+          "terminal": true
+        }
+      ],
+      "reverseStops": [
+        {
+          "name": "South City Cinere",
+          "code": null,
+          "transfers": [],
+          "terminal": true
+        },
+        {
+          "name": "Honda",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Mega Cinere",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Gerbang Tol Brigif",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Bundaran Senayan 2",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "FX Sudirman",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Gelora Bung Karno 2",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "GBK Pintu 7",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Polda Metro Jaya 1",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Menara Mandiri",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Gelora Bung Karno 1",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Summitmas",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Bundaran Senayan 2",
+          "code": null,
+          "transfers": [],
+          "terminal": true
+        }
+      ]
+    },
+    {
+      "code": "D41",
+      "name": "Sawangan - Lebak Bulus via Tol Desari",
+      "service": "transjabodetabek",
+      "corridorType": "Transjabodetabek",
+      "operator": "PT Transportasi Jakarta (Transjakarta) + contracted operators",
+      "status": "operating",
+      "serviceHours": "WD+WE, D 05.00-22.00 both directions",
+      "officialMapUrl": "https://smk.transjakarta.co.id/aset/berkas/rute/D41-20251208.jpg",
+      "updatedAt": "2025-12-05",
+      "stations": [
+        {
+          "name": "Term. Sawangan",
+          "code": null,
+          "transfers": [],
+          "terminal": true
+        },
+        {
+          "name": "Simpang Parung Bingung 2",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Jln. Tiang Dua Sawangan",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Exit Tol Desari 2",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Cilandak Town Square",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Fatmawati 2",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Gereja St. Stefanus",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Prasetya Mulya",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Beverly Tower",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Gelanggang TB Simatupang",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "RA Kartini",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Pondok Pinang",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Selapa Polri",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Lebak Bulus",
+          "code": null,
+          "transfers": [
+            "6H",
+            "8"
+          ],
+          "terminal": true
+        }
+      ],
+      "reverseStops": [
+        {
+          "name": "Term. Sawangan",
+          "code": null,
+          "transfers": [],
+          "terminal": true
+        },
+        {
+          "name": "Simpang Parung Bingung 1",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Gg. H. Sara Sawangan",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Exit Tol Desari 1",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "St. MRT Fatmawati",
+          "code": null,
+          "transfers": [
+            "MRT Jakarta"
+          ]
+        },
+        {
+          "name": "Gg. Ampera BMW Astra",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Jln. Kaimun Jaya",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "RS Siloam",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Poins Square",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Lebak Bulus 1",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Lebak Bulus",
+          "code": null,
+          "transfers": [
+            "6H",
+            "8"
+          ],
+          "terminal": true
+        }
+      ]
+    },
+    {
+      "code": "P11",
+      "name": "Blok M - Bogor",
+      "service": "transjabodetabek",
+      "corridorType": "Transjabodetabek",
+      "operator": "PT Transportasi Jakarta (Transjakarta) + contracted operators",
+      "status": "operating",
+      "serviceHours": "WD+WE, D 05.00-22.00 both directions",
+      "officialMapUrl": "https://smk.transjakarta.co.id/aset/berkas/rute/P11-20260714.jpeg",
+      "updatedAt": "2026-07-13",
+      "stations": [
+        {
+          "name": "Blok M Jalur 4",
+          "code": null,
+          "transfers": [
+            "1",
+            "1C",
+            "1E",
+            "1K",
+            "1M",
+            "1P",
+            "1Q",
+            "1W",
+            "6U",
+            "6N",
+            "6M",
+            "6W",
+            "7B",
+            "7Q",
+            "8E",
+            "8D",
+            "B13",
+            "P11",
+            "S61",
+            "T31",
+            "SH2",
+            "JAK.31"
+          ],
+          "terminal": true
+        },
+        {
+          "name": "Kejaksaan Agung",
+          "code": null,
+          "transfers": [
+            "LRT Jakarta"
+          ]
+        },
+        {
+          "name": "Pasar Santa",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Rawa Barat",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Tegal Mampang",
+          "code": null,
+          "transfers": [
+            "4K",
+            "5N",
+            "7B",
+            "13",
+            "13B",
+            "13E",
+            "L13E"
+          ]
+        },
+        {
+          "name": "Pancoran",
+          "code": null,
+          "transfers": [
+            "4K",
+            "9",
+            "9A",
+            "9C"
+          ]
+        },
+        {
+          "name": "Pancoran Tugu",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Cibubur Junction",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Pintu Tol Citeureup 1",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Simpang Sentul",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Sentul",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Mall Bellanova Sentul",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Sentul City",
+          "code": null,
+          "transfers": [],
+          "note": "Hanya dilintasi pada Sabtu, Minggu dan Hari Libur Nasional"
+        },
+        {
+          "name": "Botani Square",
+          "code": null,
+          "transfers": [],
+          "terminal": true
+        }
+      ],
+      "reverseStops": [
+        {
+          "name": "Blok M Jalur 4",
+          "code": null,
+          "transfers": [
+            "1",
+            "1C",
+            "1E",
+            "1K",
+            "1M",
+            "1P",
+            "1Q",
+            "1W",
+            "6U",
+            "6N",
+            "6M",
+            "6W",
+            "7B",
+            "7Q",
+            "8E",
+            "8D",
+            "B13",
+            "P11",
+            "S61",
+            "T31",
+            "SH2",
+            "JAK.31"
+          ],
+          "terminal": true
+        },
+        {
+          "name": "Kejaksaan Agung",
+          "code": null,
+          "transfers": [
+            "LRT Jakarta"
+          ]
+        },
+        {
+          "name": "Pasar Santa",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Rawa Barat",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Tegal Mampang",
+          "code": null,
+          "transfers": [
+            "4K",
+            "5N",
+            "7B",
+            "13",
+            "13B",
+            "13E",
+            "L13E"
+          ]
+        },
+        {
+          "name": "Pancoran",
+          "code": null,
+          "transfers": [
+            "4K",
+            "9",
+            "9A",
+            "9C"
+          ]
+        },
+        {
+          "name": "Pancoran Tugu",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Buperta Cibubur",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Pintu Tol Citeureup 2",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Monumen Pancakarsa",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Sentul City",
+          "code": null,
+          "transfers": [],
+          "note": "Hanya dilintasi pada Sabtu, Minggu dan Hari Libur Nasional"
+        },
+        {
+          "name": "Mall Bellanova Sentul",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Botani Square",
+          "code": null,
+          "transfers": [],
+          "terminal": true
+        }
+      ]
+    },
+    {
+      "code": "S31",
+      "name": "Bintaro Exchange - St. MRT Fatmawati",
+      "service": "royaltrans",
+      "corridorType": "Royaltrans",
+      "operator": "PT Transportasi Jakarta (Transjakarta)",
+      "status": "operating",
+      "serviceHours": "WD only (weekday), AM 07.25-08.15 Bintaro, PM 16.35-19.30 Fatmawati",
+      "officialMapUrl": "https://smk.transjakarta.co.id/aset/berkas/rute/S31-20260618.jpg",
+      "updatedAt": "2026-06-17",
+      "notes": "The official corridor list calls this corridor 'BINTARO - FATMAWATI'; the map header says 'Bintaro Exchange - St. MRT Fatmawati'. The right-hand column of the map carries no intermediate stops.",
+      "stations": [
+        {
+          "name": "Bintaro Exchange",
+          "code": null,
+          "transfers": [],
+          "terminal": true
+        },
+        {
+          "name": "RS Siloam",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "St. MRT Fatmawati",
+          "code": null,
+          "transfers": [
+            "MRT Jakarta"
+          ],
+          "terminal": true
+        }
+      ],
+      "reverseStops": [
+        {
+          "name": "Bintaro Exchange",
+          "code": null,
+          "transfers": [],
+          "terminal": true
+        },
+        {
+          "name": "St. MRT Fatmawati",
+          "code": null,
+          "transfers": [
+            "MRT Jakarta"
+          ],
+          "terminal": true
+        }
+      ]
+    },
+    {
+      "code": "S61",
+      "name": "Alam Sutera - Blok M",
+      "service": "transjabodetabek",
+      "corridorType": "Transjabodetabek",
+      "operator": "PT Transportasi Jakarta (Transjakarta) + contracted operators",
+      "status": "operating",
+      "serviceHours": "WD+WE, D 05.00-22.00 both directions",
+      "officialMapUrl": "https://smk.transjakarta.co.id/aset/berkas/rute/S61-20260714.jpeg",
+      "updatedAt": "2026-07-13",
+      "stations": [
+        {
+          "name": "Flavor Bliss",
+          "code": null,
+          "transfers": [],
+          "terminal": true
+        },
+        {
+          "name": "Sutera Utama",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Sports Center",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Onyx",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Prominence",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Escala 2",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Escala 1",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Renata",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Rest Area Km 13 Jakarta Merak",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Tol Kb. Jeruk 1",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Kota Bambu",
+          "code": null,
+          "transfers": [
+            "3F",
+            "9",
+            "9A",
+            "9E",
+            "10H"
+          ]
+        },
+        {
+          "name": "Kemanggisan",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Petamburan",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Gerbang Pemuda",
+          "code": null,
+          "transfers": [
+            "1B",
+            "1W",
+            "9",
+            "9A",
+            "10H",
+            "T31"
+          ]
+        },
+        {
+          "name": "Senayan Bank Jakarta",
+          "code": null,
+          "transfers": [
+            "1",
+            "1F",
+            "3F",
+            "9C",
+            "10H",
+            "T31"
+          ]
+        },
+        {
+          "name": "Bundaran Senayan",
+          "code": null,
+          "transfers": [
+            "1",
+            "1F",
+            "6M",
+            "10H"
+          ]
+        },
+        {
+          "name": "Masjid Agung",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Kejaksa Agung",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "ASEAN",
+          "code": null,
+          "transfers": [
+            "Terminal Bus"
+          ]
+        },
+        {
+          "name": "Blok M Jalur 4",
+          "code": null,
+          "transfers": [
+            "1",
+            "1C",
+            "1E",
+            "1K",
+            "1M",
+            "1P",
+            "1Q",
+            "1W",
+            "6U",
+            "6N",
+            "6M",
+            "6W",
+            "7B",
+            "7Q",
+            "8E",
+            "8D",
+            "B13",
+            "P11",
+            "S61",
+            "T31",
+            "SH2",
+            "JAK.31"
+          ],
+          "terminal": true
+        }
+      ],
+      "reverseStops": [
+        {
+          "name": "Flavor Bliss",
+          "code": null,
+          "transfers": [],
+          "terminal": true
+        },
+        {
+          "name": "Olivia",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Mall",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "IKEA",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Rest Area Km 13 Merak Jakarta",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Tol Kb.Jeruk 2",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Kota Bambu",
+          "code": null,
+          "transfers": [
+            "3F",
+            "9",
+            "9A",
+            "9E",
+            "10H"
+          ]
+        },
+        {
+          "name": "Kemanggisan",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Petamburan",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Gerbang Pemuda",
+          "code": null,
+          "transfers": [
+            "1B",
+            "1W",
+            "9",
+            "9A",
+            "10H",
+            "T31"
+          ]
+        },
+        {
+          "name": "Senayan Bank Jakarta",
+          "code": null,
+          "transfers": [
+            "1",
+            "1F",
+            "3F",
+            "9C",
+            "10H",
+            "T31"
+          ]
+        },
+        {
+          "name": "Bundaran Senayan",
+          "code": null,
+          "transfers": [
+            "1",
+            "1F",
+            "6M",
+            "10H"
+          ]
+        },
+        {
+          "name": "Masjid Agung",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Kejaksa Agung",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "ASEAN",
+          "code": null,
+          "transfers": [
+            "Terminal Bus"
+          ]
+        },
+        {
+          "name": "Blok M Jalur 4",
+          "code": null,
+          "transfers": [
+            "1",
+            "1C",
+            "1E",
+            "1K",
+            "1M",
+            "1P",
+            "1Q",
+            "1W",
+            "6U",
+            "6N",
+            "6M",
+            "6W",
+            "7B",
+            "7Q",
+            "8E",
+            "8D",
+            "B13",
+            "P11",
+            "S61",
+            "T31",
+            "SH2",
+            "JAK.31"
+          ],
+          "terminal": true
+        }
+      ]
+    },
+    {
+      "code": "SH2",
+      "name": "Blok M - Bandara Soekarno-Hatta",
+      "service": "transjabodetabek",
+      "corridorType": "Transjabodetabek",
+      "operator": "PT Transportasi Jakarta (Transjakarta) + contracted operators",
+      "status": "operating",
+      "serviceHours": "WD+WE, D 05.00-22.00 both directions",
+      "officialMapUrl": "https://smk.transjakarta.co.id/aset/berkas/rute/SH2-20260714.jpeg",
+      "updatedAt": "2026-06-22",
+      "stations": [
+        {
+          "name": "Blok M Jalur 6",
+          "code": null,
+          "transfers": [
+            "1",
+            "1C",
+            "1E",
+            "1K",
+            "1M",
+            "1P",
+            "1Q",
+            "1W",
+            "6U",
+            "6N",
+            "6M",
+            "6W",
+            "7B",
+            "7Q",
+            "8E",
+            "8D",
+            "B13",
+            "P11",
+            "S61",
+            "T31",
+            "SH2",
+            "JAK.31"
+          ],
+          "terminal": true
+        },
+        {
+          "name": "Bundaran Senayan 1",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Summitmas",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Gelora Bung Karno 1",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Sbr. DPR MPR 1",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Perpustakaan Riset BPK",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Slipi Petamburan 2",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Swadaya Slipi",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Sekolah Ibu Pertiwi",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Bundaran Cargo",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Imigrasi SHIA",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Stasiun KA Bandara",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Perkantoran Soekarno-Hatta",
+          "code": null,
+          "transfers": [],
+          "terminal": true
+        }
+      ],
+      "reverseStops": [
+        {
+          "name": "Blok M Jalur 6",
+          "code": null,
+          "transfers": [
+            "1",
+            "1C",
+            "1E",
+            "1K",
+            "1M",
+            "1P",
+            "1Q",
+            "1W",
+            "6U",
+            "6N",
+            "6M",
+            "6W",
+            "7B",
+            "7Q",
+            "8E",
+            "8D",
+            "B13",
+            "P11",
+            "S61",
+            "T31",
+            "SH2",
+            "JAK.31"
+          ],
+          "terminal": true
+        },
+        {
+          "name": "Bundaran Senayan 2",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "FX Sudirman",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Gelora Bung Karno 2",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "DPR MPR 1",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Slipi Petamburan 3",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Sbr. Sowan Wisata Belanja",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Jln. Cengkareng Golf Club 1",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Soewarna Foodhall 1",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Jln. Cengkareng Golf Club 3",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Terminal Kargo 1",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Terminal Kargo 2",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Perkantoran Soekarno-Hatta",
+          "code": null,
+          "transfers": [],
+          "terminal": true
+        }
+      ]
+    },
+    {
+      "code": "T11",
+      "name": "Poris Plawad - Petamburan",
+      "service": "transjabodetabek",
+      "corridorType": "Transjabodetabek",
+      "operator": "PT Transportasi Jakarta (Transjakarta) + contracted operators",
+      "status": "operating",
+      "serviceHours": "WD+WE, D 05.00-22.00 Poris, 22.30 Petamburan",
+      "officialMapUrl": "https://smk.transjakarta.co.id/aset/berkas/rute/T11-20241107.jpg",
+      "updatedAt": "2024-11-04",
+      "stations": [
+        {
+          "name": "Term. Poris Plawad",
+          "code": null,
+          "transfers": [],
+          "terminal": true
+        },
+        {
+          "name": "Jln. Supriyadi",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "St. Tanah Tinggi 2",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Mall Bale Kota",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "SDN Sukasari Enam 2",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Tangerang City 2",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Rukan Teuku Umar",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Victoria Park 2",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Jln. Industri 2",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Masjid Baiturrahman 2",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Komplek Pemda 2",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Hotel Olive 2",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Jln. Palembang Baru",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Palem Semi 2",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Plaza Europa",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Islamic",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Rest Area Km 13 Jakarta Merak",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Tol Kb.Jeruk 1",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "RS Harapan Kita 1",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Slipi Kemanggisan 1",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Akses Bawah Flyover Slipi",
+          "code": null,
+          "transfers": [],
+          "terminal": true
+        }
+      ],
+      "reverseStops": [
+        {
+          "name": "Term. Poris Plawad",
+          "code": null,
+          "transfers": [],
+          "terminal": true
+        },
+        {
+          "name": "Taman Royal",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Benteng Betawi",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Pengayoman",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "St. Tanah Tinggi 1",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Kehakiman",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Kb. Kangkung",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "SDN Sukasari Enam 1",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Tangerang City Mall 1",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Jln. Baru 1",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Victoria Park 1",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Jln. Industri 1",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Masjid Baiturrahman 1",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Komplek Pemda 1",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Hotel Olive 1",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Palem Semi 1",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Pinangsia",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Cyberpark Karawaci",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Rest Area Km 13 Merak Jakarta",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Tol Kb.Jeruk 2",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "RS Harapan Kita 2",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Slipi Kemanggisan 2",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Akses Bawah Flyover Slipi",
+          "code": null,
+          "transfers": [],
+          "terminal": true
+        }
+      ]
+    },
+    {
+      "code": "T12",
+      "name": "Poris Plawad - Juanda",
+      "service": "transjabodetabek",
+      "corridorType": "Transjabodetabek",
+      "operator": "PT Transportasi Jakarta (Transjakarta) + contracted operators",
+      "status": "operating",
+      "serviceHours": "WD+WE, D 05.00-21.00 Poris, 22.00 Juanda",
+      "officialMapUrl": "https://smk.transjakarta.co.id/aset/berkas/rute/T12-20241107.jpg",
+      "updatedAt": "2024-11-04",
+      "stations": [
+        {
+          "name": "Term. Poris Plawad",
+          "code": null,
+          "transfers": [],
+          "terminal": true
+        },
+        {
+          "name": "Jln. Supriyadi",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "St. Tanah Tinggi 2",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Mall Bale Kota",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "SDN Sukasari Enam 2",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Tangerang City 2",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "SDN Cikokol",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Transmart MH Thamrin 2",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Jln. Kb. Nanas 2",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Rest Area Km 13 Jakarta Merak",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Tol Kb.Jeruk 1",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Tomang Raya 2",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "RSUD Tarakan 3",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Simpang Dinkes",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Petojo 1",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Sbr. Duta Merlin",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Pecenongan 2",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Juanda Istiqlal",
+          "code": null,
+          "transfers": [],
+          "terminal": true
+        }
+      ],
+      "reverseStops": [
+        {
+          "name": "Term. Poris Plawad",
+          "code": null,
+          "transfers": [],
+          "terminal": true
+        },
+        {
+          "name": "Taman Royal",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Benteng Betawi",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Pengayoman",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "St. Tanah Tinggi 1",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Kehakiman",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Kb. Kangkung",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "SDN Sukasari Enam 1",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Tangerang City Mall 1",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Kota Ayodhya",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Transmart MH Thamrin 1",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Jln. Kb. Nanas 1",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Rest Area Km 13 Jakarta Merak",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Tol Kb.Jeruk 2",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Tomang Mandala 1",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "RSUD Tarakan 2",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Petojo 2",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "KPPU",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "SD Santa Maria Gambir",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Pecenongan 1",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Pintu Air Juanda",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Juanda Istiqlal",
+          "code": null,
+          "transfers": [],
+          "terminal": true
+        }
+      ]
+    },
+    {
+      "code": "T31",
+      "name": "PIK 2 - Blok M",
+      "service": "transjabodetabek",
+      "corridorType": "Transjabodetabek",
+      "operator": "PT Transportasi Jakarta (Transjakarta) + contracted operators",
+      "status": "operating",
+      "serviceHours": "WD+WE, D 05.00-22.00 both directions",
+      "officialMapUrl": "https://smk.transjakarta.co.id/aset/berkas/rute/T31-20260714.jpeg",
+      "updatedAt": "2026-07-13",
+      "stations": [
+        {
+          "name": "PIK 2",
+          "code": null,
+          "transfers": [],
+          "terminal": true
+        },
+        {
+          "name": "Tokyo Riverside Selatan",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Spring Ville",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Thamrin CBD",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Pantai Pasir Putih",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Simpang Empat 2",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Food Street",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Gold Coast",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Buddha Tzu Chi",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Kemanggisan",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Petamburan",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Gerbang Pemuda",
+          "code": null,
+          "transfers": [
+            "1B",
+            "3F",
+            "9",
+            "9A",
+            "9E",
+            "10H",
+            "S61"
+          ]
+        },
+        {
+          "name": "Senayan Bank Jakarta",
+          "code": null,
+          "transfers": [
+            "1",
+            "1F",
+            "3F",
+            "6V",
+            "9C",
+            "10H",
+            "S61"
+          ]
+        },
+        {
+          "name": "Masjid Agung",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Kejaksaan Agung",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "ASEAN",
+          "code": null,
+          "transfers": [
+            "1",
+            "6M",
+            "6V",
+            "S61",
+            "Terminal Bus"
+          ]
+        },
+        {
+          "name": "Blok M Jalur 4",
+          "code": null,
+          "transfers": [
+            "1",
+            "1C",
+            "1E",
+            "1K",
+            "1M",
+            "1P",
+            "1Q",
+            "1W",
+            "6U",
+            "6N",
+            "6M",
+            "6W",
+            "7B",
+            "7Q",
+            "8E",
+            "8D",
+            "B13",
+            "P11",
+            "S61",
+            "T31",
+            "SH2",
+            "JAK.31"
+          ],
+          "terminal": true
+        }
+      ],
+      "reverseStops": [
+        {
+          "name": "PIK 2",
+          "code": null,
+          "transfers": [],
+          "terminal": true
+        },
+        {
+          "name": "Mega Kuningan PIK 2",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "NICE",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "San Antonio",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Sedayu Watertown",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Menara Syariah",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Aloha",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Pantai Pasir Putih 1",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Marketing Gallery",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Simpang Empat 1",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Pantai Maju",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Fresh Market PIK",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "PIK Avenue",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Kemanggisan",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Petamburan",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Gerbang Pemuda",
+          "code": null,
+          "transfers": [
+            "1B",
+            "3F",
+            "9",
+            "9A",
+            "9E",
+            "10H",
+            "S61"
+          ]
+        },
+        {
+          "name": "Senayan Bank Jakarta",
+          "code": null,
+          "transfers": [
+            "1",
+            "1F",
+            "3F",
+            "6V",
+            "9C",
+            "10H",
+            "S61"
+          ]
+        },
+        {
+          "name": "Masjid Agung",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Kejaksaan Agung",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "ASEAN",
+          "code": null,
+          "transfers": [
+            "1",
+            "6M",
+            "6V",
+            "S61",
+            "Terminal Bus"
+          ]
+        },
+        {
+          "name": "Blok M Jalur 4",
+          "code": null,
+          "transfers": [
+            "1",
+            "1C",
+            "1E",
+            "1K",
+            "1M",
+            "1P",
+            "1Q",
+            "1W",
+            "6U",
+            "6N",
+            "6M",
+            "6W",
+            "7B",
+            "7Q",
+            "8E",
+            "8D",
+            "B13",
+            "P11",
+            "S61",
+            "T31",
+            "SH2",
+            "JAK.31"
+          ],
+          "terminal": true
+        }
+      ]
+    },
+    {
+      "code": "10B",
+      "name": "Rusun Cipinang Besar Selatan - Halim",
+      "service": "rumah-susun",
+      "corridorType": "Rumah Susun",
+      "operator": "PT Transportasi Jakarta + contracted operators",
+      "status": "operating",
+      "serviceHours": "WD+WE, D 05.00-21.00 both directions",
+      "officialMapUrl": "https://smk.transjakarta.co.id/aset/berkas/rute/10B-20260826.jpeg",
+      "updatedAt": "2026-08-24",
+      "notes": "The official corridor list calls this corridor 'RUSUN CIPINANG BESAR SELATAN - PENAS KALIMALANG'; the map header says 'Rusun Cipinang Besar Selatan - Halim' while the last stop printed on the map is 'Penas Kalimalang 2'.",
+      "stations": [
+        {
+          "name": "Rusun Cipinang Besar Selatan",
+          "code": null,
+          "transfers": [],
+          "terminal": true
+        },
+        {
+          "name": "TPU Kb. Nanas 1",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "STMT Trisakti 1",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Cipinang Kb. Nanas 2",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "SPBU Jln. DI Panjaitan",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Penas Kalimalang 2",
+          "code": null,
+          "transfers": [],
+          "terminal": true
+        }
+      ],
+      "reverseStops": [
+        {
+          "name": "Rusun Cipinang Besar Selatan",
+          "code": null,
+          "transfers": [],
+          "terminal": true
+        },
+        {
+          "name": "TPU Kb. Nanas 2",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "STMT Trisakti 2",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Penas Kalimalang 2",
+          "code": null,
+          "transfers": [],
+          "terminal": true
+        }
+      ]
+    },
+    {
+      "code": "11B",
+      "name": "Rusun Ujung Menteng - Penggilingan",
+      "service": "rumah-susun",
+      "corridorType": "Rumah Susun",
+      "operator": "PT Transportasi Jakarta + contracted operators",
+      "status": "operating",
+      "serviceHours": "WD+WE, D 05.00-21.00 both directions",
+      "officialMapUrl": "https://smk.transjakarta.co.id/aset/berkas/rute/11B-20260221.jpeg",
+      "updatedAt": "2026-02-15",
+      "stations": [
+        {
+          "name": "Rusunawa Ujung Menteng",
+          "code": null,
+          "transfers": [],
+          "terminal": true
+        },
+        {
+          "name": "Jln. Satria",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Masjid As Saadah Raya Bekasi",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Halte Metland Menteng",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Ps. Ujung Menteng",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Sbr. Jln. Angkasa 1",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Rusun Rawa Bebek 1",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "TK Nurul Ihsan Raya Pulo Gebang",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Yayasan Nurul Ihsan Pulo Gebang",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Kel. Pulo Gebang",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Raya Pulo Gebang Akses St. Cakung",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Kodim 0505 1",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Walikota Jakarta timur 1",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Jln. Dr. Sumarno",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Pengadilan Negeri Jakim 1",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Penggilingan 1",
+          "code": null,
+          "transfers": [],
+          "terminal": true
+        }
+      ],
+      "reverseStops": [
+        {
+          "name": "Rusunawa Ujung Menteng",
+          "code": null,
+          "transfers": [],
+          "terminal": true
+        },
+        {
+          "name": "Raya Bekasi I",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Kota Harapan Indah 1",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Kota Harapan Indah 2",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Raya Bekasi II",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Rusun Rawa Bebek II",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Sbr. TK Nurul Ihsan Raya Pulo Gebang",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Gg. Asrama Palad",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Stasiun Cakung 1",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "SMPN 172",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Universitas Gunadarma",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Kodim 0505 2",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Walikota Jakarta Timur 2",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Pengadilan Negeri Jakim 2",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Penggilingan 2",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "St. Klender Baru 1",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Penggilingan 1",
+          "code": null,
+          "transfers": [],
+          "terminal": true
+        }
+      ]
+    },
+    {
+      "code": "11C",
+      "name": "Rusun Pulo Gebang - Penggilingan",
+      "service": "rumah-susun",
+      "corridorType": "Rumah Susun",
+      "operator": "PT Transportasi Jakarta + contracted operators",
+      "status": "operating",
+      "serviceHours": "WD+WE, D 05.00-21.00 both directions",
+      "officialMapUrl": "https://smk.transjakarta.co.id/aset/berkas/rute/11C-20260720.jpeg",
+      "updatedAt": "2026-06-30",
+      "stations": [
+        {
+          "name": "Rusun Pulo Gebang",
+          "code": null,
+          "transfers": [],
+          "terminal": true
+        },
+        {
+          "name": "SDN Pulogebang 02",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Simpang Tiga Pulo Gebang Raya 2",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Kodim 0505 1",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Wali Kota Jakarta Timur 1",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Pengadilan Negeri Jakim 1",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Penggilingan 1",
+          "code": null,
+          "transfers": [],
+          "terminal": true
+        }
+      ],
+      "reverseStops": [
+        {
+          "name": "Rusun Pulo Gebang",
+          "code": null,
+          "transfers": [],
+          "terminal": true
+        },
+        {
+          "name": "Sbr. SDN Pulogebang 02",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Simpang Tiga Pulo Gebang Raya",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Raya Pulo Gebang Akses St. Cakung",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "SMPN 172",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Universitas Gunadarma",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Kodim 0505 2",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Wali Kota Jakarta Timur 2",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Pengadilan Negeri Jaktim 2",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Penggilingan 2",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "St. Klender Baru 1",
+          "code": null,
+          "transfers": [
+            "Terminal Bus"
+          ]
+        },
+        {
+          "name": "Penggilingan 1",
+          "code": null,
+          "transfers": [],
+          "terminal": true
+        }
+      ]
+    },
+    {
+      "code": "11M",
+      "name": "Rusun Rawa Bebek - Bukit Duri",
+      "service": "rumah-susun",
+      "corridorType": "Rumah Susun",
+      "operator": "PT Transportasi Jakarta + contracted operators",
+      "status": "operating",
+      "serviceHours": "WD+WE, D 05.00-21.00 both directions",
+      "officialMapUrl": "https://smk.transjakarta.co.id/aset/berkas/rute/11M-20260723.jpeg",
+      "updatedAt": "2026-07-21",
+      "stations": [
+        {
+          "name": "Rusun Rawa Bebek",
+          "code": null,
+          "transfers": [],
+          "terminal": true
+        },
+        {
+          "name": "Simpang Banjir Kanal Timur",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Gg. H. Rahman Pulo Gebang",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Simpang Tiga Pulo Gebang Raya 2",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Wali Kota Jakarta Timur",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Penggilingan",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Flyover Pondok Kopi",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "SimpangBuaran",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Buaran",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Kampung Sumur",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Klender",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Stasiun Klender",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Cipinang",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Flyover Cipinang",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Pasar Enjo",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Flyover Jatinegara",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Stasiun Jatinegara",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "SMPN 14",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Bukit Duri",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Santa Maria",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "RS Hermina",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Rusun Jatinegara Barat",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Kampung Melayu Kecil",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Masjid Attahiriyah",
+          "code": null,
+          "transfers": [],
+          "terminal": true
+        }
+      ],
+      "reverseStops": [
+        {
+          "name": "Rusun Rawa Bebek",
+          "code": null,
+          "transfers": [],
+          "terminal": true
+        },
+        {
+          "name": "Sbr. TK Nurul Ihsan Raya Pulo Gebang",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Gg. Asrama Palad",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Stasiun Cakung 1",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "SMPN 172",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Universitas Gunadarma",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Wali Kota Jakarta Timur",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Penggilingan",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Flyover Pondok Kopi",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Buaran",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Kampung Sumur",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Klender",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Stasiun Klender",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Cipinang",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Flyover Cipinang",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Pasar Enjo",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Flyover Jatinegara",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Stasiun Jatinegara",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Masjid Al Hidayah",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Masjid As Sudairi",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Masjid Attahiriyah",
+          "code": null,
+          "transfers": [],
+          "terminal": true
+        }
+      ]
+    },
+    {
+      "code": "11P",
+      "name": "Rusun Pondok Bambu - Wali kota Jakarta Timur",
+      "service": "rumah-susun",
+      "corridorType": "Rumah Susun",
+      "operator": "PT Transportasi Jakarta + contracted operators",
+      "status": "operating",
+      "serviceHours": "WD+WE, D 05.00-21.00 both directions",
+      "officialMapUrl": "https://smk.transjakarta.co.id/aset/berkas/rute/11P-20240709.jpg",
+      "updatedAt": "2024-07-04",
+      "notes": "The official corridor list writes 'RUSUN PONDOK BAMBU-WALIKOTA JAKARTA TIMUR'; the map header writes 'Rusun Pondok Bambu - Wali kota Jakarta Timur' and the last stop printed on the map is 'Walikota Jakarta Timur 1'.",
+      "stations": [
+        {
+          "name": "Rusun Pondok Bambu",
+          "code": null,
+          "transfers": [],
+          "terminal": true
+        },
+        {
+          "name": "Jln. Teluk Mandar 2",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Gereja Santa Anna 2",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "RS Duren Sawit 2",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Sbr. SMPN 195",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Masjid Jami Al Barkah 2",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Jln. Kel. Raya",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Sbr. Swadaya Raya",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Masjid Jami Nurul Ain 2",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Taman Ut Aheme",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Gedung Senam",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Kasi Dikdas 2",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Budhaya Santo Agustinus",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "SMKN 48",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Carrefour Buaran",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Flyover Radin Inten 1",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Jln. I Gusti Ngurah Rai 2",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Rusun Klender",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Perumnas Klender 1",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Sbr. Sekolah PGRI Penggilingan",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Penggilingan 2",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Pengadilan Negeri Jakim 2",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Walikota Jakarta Timur 2",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Kodim 0505 2",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Kodim 0505 1",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Walikota Jakarta Timur 1",
+          "code": null,
+          "transfers": [],
+          "terminal": true
+        }
+      ],
+      "reverseStops": [
+        {
+          "name": "Rusun Pondok Bambu",
+          "code": null,
+          "transfers": [],
+          "terminal": true
+        },
+        {
+          "name": "Jln. Teluk Mandar 1",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Gereja Santa Anna 1",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Duren Sawit",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Baladewa Residence",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Masjid Jami Al Barkah 1",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Jln. Serdang",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Jln. Swadaya Raya",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Masjid Jami Nurul Ain 1",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Jln. H. Aman",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Wisma Atlet Radin Inten",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Kasi Dikdas 1",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Dinas Kebersihan Duren Sawit",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Buaran Plaza",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Taman Buaran Indah",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Flyover Radin Inten 2",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Jln. I Gusti Ngurah Rai 1",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Kampung Jembatan Ngurah Rai",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Perumnas Klender 2",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Sekolah PGRI Penggilingan",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Penggilingan 1",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Pengadilan Negeri Jaktim 1",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Jln. Dr. Sumarno",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Walikota Jakarta Timur 1",
+          "code": null,
+          "transfers": [],
+          "terminal": true
+        }
+      ]
+    },
+    {
+      "code": "11R",
+      "name": "Rusun Cakung KM 2 - Penggilingan",
+      "service": "rumah-susun",
+      "corridorType": "Rumah Susun",
+      "operator": "PT Transportasi Jakarta + contracted operators",
+      "status": "operating",
+      "serviceHours": "WD+WE, D 05.00-21.00 both directions",
+      "officialMapUrl": "https://smk.transjakarta.co.id/aset/berkas/rute/11R-20260723.jpeg",
+      "updatedAt": "2026-07-21",
+      "notes": "The official corridor list writes 'RUSUN CAKUNG KM2 - PENGGILINGAN'; the map header writes 'Rusun Cakung KM 2 - Penggilingan' (with a space in KM 2).",
+      "stations": [
+        {
+          "name": "Rusun Cakung KM 2",
+          "code": null,
+          "transfers": [],
+          "terminal": true
+        },
+        {
+          "name": "Ps. Cakung 2",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Ps. Cakung 1",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Cakung United Tractors 1",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Cakung United Tractors 2",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Raya Penggilingan",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "United Tractors 1",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "United Tractors Belakang",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Kampung Padaengan 1",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Jagal 1",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Al Wathoniyah 1",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Suzuki",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Taman Elok 1",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Perum Tpi 1",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Gg. Aim 1",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Gg. Sawo 1",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Rusun PIK Penggilingan",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Pintu Masuk Pik 1",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "SMK Ristek Kikim",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Simpang Kampung Jembatan 1",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "At Thahiriah 1",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Simpang Tiga 1",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Penggilingan",
+          "code": null,
+          "transfers": [],
+          "terminal": true
+        }
+      ],
+      "reverseStops": [
+        {
+          "name": "Rusun Cakung KM 2",
+          "code": null,
+          "transfers": [],
+          "terminal": true
+        },
+        {
+          "name": "United Tractors 2",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Sbr.United Tractors Belakang",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Pool Taksi",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Kampung Padaengan 2",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Jagal 2",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Al Wathoniyah 2",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Taman Elok 2",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Perum Tpi 2",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Gg. Aim 2",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Gg. Sawo 2",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Rusun PIK Penggilingan",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Pintu Masuk Pik 2",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Sbr. SMK Ristek Kikim",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Simpang Kampung Jembatan 2",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "At Thahiriah 2",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Simpang Tiga 2",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Pengadilan Negeri Jakim 1",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Wali Kota Jakarta Timur",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Kodim 0505 1",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Kodim 0505 2",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Wali Kota Jakarta Timur",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Pengadilan Negeri Jaktim 2",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Penggilingan",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "St. Klender Baru 1",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Penggilingan",
+          "code": null,
+          "transfers": [],
+          "terminal": true
+        }
+      ]
+    },
+    {
+      "code": "12C",
+      "name": "Rusun Waduk Pluit - Rusun Penjaringan",
+      "service": "rumah-susun",
+      "corridorType": "Rumah Susun",
+      "operator": "PT Transportasi Jakarta + contracted operators",
+      "status": "operating",
+      "serviceHours": "WD+WE, D 05.00-22.00 both directions",
+      "officialMapUrl": "https://smk.transjakarta.co.id/aset/berkas/rute/12C-20260926.jpg",
+      "updatedAt": "2026-07-21",
+      "stations": [
+        {
+          "name": "Rusun Waduk Pluit",
+          "code": null,
+          "transfers": [],
+          "terminal": true
+        },
+        {
+          "name": "Sbr. Gg. Elektro",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Sbr. Gg. Marlina",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Gg. VIII Muara Baru",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "SDN Penjaringan 3",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Polsek Penjaringan",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Aston Pluit 1",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Penjaringan",
+          "code": null,
+          "transfers": [
+            "1A",
+            "5C",
+            "3D",
+            "9",
+            "12",
+            "12A"
+          ]
+        },
+        {
+          "name": "Rusun Penjaringan",
+          "code": null,
+          "transfers": [],
+          "terminal": true
+        }
+      ],
+      "reverseStops": [
+        {
+          "name": "Rusun Waduk Pluit",
+          "code": null,
+          "transfers": [],
+          "terminal": true
+        },
+        {
+          "name": "Gg. Elektro",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Gg. Marlina",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Sbr. Gg. VIII Muara Baru",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "SDN Penjaringan",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "RS Pluit",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Jln. Pluit Raya 2",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Penjaringan",
+          "code": null,
+          "transfers": [
+            "1A",
+            "3C",
+            "3D",
+            "9",
+            "12",
+            "12A"
+          ]
+        },
+        {
+          "name": "Rusun Penjaringan",
+          "code": null,
+          "transfers": [],
+          "terminal": true
+        }
+      ]
+    },
+    {
+      "code": "12F",
+      "name": "Rusun Marunda - Rusun Waduk Pluit",
+      "service": "rumah-susun",
+      "corridorType": "Rumah Susun",
+      "operator": "PT Transportasi Jakarta + contracted operators",
+      "status": "operating",
+      "serviceHours": "WD+WE, D 05.00-21.00 both directions",
+      "officialMapUrl": "https://smk.transjakarta.co.id/aset/berkas/rute/12F-20240620.jpg",
+      "updatedAt": "2024-06-15",
+      "notes": "The official corridor list writes 'RUSUN MARUNDA - RUSUN WADUK PLUIT'; the map header writes 'Rusun Marunda - Rusun Waduk Pluit'.",
+      "stations": [
+        {
+          "name": "Rusun Marunda",
+          "code": null,
+          "transfers": [],
+          "terminal": true
+        },
+        {
+          "name": "Rusun Marunda 2",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Rumah Sipitung",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "STIP",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Bidara 2",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Jl. Marunda Makmur I",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Simpang Akses Pitungan",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Simpang Ps. Bebek 2",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "KBN Marunda 1",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Sbr. Jln. Komplek Pelindo II",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Jln. Pedongkelan Raya",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Jln. Kebantenan V",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Gg. Nusantara 1",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Madya Kebantenan",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "SMAN 73",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Dopusbekbar TNI",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Tanah Merdeka 2",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Jln. Kalibaru Barat IV",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Bogasari",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Pertamina Marine III",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Pertamina Term. Priok",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Gubah Al Haddad",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Pos 9 Pelabuhan Jict",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Permai Koja 1",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Sbr. Gereja Santo Fransiskus",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Xaverius",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Kantor Camat Tj. Priok",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Plasa Telkom Jakut",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Kantor Wali kota Jakut 1",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "SPBU Gedong Panjang",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Simpang Paking 3",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Masjid Luar Batang",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Sbr. Gg. VIII Muara Baru",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Gg. Marlina",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Gg. Elektro",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Rusun Waduk Pluit",
+          "code": null,
+          "transfers": [],
+          "terminal": true
+        }
+      ],
+      "reverseStops": [
+        {
+          "name": "Rusun Marunda",
+          "code": null,
+          "transfers": [],
+          "terminal": true
+        },
+        {
+          "name": "Rusun Marunda 1",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Simpang Pitungan",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "STIP 2",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Bidara 1",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Jl. Marunda Makmur I",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Simpang STIP",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Simpang Ps. Bebek 1",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "KBN Marunda 2",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Jln. Komplek Pelindo II",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Sbr. Jln. Kebantenan V",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Sbr. Gg. Nusantara 1",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Kebantenan",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Jln. Angin Sejuk I",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Jln. Angin Mamiri",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Jln. Dewa Ruci",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Pure Dalam",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Jln. Kramat Jaya",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Jln. B Lagoa Terusan 2",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Jln. A Lagoa",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Jln. Cilencing Raya 1",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Simpang Lagoa Ciampea",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Pertamina Kilang Minyak",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Masjid Al Mukarromah Jampea",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "RSUD Koja",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Jln. Lorong 22",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Jln. Lorong 19",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Jln. Lorong 5",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Jln. Lorong 4",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Permai Koja 2",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Polres Jakut",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Tanah Pasir Gedong Panjang",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Simpang Pluit Raya",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "SDN Penjaringan",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Kel. Penjaringan",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "RS Pluit",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Polsek Penjaringan",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "SDN Penjaringan 3",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Gg. VIII Muara Baru",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Sbr. Gg. Marlina",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Sbr. Gg. Elektro",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Rusun Waduk Pluit",
+          "code": null,
+          "transfers": [],
+          "terminal": true
+        }
+      ]
+    },
+    {
+      "code": "2H",
+      "name": "Rusun Jati Rawasari - Senen",
+      "service": "rumah-susun",
+      "corridorType": "Rumah Susun",
+      "operator": "PT Transportasi Jakarta + contracted operators",
+      "status": "operating",
+      "serviceHours": "WD+WE, D 05.00-21.00 both directions",
+      "officialMapUrl": "https://smk.transjakarta.co.id/aset/berkas/rute/2H-20260720.jpeg",
+      "updatedAt": "2026-06-16",
+      "notes": "The official corridor list calls the second end 'SENEN'; the map's last stop is printed as 'RSPAD 1' (the Senen-area hospital).",
+      "stations": [
+        {
+          "name": "Rusun Jati Rawasari",
+          "code": null,
+          "transfers": [],
+          "terminal": true
+        },
+        {
+          "name": "Sbr. SDN Johar Baru 10",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Ps. Gembrong Cempaka Baru",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "SDN Cempaka Putih Barat 03",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Gg. Adjid",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Rawa Selatan 1",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Telkomsel Cempaka Putih",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Grand Cempaka Hotel",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Ps. Cempaka Putih 1",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Kompleks Pertokoan Cempaka Putih",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Rawa Selatan 2",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Galur 2",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Simpang Tanah Tinggi Timur",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Dittopad 2",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Dittopad",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "RSPAD 1",
+          "code": null,
+          "transfers": [],
+          "terminal": true
+        }
+      ],
+      "reverseStops": [
+        {
+          "name": "Rusun Jati Rawasari",
+          "code": null,
+          "transfers": [],
+          "terminal": true
+        },
+        {
+          "name": "SDN Johar Baru 10",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Sbr. Ps. Gembrong Cempaka Baru",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Sbr. SDN Cempaka Putih Barat 03",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Sbr. Gg. Adjid",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Jln. Galur Jaya",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Bengkel Jln. Letjen Suprapto",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Honda Letjen Suprapto",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "RSPAD 1",
+          "code": null,
+          "transfers": [],
+          "terminal": true
+        }
+      ]
+    },
+    {
+      "code": "3A",
+      "name": "Rusun Pesakih - Kalideres",
+      "service": "rumah-susun",
+      "corridorType": "Rumah Susun",
+      "operator": "PT Transportasi Jakarta + contracted operators",
+      "status": "operating",
+      "serviceHours": "WD+WE, D 05.00-22.00 both directions",
+      "officialMapUrl": "https://smk.transjakarta.co.id/aset/berkas/rute/3A-20251016.jpg",
+      "updatedAt": "2025-10-16",
+      "stations": [
+        {
+          "name": "Rusun Pesakih",
+          "code": null,
+          "transfers": [],
+          "terminal": true
+        },
+        {
+          "name": "Sbr. Rusun Daan Mogot",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Sbr. Masjid Raya KH Hasyim Asyari",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Jembatan Pesakih Semanan 2",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Pesakih 1",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Pertamina Kalideres Daan Mogot",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Jln. Madrasah Daan Mogot",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Kalideres 1",
+          "code": null,
+          "transfers": [],
+          "terminal": true
+        }
+      ],
+      "reverseStops": [
+        {
+          "name": "Rusun Pesakih",
+          "code": null,
+          "transfers": [],
+          "terminal": true
+        },
+        {
+          "name": "Rusun Daan Mogot",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Masjid Raya KH Hasyim Asyari",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Jembatan Pesakih Semanan",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Pesakih 2",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Pintu 2 Jembatan Semanan Raya",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Kalideres 1",
+          "code": null,
+          "transfers": [],
+          "terminal": true
+        }
+      ]
+    },
+    {
+      "code": "3B",
+      "name": "Rusun Flamboyan - Cengkareng",
+      "service": "rumah-susun",
+      "corridorType": "Rumah Susun",
+      "operator": "PT Transportasi Jakarta + contracted operators",
+      "status": "operating",
+      "serviceHours": "WD+WE, D 05.00-21.00 both directions",
+      "officialMapUrl": "https://smk.transjakarta.co.id/aset/berkas/rute/3B-20260826.jpeg",
+      "updatedAt": "2026-08-26",
+      "stations": [
+        {
+          "name": "Rusun Flamboyan",
+          "code": null,
+          "transfers": [],
+          "terminal": true
+        },
+        {
+          "name": "Perumahan KFT 1",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Taman Palem Lestari",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Jln. Rw. Bengkel",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Puskesmas Cengkareng",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "BSI Cengkareng",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Sekolah Al Huda 1",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Sbr. Ps. Cengkareng",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Ramayana Cengkareng",
+          "code": null,
+          "transfers": [],
+          "terminal": true
+        }
+      ],
+      "reverseStops": [
+        {
+          "name": "Rusun Flamboyan",
+          "code": null,
+          "transfers": [],
+          "terminal": true
+        },
+        {
+          "name": "SPBU Gg. Swadaya III",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Jln. Kencana Timur",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Jln. Kayu Besar Dalam",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "SMKS 1 Citra Adhi Pratama",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Golf Lake Residence",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Simpang Kapuk Cengkareng",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "RSUD Boulevard Raya",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Mall Taman Palem 2",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Mall Taman Palem 3",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Univ. Satyagama",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "SMKN 42",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Polsek Cengkareng 1",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "SDN Cengkareng Timur 05",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Puri Agung",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Ramayana Cengkareng",
+          "code": null,
+          "transfers": [],
+          "terminal": true
+        }
+      ]
+    },
+    {
+      "code": "3C",
+      "name": "Rusun Kapuk Muara - Rusun Tambora",
+      "service": "rumah-susun",
+      "corridorType": "Rumah Susun",
+      "operator": "PT Transportasi Jakarta + contracted operators",
+      "status": "operating",
+      "serviceHours": "WD+WE, D 05.00-21.00 both directions",
+      "officialMapUrl": "https://smk.transjakarta.co.id/aset/berkas/rute/3C-20260926.jpg",
+      "updatedAt": "2026-07-13",
+      "notes": "The official corridor list writes 'RUSUN KAPUK MUARA-RUSUN TAMBORA'; the map header writes 'Rusun Kapuk Muara - Rusun Tambora'.",
+      "stations": [
+        {
+          "name": "Rusun Kapuk Muara",
+          "code": null,
+          "transfers": [],
+          "terminal": true
+        },
+        {
+          "name": "Sbr. SDN Muara Kapuk 03",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Sbr. Jln. Kapuk Utara I",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Sbr. Jln. Swadaya 4 Kapuk",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Masjid Al Musyarofah Kapuk",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Jln. Kapuk Muara Raya",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Sbr. Jln. C. Teluk Gong",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Pasar Teluk Gong",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Duta Indah Square 1",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Polsek Teluk Intan",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Simpang Bidara Raya",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Simpang Terusan Bandengan",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Sbr. Simpang Jembatan Dua",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Jembatan Dua 2",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Jln. Pada Mulya IV",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Jln. Pada Mulya",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Jembatan Besi 1",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Kali Grogol Arah Utara",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Kali Grogol Arah Selatan",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Jembatan Besi",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Rusun Tambora",
+          "code": null,
+          "transfers": [],
+          "terminal": true
+        }
+      ],
+      "reverseStops": [
+        {
+          "name": "Rusun Kapuk Muara",
+          "code": null,
+          "transfers": [],
+          "terminal": true
+        },
+        {
+          "name": "SDN Kapuk Muara 03",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Jln. Kapuk Utara I",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Jln. Swadaya 4 Kapuk",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Sbr. Masjid Al Musyarofah Kapuk",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Sbr. Jln. Kapuk Muara Raya",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Jln. C. Teluk Gong",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Pasar Teluk Gong 1",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Sbr. Duta Indah Square 1",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Sbr. Polsek Teluk Intan",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Sbr. Simpang Bidara Raya",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Sbr. Simpang Terusan Bandengan",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Jln. Pluit Mas Selatan 1",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Penjaringan",
+          "code": null,
+          "transfers": [
+            "1A",
+            "3C",
+            "3D",
+            "9",
+            "12",
+            "12A",
+            "12C"
+          ]
+        },
+        {
+          "name": "Jembatan Tiga",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Jembatan Dua",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Rusun Tambora",
+          "code": null,
+          "transfers": [],
+          "terminal": true
+        }
+      ]
+    },
+    {
+      "code": "4E",
+      "name": "Rusun Jatinegara Kaum - Pulo Gadung",
+      "service": "rumah-susun",
+      "corridorType": "Rumah Susun",
+      "operator": "PT Transportasi Jakarta + contracted operators",
+      "status": "operating",
+      "serviceHours": "WD+WE, D 05.00-21.00 both directions",
+      "officialMapUrl": "https://smk.transjakarta.co.id/aset/berkas/rute/4E-20240709.jpg",
+      "updatedAt": "2024-07-04",
+      "stations": [
+        {
+          "name": "Rusun Jatinegara Kaum",
+          "code": null,
+          "transfers": [],
+          "terminal": true
+        },
+        {
+          "name": "Jln. Tubagus Baddarudin",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Jln. Pendidikan Jatinegara Kaum",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "St. Klender Muka",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Ps. Klender",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Flyover Ps. Klender 1",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Jln. Swadaya Pln",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Pool Hiba Utama 1",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Jatinegara Kaum Raya Bekasi",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Puskesmas Cakung",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "JIEP 1",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Pintu Kawasan 1",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Ps. Pulo Gadung 1",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Ananda Pulo Gadung",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Gg. Suzuki",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Term. Pulo Gadung",
+          "code": null,
+          "transfers": [],
+          "terminal": true
+        }
+      ],
+      "reverseStops": [
+        {
+          "name": "Rusun Jatinegara Kaum",
+          "code": null,
+          "transfers": [],
+          "terminal": true
+        },
+        {
+          "name": "Rusun Jatinegara Kaum Depan",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Masjid Jami Al Makmur Klender",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Flyover Ps. Klender 2",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Tanah Koja",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Jln. Arus Jati",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Pool Hiba Utama 2",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Transjakarta Pool Klender",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Pool Mayasari Bakti",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Pool PPD Kec. Pulo Gadung",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "SD Jatinegara Kaum",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Masjid Assuada",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Jiep 2",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Pintu Kawasan 2",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Ps. Pulo Gadung 2",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "PKB Pulo Gadung",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Pulo Gadung 4",
+          "code": null,
+          "transfers": []
+        },
+        {
+          "name": "Term. Pulo Gadung",
+          "code": null,
+          "transfers": [],
+          "terminal": true
+        }
+      ]
+    }
+  ]
+}

@@ -2,6 +2,7 @@ import { MessageSquare, Route as RouteIcon } from "lucide-react";
 import { useMemo, useState } from "react";
 
 import { RouteMap, type MapLeg, type MapMarker } from "../components/map/route-map.js";
+import { legIdOf } from "../components/transit/leg-list.js";
 import { ChatPanel } from "../features/chat/chat-panel.js";
 import { RoutePlanner } from "../features/route-planner/route-planner.js";
 import { usePlan } from "../features/route-planner/use-plan.js";
@@ -31,6 +32,15 @@ export function PlannerPage() {
     submitted !== null,
   );
 
+  /**
+   * The leg of the journey the reader is pointing at.
+   *
+   * The list and the map are one system: pointing at a leg in the list
+   * keeps that leg bright on the map, and pointing at a leg on the map
+   * lights it up in the list.
+   */
+  const [activeLeg, setActiveLeg] = useState<string | null>(null);
+
   const { legs: mapLegs, markers } = useMemo(() => {
     const data = plan.data;
     if (!data) return { legs: [] as MapLeg[], markers: [] as MapMarker[] };
@@ -43,7 +53,8 @@ export function PlannerPage() {
     for (const [index, leg] of (primary?.legs ?? []).entries()) {
       if (leg.geometry.length < 2) continue;
       legs.push({
-        id: `${leg.kind}-${index}`,
+        id: legIdOf(leg, index),
+        highlighted: activeLeg === legIdOf(leg, index),
         coordinates: leg.geometry,
         color:
           leg.kind === "walk"
@@ -132,7 +143,7 @@ export function PlannerPage() {
     }
 
     return { legs, markers };
-  }, [plan.data, activeIndex]);
+  }, [plan.data, activeIndex, activeLeg]);
 
   return (
     <div
@@ -169,6 +180,9 @@ export function PlannerPage() {
               plan={plan}
               activeIndex={activeIndex}
               onActiveIndexChange={setActiveIndex}
+              activeLeg={activeLeg}
+              onLegHover={setActiveLeg}
+              onLegSelect={setActiveLeg}
             />
           ) : (
             <ChatPanel />
@@ -177,7 +191,25 @@ export function PlannerPage() {
       </div>
 
       <div className="relative order-1 min-h-0 border-b border-line lg:order-2 lg:border-b-0">
-        <RouteMap legs={mapLegs} markers={markers} theme={theme} />
+        <RouteMap
+          legs={mapLegs}
+          markers={markers}
+          theme={theme}
+          onMarkerClick={(marker) => {
+            // A point on the map points at a leg of the journey.
+            const primary = plan.data?.itineraries[activeIndex] ?? plan.data?.itineraries[0];
+            const index = (primary?.legs ?? []).findIndex((leg) =>
+              leg.stops.some(
+                (stop) =>
+                  Math.abs(stop.latitude - marker.latitude) < 0.0004 &&
+                  Math.abs(stop.longitude - marker.longitude) < 0.0004,
+              ),
+            );
+            if (index >= 0 && primary?.legs[index]) {
+              setActiveLeg(legIdOf(primary.legs[index] as never, index));
+            }
+          }}
+        />
         <MapLegend legs={mapLegs} />
       </div>
     </div>
@@ -205,12 +237,12 @@ function MapLegend({ legs }: { legs: readonly MapLeg[] }) {
   if (entries.length === 0 && !hasTransfer) return null;
 
   return (
-    <div className="pointer-events-none absolute bottom-3 left-3 z-10 flex max-w-[min(220px,60%)] flex-col gap-1 rounded-xl border border-line bg-surface/90 px-2.5 py-2 text-[11px] text-ink-2 backdrop-blur">
+    <div className="pointer-events-none absolute inset-x-0 bottom-0 z-10 flex flex-wrap items-center gap-x-4 gap-y-1 border-t border-line bg-surface/85 px-4 py-2 text-[11px] text-ink-2 backdrop-blur">
       {entries.map((entry) => (
-        <span key={entry.color} className="flex items-center gap-2">
+        <span key={entry.color} className="flex min-w-0 items-center gap-2">
           <span
             aria-hidden
-            className="h-1 w-4 shrink-0 rounded-full"
+            className="h-[3px] w-5 shrink-0 rounded-full"
             style={{ backgroundColor: entry.color }}
           />
           <span className="truncate">{entry.label}</span>
@@ -223,7 +255,7 @@ function MapLegend({ legs }: { legs: readonly MapLeg[] }) {
             className="size-2.5 shrink-0 rounded-full border-2"
             style={{ borderColor: "var(--warn)" }}
           />
-          <span className="truncate">Titik pindah kendaraan</span>
+          <span className="truncate">Pindah kendaraan</span>
         </span>
       ) : null}
     </div>

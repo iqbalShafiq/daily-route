@@ -53,6 +53,10 @@ type RawCorridor = {
   stations?: unknown;
   sources?: unknown;
   serviceHours?: unknown;
+  /** The kind of service, in the extra document. */
+  service?: unknown;
+  /** The official route map the corridor was read from. */
+  officialMapUrl?: unknown;
 };
 
 type RawSystem = {
@@ -117,6 +121,51 @@ export async function loadCurated(path: string): Promise<CuratedDocument> {
   const parsed = JSON.parse(raw) as RawDocument;
   const systems = Array.isArray(parsed.systems) ? (parsed.systems as RawSystem[]) : [];
   const lines: CuratedLine[] = [];
+
+  /*
+   * The extra document lists the corridors of the operator that the main
+   * report does not cover, straight from the official route maps.
+   */
+  if (Array.isArray((parsed as { corridors?: unknown }).corridors)) {
+    const rawCorridors = (parsed as { corridors: RawCorridor[] }).corridors;
+    for (const rawLine of rawCorridors) {
+      const code = firstString(rawLine.code);
+      if (!code) continue;
+      const stations: CuratedStation[] = [];
+      for (const station of Array.isArray(rawLine.stations) ? rawLine.stations : []) {
+        const entry = station as Record<string, unknown>;
+        const name = firstString(entry["name"]);
+        if (!name) continue;
+        const transfers = Array.isArray(entry["transfers"])
+          ? (entry["transfers"] as string[]).filter((item) => typeof item === "string")
+          : [];
+        stations.push({
+          name,
+          latitude: (firstNumber(entry["latitude"], entry["lat"]) ?? null) as number | null,
+          longitude: (firstNumber(entry["longitude"], entry["lon"], entry["lng"]) ?? null) as number | null,
+          code: (firstString(entry["code"]) ?? null) as string | null,
+          note: transfers.length > 0 ? `Interchange: ${transfers.join(", ")}` : "",
+          aliases: [] as string[],
+        });
+      }
+      if (stations.length === 0) continue;
+      lines.push({
+        sourceKey: "transjakarta-routes-extra",
+        code,
+        name: firstString(rawLine.name) ?? code,
+        operator: firstString(rawLine.operator) ?? null,
+        serviceClass: firstString(rawLine.corridorType, rawLine.service) ?? null,
+        status: firstString(rawLine.status) ?? "operating",
+        lengthKm: firstNumber(rawLine.lengthKm) ?? null,
+        description: firstString(rawLine.serviceHours) ?? "",
+        stations,
+        sources: [firstString(rawLine.officialMapUrl) ?? "transjakarta.co.id/rute"],
+        ...(firstString(rawLine.serviceHours)
+          ? { serviceHours: firstString(rawLine.serviceHours) }
+          : {}),
+      });
+    }
+  }
 
   for (const system of systems) {
     const sourceKey = firstString(system.systemId) ?? "unknown";

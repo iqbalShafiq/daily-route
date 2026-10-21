@@ -37,11 +37,11 @@ export const MODE_LABEL: Record<TransitMode, string> = {
  * stays readable for a reader who cannot tell the colours apart.
  */
 export const MODE_WIDTH: Record<string, number> = {
-  bus: 4,
-  minibus: 4,
-  tram: 5,
+  bus: 5,
+  minibus: 5,
+  tram: 5.5,
   metro: 6,
-  rail: 5,
+  rail: 6.5,
 };
 
 /** The label for a service class, which is finer than the mode. */
@@ -95,6 +95,27 @@ export const SERVICE_CLASS_COLOR: Record<ServiceClass, string> = {
   wisata: "var(--mode-wisata, var(--mode-bus))",
   transjabodetabek: "var(--mode-transjabodetabek, var(--mode-bus))",
 };
+
+/**
+ * The time of a moment, as a rider would read it: "21 Okt 2026, 10.14".
+ */
+export function formatTimestamp(iso: string | undefined): string {
+  if (!iso) return "-";
+  const date = new Date(iso);
+  if (Number.isNaN(date.getTime())) return "-";
+  return new Intl.DateTimeFormat("id-ID", {
+    timeZone: "Asia/Jakarta",
+    day: "numeric",
+    month: "short",
+    year: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+    hour12: false,
+  })
+    .format(date)
+    .replace(" pukul ", "")
+    .replace(".", ":");
+}
 
 /** `95` becomes "1 jam 35 mnt"; `8` becomes "8 mnt". */
 export function formatDuration(minutes: number): string {

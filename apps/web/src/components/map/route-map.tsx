@@ -2,6 +2,7 @@ import {
   Map as MapLibreMap,
   NavigationControl,
   Popup,
+  type DataDrivenPropertyValueSpecification,
   type GeoJSONSource,
 } from "maplibre-gl";
 import type { FeatureCollection } from "geojson";
@@ -29,6 +30,8 @@ export type MapLeg = {
   color: string;
   /** The width of the line, in pixels. The width carries the mode too. */
   width?: number;
+  /** Whether the reader is pointing at this leg of the journey. */
+  highlighted?: boolean;
   /** What the segment is: a ride, or the walk between two vehicles. */
   kind: "ride" | "walk";
   /** The name of the vehicle, for the popover. */
@@ -62,6 +65,7 @@ export type RouteMapProps = {
 
 const ROUTE_LAYER = "route-line";
 const ROUTE_CASING_LAYER = "route-casing";
+const ROUTE_HALO_LAYER = "route-halo";
 const ALT_ROUTE_LAYER = "route-line-alt";
 const WALK_LAYER = "route-line-walk";
 const SOURCE_ID = "routes";
@@ -168,6 +172,23 @@ export function RouteMap({ legs, markers, theme, className, onMarkerClick }: Rou
     };
   }, []);
 
+  /*
+   * The reader points at one leg of the journey in the list; the map
+   * keeps that leg bright and lets the rest fade, so the two are one
+   * system rather than two pictures of the same journey.
+   */
+  useEffect(() => {
+    const map = mapRef.current;
+    if (!map || !map.getLayer(ROUTE_LAYER)) return;
+    const highlighted = legs.find((leg) => leg.highlighted);
+    const opacity: DataDrivenPropertyValueSpecification<number> = highlighted
+      ? ["case", ["==", ["get", "id"], highlighted.id], 1, 0.28]
+      : 1;
+    map.setPaintProperty(ROUTE_LAYER, "line-opacity", opacity);
+    map.setPaintProperty(ROUTE_CASING_LAYER, "line-opacity", opacity);
+    map.setPaintProperty(ROUTE_HALO_LAYER, "line-opacity", opacity);
+  }, [legs]);
+
   // --- Follow the theme -------------------------------------------------
   useEffect(() => {
     const map = mapRef.current;
@@ -224,11 +245,12 @@ function resolveColor(value: string, fallback: string): string {
 /** The colours the map paints with, read from the theme tokens. */
 function themeColors() {
   return {
-    origin: resolveColor("var(--mode-bus)", "#0b6b4f"),
-    destination: resolveColor("var(--mode-metro)", "#1d4ed8"),
+    origin: resolveColor("var(--accent)", "#0b6b4f"),
+    destination: resolveColor("var(--ink)", "#17150f"),
     stop: resolveColor("var(--ink-2, var(--ink))", "#4b4a44"),
     transfer: resolveColor("var(--warn)", "#a85b00"),
     casing: resolveColor("var(--surface)", "#ffffff"),
+    halo: resolveColor("var(--map-halo)", "rgb(23 21 15 / 0.14)"),
     alternative: resolveColor("var(--warn)", "#a85b00"),
   };
 }
@@ -237,23 +259,40 @@ function addRouteLayers(map: MapLibreMap): void {
   if (map.getLayer(ROUTE_LAYER)) return;
 
   map.addSource(SOURCE_ID, { type: "geojson", data: emptyFeatureCollection() });
+  const colors = themeColors();
 
-  // The casing sits under every segment, so the route stays legible over
-  // a road of the same colour.
+  /*
+   * Three layers under the route.
+   *
+   * A halo in the colour opposite the basemap separates the route from
+   * the roads under it, a casing in the colour of the surface lifts the
+   * route off the map, and the mode's own colour draws the line itself.
+   * A white casing alone would do nothing: white on a light map is a
+   * contrast of 1.14 to one.
+   */
+  map.addLayer({
+    id: ROUTE_HALO_LAYER,
+    type: "line",
+    source: SOURCE_ID,
+    filter: ["==", ["get", "kind"], "ride"],
+    layout: { "line-cap": "round", "line-join": "round" },
+    paint: { "line-color": colors.halo, "line-width": 12, "line-opacity": 1 },
+  });
+
   map.addLayer({
     id: ROUTE_CASING_LAYER,
     type: "line",
     source: SOURCE_ID,
-    filter: ["==", ["get", "variant"], 0],
+    filter: ["==", ["get", "kind"], "ride"],
     layout: { "line-cap": "round", "line-join": "round" },
-    paint: { "line-color": "#ffffff", "line-width": 9, "line-opacity": 0.85 },
+    paint: { "line-color": colors.casing, "line-width": 10, "line-opacity": 1 },
   });
 
   map.addLayer({
     id: ROUTE_LAYER,
     type: "line",
     source: SOURCE_ID,
-    filter: ["==", ["get", "variant"], 0],
+    filter: ["all", ["==", ["get", "variant"], 0], ["==", ["get", "kind"], "ride"]],
     layout: { "line-cap": "round", "line-join": "round" },
     paint: {
       "line-color": ["get", "color"],
@@ -301,9 +340,17 @@ function addMarkerLayers(map: MapLibreMap): void {
   if (map.getLayer(MARKER_SOURCE_ID)) return;
 
   map.addSource(MARKER_SOURCE_ID, { type: "geojson", data: emptyFeatureCollection() });
+  const colors = themeColors();
 
-  // The points of the journey. A transfer is a ring, the ends are filled,
-  // and the stops in between are small.
+  /*
+   * The points of the journey.
+   *
+   * The two ends are filled and larger than the stops in between, a
+   * transfer is a ring, and every stop has a small dot of its own. The
+   * colours are the interface's own, not the modes': the origin is the
+   * accent, the destination is the ink, and the transfer carries the
+   * warning colour because it is where the rider has to pay attention.
+   */
   map.addLayer({
     id: MARKER_SOURCE_ID,
     type: "circle",
@@ -313,36 +360,37 @@ function addMarkerLayers(map: MapLibreMap): void {
         "match",
         ["get", "kind"],
         "origin",
-        8,
+        5,
         "destination",
-        8,
+        6.5,
         "transfer",
-        7,
-        4,
+        4.5,
+        2.5,
       ],
       "circle-color": [
         "match",
         ["get", "kind"],
         "origin",
-        "#0b6b4f",
+        colors.origin,
         "destination",
-        "#1d4ed8",
+        colors.destination,
         "transfer",
-        "#ffffff",
-        "#17150f",
+        colors.casing,
+        colors.destination,
       ],
-      "circle-stroke-width": ["match", ["get", "kind"], "transfer", 3, 2],
+      "circle-stroke-width": ["match", ["get", "kind"], "transfer", 2.5, 1.5],
       "circle-stroke-color": [
         "match",
         ["get", "kind"],
         "origin",
-        "#ffffff",
+        colors.casing,
         "destination",
-        "#ffffff",
+        colors.origin,
         "transfer",
-        "#a85b00",
-        "#ffffff",
+        colors.transfer,
+        colors.casing,
       ],
+      "circle-opacity": ["match", ["get", "kind"], "stop", 0.75, 1],
     },
   });
 
@@ -353,11 +401,11 @@ function addMarkerLayers(map: MapLibreMap): void {
     source: MARKER_SOURCE_ID,
     filter: ["==", ["get", "kind"], "transfer"],
     paint: {
-      "circle-radius": 12,
+      "circle-radius": 10,
       "circle-color": "rgba(0,0,0,0)",
       "circle-stroke-width": 1.5,
-      "circle-stroke-color": "#a85b00",
-      "circle-stroke-opacity": 0.55,
+      "circle-stroke-color": colors.transfer,
+      "circle-stroke-opacity": 0.45,
     },
   });
 

@@ -8,6 +8,9 @@ import { cn } from "../../lib/cn.js";
  * A card is the app's one container: a planner section, an itinerary, an
  * alert. It never nests inside another card — that is the difference
  * between a layout and a stack of boxes.
+ *
+ * It has a hairline border and no shadow. A shadow belongs to what
+ * floats above the page, not to a box that sits on it.
  */
 export const Card = forwardRef<HTMLDivElement, HTMLAttributes<HTMLDivElement>>(function Card(
   { className, ...props },
@@ -17,7 +20,7 @@ export const Card = forwardRef<HTMLDivElement, HTMLAttributes<HTMLDivElement>>(f
     <div
       ref={ref}
       className={cn(
-        "rounded-card border border-line bg-surface shadow-card",
+        "rounded-card border border-line bg-surface",
         className,
       )}
       {...props}

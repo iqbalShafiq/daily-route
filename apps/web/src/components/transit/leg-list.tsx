@@ -19,7 +19,26 @@ import { ModeIcon } from "./mode-icon.js";
  * stops, and the time. The stop list is collapsible, because the full list
  * of every halte is rarely what a rider needs at a glance.
  */
-export function LegList({ legs, dense = false }: { legs: readonly ItineraryLeg[]; dense?: boolean }) {
+/**
+ * The journey as a list.
+ *
+ * Every leg can be pointed at, and pointing at it tells the map which
+ * leg of the journey the reader is looking at. The two are one system:
+ * the list is the keyboard's way into the map.
+ */
+export function LegList({
+  legs,
+  dense = false,
+  onLegHover,
+  onLegSelect,
+  activeLegId,
+}: {
+  legs: readonly ItineraryLeg[];
+  dense?: boolean;
+  onLegHover?: ((legId: string | null) => void) | undefined;
+  onLegSelect?: ((legId: string) => void) | undefined;
+  activeLegId?: string | null | undefined;
+}) {
   if (legs.length === 0) {
     return (
       <p className="px-4 py-3 text-[13px] text-ink-3">
@@ -31,13 +50,40 @@ export function LegList({ legs, dense = false }: { legs: readonly ItineraryLeg[]
   return (
     <ol className={cn("space-y-0", dense ? "text-[13px]" : "text-sm")}>
       {legs.map((leg, index) => (
-        <LegRow key={`${leg.fromName}-${leg.toName}-${index}`} leg={leg} last={index === legs.length - 1} />
+        <LegRow
+          key={`${leg.fromName}-${leg.toName}-${index}`}
+          leg={leg}
+          last={index === legs.length - 1}
+          legId={legIdOf(leg, index)}
+          active={activeLegId === legIdOf(leg, index)}
+          onHover={onLegHover}
+          onSelect={onLegSelect}
+        />
       ))}
     </ol>
   );
 }
 
-function LegRow({ leg, last }: { leg: ItineraryLeg; last: boolean }) {
+/** The identifier of a leg, shared by the list and the map. */
+export function legIdOf(leg: ItineraryLeg, index: number): string {
+  return `${leg.kind}-${leg.lineId ?? "walk"}-${index}`;
+}
+
+function LegRow({
+  leg,
+  last,
+  legId,
+  active,
+  onHover,
+  onSelect,
+}: {
+  leg: ItineraryLeg;
+  last: boolean;
+  legId: string;
+  active: boolean;
+  onHover?: ((legId: string | null) => void) | undefined;
+  onSelect?: ((legId: string) => void) | undefined;
+}) {
   const isWalk = leg.kind === "walk";
   const color = isWalk
     ? "var(--ink-3)"
@@ -45,7 +91,16 @@ function LegRow({ leg, last }: { leg: ItineraryLeg; last: boolean }) {
   const mode = isWalk ? "walk" : leg.mode;
 
   return (
-    <li className="relative flex gap-3 px-4 py-3">
+    <li
+      className={cn(
+        "relative flex gap-3 px-4 py-3 transition-colors",
+        active ? "bg-surface-2" : "hover:bg-surface-2/60",
+      )}
+      onMouseEnter={() => onHover?.(legId)}
+      onMouseLeave={() => onHover?.(null)}
+      onFocus={() => onHover?.(legId)}
+      onClick={() => onSelect?.(legId)}
+    >
       <div className="relative flex w-8 shrink-0 flex-col items-center">
         <span
           className="z-10 flex size-8 items-center justify-center rounded-full border"
@@ -73,8 +128,8 @@ function LegRow({ leg, last }: { leg: ItineraryLeg; last: boolean }) {
           </span>
           {!isWalk && leg.lineCode ? (
             <span
-              className="rounded px-1.5 py-px text-[11px] font-semibold"
-              style={{ backgroundColor: "var(--surface-2)", color }}
+              className="rounded-md px-1.5 py-px font-mono text-[11px] leading-4 font-medium"
+              style={{ backgroundColor: `color-mix(in oklab, ${color} 12%, transparent)`, color }}
             >
               {leg.lineCode}
             </span>

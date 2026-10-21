@@ -8,6 +8,7 @@ import { fetchNodes, fetchRouteRelations, fetchUnlinkedRailStations, toOsmRoute 
 import type { SystemId } from "../classify.js";
 import { readCache, writeCache } from "../cache.js";
 import { loadFareRules, type FaresDocument } from "../fares.js";
+import { Geocoder } from "../geocode.js";
 import { queryFingerprint } from "../overpass.js";
 import { ROUTE_QUERY_FINGERPRINT } from "../osm.js";
 import type { OverpassElement } from "../overpass.js";
@@ -24,6 +25,7 @@ import type { OverpassElement } from "../overpass.js";
 const ROOT = resolve(import.meta.dirname, "../../../..");
 const CURATED_FILES = [
   resolve(ROOT, "research/data/transjakarta.json"),
+  resolve(ROOT, "research/data/transjakarta-routes-extra.json"),
   resolve(ROOT, "research/data/rail-jakarta.json"),
 ];
 const OUTPUT = resolve(ROOT, "data/transit-network.json");
@@ -98,6 +100,41 @@ async function main(): Promise<void> {
     .filter((entry): entry is NonNullable<typeof entry> => entry !== null);
   console.log(`  ${extraStations.length} stations`);
 
+  /*
+   * The official route maps print the names of the stops of the corridors
+   * that no relation names. The ones the network does not know yet are
+   * looked up by name, once, and kept on disk.
+   */
+  console.log("· looking up the stops that have no coordinates");
+  const unknownNames = curated.lines
+    .flatMap((line) => line.stations)
+    .filter((station) => station.latitude === null || station.longitude === null)
+    .map((station) => station.name);
+  const geocoder = new Geocoder({
+    cachePath: resolve(CACHE_DIRECTORY, "geocoded-stops.json"),
+    viewbox: { south: -6.95, west: 106.2, north: -5.85, east: 107.55 },
+  });
+  const pending = geocoder.missing(unknownNames);
+  if (pending.length > 0) {
+    console.log(`  ${pending.length} names to look up`);
+    for (const [index, name] of pending.entries()) {
+      const result = await geocoder.lookup(name);
+      geocoder.save();
+      if (result) console.log(`  ${index + 1}/${pending.length} ${name} → found`);
+      // The address search allows one request a second.
+      await new Promise((resolveDelay) => setTimeout(resolveDelay, 1100));
+    }
+  }
+  const geocoded = [...new Set(unknownNames)]
+    .map((name) => {
+      const result = geocoder.get(name);
+      return result
+        ? { systemId: "transjakarta" as const, name, ...result, code: null }
+        : null;
+    })
+    .filter((entry): entry is NonNullable<typeof entry> => entry !== null);
+  console.log(`  ${geocoded.length} stops placed`);
+
   console.log("· loading the fare rules");
   const fareDocument = JSON.parse(
     await readFile(`${ROOT}/research/data/fares.json`, "utf8"),
@@ -120,7 +157,7 @@ async function main(): Promise<void> {
   const network = mergeNetwork({
     curated: curated.lines,
     osmRoutes,
-    extraStations,
+    extraStations: [...extraStations, ...geocoded],
     fareRules,
     officialRoutes,
     notes: curated.notes,

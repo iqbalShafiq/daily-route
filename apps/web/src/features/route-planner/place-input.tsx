@@ -338,7 +338,7 @@ function Highlighted({ text, ranges }: { text: string; ranges: readonly MatchedR
         part.matched ? (
           <mark
             key={index}
-            className="bg-transparent font-semibold text-ink underline decoration-accent decoration-2 underline-offset-2"
+            className="rounded-[3px] bg-accent-soft px-0.5 font-semibold text-ink"
           >
             {part.value}
           </mark>

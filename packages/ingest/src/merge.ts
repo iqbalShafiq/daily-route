@@ -304,6 +304,7 @@ export function mergeNetwork(options: MergeOptions): TransitNetworkFile {
       osmStops,
       ensureStation,
       extraStations: options.extraStations,
+      knownStations: [...stations.values()],
       polyline: forwardPolyline,
     });
     // The other direction is the same line travelled backwards, so the
@@ -551,6 +552,17 @@ export function humanizeName(value: string): string {
 }
 
 /**
+ * The key a station name is looked up by.
+ *
+ * The official route maps write a stop name the way the sign does, and
+ * the sign leaves out spaces: "SimpangBuaran" is "Simpang Buaran". The
+ * key therefore ignores them.
+ */
+function nameKey(name: string): string {
+  return canonicalKey(name).replace(/\s+/g, "");
+}
+
+/**
  * The canonical name of a service class.
  *
  * The reports and the relation names spell the same service in several
@@ -693,6 +705,10 @@ function buildStops(input: {
   extraStations?:
     | readonly { name: string; latitude: number; longitude: number; code: string | null }[]
     | undefined;
+  /** The stations the network already knows, for a name that has no coordinates. */
+  knownStations?:
+    | readonly { name: string; latitude: number; longitude: number; code: string | null }[]
+    | undefined;
   /**
    * The path the line travels.
    *
@@ -710,6 +726,16 @@ function buildStops(input: {
   // station are, even when the relation forgets them.
   const extraByName = new Map(
     (input.extraStations ?? []).map((station) => [station.name.trim().toLowerCase(), station]),
+  );
+
+  /*
+   * A station the report names but gives no coordinates for is looked up
+   * among the stations the network already knows. The official route maps
+   * print the stop names of the corridors, and most of those stops are
+   * places the network already has.
+   */
+  const knownByName = new Map(
+    (input.knownStations ?? []).map((station) => [nameKey(station.name), station]),
   );
 
   const osmByName = new Map<string, OsmStop[]>();
@@ -739,7 +765,10 @@ function buildStops(input: {
 
     // A station the report names but the relation does not still has a
     // place, when the operator's own list of stations knows it.
-    const known = match ?? extraByName.get(curatedStation.name.trim().toLowerCase());
+    const known =
+      match ??
+      extraByName.get(curatedStation.name.trim().toLowerCase()) ??
+      knownByName.get(nameKey(curatedStation.name));
     const latitude = curatedStation.latitude ?? known?.latitude ?? null;
     const longitude = curatedStation.longitude ?? known?.longitude ?? null;
     if (latitude === null || longitude === null) continue;

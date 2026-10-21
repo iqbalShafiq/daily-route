@@ -7,7 +7,7 @@ import { Tab, Tabs } from "../../components/ui/tabs.js";
 import { DisruptionBanner } from "../../components/transit/disruption-banner.js";
 import { LegList } from "../../components/transit/leg-list.js";
 import type { Itinerary, PlanResult } from "../../lib/api.js";
-import { formatDistance, formatDuration } from "../../lib/format.js";
+import { formatDistance, formatDuration, formatTimestamp } from "../../lib/format.js";
 
 import { PlaceInput } from "./place-input.js";
 import type { UsePlanResult } from "./use-plan.js";
@@ -39,6 +39,9 @@ export function RoutePlanner({
   plan,
   activeIndex,
   onActiveIndexChange,
+  activeLeg,
+  onLegHover,
+  onLegSelect,
 }: {
   origin: string;
   destination: string;
@@ -48,6 +51,9 @@ export function RoutePlanner({
   plan: UsePlanResult;
   activeIndex: number;
   onActiveIndexChange: (index: number) => void;
+  activeLeg?: string | null | undefined;
+  onLegHover?: ((legId: string | null) => void) | undefined;
+  onLegSelect?: ((legId: string) => void) | undefined;
 }) {
   const data: PlanResult | undefined = plan.data;
   const itineraries = data?.itineraries ?? [];
@@ -60,7 +66,7 @@ export function RoutePlanner({
       <Card>
         <CardHeader
           title="Cari rute"
-          description="Transjakarta, MRT Jakarta, LRT Jakarta, LRT Jabodebek, dan KRL Jabodetabek dalam satu pencarian."
+          description="Transjakarta, MRT, LRT Jakarta, LRT Jabodebek, dan KRL."
         />
 
         <form
@@ -110,7 +116,7 @@ export function RoutePlanner({
         </form>
       </Card>
 
-      {plan.isPending ? (
+      {plan.isPending && !data ? (
         <Card>
           <div className="flex items-center justify-center px-4 py-10">
             <Spinner label="Menghitung rute…" />
@@ -167,20 +173,38 @@ export function RoutePlanner({
           ) : null}
 
           {current ? (
-            <Card>
-              <CardHeader
-                title={[
-                  formatDuration(current.durationMinutes),
-                  formatDistance(current.distanceKm),
-                  current.transferCount > 0
+            <Card className="relative overflow-hidden">
+              {plan.isPending ? (
+                <span
+                  aria-hidden
+                  className="absolute inset-x-0 top-0 h-0.5 animate-pulse bg-accent"
+                />
+              ) : null}
+              <div className="px-4 pt-4 pb-3">
+                <p className="text-[11px] uppercase tracking-[0.08em] text-ink-3">
+                  {data.origin.name} → {data.destination.name}
+                </p>
+                <p className="mt-1 text-[40px] leading-[1.05] font-semibold tracking-[-0.03em] tabular-nums text-ink">
+                  {formatDuration(current.durationMinutes)}
+                </p>
+                <p className="mt-1 text-[13px] text-ink-2">
+                  {formatDistance(current.distanceKm)} ·{" "}
+                  {current.transferCount > 0
                     ? `${current.transferCount} kali pindah`
-                    : "tanpa pindah",
-                ].join(" · ")}
-                description={`${data.origin.name} → ${data.destination.name}`}
-              />
-              <div className="border-t border-line">
-                <LegList legs={current.legs} />
+                    : "tanpa pindah"}
+                </p>
               </div>
+              <div className="border-t border-line">
+                <LegList
+                  legs={current.legs}
+                  activeLegId={activeLeg}
+                  onLegHover={onLegHover}
+                  onLegSelect={onLegSelect}
+                />
+              </div>
+              <p className="border-t border-line px-4 py-2 text-[11px] text-ink-3">
+                Data per {formatTimestamp(data.computedAt)}
+              </p>
               {current.fare.available && current.fare.label ? (
                 <div className="border-t border-line px-4 py-3">
                   <div className="flex items-baseline justify-between gap-3">

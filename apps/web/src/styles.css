@@ -24,7 +24,7 @@
   --surface-3: #ebe8e1;
   --ink: #17150f;
   --ink-2: #4a4740;
-  --ink-3: #7a766c;
+  --ink-3: #6f6b61;
   --line: #e5e1d8;
   --line-strong: #cfcabe;
 
@@ -40,16 +40,31 @@
   --info: #1d4ed8;
   --info-soft: #e8eefd;
 
-  --mode-bus: #0b6b4f;
-  --mode-metro: #1d4ed8;
-  --mode-tram: #c2410c;
-  --mode-lrt-jabodebek: #6d28d9;
+  /*
+   * The colours of the modes.
+   *
+   * They are a taxonomy of the system, not the livery of the vehicles:
+   * LRT Jakarta and KRL are both red on the road, and Transjakarta and
+   * LRT Jabodebek are both blue. The set is chosen so that no two modes
+   * are hard to tell apart, even with colour blindness, and so that no
+   * mode shares a colour with the interface itself.
+   */
+  --mode-bus: #1d4ed8;
+  --mode-metro: #b91c1c;
+  --mode-tram: #b45309;
+  --mode-lrt-jabodebek: #0e7490;
   --mode-rail: #334155;
 
-  --shadow-card: 0 1px 2px rgb(23 21 15 / 0.04), 0 8px 24px -12px rgb(23 21 15 / 0.16);
+  /*
+   * A card has a border, not a shadow. A shadow is for what floats: the
+   * popover, the sheet, the map controls.
+   */
   --shadow-pop: 0 2px 6px rgb(23 21 15 / 0.08), 0 18px 48px -18px rgb(23 21 15 / 0.3);
 
   --radius-card: 14px;
+
+  /* The line that separates a route from the roads under it. */
+  --map-halo: rgb(23 21 15 / 0.14);
 }
 
 [data-theme="dark"] {
@@ -77,14 +92,15 @@
   --info: #93b4fd;
   --info-soft: #16203a;
 
-  --mode-bus: #4ade9e;
-  --mode-metro: #93b4fd;
-  --mode-tram: #fb923c;
-  --mode-lrt-jabodebek: #a78bfa;
-  --mode-rail: #94a3b8;
+  --mode-bus: #38bdf8;
+  --mode-metro: #f43f5e;
+  --mode-tram: #f59e0b;
+  --mode-lrt-jabodebek: #2dd4bf;
+  --mode-rail: #a78bfa;
 
-  --shadow-card: 0 1px 2px rgb(0 0 0 / 0.4), 0 8px 24px -12px rgb(0 0 0 / 0.6);
   --shadow-pop: 0 2px 6px rgb(0 0 0 / 0.45), 0 18px 48px -18px rgb(0 0 0 / 0.8);
+
+  --map-halo: rgb(255 255 255 / 0.12);
 }
 
 @theme inline {
@@ -120,7 +136,6 @@
   --font-mono: "JetBrains Mono Variable", ui-monospace, "SFMono-Regular", monospace;
 
   --radius-card: var(--radius-card);
-  --shadow-card: var(--shadow-card);
   --shadow-pop: var(--shadow-pop);
 }
 

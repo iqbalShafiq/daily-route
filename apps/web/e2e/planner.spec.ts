@@ -42,9 +42,10 @@ test.describe("route planner", () => {
 
     await expect(page.getByText("Perkiraan tarif")).toBeVisible({ timeout: 30_000 });
 
-    // The header says how long the journey is, how far it is, and how many
-    // changes of vehicle it takes.
-    await expect(page.getByText(/\d+ mnt · [\d,]+ km · \d+ kali pindah/)).toBeVisible();
+    // The journey is stated first, and the rest follows it: how far it
+    // is and how many changes of vehicle it takes.
+    await expect(page.getByText(/^\d+ jam \d+ mnt$|^\d+ mnt$/).first()).toBeVisible();
+    await expect(page.getByText(/^[\d,]+ km · \d+ kali pindah$/).first()).toBeVisible();
 
     // The fare is an amount in rupiah.
     await expect(page.getByText(/Rp \d/)).toBeVisible();
@@ -108,7 +109,7 @@ test.describe("route planner", () => {
 
     // The legend lists the vehicles the journey uses, so the colours of
     // the map are explained.
-    const legend = page.locator("text=Titik pindah kendaraan");
+    const legend = page.locator("text=Pindah kendaraan");
     await expect(legend).toBeVisible();
   });
 

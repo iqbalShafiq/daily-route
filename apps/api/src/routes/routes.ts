@@ -162,6 +162,7 @@ export function createRoutesRouter(deps: ApiDeps): Router {
         })),
       })),
       disruptions: matches.map((match) => summarize(match.disruption, match.impact)),
+      computedAt: new Date().toISOString(),
     });
   });
 
