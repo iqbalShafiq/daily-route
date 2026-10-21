@@ -68,7 +68,7 @@ type RawDocument = {
 };
 
 const SERVICE_CLASS_HINTS: ReadonlyArray<{ pattern: RegExp; serviceClass: string }> = [
-  { pattern: /mikrotrans/i, serviceClass: "feeder" },
+  { pattern: /mikrotrans/i, serviceClass: "mikrotrans" },
   { pattern: /minitrans/i, serviceClass: "minitrans" },
   { pattern: /^brt|brt$/i, serviceClass: "brt" },
   { pattern: /metrotrans|royaltrans|amal|ojek|non-?brt|pengumpan/i, serviceClass: "non-brt" },

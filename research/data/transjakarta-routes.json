@@ -1,0 +1,1202 @@
+{
+  "source": "https://transjakarta.co.id/rute",
+  "operator": "PT Transportasi Jakarta (Transjakarta)",
+  "note": "Daftar koridor resmi. Kelas layanan memakai nama jenis layanan di halaman operator.",
+  "corridors": [
+    {
+      "code": "1",
+      "name": "BLOK M - KOTA",
+      "service": "brt"
+    },
+    {
+      "code": "2",
+      "name": "PULO GADUNG  - MONUMEN NASIONAL",
+      "service": "brt"
+    },
+    {
+      "code": "2A",
+      "name": "PULO GADUNG  - RAWA BUAYA",
+      "service": "brt"
+    },
+    {
+      "code": "3",
+      "name": "KALIDERES - MONUMEN NASIONAL VIA VETERAN",
+      "service": "brt"
+    },
+    {
+      "code": "3F",
+      "name": "KALIDERES - SENAYAN BANK JAKARTA",
+      "service": "brt"
+    },
+    {
+      "code": "3H",
+      "name": "DAMAI - KOTA",
+      "service": "brt"
+    },
+    {
+      "code": "4",
+      "name": "PULO GADUNG - GALUNGGUNG",
+      "service": "brt"
+    },
+    {
+      "code": "4D",
+      "name": "PULO GADUNG  - KUNINGAN",
+      "service": "brt"
+    },
+    {
+      "code": "5",
+      "name": "KAMPUNG MELAYU - ANCOL",
+      "service": "brt"
+    },
+    {
+      "code": "5C",
+      "name": "CILILITAN  - JUANDA",
+      "service": "brt"
+    },
+    {
+      "code": "6",
+      "name": "RAGUNAN - GALUNGGUNG",
+      "service": "brt"
+    },
+    {
+      "code": "6A",
+      "name": "RAGUNAN - BALAI KOTA VIA KUNINGAN",
+      "service": "brt"
+    },
+    {
+      "code": "6B",
+      "name": "RAGUNAN - BALAI KOTA VIA SEMANGGI",
+      "service": "brt"
+    },
+    {
+      "code": "6V",
+      "name": "RAGUNAN - SENAYAN BANK JAKARTA",
+      "service": "brt"
+    },
+    {
+      "code": "7",
+      "name": "KAMPUNG MELAYU - KAMPUNG RAMBUTAN",
+      "service": "brt"
+    },
+    {
+      "code": "7F",
+      "name": "KAMPUNG RAMBUTAN - JUANDA VIA CEMPAKA PUTIH",
+      "service": "brt"
+    },
+    {
+      "code": "8",
+      "name": "LEBAK BULUS - PASAR BARU",
+      "service": "brt"
+    },
+    {
+      "code": "9",
+      "name": "PINANG RANTI - PLUIT",
+      "service": "brt"
+    },
+    {
+      "code": "9A",
+      "name": "CILILITAN - GROGOL",
+      "service": "brt"
+    },
+    {
+      "code": "9C",
+      "name": "PINANG RANTI - BUNDARAN SENAYAN",
+      "service": "brt"
+    },
+    {
+      "code": "9N",
+      "name": "PINANG RANTI - SIMPANG CAWANG",
+      "service": "brt"
+    },
+    {
+      "code": "10",
+      "name": "TANJUNG PRIOK - PGC",
+      "service": "brt"
+    },
+    {
+      "code": "10H",
+      "name": "TANJUNG PRIOK - BUNDARAN SENAYAN",
+      "service": "brt"
+    },
+    {
+      "code": "11",
+      "name": "PULO GEBANG - KAMPUNG MELAYU",
+      "service": "brt"
+    },
+    {
+      "code": "12",
+      "name": "PLUIT - TANJUNG PRIOK",
+      "service": "brt"
+    },
+    {
+      "code": "13",
+      "name": "CILEDUG - TEGAL MAMPANG",
+      "service": "brt"
+    },
+    {
+      "code": "13B",
+      "name": "PURI BETA - PANCORAN",
+      "service": "brt"
+    },
+    {
+      "code": "13E",
+      "name": "PURI BETA - FLYOVER KUNINGAN",
+      "service": "brt"
+    },
+    {
+      "code": "14",
+      "name": "JAKARTA INTERNATIONAL STADIUM - SENEN",
+      "service": "brt"
+    },
+    {
+      "code": "L13E",
+      "name": "PURI BETA - FLYOVER KUNINGAN (EXPRESS)",
+      "service": "brt"
+    },
+    {
+      "code": "1A",
+      "name": "PANTAI MAJU - BALAI KOTA",
+      "service": "non-brt"
+    },
+    {
+      "code": "1B",
+      "name": "STASIUN PALMERAH - TRANSPORT HUB DUKUH ATAS",
+      "service": "non-brt"
+    },
+    {
+      "code": "1C",
+      "name": "PESANGGRAHAN - BLOK M",
+      "service": "non-brt"
+    },
+    {
+      "code": "1E",
+      "name": "PONDOK LABU - BLOK M",
+      "service": "non-brt"
+    },
+    {
+      "code": "1F",
+      "name": "STASIUN PALMERAH - BUNDARAN SENAYAN",
+      "service": "non-brt"
+    },
+    {
+      "code": "1H",
+      "name": "TANAH ABANG - STASIUN GONDANGDIA",
+      "service": "non-brt"
+    },
+    {
+      "code": "1M",
+      "name": "MERUYA - BLOK M",
+      "service": "non-brt"
+    },
+    {
+      "code": "1P",
+      "name": "SENEN - BLOK M",
+      "service": "non-brt"
+    },
+    {
+      "code": "1Q",
+      "name": "REMPOA - BLOK M",
+      "service": "non-brt"
+    },
+    {
+      "code": "1R",
+      "name": "SENEN - TANAH ABANG",
+      "service": "non-brt"
+    },
+    {
+      "code": "1W",
+      "name": "BLOK M - ANCOL",
+      "service": "non-brt"
+    },
+    {
+      "code": "2B",
+      "name": "HARAPAN INDAH - PULO GADUNG",
+      "service": "non-brt"
+    },
+    {
+      "code": "2P",
+      "name": "STASIUN GONDANGDIA - PASAR SENEN",
+      "service": "non-brt"
+    },
+    {
+      "code": "2Q",
+      "name": "GONDANGDIA - BALAIKOTA",
+      "service": "non-brt"
+    },
+    {
+      "code": "3D",
+      "name": "TAMAN KOTA - PENJARINGAN VIA TUBAGUS ANGKE",
+      "service": "non-brt"
+    },
+    {
+      "code": "3E",
+      "name": "SENTRALAND CENGKARENG - PURI KEMBANGAN",
+      "service": "non-brt"
+    },
+    {
+      "code": "4B",
+      "name": "STASIUN MANGGARAI - UNIVERSITAS INDONESIA",
+      "service": "non-brt"
+    },
+    {
+      "code": "4C",
+      "name": "JIEP - BUNDARAN SENAYAN",
+      "service": "non-brt"
+    },
+    {
+      "code": "4F",
+      "name": "PINANG RANTI - PULO GADUNG",
+      "service": "non-brt"
+    },
+    {
+      "code": "4K",
+      "name": "PULO GADUNG - KEJAKSAAN AGUNG",
+      "service": "non-brt"
+    },
+    {
+      "code": "5B",
+      "name": "STASIUN TEBET - BIDARA CINA",
+      "service": "non-brt"
+    },
+    {
+      "code": "5F",
+      "name": "KAMPUNG MELAYU - TANAH ABANG",
+      "service": "non-brt"
+    },
+    {
+      "code": "5M",
+      "name": "KAMPUNG MELAYU - TANAH ABANG",
+      "service": "non-brt"
+    },
+    {
+      "code": "5N",
+      "name": "RAGUNAN- KAMPUNG MELAYU",
+      "service": "non-brt"
+    },
+    {
+      "code": "6C",
+      "name": "STASIUN TEBET - KUNINGAN",
+      "service": "non-brt"
+    },
+    {
+      "code": "6D",
+      "name": "STASIUN TEBET - BUNDARAN SENAYAN",
+      "service": "non-brt"
+    },
+    {
+      "code": "6H",
+      "name": "SENEN - LEBAK BULUS",
+      "service": "non-brt"
+    },
+    {
+      "code": "6K",
+      "name": "KUNINGAN - KARET",
+      "service": "non-brt"
+    },
+    {
+      "code": "6M",
+      "name": "STASIUN MANGGARAI - BLOK M",
+      "service": "non-brt"
+    },
+    {
+      "code": "6N",
+      "name": "RAGUNAN - BLOK M VIA KEMANG",
+      "service": "non-brt"
+    },
+    {
+      "code": "6Q",
+      "name": "DUKUH ATAS - CASABLANCA VIA EPICENTRUM",
+      "service": "non-brt"
+    },
+    {
+      "code": "6T",
+      "name": "PASAR MINGGU - VELBAK VIA KEBON JERUK",
+      "service": "non-brt"
+    },
+    {
+      "code": "6U",
+      "name": "BLOK M - PASAR MINGGU",
+      "service": "non-brt"
+    },
+    {
+      "code": "6W",
+      "name": "DUREN TIGA - BLOK M VIA BANGKA RAYA",
+      "service": "non-brt"
+    },
+    {
+      "code": "7A",
+      "name": "KAMPUNG RAMBUTAN - LEBAK BULUS",
+      "service": "non-brt"
+    },
+    {
+      "code": "7B",
+      "name": "KAMPUNG RAMBUTAN - BLOK M",
+      "service": "non-brt"
+    },
+    {
+      "code": "7C",
+      "name": "CIBUBUR - CAWANG CILILITAN",
+      "service": "non-brt"
+    },
+    {
+      "code": "7D",
+      "name": "TMII - PANCORAN",
+      "service": "non-brt"
+    },
+    {
+      "code": "7E",
+      "name": "KAMPUNG RAMBUTAN - RAGUNAN",
+      "service": "non-brt"
+    },
+    {
+      "code": "7P",
+      "name": "PONDOK KELAPA - CAWANG CILILITAN",
+      "service": "non-brt"
+    },
+    {
+      "code": "7Q",
+      "name": "BLOK M - CAWANG CILILITAN",
+      "service": "non-brt"
+    },
+    {
+      "code": "7R",
+      "name": "CIBUBUR - PLUIT",
+      "service": "non-brt"
+    },
+    {
+      "code": "7T",
+      "name": "CIBUBUR - TANJUNG PRIOK",
+      "service": "non-brt"
+    },
+    {
+      "code": "7U",
+      "name": "CIBUBUR - ANCOL",
+      "service": "non-brt"
+    },
+    {
+      "code": "7V",
+      "name": "CIBUBUR - KAMPUNG RAMBUTAN",
+      "service": "non-brt"
+    },
+    {
+      "code": "7W",
+      "name": "CAWANG - STASIUN KERETA CEPAT HALIM",
+      "service": "non-brt"
+    },
+    {
+      "code": "8C",
+      "name": "KEBAYORAN LAMA - TANAH ABANG",
+      "service": "non-brt"
+    },
+    {
+      "code": "8D",
+      "name": "MERUYA SELATAN - BLOK M",
+      "service": "non-brt"
+    },
+    {
+      "code": "8E",
+      "name": "BINTARO - BLOK M",
+      "service": "non-brt"
+    },
+    {
+      "code": "8K",
+      "name": "BATUSARI - GROGOL",
+      "service": "non-brt"
+    },
+    {
+      "code": "8M",
+      "name": "TANAH ABANG - TANJUNG DUREN",
+      "service": "non-brt"
+    },
+    {
+      "code": "8N",
+      "name": "KEBAYORAN - PETAMBURAN VIA ASIA AFRIKA",
+      "service": "non-brt"
+    },
+    {
+      "code": "9D",
+      "name": "PASAR MINGGU - TANAH ABANG",
+      "service": "non-brt"
+    },
+    {
+      "code": "9E",
+      "name": "KEBAYORAN - JELAMBAR",
+      "service": "non-brt"
+    },
+    {
+      "code": "9H",
+      "name": "PASAR MINGGU - CIPEDAK",
+      "service": "non-brt"
+    },
+    {
+      "code": "11D",
+      "name": "PULO GEBANG - PULO GADUNG VIA PIK",
+      "service": "non-brt"
+    },
+    {
+      "code": "11Q",
+      "name": "KAMPUNG MELAYU - PULO GEBANG VIA BKT",
+      "service": "non-brt"
+    },
+    {
+      "code": "11W",
+      "name": "STASIUN KLENDER - PULO GADUNG",
+      "service": "non-brt"
+    },
+    {
+      "code": "12A",
+      "name": "KOTA - KALIADEM",
+      "service": "non-brt"
+    },
+    {
+      "code": "12B",
+      "name": "PLUIT - SENEN",
+      "service": "non-brt"
+    },
+    {
+      "code": "12P",
+      "name": "STASIUN LRT PEGANGSAAN - JIS",
+      "service": "non-brt"
+    },
+    {
+      "code": "14A",
+      "name": "MONUMEN NASIONAL - JAKARTA INTERNATIONAL STADIUM",
+      "service": "non-brt"
+    },
+    {
+      "code": "14B",
+      "name": "TANJUNG PRIOK - SENEN VIA JIS",
+      "service": "non-brt"
+    },
+    {
+      "code": "51ST",
+      "name": "SHUTTLE HBKB ANCOL",
+      "service": "non-brt"
+    },
+    {
+      "code": "1K",
+      "name": "CIBUBUR - BLOK M",
+      "service": "royaltrans"
+    },
+    {
+      "code": "1T",
+      "name": "CIBUBUR - BALAI KOTA",
+      "service": "royaltrans"
+    },
+    {
+      "code": "6P",
+      "name": "CIBUBUR - KUNINGAN",
+      "service": "royaltrans"
+    },
+    {
+      "code": "B13",
+      "name": "SUMMARECON BEKASI - BLOK M",
+      "service": "royaltrans"
+    },
+    {
+      "code": "B14",
+      "name": "SUMMARECON BEKASI - KUNINGAN",
+      "service": "royaltrans"
+    },
+    {
+      "code": "D31",
+      "name": "CINERE - KUNINGAN",
+      "service": "royaltrans"
+    },
+    {
+      "code": "D32",
+      "name": "CINERE - BUNDARAN SENAYAN",
+      "service": "royaltrans"
+    },
+    {
+      "code": "S12",
+      "name": "TERMINAL BSD - FATMAWATI",
+      "service": "royaltrans"
+    },
+    {
+      "code": "S14",
+      "name": "SUMMARECON SERPONG - LEBAK BULUS",
+      "service": "royaltrans"
+    },
+    {
+      "code": "S31",
+      "name": "BINTARO - FATMAWATI",
+      "service": "royaltrans"
+    },
+    {
+      "code": "BW1",
+      "name": "SEJARAH JAKARTA",
+      "service": "wisata"
+    },
+    {
+      "code": "BW2",
+      "name": "MONAS EXPLORER",
+      "service": "wisata"
+    },
+    {
+      "code": "BW4",
+      "name": "PENCAKAR LANGIT",
+      "service": "wisata"
+    },
+    {
+      "code": "JAK01",
+      "name": "TANJUNG PRIOK - PLUMPANG",
+      "service": "mikrotrans"
+    },
+    {
+      "code": "JAK02",
+      "name": "KAMPUNG MELAYU - DUREN SAWIT",
+      "service": "mikrotrans"
+    },
+    {
+      "code": "JAK03",
+      "name": "LEBAK BULUS - ANDARA",
+      "service": "mikrotrans"
+    },
+    {
+      "code": "JAK04",
+      "name": "GROGOL - TUBAGUS ANGKE",
+      "service": "mikrotrans"
+    },
+    {
+      "code": "JAK05",
+      "name": "SEMPER - ROROTAN",
+      "service": "mikrotrans"
+    },
+    {
+      "code": "JAK06",
+      "name": "KAMPUNG RAMBUTAN - PONDOK GEDE",
+      "service": "mikrotrans"
+    },
+    {
+      "code": "JAK07",
+      "name": "TANAH ABANG - GROGOL VIA TAWAKAL",
+      "service": "mikrotrans"
+    },
+    {
+      "code": "JAK08",
+      "name": "TANAH ABANG - BENHIL VIA ROXY",
+      "service": "mikrotrans"
+    },
+    {
+      "code": "JAK09",
+      "name": "TANAH ABANG - KARET VIA ROXY",
+      "service": "mikrotrans"
+    },
+    {
+      "code": "JAK10",
+      "name": "TANAH ABANG - KOTA",
+      "service": "mikrotrans"
+    },
+    {
+      "code": "JAK100",
+      "name": "TERMINAL PULO GEBANG - RUSUN PINUS ELOK",
+      "service": "mikrotrans"
+    },
+    {
+      "code": "JAK102",
+      "name": "BLOK M - LEBAK BULUS",
+      "service": "mikrotrans"
+    },
+    {
+      "code": "JAK105",
+      "name": "STASIUN TEBET - RUSUN CIPINANG MUARA",
+      "service": "mikrotrans"
+    },
+    {
+      "code": "JAK106",
+      "name": "TERMINAL KLENDER - TERMINAL KAMPUNG MELAYU",
+      "service": "mikrotrans"
+    },
+    {
+      "code": "JAK107",
+      "name": "JEMBATAN GARDEN - PURI BETA",
+      "service": "mikrotrans"
+    },
+    {
+      "code": "JAK108",
+      "name": "KRAMAT JATI - BAMBU APUS",
+      "service": "mikrotrans"
+    },
+    {
+      "code": "JAK10A",
+      "name": "GONDANGDIA - CIKINI VIA SALEMBA RAYA",
+      "service": "mikrotrans"
+    },
+    {
+      "code": "JAK10B",
+      "name": "GONDANGDIA - CIKINI VIA KRAMAT RAYA",
+      "service": "mikrotrans"
+    },
+    {
+      "code": "JAK11",
+      "name": "TANAH ABANG - KEBAYORAN LAMA",
+      "service": "mikrotrans"
+    },
+    {
+      "code": "JAK110A",
+      "name": "RUSUN MARUNDA - PULO GEBANG",
+      "service": "mikrotrans"
+    },
+    {
+      "code": "JAK110B",
+      "name": "RUSUN KOMARUDIN - PUTARAN BALIK BEBEK TNI",
+      "service": "mikrotrans"
+    },
+    {
+      "code": "JAK112",
+      "name": "TERMINAL TANAH MERAH - PULO GADUNG",
+      "service": "mikrotrans"
+    },
+    {
+      "code": "JAK113",
+      "name": "TANAH MERDEKA - KAMPUNG SAWAH",
+      "service": "mikrotrans"
+    },
+    {
+      "code": "JAK115",
+      "name": "TERMINAL TANJUNG PRIOK - PEGANGSAAN II IGI",
+      "service": "mikrotrans"
+    },
+    {
+      "code": "JAK117",
+      "name": "TANJUNG PRIOK - TANAH MERDEKA",
+      "service": "mikrotrans"
+    },
+    {
+      "code": "JAK118",
+      "name": "TAMAN WADUK PAPANGGO - KOTA TUA",
+      "service": "mikrotrans"
+    },
+    {
+      "code": "JAK12",
+      "name": "TANAH ABANG - KEBAYORAN LAMA VIA POS PENGUMBEN",
+      "service": "mikrotrans"
+    },
+    {
+      "code": "JAK120",
+      "name": "JAKARTA INTERNATIONAL STADIUM-TERMINAL MUARA ANGKE",
+      "service": "mikrotrans"
+    },
+    {
+      "code": "JAK13",
+      "name": "TANAH ABANG - JEMBATAN LIMA",
+      "service": "mikrotrans"
+    },
+    {
+      "code": "JAK14",
+      "name": "TANAH ABANG - MERUYA",
+      "service": "mikrotrans"
+    },
+    {
+      "code": "JAK15",
+      "name": "TANJUNG PRIOK - RUSUN MARUNDA",
+      "service": "mikrotrans"
+    },
+    {
+      "code": "JAK16",
+      "name": "CILILITAN  - CONDET",
+      "service": "mikrotrans"
+    },
+    {
+      "code": "JAK17",
+      "name": "SENEN - PULOGADUNG",
+      "service": "mikrotrans"
+    },
+    {
+      "code": "JAK18",
+      "name": "STASIUN DUREN KALIBATA - KUNINGAN",
+      "service": "mikrotrans"
+    },
+    {
+      "code": "JAK19",
+      "name": "PINANG RANTI - KAMPUNG RAMBUTAN",
+      "service": "mikrotrans"
+    },
+    {
+      "code": "JAK20",
+      "name": "CAWANG UKI - LUBANG BUAYA",
+      "service": "mikrotrans"
+    },
+    {
+      "code": "JAK21",
+      "name": "CILILITAN  - DWIKORA",
+      "service": "mikrotrans"
+    },
+    {
+      "code": "JAK22",
+      "name": "DWIKORA - PENAS KALIMALANG",
+      "service": "mikrotrans"
+    },
+    {
+      "code": "JAK23",
+      "name": "SENEN - PISANGAN BARU",
+      "service": "mikrotrans"
+    },
+    {
+      "code": "JAK24",
+      "name": "SENEN - PULO GADUNG VIA KELAPA GADING",
+      "service": "mikrotrans"
+    },
+    {
+      "code": "JAK25",
+      "name": "PASAR REBO - KALISARI",
+      "service": "mikrotrans"
+    },
+    {
+      "code": "JAK26",
+      "name": "RAWAMANGUN - DUREN SAWIT",
+      "service": "mikrotrans"
+    },
+    {
+      "code": "JAK27",
+      "name": "PULO GEBANG - ROROTAN",
+      "service": "mikrotrans"
+    },
+    {
+      "code": "JAK28",
+      "name": "PASAR REBO-STASIUN LRT HARJAMUKTI",
+      "service": "mikrotrans"
+    },
+    {
+      "code": "JAK29",
+      "name": "TANJUNG PRIOK - SUKAPURA",
+      "service": "mikrotrans"
+    },
+    {
+      "code": "JAK30",
+      "name": "GROGOL - MERUYA VIA ROXY",
+      "service": "mikrotrans"
+    },
+    {
+      "code": "JAK31",
+      "name": "BLOK M - ANDARA",
+      "service": "mikrotrans"
+    },
+    {
+      "code": "JAK32",
+      "name": "LEBAK BULUS - JOGLO",
+      "service": "mikrotrans"
+    },
+    {
+      "code": "JAK33",
+      "name": "PULO GADUNG - KOTA",
+      "service": "mikrotrans"
+    },
+    {
+      "code": "JAK34",
+      "name": "TERMINAL KLENDER - TERMINAL RAWAMANGUN",
+      "service": "mikrotrans"
+    },
+    {
+      "code": "JAK35",
+      "name": "RAWAMANGUN - PANGKALAN JATI",
+      "service": "mikrotrans"
+    },
+    {
+      "code": "JAK36",
+      "name": "CILANGKAP  - CILILITAN ( PGC )",
+      "service": "mikrotrans"
+    },
+    {
+      "code": "JAK37",
+      "name": "CILILITAN ( PGC ) - CONDET VIA KAYU MANIS",
+      "service": "mikrotrans"
+    },
+    {
+      "code": "JAK38",
+      "name": "BULAK RINGIN - KAMPUNG RAMBUTAN",
+      "service": "mikrotrans"
+    },
+    {
+      "code": "JAK39",
+      "name": "KALIMALANG - DUREN SAWIT",
+      "service": "mikrotrans"
+    },
+    {
+      "code": "JAK40",
+      "name": "HARAPAN BARU - PULO GEBANG VIA RAWA KUNING",
+      "service": "mikrotrans"
+    },
+    {
+      "code": "JAK41",
+      "name": "KAMPUNG MELAYU - PULO GADUNG",
+      "service": "mikrotrans"
+    },
+    {
+      "code": "JAK42",
+      "name": "KAMPUNG MELAYU - PONDOK KELAPA",
+      "service": "mikrotrans"
+    },
+    {
+      "code": "JAK43B",
+      "name": "TONGTEK - TEBET ECO PARK - CILILITAN",
+      "service": "mikrotrans"
+    },
+    {
+      "code": "JAK43C",
+      "name": "SARANA JAYA - TEBET ECO PARK - STASIUN CAWANG",
+      "service": "mikrotrans"
+    },
+    {
+      "code": "JAK44",
+      "name": "ANDARA - STASIUN UNIVERSITAS PANCASILA",
+      "service": "mikrotrans"
+    },
+    {
+      "code": "JAK45",
+      "name": "LEBAK BULUS - RAGUNAN",
+      "service": "mikrotrans"
+    },
+    {
+      "code": "JAK46",
+      "name": "JAGAKARSA - PASAR MINGGU",
+      "service": "mikrotrans"
+    },
+    {
+      "code": "JAK47",
+      "name": "PASAR MINGGU - CIGANJUR VIA KEBUN BINATANG RAGUNAN",
+      "service": "mikrotrans"
+    },
+    {
+      "code": "JAK48A",
+      "name": "STASIUN TEBET - KARET",
+      "service": "mikrotrans"
+    },
+    {
+      "code": "JAK49",
+      "name": "LEBAK BULUS - CIPULIR",
+      "service": "mikrotrans"
+    },
+    {
+      "code": "JAK50",
+      "name": "KALIDERES - PURI KEMBANGAN",
+      "service": "mikrotrans"
+    },
+    {
+      "code": "JAK51",
+      "name": "TAMAN KOTA - BUDI LUHUR",
+      "service": "mikrotrans"
+    },
+    {
+      "code": "JAK52",
+      "name": "KALIDERES - MUARA ANGKE",
+      "service": "mikrotrans"
+    },
+    {
+      "code": "JAK53",
+      "name": "GROGOL - POS PENGUMBEN",
+      "service": "mikrotrans"
+    },
+    {
+      "code": "JAK54",
+      "name": "GROGOL - BENHIL",
+      "service": "mikrotrans"
+    },
+    {
+      "code": "JAK56",
+      "name": "PESING - SRENGSENG",
+      "service": "mikrotrans"
+    },
+    {
+      "code": "JAK58",
+      "name": "CILINCING - RUSUN PADAT KARYA",
+      "service": "mikrotrans"
+    },
+    {
+      "code": "JAK59",
+      "name": "RAWAMANGUN - RAWA SENGON",
+      "service": "mikrotrans"
+    },
+    {
+      "code": "JAK60",
+      "name": "KELAPA GADING - RUSUN KEMAYORAN",
+      "service": "mikrotrans"
+    },
+    {
+      "code": "JAK61",
+      "name": "CEMPAKA PUTIH-PULO GADUNG VIA KELAPA GADING",
+      "service": "mikrotrans"
+    },
+    {
+      "code": "JAK64",
+      "name": "ASELI - TERMINAL PASAR MINGGU",
+      "service": "mikrotrans"
+    },
+    {
+      "code": "JAK71",
+      "name": "KAMPUNG RAMBUTAN - PINANG RANTI",
+      "service": "mikrotrans"
+    },
+    {
+      "code": "JAK72",
+      "name": "KAMPUNG RAMBUTAN - PASAR REBO VIA PONCOL",
+      "service": "mikrotrans"
+    },
+    {
+      "code": "JAK73",
+      "name": "JAMBORE CIBUBUR - PASAR REBO",
+      "service": "mikrotrans"
+    },
+    {
+      "code": "JAK74",
+      "name": "RAWAMANGUN - CIPINANG MUARA",
+      "service": "mikrotrans"
+    },
+    {
+      "code": "JAK75",
+      "name": "CILILITAN - KAMPUNG PULO",
+      "service": "mikrotrans"
+    },
+    {
+      "code": "JAK76",
+      "name": "JALAN INDUSTRI RAYA - ASMI",
+      "service": "mikrotrans"
+    },
+    {
+      "code": "JAK77",
+      "name": "TANJUNG PRIOK - JEMBATAN HITAM",
+      "service": "mikrotrans"
+    },
+    {
+      "code": "JAK78A",
+      "name": "BENDA - CENGKARENG",
+      "service": "mikrotrans"
+    },
+    {
+      "code": "JAK78B",
+      "name": "JEMBATAN TIGA -TELUK GONG",
+      "service": "mikrotrans"
+    },
+    {
+      "code": "JAK79",
+      "name": "CENGKARENG - TUBAGUS ANGKE",
+      "service": "mikrotrans"
+    },
+    {
+      "code": "JAK80",
+      "name": "RAWA BUAYA - RAWA KOMPENI",
+      "service": "mikrotrans"
+    },
+    {
+      "code": "JAK84",
+      "name": "TERMINAL KAMPUNG MELAYU - KAPIN RAYA",
+      "service": "mikrotrans"
+    },
+    {
+      "code": "JAK85",
+      "name": "BINTARA - CIPINANG INDAH",
+      "service": "mikrotrans"
+    },
+    {
+      "code": "JAK86",
+      "name": "TERMINAL RAWAMANGUN - TERMINAL MANGGARAI",
+      "service": "mikrotrans"
+    },
+    {
+      "code": "JAK87",
+      "name": "TERMINAL TANJUNG PRIOK - TERMINAL RAWAMANGUN",
+      "service": "mikrotrans"
+    },
+    {
+      "code": "JAK88",
+      "name": "TERMINAL TANJUNG PRIOK - ANCOL BARAT",
+      "service": "mikrotrans"
+    },
+    {
+      "code": "JAK89",
+      "name": "TERMINAL TANJUNG PRIOK - TAMAN KOTA INTAN",
+      "service": "mikrotrans"
+    },
+    {
+      "code": "JAK90",
+      "name": "TERMINAL TANJUNG PRIOK - RUSUN KEMAYORAN",
+      "service": "mikrotrans"
+    },
+    {
+      "code": "JAK93",
+      "name": "JERUK PURUT - KEBAYORAN LAMA",
+      "service": "mikrotrans"
+    },
+    {
+      "code": "JAK95",
+      "name": "TERMINAL LEBAK BULUS - TERMINAL PASAR MINGGU",
+      "service": "mikrotrans"
+    },
+    {
+      "code": "JAK98",
+      "name": "TERMINAL KAMPUNG RAMBUTAN - MUNJUL",
+      "service": "mikrotrans"
+    },
+    {
+      "code": "JAK99",
+      "name": "TERMINAL PULO GADUNG - LAMPIRI",
+      "service": "mikrotrans"
+    },
+    {
+      "code": "2F",
+      "name": "PULO GADUNG - RUSUN CAKUNG BARAT",
+      "service": "rumah-susun"
+    },
+    {
+      "code": "2H",
+      "name": "RUSUN JATI RAWASARI - SENEN",
+      "service": "rumah-susun"
+    },
+    {
+      "code": "3A",
+      "name": "RUSUN PESAKIH - KALIDERES",
+      "service": "rumah-susun"
+    },
+    {
+      "code": "3B",
+      "name": "RUSUN FLAMBOYAN - CENGKARENG",
+      "service": "rumah-susun"
+    },
+    {
+      "code": "3C",
+      "name": "RUSUN KAPUK MUARA-RUSUN TAMBORA",
+      "service": "rumah-susun"
+    },
+    {
+      "code": "4E",
+      "name": "RUSUN JATINEGARA KAUM-PULOGADUNG",
+      "service": "rumah-susun"
+    },
+    {
+      "code": "10B",
+      "name": "RUSUN CIPINANG BESAR SELATAN - PENAS KALIMALANG",
+      "service": "rumah-susun"
+    },
+    {
+      "code": "11B",
+      "name": "RUSUN UJUNG MENTENG - PENGGILINGAN",
+      "service": "rumah-susun"
+    },
+    {
+      "code": "11C",
+      "name": "RUSUN PULO GEBANG - PENGGILINGAN",
+      "service": "rumah-susun"
+    },
+    {
+      "code": "11M",
+      "name": "RUSUN RAWA BEBEK - BUKIT DURI",
+      "service": "rumah-susun"
+    },
+    {
+      "code": "11P",
+      "name": "RUSUN PONDOK BAMBU-WALIKOTA JAKARTA TIMUR",
+      "service": "rumah-susun"
+    },
+    {
+      "code": "11R",
+      "name": "RUSUN CAKUNG KM2 - PENGGILINGAN",
+      "service": "rumah-susun"
+    },
+    {
+      "code": "12C",
+      "name": "RUSUN WADUK PLUIT-RUSUN PENJARINGAN",
+      "service": "rumah-susun"
+    },
+    {
+      "code": "12F",
+      "name": "RUSUN MARUNDA - RUSUN WADUK PLUIT",
+      "service": "rumah-susun"
+    },
+    {
+      "code": "B11",
+      "name": "SUMMARECON BEKASI - CAWANG",
+      "service": "transjabodetabek"
+    },
+    {
+      "code": "B21",
+      "name": "BEKASI TIMUR - CAWANG",
+      "service": "transjabodetabek"
+    },
+    {
+      "code": "B25",
+      "name": "BEKASI - DUKUH ATAS",
+      "service": "transjabodetabek"
+    },
+    {
+      "code": "B41",
+      "name": "VIDA BEKASI - CAWANG SENTRAL",
+      "service": "transjabodetabek"
+    },
+    {
+      "code": "B51",
+      "name": "CIKARANG - CAWANG",
+      "service": "transjabodetabek"
+    },
+    {
+      "code": "D11",
+      "name": "DEPOK - CAWANG SENTRAL VIA CIBUBUR",
+      "service": "transjabodetabek"
+    },
+    {
+      "code": "D21",
+      "name": "UNIVERSITAS INDONESIA - LEBAK BULUS",
+      "service": "transjabodetabek"
+    },
+    {
+      "code": "D41",
+      "name": "SAWANGAN - LEBAK BULUS VIA TOL DESARI",
+      "service": "transjabodetabek"
+    },
+    {
+      "code": "P11",
+      "name": "BLOK M - BOGOR",
+      "service": "transjabodetabek"
+    },
+    {
+      "code": "S11",
+      "name": "BSD (SERPONG) - JELAMBAR",
+      "service": "transjabodetabek"
+    },
+    {
+      "code": "S21",
+      "name": "CSW - CIPUTAT",
+      "service": "transjabodetabek"
+    },
+    {
+      "code": "S22",
+      "name": "CIPUTAT - KAMPUNG RAMBUTAN",
+      "service": "transjabodetabek"
+    },
+    {
+      "code": "S61",
+      "name": "ALAM SUTERA  - BLOK M",
+      "service": "transjabodetabek"
+    },
+    {
+      "code": "SH1",
+      "name": "KALIDERES - PERKANTORAN SOEKARNO HATTA",
+      "service": "transjabodetabek"
+    },
+    {
+      "code": "SH2",
+      "name": "BLOK M - BANDARA SOEKARNO-HATTA",
+      "service": "transjabodetabek"
+    },
+    {
+      "code": "T11",
+      "name": "PORIS PLAWAD - PETAMBURAN",
+      "service": "transjabodetabek"
+    },
+    {
+      "code": "T12",
+      "name": "PORIS PLAWAD - JUANDA",
+      "service": "transjabodetabek"
+    },
+    {
+      "code": "T31",
+      "name": "PIK 2 - BLOK M",
+      "service": "transjabodetabek"
+    },
+    {
+      "code": "1500102",
+      "name": "081804500102",
+      "service": "transjabodetabek"
+    }
+  ]
+}

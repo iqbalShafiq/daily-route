@@ -2,6 +2,7 @@ import { mkdir, readFile, writeFile } from "node:fs/promises";
 import { dirname, resolve } from "node:path";
 
 import { loadCurated, type CuratedDocument } from "../curated.js";
+import { loadOfficialRoutes, OFFICIAL_ROUTES_PATH } from "../official.js";
 import { mergeNetwork } from "../merge.js";
 import { fetchNodes, fetchRouteRelations, fetchUnlinkedRailStations, toOsmRoute } from "../osm.js";
 import type { SystemId } from "../classify.js";
@@ -107,11 +108,21 @@ async function main(): Promise<void> {
   );
 
   console.log("· merging");
+  const officialRoutes = loadOfficialRoutes(`${ROOT}/${OFFICIAL_ROUTES_PATH}`);
+  if (officialRoutes) {
+    console.log(
+      `  ${officialRoutes.corridors.length} koridor resmi (${officialRoutes.source})`,
+    );
+  } else {
+    console.warn(`  daftar koridor resmi tidak ditemukan: ${OFFICIAL_ROUTES_PATH}`);
+  }
+
   const network = mergeNetwork({
     curated: curated.lines,
     osmRoutes,
     extraStations,
     fareRules,
+    officialRoutes,
     notes: curated.notes,
   });
 

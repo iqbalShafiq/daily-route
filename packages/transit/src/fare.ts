@@ -14,12 +14,17 @@
 /** A fare that does not depend on the distance. */
 export type FlatFare = {
   kind: "flat";
-  /** The amount in rupiah, outside the cheaper hours. */
+  /** The amount in rupiah, the price the operator charges as a rule. */
   amount: number;
-  /** The amount in rupiah during the cheaper hours, when there are any. */
-  offPeakAmount?: number;
+  /**
+   * The amount in rupiah during the cheaper hours, when there are any.
+   *
+   * Transjakarta charges less in the early morning, and the name says
+   * so: it is not an "off-peak" that happens to be early.
+   */
+  earlyMorningAmount?: number;
   /** The hours the cheaper amount applies, in local time. */
-  offPeakHours?: string;
+  earlyMorningHours?: string;
 };
 
 /** A fare that is free for the passenger, with a reason. */
@@ -68,6 +73,13 @@ export type FareRules = {
   modes: Record<string, FareRule>;
   /** The combined tickets that cover more than one operator. */
   integrations: IntegrationRule[];
+  /**
+   * The public holidays, as ISO dates.
+   *
+   * The LRT Jabodebek charges the cheaper fare on a public holiday even
+   * when it falls on a working day, so the calendar decides the price.
+   */
+  holidays: readonly string[];
 };
 
 export type IntegrationRule = {
@@ -134,10 +146,15 @@ export function localTimeParts(at: Date): {
   weekday: number;
   hour: number;
   minute: number;
+  /** The date in Jakarta, as `YYYY-MM-DD`. */
+  date: string;
 } {
   const formatter = new Intl.DateTimeFormat("en-GB", {
     timeZone: "Asia/Jakarta",
     weekday: "short",
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
     hour: "2-digit",
     minute: "2-digit",
     hour12: false,
@@ -161,6 +178,7 @@ export function localTimeParts(at: Date): {
     weekday: weekdayMap[read("weekday")] ?? 1,
     hour: Number(read("hour")) % 24,
     minute: Number(read("minute")),
+    date: `${read("year")}-${read("month")}-${read("day")}`,
   };
 }
 
@@ -187,15 +205,23 @@ function isWithinWindow(
   return current >= start || current < end;
 }
 
-/** Whether a moment falls inside a peak window such as "06:00-09:00,16:00-20:00". */
+/**
+ * Whether a moment falls inside a peak window such as
+ * "06:00-09:00,16:00-20:00".
+ *
+ * The peak applies on working days only, and a public holiday counts as
+ * a day off even when it falls on a Monday to Friday.
+ */
 function isPeak(
   at: Date,
   window: string | undefined,
+  holidays: readonly string[],
 ): boolean {
   if (!window) return false;
-  const { weekday, hour, minute } = localTimeParts(at);
+  const { weekday, hour, minute, date } = localTimeParts(at);
   // The peak applies on working days only.
   if (weekday === 0 || weekday === 6) return false;
+  if (holidays.includes(date)) return false;
 
   return window
     .split(",")
@@ -207,22 +233,21 @@ function fareOfLeg(
   rule: FareRule,
   leg: FareLeg,
   at: Date,
+  holidays: readonly string[],
 ): { amount: number; detail?: string } {
   switch (rule.kind) {
     case "free":
       return { amount: 0, detail: rule.note };
 
     case "flat": {
-      const offPeak =
-        rule.offPeakAmount !== undefined && isWithinWindow(
-          localTimeParts(at).hour,
-          localTimeParts(at).minute,
-          rule.offPeakHours,
-        );
-      if (offPeak && rule.offPeakAmount !== undefined) {
+      const { hour, minute } = localTimeParts(at);
+      const earlyMorning =
+        rule.earlyMorningAmount !== undefined &&
+        isWithinWindow(hour, minute, rule.earlyMorningHours);
+      if (earlyMorning && rule.earlyMorningAmount !== undefined) {
         return {
-          amount: rule.offPeakAmount,
-          detail: `di luar jam sibuk (${rule.offPeakHours ?? ""})`,
+          amount: rule.earlyMorningAmount,
+          detail: `pagi hari (${rule.earlyMorningHours ?? ""})`,
         };
       }
       return { amount: rule.amount };
@@ -245,7 +270,7 @@ function fareOfLeg(
       }
       amount = Math.max(rule.min, amount);
 
-      const peak = isPeak(at, rule.peakHours);
+      const peak = isPeak(at, rule.peakHours, holidays);
       const ceiling = peak ? rule.max : (rule.offPeakMax ?? rule.max);
       if (ceiling !== undefined) amount = Math.min(ceiling, amount);
 
@@ -289,7 +314,7 @@ export function quoteFare(input: {
       continue;
     }
 
-    const fare = fareOfLeg(rule, leg, input.at);
+    const fare = fareOfLeg(rule, leg, input.at, input.rules.holidays);
     separateTotal += fare.amount;
     const label = input.labels?.[operator] ?? operator;
     breakdown.push({
@@ -360,17 +385,42 @@ export function quoteFare(input: {
 export function fareOperatorFor(leg: {
   systemId: string;
   serviceClass: string | null;
+  /** The code of the line, when the operator prices a route on its own. */
+  lineCode?: string | null;
 }): string | null {
+  const code = (leg.lineCode ?? "").replace(/\./g, "").toUpperCase();
+
+  // Two services are priced per route rather than per kind of service.
+  // The Royaltrans to Serpong is more than double the usual price, and
+  // the Transbandara to the airport was set at its own tariff.
+  if (leg.serviceClass === "royaltrans" && code === "S13") {
+    return "transjakarta-royaltrans-s13";
+  }
+  if (leg.serviceClass === "transjabodetabek" && code === "SH2") {
+    return "transjakarta-transbandara";
+  }
+
   switch (leg.serviceClass) {
     case "brt":
       return "transjakarta-brt";
     case "non-brt":
     case "minitrans":
+    // The night bus carries the same ticket as the daytime service.
+    case "amari": // eslint-disable-line no-fallthrough
       return "transjakarta-non-brt";
-    case "feeder":
-      return "transjakarta-feeder";
+    case "mikrotrans":
+      return "transjakarta-mikrotrans";
     case "royaltrans":
       return "transjakarta-royaltrans";
+    // The sightseeing buses and the buses that serve the housing blocks
+    // are free for the passenger; the cross-border services carry the
+    // regular fare.
+    case "wisata":
+      return "transjakarta-wisata";
+    case "rumah-susun":
+      return "transjakarta-rumah-susun";
+    case "transjabodetabek":
+      return "transjakarta-transjabodetabek";
     case "rapid-transit":
       return "mrt-jakarta";
     case "lrt":
@@ -384,6 +434,8 @@ export function fareOperatorFor(leg: {
 
 /** The names the operators are known by, for the breakdown. */
 export const FARE_OPERATOR_LABELS: Record<string, string> = {
+  "transjakarta-royaltrans-s13": "Royaltrans Summarecon Serpong - Tomang",
+  "transjakarta-transbandara": "Transbandara Blok M - Bandara Soekarno-Hatta",
   "transjakarta-brt": "Transjakarta BRT (Jakpro)",
   "transjakarta-non-brt": "Transjakarta Metrotrans / Minitrans",
   "transjakarta-feeder": "Transjakarta Mikrotrans",

@@ -7,14 +7,13 @@
       "peak": {
         "amount": 3500,
         "currency": "IDR",
-        "label": "Jam sibuk"
+        "label": "Tarif reguler"
       },
       "offPeak": {
         "amount": 2000,
         "currency": "IDR",
-        "label": "Di luar jam sibuk"
+        "label": "Pagi hari (tap-in 05.00-07.00)"
       },
-      "offPeakHours": "05:00-07:00",
       "transferRule": "Flat fare charged per boarding (tap-in), not per journey: changing vehicle means a new tap-in and a new full fare. A transfer is covered only by the OKOTRIP scheme (max Rp 5,000 within 3 hours, JakLingko co-branded card only) or by the Integrasi Multimodal scheme (max Rp 10,000 within 3 hours, covering Transjakarta BRT + MRT Jakarta + LRT Jakarta). Mikrotrans and non-BRT buses break the multimodal scheme and require a separate ticket. The peak/off-peak band is decided by the tap-in time, not the tap-out time. KLG holders travel free.",
       "microtransFare": {
         "amount": 0,
@@ -27,7 +26,8 @@
         "https://id.wikipedia.org/w/index.php?title=Transjakarta&action=raw",
         "https://transjakarta.co.id/layanan/brt",
         "https://jaklingkoindonesia.co.id/faq-tarif-integrasi"
-      ]
+      ],
+      "earlyMorningHours": "05:00-07:00"
     },
     "transjakarta-non-brt": {
       "label": "Transjakarta non-BRT (Angkutan Pengumpan: Metrotrans, Minitrans)",
@@ -35,14 +35,13 @@
       "peak": {
         "amount": 3500,
         "currency": "IDR",
-        "label": "Jam sibuk"
+        "label": "Tarif reguler"
       },
       "offPeak": {
         "amount": 2000,
         "currency": "IDR",
-        "label": "Di luar jam sibuk"
+        "label": "Pagi hari (tap-in 05.00-07.00)"
       },
-      "offPeakHours": "05:00-07:00",
       "transferRule": "Same flat Jakpro fare as the BRT corridors: Rp 3,500 at every time except 05:00-07:00 WIB (Rp 2,000), decided by tap-in time. Each boarding is charged separately; non-BRT buses are excluded from the JakLingko Integrasi Multimodal scheme and BREAK it, so a feeder leg between two covered modes forces a new fare. Royaltrans is a separate non-subsidised product (see royaltransFare) and is never covered by any integration scheme.",
       "royaltransFare": {
         "amount": 20000,
@@ -56,7 +55,8 @@
         "https://transjakarta.co.id/layanan/angkutan-pengumpan",
         "https://transjakarta.co.id/layanan/royaltrans",
         "https://news.detik.com/berita/d-6891014/transjakarta-tarif-bus-royaltrans-tetap-rp-20-000"
-      ]
+      ],
+      "earlyMorningHours": "05:00-07:00"
     },
     "mrt-jakarta": {
       "label": "MRT Jakarta",
@@ -106,7 +106,7 @@
       "peak": {
         "amount": 5000,
         "currency": "IDR",
-        "label": "Jam sibuk"
+        "label": "Tarif"
       },
       "offPeak": {
         "amount": 5000,
@@ -162,7 +162,11 @@
         "https://lrtjabodebek.kai.id/daftar-stasiun-lrt-jabodebek",
         "https://id.wikipedia.org/w/index.php?title=LRT_Jabodebek&action=raw",
         "https://id.wikipedia.org/w/index.php?title=Daftar_tarif_LRT_Jabodebek&action=raw"
-      ]
+      ],
+      "baseKm": 1,
+      "stepKm": 1,
+      "peakHours": "06:00-09:00,16:00-20:00",
+      "peakHoursNote": "Jam sibuk 06:00-08:59 dan 16:00-19:59, Senin sampai Jumat, di luar hari libur nasional. Sabtu, Minggu dan hari libur nasional memakai tarif maksimal yang lebih rendah."
     },
     "krl-jabodetabek": {
       "label": "KRL Jabodetabek (KAI Commuter)",
@@ -192,11 +196,6 @@
         "amount": 3000,
         "currency": "IDR"
       },
-      "max": {
-        "amount": 0,
-        "currency": "IDR",
-        "note": "UNKNOWN, not zero: KAI Commuter publishes a formula, not a cap. No maximum was found on any operator or news page read."
-      },
       "transferRule": "Distance-based tariff under Kepmenhub 354/2020 (structure inherited from Permenhub 35/2016): Rp 3,000 for the first 25 km, then Rp 1,000 for every further 10 km. Example: Bogor to Tanah Abang = Rp 3,000 + Rp 1,000 = Rp 4,000. There is no class-based tariff in Jabodetabek any more: all services are KRL AC since the non-AC Economy trains were withdrawn on 25 July 2013, and the single-trip-with-deposit ticket (THB) was abolished on 3 September 2022. The free-out facility was withdrawn on 16 December 2015, so a same-station journey is charged the lowest tariff. JakLingko lets a rider BUY a KRL QR ticket, but the KRL tariff itself is NOT integrated: changing to or from any other mode costs a second full fare, and KRL is explicitly excluded from the Rp 10,000 Integrasi Multimodal scheme. Payment: KMT (minimum balance Rp 5,000), bank e-money, JakLingko, Access by KAI, C-Access, GoTransit QR, QRIS Tap (since 30 October 2025); LinkAja was discontinued on 16 January 2023.",
       "verified": true,
       "sources": [
@@ -204,6 +203,97 @@
         "https://news.detik.com/berita/d-7929030/bagaimana-cara-hitung-tarif-krl-jabodetabek-simak-infonya",
         "https://id.wikipedia.org/w/index.php?title=KRL_Commuter_Line&action=raw",
         "https://id.wikipedia.org/w/index.php?title=Kartu_Multi_Trip&action=raw"
+      ],
+      "baseKm": 25,
+      "stepKm": 10,
+      "maxNote": "KAI Commuter tidakmunitionkan plafon tarif; tarifnya sebuah rumus, bukan batas atas."
+    },
+    "transjakarta-mikrotrans": {
+      "label": "Transjakarta Mikrotrans (JakLingko)",
+      "structure": "free",
+      "note": "Mikrotrans JakLingko gratis bagi penumpang pada 21 Oktober 2026; penumpang tetap harus tap-in dan tap-out, dan operator dibayar per jarak tempuh. Usulan tarif Rp 2.000 mulai 1 Januari 2027 belum berlaku.",
+      "verified": true,
+      "sources": [
+        "https://www.antaranews.com/berita/375342/mikrotrans-jaklingko-gratis-biaya-uje-",
+        "https://transjakarta.co.id/layanan/mikrotrans"
+      ]
+    },
+    "transjakarta-wisata": {
+      "label": "Bus Wisata Transjakarta",
+      "structure": "free",
+      "note": "Bus Wisata Transjakarta beroperasi dengan tarif Rp 0 atau gratis, demikian keterangan resmi operator untuk BW1, BW2 dan BW4.",
+      "verified": true,
+      "sources": [
+        "https://transjakarta.co.id/berita/liburan-tahun-baru-seru-dan-hemat-nikmati-jakarta-dengan-bus-tingkat-transjakarta"
+      ]
+    },
+    "transjakarta-rumah-susun": {
+      "label": "Bus ke Hunian Rusun Transjakarta",
+      "structure": "flat",
+      "peak": {
+        "amount": 3500,
+        "currency": "IDR",
+        "label": "Tarif reguler"
+      },
+      "offPeak": {
+        "amount": 2000,
+        "currency": "IDR",
+        "label": "Pagi hari (tap-in 05.00-07.00)"
+      },
+      "earlyMorningHours": "05:00-07:00",
+      "note": "Layanan bus ke hunian rusun memakai tarif reguler Transjakarta, Rp 3.500; penghuni rusun termasuk salah satu kelompok yang mendapat tarif gratis.",
+      "verified": false,
+      "sources": [
+        "https://transjakarta.co.id/rute"
+      ]
+    },
+    "transjakarta-transjabodetabek": {
+      "label": "Layanan Transjabodetabek",
+      "structure": "flat",
+      "peak": {
+        "amount": 3500,
+        "currency": "IDR",
+        "label": "Tarif reguler"
+      },
+      "offPeak": {
+        "amount": 2000,
+        "currency": "IDR",
+        "label": "Pagi hari (tap-in 05.00-07.00)"
+      },
+      "earlyMorningHours": "05:00-07:00",
+      "note": "Layanan Transjabodetabek memakai tarif reguler Transjakarta, Rp 3.500; 그는 Gubernur DKI Jakarta menjelaskan tarif itu disubsidi Pemerintah DKI.",
+      "verified": true,
+      "sources": [
+        "https://beritanasional.com/detail/101196/tarif-transjabodetabek-blok-m-alam-sutera-rp-3500-gratis-untuk-15-golongan"
+      ]
+    },
+    "transjakarta-royaltrans-s13": {
+      "label": "Royaltrans Summarecon Serpong - Tomang",
+      "structure": "flat",
+      "peak": {
+        "amount": 35000,
+        "currency": "IDR",
+        "label": "Tarif"
+      },
+      "note": "Rute Royaltrans ke Serpong dihargai lebih tinggi daripada rute Royaltrans lainnya karena jaraknya jauh lebih panjang.",
+      "verified": true,
+      "sources": [
+        "https://news.detik.com/berita/d-7113315/info-layanan-bus-amari-transjakarta-daftar-koridor-rute-jadwal"
+      ]
+    },
+    "transjakarta-transbandara": {
+      "label": "Transbandara Blok M - Bandara Soekarno-Hatta",
+      "structure": "flat",
+      "peak": {
+        "amount": 15000,
+        "currency": "IDR",
+        "label": "Tarif"
+      },
+      "note": "Tarif ditetapkan dalam Kepgub Nomor 685 Tahun 2026, berlaku sejak 1 September 2026. Sebelumnya rute ini masih dalam masa uji coba dengan tarif Rp 3.500.",
+      "verified": true,
+      "sources": [
+        "https://jdih.jakarta.go.id/link/download-fulltext/15051",
+        "https://m.beritajakarta.id/read/154429/"
       ]
     }
   },
@@ -327,6 +417,45 @@
     "OKOTRIP (Transjakarta-only, max Rp 5,000 in 3 hours, JakLingko co-branded card) is documented only on id.wikipedia; JakLingko's current 2026 tariff FAQ does not mention it, so it is flagged verified: false and may be superseded by the Integrasi Multimodal scheme.",
     "Free-travel groups: Kartu Layanan Gratis (KLG) holders travel free on Transjakarta, MRT Jakarta and LRT Jakarta. The eligible groups are being widened from 15 to 21.",
     "Transfer tap-in/tap-out rules a rider must respect: Transjakarta charges at tap-out and needs a minimum balance of Rp 5,000; a missed tap-out blocks the card; the KRL free-out was withdrawn in December 2015; the LRT Jakarta paid-area overstay penalty is Rp 5,000 after 2 hours.",
-    "Cross-mode connectivity exists without a shared ticket at Dukuh Atas (LRT Jabodebek Dukuh Atas / MRT Jakarta Dukuh Atas / KAI Commuter Sudirman / Transjakarta, via the JPM Dukuh Atas transport hub) and at Manggarai (LRT Jakarta Manggarai / KRL Manggarai). Each side is charged separately."
-  ]
+    "Cross-mode connectivity exists without a shared ticket at Dukuh Atas (LRT Jabodebek Dukuh Atas / MRT Jakarta Dukuh Atas / KAI Commuter Sudirman / Transjakarta, via the JPM Dukuh Atas transport hub) and at Manggarai (LRT Jakarta Manggarai / KRL Manggarai). Each side is charged separately.",
+    "Perubahan tarif 1 Januari 2027: tanggalnya sudah ditetapkan (diumumkan 29-30 September 2026) untuk Transjakarta, Transjabodetabek dan LRT Jakarta; MRT tidak ikut. Besarannya belum diumumkan sampai 21 Oktober 2026, sehingga aplikasi ini masih memakai tarif yang berlaku hari ini."
+  ],
+  "holidays": [
+    "2026-01-01",
+    "2026-01-16",
+    "2026-02-17",
+    "2026-03-19",
+    "2026-03-21",
+    "2026-03-22",
+    "2026-04-03",
+    "2026-04-05",
+    "2026-05-01",
+    "2026-05-14",
+    "2026-05-27",
+    "2026-05-31",
+    "2026-06-01",
+    "2026-06-16",
+    "2026-08-17",
+    "2026-08-25",
+    "2026-12-25",
+    "2027-01-01",
+    "2027-01-05",
+    "2027-02-06",
+    "2027-03-08",
+    "2027-03-10",
+    "2027-03-11",
+    "2027-03-26",
+    "2027-03-28",
+    "2027-05-01",
+    "2027-05-06",
+    "2027-05-17",
+    "2027-05-20",
+    "2027-06-01",
+    "2027-06-06",
+    "2027-08-15",
+    "2027-08-17",
+    "2027-12-25",
+    "2027-12-26"
+  ],
+  "holidaysSource": "SKB 3 Menteri tentang Hari Libur Nasional dan Cuti Bersama 2026 (Sekretariat Negara, 17 hari libur nasional) dan 2027 (18 hari, ditetapkan 18 September 2026)."
 }

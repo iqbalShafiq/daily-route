@@ -14,6 +14,13 @@ export type FaresDocument = {
   modes: Record<string, Record<string, unknown>>;
   integrations: Record<string, unknown>[];
   notes: string[];
+  /**
+   * The public holidays, as ISO dates.
+   *
+   * The LRT Jabodebek charges the cheaper fare on a public holiday even
+   * when it falls on a working day.
+   */
+  holidays?: string[];
 };
 
 type Amount = { amount: number; currency: string; note?: string; label?: string };
@@ -35,11 +42,20 @@ function text(value: unknown): string | undefined {
   return typeof value === "string" ? value : undefined;
 }
 
+function numberOf(value: unknown): number | undefined {
+  return typeof value === "number" && Number.isFinite(value) ? value : undefined;
+}
+
 /** The rule of one operator, from the published document. */
 function ruleOf(mode: Record<string, unknown>): FareRule | null {
   const structure = text(mode["structure"]);
   const peak = amountOf(mode["peak"]);
   const offPeak = amountOf(mode["offPeak"]);
+  // The number of kilometres the base covers and the size of every step
+  // are stated by the operator, so they are read from the document and
+  // never guessed from the wording of a note.
+  const baseKm = numberOf(mode["baseKm"]);
+  const stepKm = numberOf(mode["stepKm"]);
   const minimum = amountOf(mode["min"]);
   const maximum = amountOf(mode["max"]);
   const base = amountOf(mode["base"]);
@@ -59,13 +75,22 @@ function ruleOf(mode: Record<string, unknown>): FareRule | null {
   }
 
   switch (structure) {
+    case "free": {
+      const note = text(mode["note"]);
+      if (!note) return null;
+      return { kind: "free", note };
+    }
+
     case "flat": {
       if (!peak) return null;
       return {
         kind: "flat",
         amount: peak.amount,
         ...(offPeak && offPeak.amount !== peak.amount
-          ? { offPeakAmount: offPeak.amount, offPeakHours: text(mode["offPeakHours"]) ?? "05:00-07:00" }
+          ? {
+              earlyMorningAmount: offPeak.amount,
+              earlyMorningHours: text(mode["earlyMorningHours"]) ?? "05:00-07:00",
+            }
           : {}),
       };
     }
@@ -74,9 +99,8 @@ function ruleOf(mode: Record<string, unknown>): FareRule | null {
       if (!base || !perKm || !minimum) return null;
       // The base covers a number of kilometres that differs per operator:
       // the LRT Jabodebek charges for the first kilometre, the KRL for the
-      // first twenty-five.
-      const baseKm = base.note?.toLowerCase().includes("25 km") ? 25 : 1;
-      const stepKm = perKm.note?.toLowerCase().includes("10 km") ? 10 : 1;
+      // first twenty-five. The document states both numbers.
+      if (baseKm === undefined || stepKm === undefined) return null;
       return {
         kind: "perKm",
         base: base.amount,
@@ -86,7 +110,10 @@ function ruleOf(mode: Record<string, unknown>): FareRule | null {
         min: minimum.amount,
         ...(maximum && maximum.amount > 0 ? { max: maximum.amount } : {}),
         ...(offPeak && offPeak.amount !== peak?.amount
-          ? { offPeakMax: offPeak.amount, peakHours: "06:00-09:00,16:00-20:00" }
+          ? {
+              offPeakMax: offPeak.amount,
+              peakHours: text(mode["peakHours"]) ?? "06:00-09:00,16:00-20:00",
+            }
           : {}),
       };
     }
@@ -141,19 +168,16 @@ export function loadFareRules(document: FaresDocument): FareRules {
     if (rule) modes[key] = rule;
   }
 
-  // The feeder routes of JakLingko are free for the passenger for now.
-  modes["transjakarta-feeder"] = {
-    kind: "free",
-    note: "Mikrotrans JakLingko masih gratis bagi penumpang; tarif Rp 2.000 hanya usulan.",
-  };
-
-  // Royaltrans is a separate product with its own price.
-  modes["transjakarta-royaltrans"] = { kind: "flat", amount: 20_000 };
+  // The Royaltrans service has one price, and the route to Serpong
+  // another; the document states both.
+  if (!modes["transjakarta-royaltrans"]) {
+    modes["transjakarta-royaltrans"] = { kind: "flat", amount: 20_000 };
+  }
 
   const integrations = document.integrations
     .map((entry) => integrationOf(entry as Record<string, unknown>))
     .filter((rule): rule is IntegrationRule => rule !== null)
     .filter((rule) => rule.covers.length > 0);
 
-  return { modes, integrations };
+  return { modes, integrations, holidays: document.holidays ?? [] };
 }

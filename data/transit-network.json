@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-10-21T01:11:20.352Z",
+  "generatedAt": "2026-10-21T03:08:36.032Z",
   "sources": [
     "OpenStreetMap (ODbL) via the Overpass API — station coordinates, route relations and stop order",
     "research/data/transjakarta.json — official corridor names, operators, service hours and stop lists",
@@ -12,7 +12,7 @@
       "mode": "bus",
       "operator": "PT Transportasi Jakarta",
       "color": "#0b6b4f",
-      "website": "https://www.transjakarta.co.id",
+      "website": "https://transjakarta.co.id",
       "description": "Bus operasional Transjakarta: koridor BRT, Metrotrans (non-BRT), Royaltrans, Minitrans, Mikrotrans dan Amari."
     },
     {
@@ -21,7 +21,7 @@
       "mode": "metro",
       "operator": "PT MRT Jakarta Perseroda",
       "color": "#0f5aa8",
-      "website": "https://www.mrtjakarta.co.id",
+      "website": "https://jakartamrt.co.id",
       "description": "Mass Rapid Transit Jakarta. Lin Utara–Selatan telah beroperasi sejak 2019 (Lebak Bulus–Bundaran HI, 13 stasiun); Lin Timur–Barat masih dalam konstruksi (Tahap 1 Tomang–Medan Satria)."
     },
     {
@@ -39,7 +39,7 @@
       "mode": "tram",
       "operator": "PT LRT Jabodebek",
       "color": "#7c3aed",
-      "website": "https://www.lrtjabodebek.co.id",
+      "website": "https://lrtjabodebek.kai.id",
       "description": "LRT Jabodebek: 18 stasiun, dibuka 28 Agustus 2023. Dua cabang dari trunk Dukuh Atas–Cawang: Cibubur–Harjamukti dan Bekasi–Jati Mulya."
     },
     {
@@ -48,7 +48,7 @@
       "mode": "rail",
       "operator": "PT Kereta Api Indonesia (KAI Commuter)",
       "color": "#b45309",
-      "website": "https://www.kai.id",
+      "website": "https://www.kci.id",
       "description": "Kereta api commuter Jabodetabek: Lin Bogor, Lin Cikarang, Lin Rangkasbitung, Lin Tangerang, dan Lin Tanjung Priok."
     }
   ],
@@ -79,6 +79,7 @@
           "https://id.wikipedia.org/wiki/Transjakarta"
         ],
         "officialName": "BLOK M - KOTA",
+        "officialService": "brt",
         "osmRelationIds": [
           16738414,
           16739341
@@ -115,6 +116,7 @@
           "https://id.wikipedia.org/wiki/Transjakarta"
         ],
         "officialName": "PULO GADUNG  - MONUMEN NASIONAL",
+        "officialService": "brt",
         "osmRelationIds": [
           2922061,
           6783310
@@ -150,6 +152,7 @@
           "https://id.wikipedia.org/wiki/Transjakarta"
         ],
         "officialName": "KALIDERES - MONUMEN NASIONAL VIA VETERAN",
+        "officialService": "brt",
         "osmRelationIds": [
           6194223,
           17020066
@@ -185,6 +188,7 @@
           "https://id.wikipedia.org/wiki/Transjakarta"
         ],
         "officialName": "PULO GADUNG - GALUNGGUNG",
+        "officialService": "brt",
         "osmRelationIds": [
           6194224,
           14717456
@@ -221,6 +225,7 @@
           "https://id.wikipedia.org/wiki/Transjakarta"
         ],
         "officialName": "KAMPUNG MELAYU - ANCOL",
+        "officialService": "brt",
         "osmRelationIds": [
           6194225,
           16868145
@@ -257,6 +262,7 @@
           "https://id.wikipedia.org/wiki/Transjakarta"
         ],
         "officialName": "RAGUNAN - GALUNGGUNG",
+        "officialService": "brt",
         "osmRelationIds": [
           6197528,
           16935748
@@ -293,6 +299,7 @@
           "https://id.wikipedia.org/wiki/Transjakarta"
         ],
         "officialName": "KAMPUNG MELAYU - KAMPUNG RAMBUTAN",
+        "officialService": "brt",
         "osmRelationIds": [
           2932283,
           16035085
@@ -329,6 +336,7 @@
           "https://id.wikipedia.org/wiki/Transjakarta"
         ],
         "officialName": "LEBAK BULUS - PASAR BARU",
+        "officialService": "brt",
         "osmRelationIds": [
           6198078,
           17019301
@@ -365,6 +373,7 @@
           "https://id.wikipedia.org/wiki/Transjakarta"
         ],
         "officialName": "PINANG RANTI - PLUIT",
+        "officialService": "brt",
         "osmRelationIds": [
           6198079,
           10042521
@@ -401,6 +410,7 @@
           "https://id.wikipedia.org/wiki/Transjakarta"
         ],
         "officialName": "TANJUNG PRIOK - PGC",
+        "officialService": "brt",
         "osmRelationIds": [
           6198075,
           16871501
@@ -437,6 +447,7 @@
           "https://id.wikipedia.org/wiki/Transjakarta"
         ],
         "officialName": "PULO GEBANG - KAMPUNG MELAYU",
+        "officialService": "brt",
         "osmRelationIds": [
           6198076,
           17003390
@@ -472,6 +483,7 @@
           "https://id.wikipedia.org/wiki/Transjakarta"
         ],
         "officialName": "PLUIT - TANJUNG PRIOK",
+        "officialService": "brt",
         "osmRelationIds": [
           6198077,
           16871385
@@ -508,6 +520,7 @@
           "https://id.wikipedia.org/wiki/Transjakarta"
         ],
         "officialName": "CILEDUG - TEGAL MAMPANG",
+        "officialService": "brt",
         "osmRelationIds": [
           13251858,
           13251859
@@ -544,6 +557,7 @@
           "https://id.wikipedia.org/wiki/Transjakarta"
         ],
         "officialName": "JAKARTA INTERNATIONAL STADIUM - SENEN",
+        "officialService": "brt",
         "osmRelationIds": [
           16732068,
           16732069
@@ -579,6 +593,7 @@
           "https://id.wikipedia.org/wiki/Transjakarta"
         ],
         "officialName": "PULO GADUNG  - RAWA BUAYA",
+        "officialService": "brt",
         "osmRelationIds": [
           17193583,
           17193584
@@ -614,6 +629,7 @@
           "https://id.wikipedia.org/wiki/Transjakarta"
         ],
         "officialName": "KALIDERES - SENAYAN BANK JAKARTA",
+        "officialService": "brt",
         "osmRelationIds": [
           17193580,
           17193581
@@ -649,6 +665,7 @@
           "https://id.wikipedia.org/wiki/Transjakarta"
         ],
         "officialName": "DAMAI - KOTA",
+        "officialService": "brt",
         "osmRelationIds": [
           17378218,
           17378219
@@ -684,6 +701,7 @@
           "https://id.wikipedia.org/wiki/Transjakarta"
         ],
         "officialName": "PULO GADUNG  - KUNINGAN",
+        "officialService": "brt",
         "osmRelationIds": [
           17208104,
           17208105
@@ -719,6 +737,7 @@
           "https://id.wikipedia.org/wiki/Transjakarta"
         ],
         "officialName": "CILILITAN  - JUANDA",
+        "officialService": "brt",
         "osmRelationIds": [
           17193586,
           17193590
@@ -754,6 +773,7 @@
           "https://id.wikipedia.org/wiki/Transjakarta"
         ],
         "officialName": "RAGUNAN - BALAI KOTA VIA KUNINGAN",
+        "officialService": "brt",
         "osmRelationIds": [
           17206156,
           17206157
@@ -789,6 +809,7 @@
           "https://id.wikipedia.org/wiki/Transjakarta"
         ],
         "officialName": "RAGUNAN - BALAI KOTA VIA SEMANGGI",
+        "officialService": "brt",
         "osmRelationIds": [
           17206159,
           17206160
@@ -824,6 +845,7 @@
           "https://id.wikipedia.org/wiki/Transjakarta"
         ],
         "officialName": "RAGUNAN - SENAYAN BANK JAKARTA",
+        "officialService": "brt",
         "osmRelationIds": [
           17206162,
           17206163
@@ -859,6 +881,7 @@
           "https://id.wikipedia.org/wiki/Transjakarta"
         ],
         "officialName": "KAMPUNG RAMBUTAN - JUANDA VIA CEMPAKA PUTIH",
+        "officialService": "brt",
         "osmRelationIds": [
           17193587,
           17193588
@@ -894,6 +917,7 @@
           "https://id.wikipedia.org/wiki/Transjakarta"
         ],
         "officialName": "CILILITAN - GROGOL",
+        "officialService": "brt",
         "osmRelationIds": [
           10049799,
           10116953
@@ -929,6 +953,7 @@
           "https://id.wikipedia.org/wiki/Transjakarta"
         ],
         "officialName": "PINANG RANTI - BUNDARAN SENAYAN",
+        "officialService": "brt",
         "osmRelationIds": [
           17206880,
           17206881
@@ -964,6 +989,7 @@
           "https://id.wikipedia.org/wiki/Transjakarta"
         ],
         "officialName": "PINANG RANTI - SIMPANG CAWANG",
+        "officialService": "brt",
         "osmRelationIds": [
           17676136,
           17676137
@@ -999,6 +1025,7 @@
           "https://id.wikipedia.org/wiki/Transjakarta"
         ],
         "officialName": "TANJUNG PRIOK - BUNDARAN SENAYAN",
+        "officialService": "brt",
         "osmRelationIds": [
           17205660,
           17205661
@@ -1034,6 +1061,7 @@
           "https://id.wikipedia.org/wiki/Transjakarta"
         ],
         "officialName": "PURI BETA - PANCORAN",
+        "officialService": "brt",
         "osmRelationIds": [
           17613860,
           17613861
@@ -1066,6 +1094,7 @@
           "https://id.wikipedia.org/wiki/Transjakarta"
         ],
         "officialName": "PURI BETA - FLYOVER KUNINGAN",
+        "officialService": "brt",
         "osmRelationIds": [],
         "rawName": null,
         "from": null,
@@ -1098,6 +1127,7 @@
           "https://id.wikipedia.org/wiki/Transjakarta"
         ],
         "officialName": "PURI BETA - FLYOVER KUNINGAN (EXPRESS)",
+        "officialService": "brt",
         "osmRelationIds": [
           17206328,
           17206329
@@ -1133,6 +1163,7 @@
           "https://id.wikipedia.org/wiki/Transjakarta"
         ],
         "officialName": "PANTAI MAJU - BALAI KOTA",
+        "officialService": "non-brt",
         "osmRelationIds": [
           17248439,
           17248441
@@ -1168,6 +1199,7 @@
           "https://id.wikipedia.org/wiki/Transjakarta"
         ],
         "officialName": "STASIUN PALMERAH - TRANSPORT HUB DUKUH ATAS",
+        "officialService": "non-brt",
         "osmRelationIds": [
           17241279,
           17242457
@@ -1203,6 +1235,7 @@
           "https://id.wikipedia.org/wiki/Transjakarta"
         ],
         "officialName": "PONDOK LABU - BLOK M",
+        "officialService": "non-brt",
         "osmRelationIds": [
           17268868,
           17268873
@@ -1238,6 +1271,7 @@
           "https://id.wikipedia.org/wiki/Transjakarta"
         ],
         "officialName": "STASIUN PALMERAH - BUNDARAN SENAYAN",
+        "officialService": "non-brt",
         "osmRelationIds": [
           17241280,
           17242452
@@ -1273,6 +1307,7 @@
           "https://id.wikipedia.org/wiki/Transjakarta"
         ],
         "officialName": "TANAH ABANG - STASIUN GONDANGDIA",
+        "officialService": "non-brt",
         "osmRelationIds": [
           17238529,
           17238532
@@ -1308,6 +1343,7 @@
           "https://id.wikipedia.org/wiki/Transjakarta"
         ],
         "officialName": "MERUYA - BLOK M",
+        "officialService": "non-brt",
         "osmRelationIds": [
           17803285,
           17803286
@@ -1343,6 +1379,7 @@
           "https://id.wikipedia.org/wiki/Transjakarta"
         ],
         "officialName": "SENEN - BLOK M",
+        "officialService": "non-brt",
         "osmRelationIds": [
           17218696,
           17237387
@@ -1378,6 +1415,7 @@
           "https://id.wikipedia.org/wiki/Transjakarta"
         ],
         "officialName": "REMPOA - BLOK M",
+        "officialService": "non-brt",
         "osmRelationIds": [
           3070516,
           17268935
@@ -1413,6 +1451,7 @@
           "https://id.wikipedia.org/wiki/Transjakarta"
         ],
         "officialName": "SENEN - TANAH ABANG",
+        "officialService": "non-brt",
         "osmRelationIds": [
           17218701,
           17238528
@@ -1448,6 +1487,7 @@
           "https://id.wikipedia.org/wiki/Transjakarta"
         ],
         "officialName": "HARAPAN INDAH - PULO GADUNG",
+        "officialService": "non-brt",
         "osmRelationIds": [
           17620958,
           17620959
@@ -1483,6 +1523,7 @@
           "https://id.wikipedia.org/wiki/Transjakarta"
         ],
         "officialName": "STASIUN GONDANGDIA - PASAR SENEN",
+        "officialService": "non-brt",
         "osmRelationIds": [
           17242299,
           17242309
@@ -1518,6 +1559,7 @@
           "https://id.wikipedia.org/wiki/Transjakarta"
         ],
         "officialName": "GONDANGDIA - BALAIKOTA",
+        "officialService": "non-brt",
         "osmRelationIds": [
           17242300,
           17242304
@@ -1553,6 +1595,7 @@
           "https://id.wikipedia.org/wiki/Transjakarta"
         ],
         "officialName": "TAMAN KOTA - PENJARINGAN VIA TUBAGUS ANGKE",
+        "officialService": "non-brt",
         "osmRelationIds": [
           17636547,
           17636548
@@ -1588,6 +1631,7 @@
           "https://id.wikipedia.org/wiki/Transjakarta"
         ],
         "officialName": "SENTRALAND CENGKARENG - PURI KEMBANGAN",
+        "officialService": "non-brt",
         "osmRelationIds": [
           17681845,
           17681867
@@ -1623,6 +1667,7 @@
           "https://id.wikipedia.org/wiki/Transjakarta"
         ],
         "officialName": "STASIUN MANGGARAI - UNIVERSITAS INDONESIA",
+        "officialService": "non-brt",
         "osmRelationIds": [
           17251674,
           17251676
@@ -1658,6 +1703,7 @@
           "https://id.wikipedia.org/wiki/Transjakarta"
         ],
         "officialName": "JIEP - BUNDARAN SENAYAN",
+        "officialService": "non-brt",
         "osmRelationIds": [
           17218712,
           17218719
@@ -1693,6 +1739,7 @@
           "https://id.wikipedia.org/wiki/Transjakarta"
         ],
         "officialName": "PINANG RANTI - PULO GADUNG",
+        "officialService": "non-brt",
         "osmRelationIds": [
           17614924,
           17614925
@@ -1728,6 +1775,7 @@
           "https://id.wikipedia.org/wiki/Transjakarta"
         ],
         "officialName": "PULO GADUNG - KEJAKSAAN AGUNG",
+        "officialService": "non-brt",
         "osmRelationIds": [
           17758810,
           17758816
@@ -1763,6 +1811,7 @@
           "https://id.wikipedia.org/wiki/Transjakarta"
         ],
         "officialName": "STASIUN TEBET - BIDARA CINA",
+        "officialService": "non-brt",
         "osmRelationIds": [
           17249158,
           17249159
@@ -1798,6 +1847,7 @@
           "https://id.wikipedia.org/wiki/Transjakarta"
         ],
         "officialName": "KAMPUNG MELAYU - TANAH ABANG",
+        "officialService": "non-brt",
         "osmRelationIds": [
           17249164,
           17249167
@@ -1833,6 +1883,7 @@
           "https://id.wikipedia.org/wiki/Transjakarta"
         ],
         "officialName": "KAMPUNG MELAYU - TANAH ABANG",
+        "officialService": "non-brt",
         "osmRelationIds": [
           17243068,
           17243075
@@ -1868,6 +1919,7 @@
           "https://id.wikipedia.org/wiki/Transjakarta"
         ],
         "officialName": "RAGUNAN- KAMPUNG MELAYU",
+        "officialService": "non-brt",
         "osmRelationIds": [
           17249161,
           17249170
@@ -1903,6 +1955,7 @@
           "https://id.wikipedia.org/wiki/Transjakarta"
         ],
         "officialName": "STASIUN TEBET - KUNINGAN",
+        "officialService": "non-brt",
         "osmRelationIds": [
           17250075,
           17250079
@@ -1938,6 +1991,7 @@
           "https://id.wikipedia.org/wiki/Transjakarta"
         ],
         "officialName": "STASIUN TEBET - BUNDARAN SENAYAN",
+        "officialService": "non-brt",
         "osmRelationIds": [
           17250076,
           17250077
@@ -1973,6 +2027,7 @@
           "https://id.wikipedia.org/wiki/Transjakarta"
         ],
         "officialName": "KUNINGAN - KARET",
+        "officialService": "non-brt",
         "osmRelationIds": [
           17251020,
           17251021
@@ -2008,6 +2063,7 @@
           "https://id.wikipedia.org/wiki/Transjakarta"
         ],
         "officialName": "STASIUN MANGGARAI - BLOK M",
+        "officialService": "non-brt",
         "osmRelationIds": [
           17243312,
           17243313
@@ -2043,6 +2099,7 @@
           "https://id.wikipedia.org/wiki/Transjakarta"
         ],
         "officialName": "RAGUNAN - BLOK M VIA KEMANG",
+        "officialService": "non-brt",
         "osmRelationIds": [
           17268244,
           17268245
@@ -2078,6 +2135,7 @@
           "https://id.wikipedia.org/wiki/Transjakarta"
         ],
         "officialName": "DUKUH ATAS - CASABLANCA VIA EPICENTRUM",
+        "officialService": "non-brt",
         "osmRelationIds": [
           17676304,
           17676312
@@ -2113,6 +2171,7 @@
           "https://id.wikipedia.org/wiki/Transjakarta"
         ],
         "officialName": "PASAR MINGGU - VELBAK VIA KEBON JERUK",
+        "officialService": "non-brt",
         "osmRelationIds": [
           17274366,
           17274367
@@ -2148,6 +2207,7 @@
           "https://id.wikipedia.org/wiki/Transjakarta"
         ],
         "officialName": "BLOK M - PASAR MINGGU",
+        "officialService": "non-brt",
         "osmRelationIds": [
           17274372,
           17274373
@@ -2183,6 +2243,7 @@
           "https://id.wikipedia.org/wiki/Transjakarta"
         ],
         "officialName": "DUREN TIGA - BLOK M VIA BANGKA RAYA",
+        "officialService": "non-brt",
         "osmRelationIds": [
           17293380,
           17293998
@@ -2218,6 +2279,7 @@
           "https://id.wikipedia.org/wiki/Transjakarta"
         ],
         "officialName": "KAMPUNG RAMBUTAN - LEBAK BULUS",
+        "officialService": "non-brt",
         "osmRelationIds": [
           16034723,
           16035221
@@ -2253,6 +2315,7 @@
           "https://id.wikipedia.org/wiki/Transjakarta"
         ],
         "officialName": "KAMPUNG RAMBUTAN - BLOK M",
+        "officialService": "non-brt",
         "osmRelationIds": [
           17293374,
           17293375
@@ -2288,6 +2351,7 @@
           "https://id.wikipedia.org/wiki/Transjakarta"
         ],
         "officialName": "CIBUBUR - CAWANG CILILITAN",
+        "officialService": "non-brt",
         "osmRelationIds": [
           17295488,
           17295489
@@ -2323,6 +2387,7 @@
           "https://id.wikipedia.org/wiki/Transjakarta"
         ],
         "officialName": "TMII - PANCORAN",
+        "officialService": "non-brt",
         "osmRelationIds": [
           17302948,
           17302949
@@ -2358,6 +2423,7 @@
           "https://id.wikipedia.org/wiki/Transjakarta"
         ],
         "officialName": "KAMPUNG RAMBUTAN - RAGUNAN",
+        "officialService": "non-brt",
         "osmRelationIds": [
           17261792,
           17261793
@@ -2393,6 +2459,7 @@
           "https://id.wikipedia.org/wiki/Transjakarta"
         ],
         "officialName": "PONDOK KELAPA - CAWANG CILILITAN",
+        "officialService": "non-brt",
         "osmRelationIds": [
           17619359,
           17619360
@@ -2428,6 +2495,7 @@
           "https://id.wikipedia.org/wiki/Transjakarta"
         ],
         "officialName": "BLOK M - CAWANG CILILITAN",
+        "officialService": "non-brt",
         "osmRelationIds": [
           17293377,
           17293378
@@ -2463,6 +2531,7 @@
           "https://id.wikipedia.org/wiki/Transjakarta"
         ],
         "officialName": "CIBUBUR - PLUIT",
+        "officialService": "non-brt",
         "osmRelationIds": [
           17295487
         ],
@@ -2497,6 +2566,7 @@
           "https://id.wikipedia.org/wiki/Transjakarta"
         ],
         "officialName": "CIBUBUR - TANJUNG PRIOK",
+        "officialService": "non-brt",
         "osmRelationIds": [
           17295486
         ],
@@ -2531,6 +2601,7 @@
           "https://id.wikipedia.org/wiki/Transjakarta"
         ],
         "officialName": "CIBUBUR - ANCOL",
+        "officialService": "non-brt",
         "osmRelationIds": [
           17295485
         ],
@@ -2565,6 +2636,7 @@
           "https://id.wikipedia.org/wiki/Transjakarta"
         ],
         "officialName": "CIBUBUR - KAMPUNG RAMBUTAN",
+        "officialService": "non-brt",
         "osmRelationIds": [
           17295482,
           17295483
@@ -2600,6 +2672,7 @@
           "https://id.wikipedia.org/wiki/Transjakarta"
         ],
         "officialName": "CAWANG - STASIUN KERETA CEPAT HALIM",
+        "officialService": "non-brt",
         "osmRelationIds": [
           17265552
         ],
@@ -2634,6 +2707,7 @@
           "https://id.wikipedia.org/wiki/Transjakarta"
         ],
         "officialName": "KEBAYORAN LAMA - TANAH ABANG",
+        "officialService": "non-brt",
         "osmRelationIds": [
           17378684,
           17378720
@@ -2669,6 +2743,7 @@
           "https://id.wikipedia.org/wiki/Transjakarta"
         ],
         "officialName": "MERUYA SELATAN - BLOK M",
+        "officialService": "non-brt",
         "osmRelationIds": [
           17797480,
           17797482
@@ -2704,6 +2779,7 @@
           "https://id.wikipedia.org/wiki/Transjakarta"
         ],
         "officialName": "BINTARO - BLOK M",
+        "officialService": "non-brt",
         "osmRelationIds": [
           17639747,
           17639748
@@ -2736,6 +2812,7 @@
           "https://id.wikipedia.org/wiki/Transjakarta"
         ],
         "officialName": "BATUSARI - GROGOL",
+        "officialService": "non-brt",
         "osmRelationIds": [],
         "rawName": null,
         "from": null,
@@ -2768,6 +2845,7 @@
           "https://id.wikipedia.org/wiki/Transjakarta"
         ],
         "officialName": "TANAH ABANG - TANJUNG DUREN",
+        "officialService": "non-brt",
         "osmRelationIds": [
           17379817,
           17379835
@@ -2803,6 +2881,7 @@
           "https://id.wikipedia.org/wiki/Transjakarta"
         ],
         "officialName": "KEBAYORAN - PETAMBURAN VIA ASIA AFRIKA",
+        "officialService": "non-brt",
         "osmRelationIds": [
           17614749,
           17614751
@@ -2838,6 +2917,7 @@
           "https://id.wikipedia.org/wiki/Transjakarta"
         ],
         "officialName": "PASAR MINGGU - TANAH ABANG",
+        "officialService": "non-brt",
         "osmRelationIds": [
           17243161,
           17243240
@@ -2873,6 +2953,7 @@
           "https://id.wikipedia.org/wiki/Transjakarta"
         ],
         "officialName": "KEBAYORAN - JELAMBAR",
+        "officialService": "non-brt",
         "osmRelationIds": [
           17378685,
           17378710
@@ -2908,6 +2989,7 @@
           "https://id.wikipedia.org/wiki/Transjakarta"
         ],
         "officialName": "PASAR MINGGU - CIPEDAK",
+        "officialService": "non-brt",
         "osmRelationIds": [
           17253432,
           17253438
@@ -2943,6 +3025,7 @@
           "https://id.wikipedia.org/wiki/Transjakarta"
         ],
         "officialName": "PULO GEBANG - PULO GADUNG VIA PIK",
+        "officialService": "non-brt",
         "osmRelationIds": [
           17620960,
           17620961
@@ -2978,6 +3061,7 @@
           "https://id.wikipedia.org/wiki/Transjakarta"
         ],
         "officialName": "KAMPUNG MELAYU - PULO GEBANG VIA BKT",
+        "officialService": "non-brt",
         "osmRelationIds": [
           17624802,
           17624803
@@ -3013,6 +3097,7 @@
           "https://id.wikipedia.org/wiki/Transjakarta"
         ],
         "officialName": "STASIUN KLENDER - PULO GADUNG",
+        "officialService": "non-brt",
         "osmRelationIds": [
           17614935,
           17614936
@@ -3048,6 +3133,7 @@
           "https://id.wikipedia.org/wiki/Transjakarta"
         ],
         "officialName": "PLUIT - SENEN",
+        "officialService": "non-brt",
         "osmRelationIds": [
           17375494,
           17375495
@@ -3083,6 +3169,7 @@
           "https://id.wikipedia.org/wiki/Transjakarta"
         ],
         "officialName": "STASIUN LRT PEGANGSAAN - JIS",
+        "officialService": "non-brt",
         "osmRelationIds": [
           17257217,
           17257218
@@ -3118,6 +3205,7 @@
           "https://id.wikipedia.org/wiki/Transjakarta"
         ],
         "officialName": "MONUMEN NASIONAL - JAKARTA INTERNATIONAL STADIUM",
+        "officialService": "non-brt",
         "osmRelationIds": [
           17372598,
           17372599
@@ -3153,6 +3241,7 @@
           "https://id.wikipedia.org/wiki/Transjakarta"
         ],
         "officialName": "TANJUNG PRIOK - SENEN VIA JIS",
+        "officialService": "non-brt",
         "osmRelationIds": [
           17378015,
           17378032
@@ -3169,7 +3258,7 @@
       "code": "JAK.01",
       "name": "Tanjung Priok - Plumpang",
       "mode": "minibus",
-      "serviceClass": "feeder",
+      "serviceClass": "mikrotrans",
       "operator": "Koperasi Wahana Kendaraan Angkutan Lingkungan dan Pinggir Kota (KWK), Pusat Koperasi Angkutan Udara Halim Perdanakusuma (PUS), Mikrolet/APB group (PT Kencana Sakti Transport, Koperasi Mikrolet Jakarta Raya, Koperasi Angkutan Umum Budi Luhur, Koperasi Minibus Karya Jakarta Raya, Koperasi Angkutan Umum Kopamilet Jaya, Koperasi Angkutan Purimas Jaya, PT Lestari Surya Gema Persada, Koperasi Kojang Jaya, Koperasi Angkutan Layanan Masyarakat Jakarta Raya)",
       "status": "operating",
       "color": "#87CEEB",
@@ -3188,6 +3277,7 @@
           "https://id.wikipedia.org/wiki/Transjakarta"
         ],
         "officialName": "TANJUNG PRIOK - PLUMPANG",
+        "officialService": null,
         "osmRelationIds": [
           17650125,
           17650126
@@ -3204,7 +3294,7 @@
       "code": "JAK.02",
       "name": "Kampung Melayu - Duren Sawit",
       "mode": "minibus",
-      "serviceClass": "feeder",
+      "serviceClass": "mikrotrans",
       "operator": "Koperasi Wahana Kendaraan Angkutan Lingkungan dan Pinggir Kota (KWK), Pusat Koperasi Angkutan Udara Halim Perdanakusuma (PUS), Mikrolet/APB group (PT Kencana Sakti Transport, Koperasi Mikrolet Jakarta Raya, Koperasi Angkutan Umum Budi Luhur, Koperasi Minibus Karya Jakarta Raya, Koperasi Angkutan Umum Kopamilet Jaya, Koperasi Angkutan Purimas Jaya, PT Lestari Surya Gema Persada, Koperasi Kojang Jaya, Koperasi Angkutan Layanan Masyarakat Jakarta Raya)",
       "status": "operating",
       "color": "#87CEEB",
@@ -3223,6 +3313,7 @@
           "https://id.wikipedia.org/wiki/Transjakarta"
         ],
         "officialName": "KAMPUNG MELAYU - DUREN SAWIT",
+        "officialService": null,
         "osmRelationIds": [
           17667968,
           17667969
@@ -3239,7 +3330,7 @@
       "code": "JAK.03",
       "name": "Lebak Bulus - Andara",
       "mode": "minibus",
-      "serviceClass": "feeder",
+      "serviceClass": "mikrotrans",
       "operator": "Koperasi Wahana Kendaraan Angkutan Lingkungan dan Pinggir Kota (KWK), Pusat Koperasi Angkutan Udara Halim Perdanakusuma (PUS), Mikrolet/APB group (PT Kencana Sakti Transport, Koperasi Mikrolet Jakarta Raya, Koperasi Angkutan Umum Budi Luhur, Koperasi Minibus Karya Jakarta Raya, Koperasi Angkutan Umum Kopamilet Jaya, Koperasi Angkutan Purimas Jaya, PT Lestari Surya Gema Persada, Koperasi Kojang Jaya, Koperasi Angkutan Layanan Masyarakat Jakarta Raya)",
       "status": "operating",
       "color": "#FF0000",
@@ -3258,6 +3349,7 @@
           "https://id.wikipedia.org/wiki/Transjakarta"
         ],
         "officialName": "LEBAK BULUS - ANDARA",
+        "officialService": null,
         "osmRelationIds": [
           17671112,
           17671302
@@ -3274,7 +3366,7 @@
       "code": "JAK.04",
       "name": "Grogol - Tubagus Angke",
       "mode": "minibus",
-      "serviceClass": "feeder",
+      "serviceClass": "mikrotrans",
       "operator": "Koperasi Wahana Kendaraan Angkutan Lingkungan dan Pinggir Kota (KWK), Pusat Koperasi Angkutan Udara Halim Perdanakusuma (PUS), Mikrolet/APB group (PT Kencana Sakti Transport, Koperasi Mikrolet Jakarta Raya, Koperasi Angkutan Umum Budi Luhur, Koperasi Minibus Karya Jakarta Raya, Koperasi Angkutan Umum Kopamilet Jaya, Koperasi Angkutan Purimas Jaya, PT Lestari Surya Gema Persada, Koperasi Kojang Jaya, Koperasi Angkutan Layanan Masyarakat Jakarta Raya)",
       "status": "operating",
       "color": "#87CEEB",
@@ -3293,6 +3385,7 @@
           "https://id.wikipedia.org/wiki/Transjakarta"
         ],
         "officialName": "GROGOL - TUBAGUS ANGKE",
+        "officialService": null,
         "osmRelationIds": [
           17671603,
           17671649
@@ -3309,7 +3402,7 @@
       "code": "JAK.05",
       "name": "Semper - Rorotan",
       "mode": "minibus",
-      "serviceClass": "feeder",
+      "serviceClass": "mikrotrans",
       "operator": "Koperasi Wahana Kendaraan Angkutan Lingkungan dan Pinggir Kota (KWK), Pusat Koperasi Angkutan Udara Halim Perdanakusuma (PUS), Mikrolet/APB group (PT Kencana Sakti Transport, Koperasi Mikrolet Jakarta Raya, Koperasi Angkutan Umum Budi Luhur, Koperasi Minibus Karya Jakarta Raya, Koperasi Angkutan Umum Kopamilet Jaya, Koperasi Angkutan Purimas Jaya, PT Lestari Surya Gema Persada, Koperasi Kojang Jaya, Koperasi Angkutan Layanan Masyarakat Jakarta Raya)",
       "status": "operating",
       "color": "#FF0000",
@@ -3328,6 +3421,7 @@
           "https://id.wikipedia.org/wiki/Transjakarta"
         ],
         "officialName": "SEMPER - ROROTAN",
+        "officialService": null,
         "osmRelationIds": [
           17672041,
           17672216
@@ -3344,7 +3438,7 @@
       "code": "JAK.06",
       "name": "Kampung Rambutan - Pondok Gede",
       "mode": "minibus",
-      "serviceClass": "feeder",
+      "serviceClass": "mikrotrans",
       "operator": "Koperasi Wahana Kendaraan Angkutan Lingkungan dan Pinggir Kota (KWK), Pusat Koperasi Angkutan Udara Halim Perdanakusuma (PUS), Mikrolet/APB group (PT Kencana Sakti Transport, Koperasi Mikrolet Jakarta Raya, Koperasi Angkutan Umum Budi Luhur, Koperasi Minibus Karya Jakarta Raya, Koperasi Angkutan Umum Kopamilet Jaya, Koperasi Angkutan Purimas Jaya, PT Lestari Surya Gema Persada, Koperasi Kojang Jaya, Koperasi Angkutan Layanan Masyarakat Jakarta Raya)",
       "status": "operating",
       "color": "#FF0000",
@@ -3363,6 +3457,7 @@
           "https://id.wikipedia.org/wiki/Transjakarta"
         ],
         "officialName": "KAMPUNG RAMBUTAN - PONDOK GEDE",
+        "officialService": null,
         "osmRelationIds": [
           17335384,
           17335385
@@ -3379,7 +3474,7 @@
       "code": "JAK.07",
       "name": "Tanah Abang - Grogol VIA Tawakal",
       "mode": "minibus",
-      "serviceClass": "feeder",
+      "serviceClass": "mikrotrans",
       "operator": "Koperasi Wahana Kendaraan Angkutan Lingkungan dan Pinggir Kota (KWK), Pusat Koperasi Angkutan Udara Halim Perdanakusuma (PUS), Mikrolet/APB group (PT Kencana Sakti Transport, Koperasi Mikrolet Jakarta Raya, Koperasi Angkutan Umum Budi Luhur, Koperasi Minibus Karya Jakarta Raya, Koperasi Angkutan Umum Kopamilet Jaya, Koperasi Angkutan Purimas Jaya, PT Lestari Surya Gema Persada, Koperasi Kojang Jaya, Koperasi Angkutan Layanan Masyarakat Jakarta Raya)",
       "status": "operating",
       "color": "#87CEEB",
@@ -3398,6 +3493,7 @@
           "https://id.wikipedia.org/wiki/Transjakarta"
         ],
         "officialName": "TANAH ABANG - GROGOL VIA TAWAKAL",
+        "officialService": null,
         "osmRelationIds": [
           17672596,
           17672926
@@ -3414,7 +3510,7 @@
       "code": "JAK.08",
       "name": "Tanah Abang - Benhil VIA Roxy",
       "mode": "minibus",
-      "serviceClass": "feeder",
+      "serviceClass": "mikrotrans",
       "operator": "Koperasi Wahana Kendaraan Angkutan Lingkungan dan Pinggir Kota (KWK), Pusat Koperasi Angkutan Udara Halim Perdanakusuma (PUS), Mikrolet/APB group (PT Kencana Sakti Transport, Koperasi Mikrolet Jakarta Raya, Koperasi Angkutan Umum Budi Luhur, Koperasi Minibus Karya Jakarta Raya, Koperasi Angkutan Umum Kopamilet Jaya, Koperasi Angkutan Purimas Jaya, PT Lestari Surya Gema Persada, Koperasi Kojang Jaya, Koperasi Angkutan Layanan Masyarakat Jakarta Raya)",
       "status": "operating",
       "color": "#87CEEB",
@@ -3433,6 +3529,7 @@
           "https://id.wikipedia.org/wiki/Transjakarta"
         ],
         "officialName": "TANAH ABANG - BENHIL VIA ROXY",
+        "officialService": null,
         "osmRelationIds": [
           17678725,
           17678917
@@ -3449,7 +3546,7 @@
       "code": "JAK.09",
       "name": "Tanah Abang - Karet VIA Roxy",
       "mode": "minibus",
-      "serviceClass": "feeder",
+      "serviceClass": "mikrotrans",
       "operator": "Koperasi Wahana Kendaraan Angkutan Lingkungan dan Pinggir Kota (KWK), Pusat Koperasi Angkutan Udara Halim Perdanakusuma (PUS), Mikrolet/APB group (PT Kencana Sakti Transport, Koperasi Mikrolet Jakarta Raya, Koperasi Angkutan Umum Budi Luhur, Koperasi Minibus Karya Jakarta Raya, Koperasi Angkutan Umum Kopamilet Jaya, Koperasi Angkutan Purimas Jaya, PT Lestari Surya Gema Persada, Koperasi Kojang Jaya, Koperasi Angkutan Layanan Masyarakat Jakarta Raya)",
       "status": "operating",
       "color": "#87CEEB",
@@ -3468,6 +3565,7 @@
           "https://id.wikipedia.org/wiki/Transjakarta"
         ],
         "officialName": "TANAH ABANG - KARET VIA ROXY",
+        "officialService": null,
         "osmRelationIds": [
           17680164
         ],
@@ -3483,7 +3581,7 @@
       "code": "JAK.10",
       "name": "Tanah Abang - Kota",
       "mode": "minibus",
-      "serviceClass": "feeder",
+      "serviceClass": "mikrotrans",
       "operator": "Koperasi Wahana Kendaraan Angkutan Lingkungan dan Pinggir Kota (KWK), Pusat Koperasi Angkutan Udara Halim Perdanakusuma (PUS), Mikrolet/APB group (PT Kencana Sakti Transport, Koperasi Mikrolet Jakarta Raya, Koperasi Angkutan Umum Budi Luhur, Koperasi Minibus Karya Jakarta Raya, Koperasi Angkutan Umum Kopamilet Jaya, Koperasi Angkutan Purimas Jaya, PT Lestari Surya Gema Persada, Koperasi Kojang Jaya, Koperasi Angkutan Layanan Masyarakat Jakarta Raya)",
       "status": "operating",
       "color": "#87CEEB",
@@ -3502,6 +3600,7 @@
           "https://id.wikipedia.org/wiki/Transjakarta"
         ],
         "officialName": "TANAH ABANG - KOTA",
+        "officialService": null,
         "osmRelationIds": [
           17746114,
           17746375
@@ -3518,7 +3617,7 @@
       "code": "JAK.11",
       "name": "Tanah Abang - Kebayoran Lama",
       "mode": "minibus",
-      "serviceClass": "feeder",
+      "serviceClass": "mikrotrans",
       "operator": "Koperasi Wahana Kendaraan Angkutan Lingkungan dan Pinggir Kota (KWK), Pusat Koperasi Angkutan Udara Halim Perdanakusuma (PUS), Mikrolet/APB group (PT Kencana Sakti Transport, Koperasi Mikrolet Jakarta Raya, Koperasi Angkutan Umum Budi Luhur, Koperasi Minibus Karya Jakarta Raya, Koperasi Angkutan Umum Kopamilet Jaya, Koperasi Angkutan Purimas Jaya, PT Lestari Surya Gema Persada, Koperasi Kojang Jaya, Koperasi Angkutan Layanan Masyarakat Jakarta Raya)",
       "status": "operating",
       "color": "#87CEEB",
@@ -3537,6 +3636,7 @@
           "https://id.wikipedia.org/wiki/Transjakarta"
         ],
         "officialName": "TANAH ABANG - KEBAYORAN LAMA",
+        "officialService": null,
         "osmRelationIds": [
           17748081,
           17748082
@@ -3553,7 +3653,7 @@
       "code": "JAK.12",
       "name": "Tanah Abang - Kebayoran Lama VIA POS Pengumben",
       "mode": "minibus",
-      "serviceClass": "feeder",
+      "serviceClass": "mikrotrans",
       "operator": "Koperasi Wahana Kendaraan Angkutan Lingkungan dan Pinggir Kota (KWK), Pusat Koperasi Angkutan Udara Halim Perdanakusuma (PUS), Mikrolet/APB group (PT Kencana Sakti Transport, Koperasi Mikrolet Jakarta Raya, Koperasi Angkutan Umum Budi Luhur, Koperasi Minibus Karya Jakarta Raya, Koperasi Angkutan Umum Kopamilet Jaya, Koperasi Angkutan Purimas Jaya, PT Lestari Surya Gema Persada, Koperasi Kojang Jaya, Koperasi Angkutan Layanan Masyarakat Jakarta Raya)",
       "status": "operating",
       "color": "#87CEEB",
@@ -3572,6 +3672,7 @@
           "https://id.wikipedia.org/wiki/Transjakarta"
         ],
         "officialName": "TANAH ABANG - KEBAYORAN LAMA VIA POS PENGUMBEN",
+        "officialService": null,
         "osmRelationIds": [
           17814761,
           17814879
@@ -3588,7 +3689,7 @@
       "code": "JAK.13",
       "name": "Tanah Abang - Jembatan Lima",
       "mode": "minibus",
-      "serviceClass": "feeder",
+      "serviceClass": "mikrotrans",
       "operator": "Koperasi Wahana Kendaraan Angkutan Lingkungan dan Pinggir Kota (KWK), Pusat Koperasi Angkutan Udara Halim Perdanakusuma (PUS), Mikrolet/APB group (PT Kencana Sakti Transport, Koperasi Mikrolet Jakarta Raya, Koperasi Angkutan Umum Budi Luhur, Koperasi Minibus Karya Jakarta Raya, Koperasi Angkutan Umum Kopamilet Jaya, Koperasi Angkutan Purimas Jaya, PT Lestari Surya Gema Persada, Koperasi Kojang Jaya, Koperasi Angkutan Layanan Masyarakat Jakarta Raya)",
       "status": "operating",
       "color": "#87CEEB",
@@ -3607,6 +3708,7 @@
           "https://id.wikipedia.org/wiki/Transjakarta"
         ],
         "officialName": "TANAH ABANG - JEMBATAN LIMA",
+        "officialService": null,
         "osmRelationIds": [
           17866675,
           17866883
@@ -3623,7 +3725,7 @@
       "code": "JAK.14",
       "name": "Tanah Abang - Meruya",
       "mode": "minibus",
-      "serviceClass": "feeder",
+      "serviceClass": "mikrotrans",
       "operator": "Koperasi Wahana Kendaraan Angkutan Lingkungan dan Pinggir Kota (KWK), Pusat Koperasi Angkutan Udara Halim Perdanakusuma (PUS), Mikrolet/APB group (PT Kencana Sakti Transport, Koperasi Mikrolet Jakarta Raya, Koperasi Angkutan Umum Budi Luhur, Koperasi Minibus Karya Jakarta Raya, Koperasi Angkutan Umum Kopamilet Jaya, Koperasi Angkutan Purimas Jaya, PT Lestari Surya Gema Persada, Koperasi Kojang Jaya, Koperasi Angkutan Layanan Masyarakat Jakarta Raya)",
       "status": "operating",
       "color": "#87CEEB",
@@ -3642,6 +3744,7 @@
           "https://id.wikipedia.org/wiki/Transjakarta"
         ],
         "officialName": "TANAH ABANG - MERUYA",
+        "officialService": null,
         "osmRelationIds": [
           17869121,
           17869282
@@ -3658,7 +3761,7 @@
       "code": "JAK.15",
       "name": "Tanjung Priok - Rusun Marunda",
       "mode": "minibus",
-      "serviceClass": "feeder",
+      "serviceClass": "mikrotrans",
       "operator": "Koperasi Wahana Kendaraan Angkutan Lingkungan dan Pinggir Kota (KWK), Pusat Koperasi Angkutan Udara Halim Perdanakusuma (PUS), Mikrolet/APB group (PT Kencana Sakti Transport, Koperasi Mikrolet Jakarta Raya, Koperasi Angkutan Umum Budi Luhur, Koperasi Minibus Karya Jakarta Raya, Koperasi Angkutan Umum Kopamilet Jaya, Koperasi Angkutan Purimas Jaya, PT Lestari Surya Gema Persada, Koperasi Kojang Jaya, Koperasi Angkutan Layanan Masyarakat Jakarta Raya)",
       "status": "operating",
       "color": null,
@@ -3674,6 +3777,7 @@
           "https://id.wikipedia.org/wiki/Transjakarta"
         ],
         "officialName": "TANJUNG PRIOK - RUSUN MARUNDA",
+        "officialService": null,
         "osmRelationIds": [],
         "rawName": null,
         "from": null,
@@ -3687,7 +3791,7 @@
       "code": "JAK.16",
       "name": "Cililitan - Condet",
       "mode": "minibus",
-      "serviceClass": "feeder",
+      "serviceClass": "mikrotrans",
       "operator": "Koperasi Wahana Kendaraan Angkutan Lingkungan dan Pinggir Kota (KWK), Pusat Koperasi Angkutan Udara Halim Perdanakusuma (PUS), Mikrolet/APB group (PT Kencana Sakti Transport, Koperasi Mikrolet Jakarta Raya, Koperasi Angkutan Umum Budi Luhur, Koperasi Minibus Karya Jakarta Raya, Koperasi Angkutan Umum Kopamilet Jaya, Koperasi Angkutan Purimas Jaya, PT Lestari Surya Gema Persada, Koperasi Kojang Jaya, Koperasi Angkutan Layanan Masyarakat Jakarta Raya)",
       "status": "operating",
       "color": "#FF0000",
@@ -3706,6 +3810,7 @@
           "https://id.wikipedia.org/wiki/Transjakarta"
         ],
         "officialName": "CILILITAN  - CONDET",
+        "officialService": null,
         "osmRelationIds": [
           17757594,
           17757608
@@ -3722,7 +3827,7 @@
       "code": "JAK.17",
       "name": "Senen - Pulogadung",
       "mode": "minibus",
-      "serviceClass": "feeder",
+      "serviceClass": "mikrotrans",
       "operator": "Koperasi Wahana Kendaraan Angkutan Lingkungan dan Pinggir Kota (KWK), Pusat Koperasi Angkutan Udara Halim Perdanakusuma (PUS), Mikrolet/APB group (PT Kencana Sakti Transport, Koperasi Mikrolet Jakarta Raya, Koperasi Angkutan Umum Budi Luhur, Koperasi Minibus Karya Jakarta Raya, Koperasi Angkutan Umum Kopamilet Jaya, Koperasi Angkutan Purimas Jaya, PT Lestari Surya Gema Persada, Koperasi Kojang Jaya, Koperasi Angkutan Layanan Masyarakat Jakarta Raya)",
       "status": "operating",
       "color": "#87CEEB",
@@ -3741,6 +3846,7 @@
           "https://id.wikipedia.org/wiki/Transjakarta"
         ],
         "officialName": "SENEN - PULOGADUNG",
+        "officialService": null,
         "osmRelationIds": [
           17759527,
           17760005
@@ -3757,7 +3863,7 @@
       "code": "JAK.18",
       "name": "Stasiun Duren Kalibata - Kuningan",
       "mode": "minibus",
-      "serviceClass": "feeder",
+      "serviceClass": "mikrotrans",
       "operator": "Koperasi Wahana Kendaraan Angkutan Lingkungan dan Pinggir Kota (KWK), Pusat Koperasi Angkutan Udara Halim Perdanakusuma (PUS), Mikrolet/APB group (PT Kencana Sakti Transport, Koperasi Mikrolet Jakarta Raya, Koperasi Angkutan Umum Budi Luhur, Koperasi Minibus Karya Jakarta Raya, Koperasi Angkutan Umum Kopamilet Jaya, Koperasi Angkutan Purimas Jaya, PT Lestari Surya Gema Persada, Koperasi Kojang Jaya, Koperasi Angkutan Layanan Masyarakat Jakarta Raya)",
       "status": "operating",
       "color": null,
@@ -3773,6 +3879,7 @@
           "https://id.wikipedia.org/wiki/Transjakarta"
         ],
         "officialName": "STASIUN DUREN KALIBATA - KUNINGAN",
+        "officialService": null,
         "osmRelationIds": [],
         "rawName": null,
         "from": null,
@@ -3786,7 +3893,7 @@
       "code": "JAK.19",
       "name": "Pinang Ranti - Kampung Rambutan",
       "mode": "minibus",
-      "serviceClass": "feeder",
+      "serviceClass": "mikrotrans",
       "operator": "Koperasi Wahana Kendaraan Angkutan Lingkungan dan Pinggir Kota (KWK), Pusat Koperasi Angkutan Udara Halim Perdanakusuma (PUS), Mikrolet/APB group (PT Kencana Sakti Transport, Koperasi Mikrolet Jakarta Raya, Koperasi Angkutan Umum Budi Luhur, Koperasi Minibus Karya Jakarta Raya, Koperasi Angkutan Umum Kopamilet Jaya, Koperasi Angkutan Purimas Jaya, PT Lestari Surya Gema Persada, Koperasi Kojang Jaya, Koperasi Angkutan Layanan Masyarakat Jakarta Raya)",
       "status": "operating",
       "color": null,
@@ -3802,6 +3909,7 @@
           "https://id.wikipedia.org/wiki/Transjakarta"
         ],
         "officialName": "PINANG RANTI - KAMPUNG RAMBUTAN",
+        "officialService": null,
         "osmRelationIds": [],
         "rawName": null,
         "from": null,
@@ -3815,7 +3923,7 @@
       "code": "JAK.20",
       "name": "Cawang UKI - Lubang Buaya",
       "mode": "minibus",
-      "serviceClass": "feeder",
+      "serviceClass": "mikrotrans",
       "operator": "Koperasi Wahana Kendaraan Angkutan Lingkungan dan Pinggir Kota (KWK), Pusat Koperasi Angkutan Udara Halim Perdanakusuma (PUS), Mikrolet/APB group (PT Kencana Sakti Transport, Koperasi Mikrolet Jakarta Raya, Koperasi Angkutan Umum Budi Luhur, Koperasi Minibus Karya Jakarta Raya, Koperasi Angkutan Umum Kopamilet Jaya, Koperasi Angkutan Purimas Jaya, PT Lestari Surya Gema Persada, Koperasi Kojang Jaya, Koperasi Angkutan Layanan Masyarakat Jakarta Raya)",
       "status": "operating",
       "color": "#87CEEB",
@@ -3834,6 +3942,7 @@
           "https://id.wikipedia.org/wiki/Transjakarta"
         ],
         "officialName": "CAWANG UKI - LUBANG BUAYA",
+        "officialService": null,
         "osmRelationIds": [
           17785712,
           17785857
@@ -3850,7 +3959,7 @@
       "code": "JAK.21",
       "name": "Cililitan - Dwikora",
       "mode": "minibus",
-      "serviceClass": "feeder",
+      "serviceClass": "mikrotrans",
       "operator": "Koperasi Wahana Kendaraan Angkutan Lingkungan dan Pinggir Kota (KWK), Pusat Koperasi Angkutan Udara Halim Perdanakusuma (PUS), Mikrolet/APB group (PT Kencana Sakti Transport, Koperasi Mikrolet Jakarta Raya, Koperasi Angkutan Umum Budi Luhur, Koperasi Minibus Karya Jakarta Raya, Koperasi Angkutan Umum Kopamilet Jaya, Koperasi Angkutan Purimas Jaya, PT Lestari Surya Gema Persada, Koperasi Kojang Jaya, Koperasi Angkutan Layanan Masyarakat Jakarta Raya)",
       "status": "operating",
       "color": null,
@@ -3866,6 +3975,7 @@
           "https://id.wikipedia.org/wiki/Transjakarta"
         ],
         "officialName": "CILILITAN  - DWIKORA",
+        "officialService": null,
         "osmRelationIds": [],
         "rawName": null,
         "from": null,
@@ -3879,7 +3989,7 @@
       "code": "JAK.22",
       "name": "Dwikora - Penas Kalimalang",
       "mode": "minibus",
-      "serviceClass": "feeder",
+      "serviceClass": "mikrotrans",
       "operator": "Koperasi Wahana Kendaraan Angkutan Lingkungan dan Pinggir Kota (KWK), Pusat Koperasi Angkutan Udara Halim Perdanakusuma (PUS), Mikrolet/APB group (PT Kencana Sakti Transport, Koperasi Mikrolet Jakarta Raya, Koperasi Angkutan Umum Budi Luhur, Koperasi Minibus Karya Jakarta Raya, Koperasi Angkutan Umum Kopamilet Jaya, Koperasi Angkutan Purimas Jaya, PT Lestari Surya Gema Persada, Koperasi Kojang Jaya, Koperasi Angkutan Layanan Masyarakat Jakarta Raya)",
       "status": "operating",
       "color": null,
@@ -3895,6 +4005,7 @@
           "https://id.wikipedia.org/wiki/Transjakarta"
         ],
         "officialName": "DWIKORA - PENAS KALIMALANG",
+        "officialService": null,
         "osmRelationIds": [],
         "rawName": null,
         "from": null,
@@ -3908,7 +4019,7 @@
       "code": "JAK.23",
       "name": "Senen - Pisangan Baru",
       "mode": "minibus",
-      "serviceClass": "feeder",
+      "serviceClass": "mikrotrans",
       "operator": "Koperasi Wahana Kendaraan Angkutan Lingkungan dan Pinggir Kota (KWK), Pusat Koperasi Angkutan Udara Halim Perdanakusuma (PUS), Mikrolet/APB group (PT Kencana Sakti Transport, Koperasi Mikrolet Jakarta Raya, Koperasi Angkutan Umum Budi Luhur, Koperasi Minibus Karya Jakarta Raya, Koperasi Angkutan Umum Kopamilet Jaya, Koperasi Angkutan Purimas Jaya, PT Lestari Surya Gema Persada, Koperasi Kojang Jaya, Koperasi Angkutan Layanan Masyarakat Jakarta Raya)",
       "status": "operating",
       "color": null,
@@ -3924,6 +4035,7 @@
           "https://id.wikipedia.org/wiki/Transjakarta"
         ],
         "officialName": "SENEN - PISANGAN BARU",
+        "officialService": null,
         "osmRelationIds": [],
         "rawName": null,
         "from": null,
@@ -3937,7 +4049,7 @@
       "code": "JAK.24",
       "name": "Senen - Pulo Gadung VIA Kelapa Gading",
       "mode": "minibus",
-      "serviceClass": "feeder",
+      "serviceClass": "mikrotrans",
       "operator": "Koperasi Wahana Kendaraan Angkutan Lingkungan dan Pinggir Kota (KWK), Pusat Koperasi Angkutan Udara Halim Perdanakusuma (PUS), Mikrolet/APB group (PT Kencana Sakti Transport, Koperasi Mikrolet Jakarta Raya, Koperasi Angkutan Umum Budi Luhur, Koperasi Minibus Karya Jakarta Raya, Koperasi Angkutan Umum Kopamilet Jaya, Koperasi Angkutan Purimas Jaya, PT Lestari Surya Gema Persada, Koperasi Kojang Jaya, Koperasi Angkutan Layanan Masyarakat Jakarta Raya)",
       "status": "operating",
       "color": null,
@@ -3953,6 +4065,7 @@
           "https://id.wikipedia.org/wiki/Transjakarta"
         ],
         "officialName": "SENEN - PULO GADUNG VIA KELAPA GADING",
+        "officialService": null,
         "osmRelationIds": [],
         "rawName": null,
         "from": null,
@@ -3966,7 +4079,7 @@
       "code": "JAK.25",
       "name": "Pasar Rebo - Kalisari",
       "mode": "minibus",
-      "serviceClass": "feeder",
+      "serviceClass": "mikrotrans",
       "operator": "Koperasi Wahana Kendaraan Angkutan Lingkungan dan Pinggir Kota (KWK), Pusat Koperasi Angkutan Udara Halim Perdanakusuma (PUS), Mikrolet/APB group (PT Kencana Sakti Transport, Koperasi Mikrolet Jakarta Raya, Koperasi Angkutan Umum Budi Luhur, Koperasi Minibus Karya Jakarta Raya, Koperasi Angkutan Umum Kopamilet Jaya, Koperasi Angkutan Purimas Jaya, PT Lestari Surya Gema Persada, Koperasi Kojang Jaya, Koperasi Angkutan Layanan Masyarakat Jakarta Raya)",
       "status": "operating",
       "color": "#00B0EC",
@@ -3985,6 +4098,7 @@
           "https://id.wikipedia.org/wiki/Transjakarta"
         ],
         "officialName": "PASAR REBO - KALISARI",
+        "officialService": null,
         "osmRelationIds": [
           17327946,
           17327947
@@ -4001,7 +4115,7 @@
       "code": "JAK.26",
       "name": "Rawamangun - Duren Sawit",
       "mode": "minibus",
-      "serviceClass": "feeder",
+      "serviceClass": "mikrotrans",
       "operator": "Koperasi Wahana Kendaraan Angkutan Lingkungan dan Pinggir Kota (KWK), Pusat Koperasi Angkutan Udara Halim Perdanakusuma (PUS), Mikrolet/APB group (PT Kencana Sakti Transport, Koperasi Mikrolet Jakarta Raya, Koperasi Angkutan Umum Budi Luhur, Koperasi Minibus Karya Jakarta Raya, Koperasi Angkutan Umum Kopamilet Jaya, Koperasi Angkutan Purimas Jaya, PT Lestari Surya Gema Persada, Koperasi Kojang Jaya, Koperasi Angkutan Layanan Masyarakat Jakarta Raya)",
       "status": "operating",
       "color": null,
@@ -4017,6 +4131,7 @@
           "https://id.wikipedia.org/wiki/Transjakarta"
         ],
         "officialName": "RAWAMANGUN - DUREN SAWIT",
+        "officialService": null,
         "osmRelationIds": [],
         "rawName": null,
         "from": null,
@@ -4030,7 +4145,7 @@
       "code": "JAK.27",
       "name": "Pulo Gebang - Rorotan",
       "mode": "minibus",
-      "serviceClass": "feeder",
+      "serviceClass": "mikrotrans",
       "operator": "Koperasi Wahana Kendaraan Angkutan Lingkungan dan Pinggir Kota (KWK), Pusat Koperasi Angkutan Udara Halim Perdanakusuma (PUS), Mikrolet/APB group (PT Kencana Sakti Transport, Koperasi Mikrolet Jakarta Raya, Koperasi Angkutan Umum Budi Luhur, Koperasi Minibus Karya Jakarta Raya, Koperasi Angkutan Umum Kopamilet Jaya, Koperasi Angkutan Purimas Jaya, PT Lestari Surya Gema Persada, Koperasi Kojang Jaya, Koperasi Angkutan Layanan Masyarakat Jakarta Raya)",
       "status": "operating",
       "color": null,
@@ -4046,6 +4161,7 @@
           "https://id.wikipedia.org/wiki/Transjakarta"
         ],
         "officialName": "PULO GEBANG - ROROTAN",
+        "officialService": null,
         "osmRelationIds": [],
         "rawName": null,
         "from": null,
@@ -4059,7 +4175,7 @@
       "code": "JAK.28",
       "name": "Pasar Rebo-Stasiun LRT Harjamukti",
       "mode": "minibus",
-      "serviceClass": "feeder",
+      "serviceClass": "mikrotrans",
       "operator": "Koperasi Wahana Kendaraan Angkutan Lingkungan dan Pinggir Kota (KWK), Pusat Koperasi Angkutan Udara Halim Perdanakusuma (PUS), Mikrolet/APB group (PT Kencana Sakti Transport, Koperasi Mikrolet Jakarta Raya, Koperasi Angkutan Umum Budi Luhur, Koperasi Minibus Karya Jakarta Raya, Koperasi Angkutan Umum Kopamilet Jaya, Koperasi Angkutan Purimas Jaya, PT Lestari Surya Gema Persada, Koperasi Kojang Jaya, Koperasi Angkutan Layanan Masyarakat Jakarta Raya)",
       "status": "operating",
       "color": "#00B2EE",
@@ -4078,6 +4194,7 @@
           "https://id.wikipedia.org/wiki/Transjakarta"
         ],
         "officialName": "PASAR REBO-STASIUN LRT HARJAMUKTI",
+        "officialService": null,
         "osmRelationIds": [
           17331451,
           17331452
@@ -4094,7 +4211,7 @@
       "code": "JAK.29",
       "name": "Tanjung Priok - Sukapura",
       "mode": "minibus",
-      "serviceClass": "feeder",
+      "serviceClass": "mikrotrans",
       "operator": "Koperasi Wahana Kendaraan Angkutan Lingkungan dan Pinggir Kota (KWK), Pusat Koperasi Angkutan Udara Halim Perdanakusuma (PUS), Mikrolet/APB group (PT Kencana Sakti Transport, Koperasi Mikrolet Jakarta Raya, Koperasi Angkutan Umum Budi Luhur, Koperasi Minibus Karya Jakarta Raya, Koperasi Angkutan Umum Kopamilet Jaya, Koperasi Angkutan Purimas Jaya, PT Lestari Surya Gema Persada, Koperasi Kojang Jaya, Koperasi Angkutan Layanan Masyarakat Jakarta Raya)",
       "status": "operating",
       "color": null,
@@ -4110,6 +4227,7 @@
           "https://id.wikipedia.org/wiki/Transjakarta"
         ],
         "officialName": "TANJUNG PRIOK - SUKAPURA",
+        "officialService": null,
         "osmRelationIds": [],
         "rawName": null,
         "from": null,
@@ -4123,7 +4241,7 @@
       "code": "JAK.30",
       "name": "Grogol - Meruya VIA Roxy",
       "mode": "minibus",
-      "serviceClass": "feeder",
+      "serviceClass": "mikrotrans",
       "operator": "Koperasi Wahana Kendaraan Angkutan Lingkungan dan Pinggir Kota (KWK), Pusat Koperasi Angkutan Udara Halim Perdanakusuma (PUS), Mikrolet/APB group (PT Kencana Sakti Transport, Koperasi Mikrolet Jakarta Raya, Koperasi Angkutan Umum Budi Luhur, Koperasi Minibus Karya Jakarta Raya, Koperasi Angkutan Umum Kopamilet Jaya, Koperasi Angkutan Purimas Jaya, PT Lestari Surya Gema Persada, Koperasi Kojang Jaya, Koperasi Angkutan Layanan Masyarakat Jakarta Raya)",
       "status": "operating",
       "color": null,
@@ -4139,6 +4257,7 @@
           "https://id.wikipedia.org/wiki/Transjakarta"
         ],
         "officialName": "GROGOL - MERUYA VIA ROXY",
+        "officialService": null,
         "osmRelationIds": [],
         "rawName": null,
         "from": null,
@@ -4152,7 +4271,7 @@
       "code": "JAK.31",
       "name": "Blok M - Andara",
       "mode": "minibus",
-      "serviceClass": "feeder",
+      "serviceClass": "mikrotrans",
       "operator": "Koperasi Wahana Kendaraan Angkutan Lingkungan dan Pinggir Kota (KWK), Pusat Koperasi Angkutan Udara Halim Perdanakusuma (PUS), Mikrolet/APB group (PT Kencana Sakti Transport, Koperasi Mikrolet Jakarta Raya, Koperasi Angkutan Umum Budi Luhur, Koperasi Minibus Karya Jakarta Raya, Koperasi Angkutan Umum Kopamilet Jaya, Koperasi Angkutan Purimas Jaya, PT Lestari Surya Gema Persada, Koperasi Kojang Jaya, Koperasi Angkutan Layanan Masyarakat Jakarta Raya)",
       "status": "operating",
       "color": null,
@@ -4168,6 +4287,7 @@
           "https://id.wikipedia.org/wiki/Transjakarta"
         ],
         "officialName": "BLOK M - ANDARA",
+        "officialService": null,
         "osmRelationIds": [],
         "rawName": null,
         "from": null,
@@ -4181,7 +4301,7 @@
       "code": "JAK.32",
       "name": "Lebak Bulus - Joglo",
       "mode": "minibus",
-      "serviceClass": "feeder",
+      "serviceClass": "mikrotrans",
       "operator": "Koperasi Wahana Kendaraan Angkutan Lingkungan dan Pinggir Kota (KWK), Pusat Koperasi Angkutan Udara Halim Perdanakusuma (PUS), Mikrolet/APB group (PT Kencana Sakti Transport, Koperasi Mikrolet Jakarta Raya, Koperasi Angkutan Umum Budi Luhur, Koperasi Minibus Karya Jakarta Raya, Koperasi Angkutan Umum Kopamilet Jaya, Koperasi Angkutan Purimas Jaya, PT Lestari Surya Gema Persada, Koperasi Kojang Jaya, Koperasi Angkutan Layanan Masyarakat Jakarta Raya)",
       "status": "operating",
       "color": null,
@@ -4197,6 +4317,7 @@
           "https://id.wikipedia.org/wiki/Transjakarta"
         ],
         "officialName": "LEBAK BULUS - JOGLO",
+        "officialService": null,
         "osmRelationIds": [],
         "rawName": null,
         "from": null,
@@ -4210,7 +4331,7 @@
       "code": "JAK.33",
       "name": "Pulo Gadung - Kota",
       "mode": "minibus",
-      "serviceClass": "feeder",
+      "serviceClass": "mikrotrans",
       "operator": "Koperasi Wahana Kendaraan Angkutan Lingkungan dan Pinggir Kota (KWK), Pusat Koperasi Angkutan Udara Halim Perdanakusuma (PUS), Mikrolet/APB group (PT Kencana Sakti Transport, Koperasi Mikrolet Jakarta Raya, Koperasi Angkutan Umum Budi Luhur, Koperasi Minibus Karya Jakarta Raya, Koperasi Angkutan Umum Kopamilet Jaya, Koperasi Angkutan Purimas Jaya, PT Lestari Surya Gema Persada, Koperasi Kojang Jaya, Koperasi Angkutan Layanan Masyarakat Jakarta Raya)",
       "status": "operating",
       "color": null,
@@ -4226,6 +4347,7 @@
           "https://id.wikipedia.org/wiki/Transjakarta"
         ],
         "officialName": "PULO GADUNG - KOTA",
+        "officialService": null,
         "osmRelationIds": [],
         "rawName": null,
         "from": null,
@@ -4239,7 +4361,7 @@
       "code": "JAK.34",
       "name": "Terminal Klender - Terminal Rawamangun",
       "mode": "minibus",
-      "serviceClass": "feeder",
+      "serviceClass": "mikrotrans",
       "operator": "Koperasi Wahana Kendaraan Angkutan Lingkungan dan Pinggir Kota (KWK), Pusat Koperasi Angkutan Udara Halim Perdanakusuma (PUS), Mikrolet/APB group (PT Kencana Sakti Transport, Koperasi Mikrolet Jakarta Raya, Koperasi Angkutan Umum Budi Luhur, Koperasi Minibus Karya Jakarta Raya, Koperasi Angkutan Umum Kopamilet Jaya, Koperasi Angkutan Purimas Jaya, PT Lestari Surya Gema Persada, Koperasi Kojang Jaya, Koperasi Angkutan Layanan Masyarakat Jakarta Raya)",
       "status": "operating",
       "color": null,
@@ -4255,6 +4377,7 @@
           "https://id.wikipedia.org/wiki/Transjakarta"
         ],
         "officialName": "TERMINAL KLENDER - TERMINAL RAWAMANGUN",
+        "officialService": null,
         "osmRelationIds": [],
         "rawName": null,
         "from": null,
@@ -4268,7 +4391,7 @@
       "code": "JAK.35",
       "name": "Rawamangun - Pangkalan Jati",
       "mode": "minibus",
-      "serviceClass": "feeder",
+      "serviceClass": "mikrotrans",
       "operator": "Koperasi Wahana Kendaraan Angkutan Lingkungan dan Pinggir Kota (KWK), Pusat Koperasi Angkutan Udara Halim Perdanakusuma (PUS), Mikrolet/APB group (PT Kencana Sakti Transport, Koperasi Mikrolet Jakarta Raya, Koperasi Angkutan Umum Budi Luhur, Koperasi Minibus Karya Jakarta Raya, Koperasi Angkutan Umum Kopamilet Jaya, Koperasi Angkutan Purimas Jaya, PT Lestari Surya Gema Persada, Koperasi Kojang Jaya, Koperasi Angkutan Layanan Masyarakat Jakarta Raya)",
       "status": "operating",
       "color": null,
@@ -4284,6 +4407,7 @@
           "https://id.wikipedia.org/wiki/Transjakarta"
         ],
         "officialName": "RAWAMANGUN - PANGKALAN JATI",
+        "officialService": null,
         "osmRelationIds": [],
         "rawName": null,
         "from": null,
@@ -4297,7 +4421,7 @@
       "code": "JAK.36",
       "name": "Cilangkap - Cililitan ( PGC )",
       "mode": "minibus",
-      "serviceClass": "feeder",
+      "serviceClass": "mikrotrans",
       "operator": "Koperasi Wahana Kendaraan Angkutan Lingkungan dan Pinggir Kota (KWK), Pusat Koperasi Angkutan Udara Halim Perdanakusuma (PUS), Mikrolet/APB group (PT Kencana Sakti Transport, Koperasi Mikrolet Jakarta Raya, Koperasi Angkutan Umum Budi Luhur, Koperasi Minibus Karya Jakarta Raya, Koperasi Angkutan Umum Kopamilet Jaya, Koperasi Angkutan Purimas Jaya, PT Lestari Surya Gema Persada, Koperasi Kojang Jaya, Koperasi Angkutan Layanan Masyarakat Jakarta Raya)",
       "status": "operating",
       "color": null,
@@ -4313,6 +4437,7 @@
           "https://id.wikipedia.org/wiki/Transjakarta"
         ],
         "officialName": "CILANGKAP  - CILILITAN ( PGC )",
+        "officialService": null,
         "osmRelationIds": [],
         "rawName": null,
         "from": null,
@@ -4326,7 +4451,7 @@
       "code": "JAK.37",
       "name": "Cililitan ( PGC ) - Condet VIA Kayu Manis",
       "mode": "minibus",
-      "serviceClass": "feeder",
+      "serviceClass": "mikrotrans",
       "operator": "Koperasi Wahana Kendaraan Angkutan Lingkungan dan Pinggir Kota (KWK), Pusat Koperasi Angkutan Udara Halim Perdanakusuma (PUS), Mikrolet/APB group (PT Kencana Sakti Transport, Koperasi Mikrolet Jakarta Raya, Koperasi Angkutan Umum Budi Luhur, Koperasi Minibus Karya Jakarta Raya, Koperasi Angkutan Umum Kopamilet Jaya, Koperasi Angkutan Purimas Jaya, PT Lestari Surya Gema Persada, Koperasi Kojang Jaya, Koperasi Angkutan Layanan Masyarakat Jakarta Raya)",
       "status": "operating",
       "color": null,
@@ -4342,6 +4467,7 @@
           "https://id.wikipedia.org/wiki/Transjakarta"
         ],
         "officialName": "CILILITAN ( PGC ) - CONDET VIA KAYU MANIS",
+        "officialService": null,
         "osmRelationIds": [],
         "rawName": null,
         "from": null,
@@ -4355,7 +4481,7 @@
       "code": "JAK.38",
       "name": "Bulak Ringin - Kampung Rambutan",
       "mode": "minibus",
-      "serviceClass": "feeder",
+      "serviceClass": "mikrotrans",
       "operator": "Koperasi Wahana Kendaraan Angkutan Lingkungan dan Pinggir Kota (KWK), Pusat Koperasi Angkutan Udara Halim Perdanakusuma (PUS), Mikrolet/APB group (PT Kencana Sakti Transport, Koperasi Mikrolet Jakarta Raya, Koperasi Angkutan Umum Budi Luhur, Koperasi Minibus Karya Jakarta Raya, Koperasi Angkutan Umum Kopamilet Jaya, Koperasi Angkutan Purimas Jaya, PT Lestari Surya Gema Persada, Koperasi Kojang Jaya, Koperasi Angkutan Layanan Masyarakat Jakarta Raya)",
       "status": "operating",
       "color": null,
@@ -4371,6 +4497,7 @@
           "https://id.wikipedia.org/wiki/Transjakarta"
         ],
         "officialName": "BULAK RINGIN - KAMPUNG RAMBUTAN",
+        "officialService": null,
         "osmRelationIds": [],
         "rawName": null,
         "from": null,
@@ -4384,7 +4511,7 @@
       "code": "JAK.39",
       "name": "Kalimalang - Duren Sawit",
       "mode": "minibus",
-      "serviceClass": "feeder",
+      "serviceClass": "mikrotrans",
       "operator": "Koperasi Wahana Kendaraan Angkutan Lingkungan dan Pinggir Kota (KWK), Pusat Koperasi Angkutan Udara Halim Perdanakusuma (PUS), Mikrolet/APB group (PT Kencana Sakti Transport, Koperasi Mikrolet Jakarta Raya, Koperasi Angkutan Umum Budi Luhur, Koperasi Minibus Karya Jakarta Raya, Koperasi Angkutan Umum Kopamilet Jaya, Koperasi Angkutan Purimas Jaya, PT Lestari Surya Gema Persada, Koperasi Kojang Jaya, Koperasi Angkutan Layanan Masyarakat Jakarta Raya)",
       "status": "operating",
       "color": "#00b0ec",
@@ -4403,6 +4530,7 @@
           "https://id.wikipedia.org/wiki/Transjakarta"
         ],
         "officialName": "KALIMALANG - DUREN SAWIT",
+        "officialService": null,
         "osmRelationIds": [
           14300089,
           14302432
@@ -4419,7 +4547,7 @@
       "code": "JAK.40",
       "name": "Harapan Baru - Pulo Gebang VIA Rawa Kuning",
       "mode": "minibus",
-      "serviceClass": "feeder",
+      "serviceClass": "mikrotrans",
       "operator": "Koperasi Wahana Kendaraan Angkutan Lingkungan dan Pinggir Kota (KWK), Pusat Koperasi Angkutan Udara Halim Perdanakusuma (PUS), Mikrolet/APB group (PT Kencana Sakti Transport, Koperasi Mikrolet Jakarta Raya, Koperasi Angkutan Umum Budi Luhur, Koperasi Minibus Karya Jakarta Raya, Koperasi Angkutan Umum Kopamilet Jaya, Koperasi Angkutan Purimas Jaya, PT Lestari Surya Gema Persada, Koperasi Kojang Jaya, Koperasi Angkutan Layanan Masyarakat Jakarta Raya)",
       "status": "operating",
       "color": null,
@@ -4435,6 +4563,7 @@
           "https://id.wikipedia.org/wiki/Transjakarta"
         ],
         "officialName": "HARAPAN BARU - PULO GEBANG VIA RAWA KUNING",
+        "officialService": null,
         "osmRelationIds": [],
         "rawName": null,
         "from": null,
@@ -4448,7 +4577,7 @@
       "code": "JAK.41",
       "name": "Kampung Melayu - Pulo Gadung",
       "mode": "minibus",
-      "serviceClass": "feeder",
+      "serviceClass": "mikrotrans",
       "operator": "Koperasi Wahana Kendaraan Angkutan Lingkungan dan Pinggir Kota (KWK), Pusat Koperasi Angkutan Udara Halim Perdanakusuma (PUS), Mikrolet/APB group (PT Kencana Sakti Transport, Koperasi Mikrolet Jakarta Raya, Koperasi Angkutan Umum Budi Luhur, Koperasi Minibus Karya Jakarta Raya, Koperasi Angkutan Umum Kopamilet Jaya, Koperasi Angkutan Purimas Jaya, PT Lestari Surya Gema Persada, Koperasi Kojang Jaya, Koperasi Angkutan Layanan Masyarakat Jakarta Raya)",
       "status": "operating",
       "color": null,
@@ -4464,6 +4593,7 @@
           "https://id.wikipedia.org/wiki/Transjakarta"
         ],
         "officialName": "KAMPUNG MELAYU - PULO GADUNG",
+        "officialService": null,
         "osmRelationIds": [],
         "rawName": null,
         "from": null,
@@ -4477,7 +4607,7 @@
       "code": "JAK.42",
       "name": "Kampung Melayu - Pondok Kelapa",
       "mode": "minibus",
-      "serviceClass": "feeder",
+      "serviceClass": "mikrotrans",
       "operator": "Koperasi Wahana Kendaraan Angkutan Lingkungan dan Pinggir Kota (KWK), Pusat Koperasi Angkutan Udara Halim Perdanakusuma (PUS), Mikrolet/APB group (PT Kencana Sakti Transport, Koperasi Mikrolet Jakarta Raya, Koperasi Angkutan Umum Budi Luhur, Koperasi Minibus Karya Jakarta Raya, Koperasi Angkutan Umum Kopamilet Jaya, Koperasi Angkutan Purimas Jaya, PT Lestari Surya Gema Persada, Koperasi Kojang Jaya, Koperasi Angkutan Layanan Masyarakat Jakarta Raya)",
       "status": "operating",
       "color": null,
@@ -4493,6 +4623,7 @@
           "https://id.wikipedia.org/wiki/Transjakarta"
         ],
         "officialName": "KAMPUNG MELAYU - PONDOK KELAPA",
+        "officialService": null,
         "osmRelationIds": [],
         "rawName": null,
         "from": null,
@@ -4506,7 +4637,7 @@
       "code": "JAK.44",
       "name": "Andara - Stasiun Universitas Pancasila",
       "mode": "minibus",
-      "serviceClass": "feeder",
+      "serviceClass": "mikrotrans",
       "operator": "Koperasi Wahana Kendaraan Angkutan Lingkungan dan Pinggir Kota (KWK), Pusat Koperasi Angkutan Udara Halim Perdanakusuma (PUS), Mikrolet/APB group (PT Kencana Sakti Transport, Koperasi Mikrolet Jakarta Raya, Koperasi Angkutan Umum Budi Luhur, Koperasi Minibus Karya Jakarta Raya, Koperasi Angkutan Umum Kopamilet Jaya, Koperasi Angkutan Purimas Jaya, PT Lestari Surya Gema Persada, Koperasi Kojang Jaya, Koperasi Angkutan Layanan Masyarakat Jakarta Raya)",
       "status": "operating",
       "color": null,
@@ -4522,6 +4653,7 @@
           "https://id.wikipedia.org/wiki/Transjakarta"
         ],
         "officialName": "ANDARA - STASIUN UNIVERSITAS PANCASILA",
+        "officialService": null,
         "osmRelationIds": [],
         "rawName": null,
         "from": null,
@@ -4535,7 +4667,7 @@
       "code": "JAK.45",
       "name": "Lebak Bulus - Ragunan",
       "mode": "minibus",
-      "serviceClass": "feeder",
+      "serviceClass": "mikrotrans",
       "operator": "Koperasi Wahana Kendaraan Angkutan Lingkungan dan Pinggir Kota (KWK), Pusat Koperasi Angkutan Udara Halim Perdanakusuma (PUS), Mikrolet/APB group (PT Kencana Sakti Transport, Koperasi Mikrolet Jakarta Raya, Koperasi Angkutan Umum Budi Luhur, Koperasi Minibus Karya Jakarta Raya, Koperasi Angkutan Umum Kopamilet Jaya, Koperasi Angkutan Purimas Jaya, PT Lestari Surya Gema Persada, Koperasi Kojang Jaya, Koperasi Angkutan Layanan Masyarakat Jakarta Raya)",
       "status": "operating",
       "color": null,
@@ -4551,6 +4683,7 @@
           "https://id.wikipedia.org/wiki/Transjakarta"
         ],
         "officialName": "LEBAK BULUS - RAGUNAN",
+        "officialService": null,
         "osmRelationIds": [],
         "rawName": null,
         "from": null,
@@ -4564,7 +4697,7 @@
       "code": "JAK.46",
       "name": "Jagakarsa - Pasar Minggu",
       "mode": "minibus",
-      "serviceClass": "feeder",
+      "serviceClass": "mikrotrans",
       "operator": "Koperasi Wahana Kendaraan Angkutan Lingkungan dan Pinggir Kota (KWK), Pusat Koperasi Angkutan Udara Halim Perdanakusuma (PUS), Mikrolet/APB group (PT Kencana Sakti Transport, Koperasi Mikrolet Jakarta Raya, Koperasi Angkutan Umum Budi Luhur, Koperasi Minibus Karya Jakarta Raya, Koperasi Angkutan Umum Kopamilet Jaya, Koperasi Angkutan Purimas Jaya, PT Lestari Surya Gema Persada, Koperasi Kojang Jaya, Koperasi Angkutan Layanan Masyarakat Jakarta Raya)",
       "status": "operating",
       "color": null,
@@ -4580,6 +4713,7 @@
           "https://id.wikipedia.org/wiki/Transjakarta"
         ],
         "officialName": "JAGAKARSA - PASAR MINGGU",
+        "officialService": null,
         "osmRelationIds": [],
         "rawName": null,
         "from": null,
@@ -4593,7 +4727,7 @@
       "code": "JAK.47",
       "name": "Pasar Minggu - Ciganjur VIA Kebun Binatang Ragunan",
       "mode": "minibus",
-      "serviceClass": "feeder",
+      "serviceClass": "mikrotrans",
       "operator": "Koperasi Wahana Kendaraan Angkutan Lingkungan dan Pinggir Kota (KWK), Pusat Koperasi Angkutan Udara Halim Perdanakusuma (PUS), Mikrolet/APB group (PT Kencana Sakti Transport, Koperasi Mikrolet Jakarta Raya, Koperasi Angkutan Umum Budi Luhur, Koperasi Minibus Karya Jakarta Raya, Koperasi Angkutan Umum Kopamilet Jaya, Koperasi Angkutan Purimas Jaya, PT Lestari Surya Gema Persada, Koperasi Kojang Jaya, Koperasi Angkutan Layanan Masyarakat Jakarta Raya)",
       "status": "operating",
       "color": null,
@@ -4609,6 +4743,7 @@
           "https://id.wikipedia.org/wiki/Transjakarta"
         ],
         "officialName": "PASAR MINGGU - CIGANJUR VIA KEBUN BINATANG RAGUNAN",
+        "officialService": null,
         "osmRelationIds": [],
         "rawName": null,
         "from": null,
@@ -4622,7 +4757,7 @@
       "code": "JAK.49",
       "name": "Lebak Bulus - Cipulir",
       "mode": "minibus",
-      "serviceClass": "feeder",
+      "serviceClass": "mikrotrans",
       "operator": "Koperasi Wahana Kendaraan Angkutan Lingkungan dan Pinggir Kota (KWK), Pusat Koperasi Angkutan Udara Halim Perdanakusuma (PUS), Mikrolet/APB group (PT Kencana Sakti Transport, Koperasi Mikrolet Jakarta Raya, Koperasi Angkutan Umum Budi Luhur, Koperasi Minibus Karya Jakarta Raya, Koperasi Angkutan Umum Kopamilet Jaya, Koperasi Angkutan Purimas Jaya, PT Lestari Surya Gema Persada, Koperasi Kojang Jaya, Koperasi Angkutan Layanan Masyarakat Jakarta Raya)",
       "status": "operating",
       "color": null,
@@ -4638,6 +4773,7 @@
           "https://id.wikipedia.org/wiki/Transjakarta"
         ],
         "officialName": "LEBAK BULUS - CIPULIR",
+        "officialService": null,
         "osmRelationIds": [],
         "rawName": null,
         "from": null,
@@ -4651,7 +4787,7 @@
       "code": "JAK.50",
       "name": "Kalideres - Puri Kembangan",
       "mode": "minibus",
-      "serviceClass": "feeder",
+      "serviceClass": "mikrotrans",
       "operator": "Koperasi Wahana Kendaraan Angkutan Lingkungan dan Pinggir Kota (KWK), Pusat Koperasi Angkutan Udara Halim Perdanakusuma (PUS), Mikrolet/APB group (PT Kencana Sakti Transport, Koperasi Mikrolet Jakarta Raya, Koperasi Angkutan Umum Budi Luhur, Koperasi Minibus Karya Jakarta Raya, Koperasi Angkutan Umum Kopamilet Jaya, Koperasi Angkutan Purimas Jaya, PT Lestari Surya Gema Persada, Koperasi Kojang Jaya, Koperasi Angkutan Layanan Masyarakat Jakarta Raya)",
       "status": "operating",
       "color": null,
@@ -4667,6 +4803,7 @@
           "https://id.wikipedia.org/wiki/Transjakarta"
         ],
         "officialName": "KALIDERES - PURI KEMBANGAN",
+        "officialService": null,
         "osmRelationIds": [],
         "rawName": null,
         "from": null,
@@ -4680,7 +4817,7 @@
       "code": "JAK.51",
       "name": "Taman Kota - Budi Luhur",
       "mode": "minibus",
-      "serviceClass": "feeder",
+      "serviceClass": "mikrotrans",
       "operator": "Koperasi Wahana Kendaraan Angkutan Lingkungan dan Pinggir Kota (KWK), Pusat Koperasi Angkutan Udara Halim Perdanakusuma (PUS), Mikrolet/APB group (PT Kencana Sakti Transport, Koperasi Mikrolet Jakarta Raya, Koperasi Angkutan Umum Budi Luhur, Koperasi Minibus Karya Jakarta Raya, Koperasi Angkutan Umum Kopamilet Jaya, Koperasi Angkutan Purimas Jaya, PT Lestari Surya Gema Persada, Koperasi Kojang Jaya, Koperasi Angkutan Layanan Masyarakat Jakarta Raya)",
       "status": "operating",
       "color": null,
@@ -4696,6 +4833,7 @@
           "https://id.wikipedia.org/wiki/Transjakarta"
         ],
         "officialName": "TAMAN KOTA - BUDI LUHUR",
+        "officialService": null,
         "osmRelationIds": [],
         "rawName": null,
         "from": null,
@@ -4709,7 +4847,7 @@
       "code": "JAK.52",
       "name": "Kalideres - Muara Angke",
       "mode": "minibus",
-      "serviceClass": "feeder",
+      "serviceClass": "mikrotrans",
       "operator": "Koperasi Wahana Kendaraan Angkutan Lingkungan dan Pinggir Kota (KWK), Pusat Koperasi Angkutan Udara Halim Perdanakusuma (PUS), Mikrolet/APB group (PT Kencana Sakti Transport, Koperasi Mikrolet Jakarta Raya, Koperasi Angkutan Umum Budi Luhur, Koperasi Minibus Karya Jakarta Raya, Koperasi Angkutan Umum Kopamilet Jaya, Koperasi Angkutan Purimas Jaya, PT Lestari Surya Gema Persada, Koperasi Kojang Jaya, Koperasi Angkutan Layanan Masyarakat Jakarta Raya)",
       "status": "operating",
       "color": null,
@@ -4725,6 +4863,7 @@
           "https://id.wikipedia.org/wiki/Transjakarta"
         ],
         "officialName": "KALIDERES - MUARA ANGKE",
+        "officialService": null,
         "osmRelationIds": [],
         "rawName": null,
         "from": null,
@@ -4738,7 +4877,7 @@
       "code": "JAK.53",
       "name": "Grogol - POS Pengumben",
       "mode": "minibus",
-      "serviceClass": "feeder",
+      "serviceClass": "mikrotrans",
       "operator": "Koperasi Wahana Kendaraan Angkutan Lingkungan dan Pinggir Kota (KWK), Pusat Koperasi Angkutan Udara Halim Perdanakusuma (PUS), Mikrolet/APB group (PT Kencana Sakti Transport, Koperasi Mikrolet Jakarta Raya, Koperasi Angkutan Umum Budi Luhur, Koperasi Minibus Karya Jakarta Raya, Koperasi Angkutan Umum Kopamilet Jaya, Koperasi Angkutan Purimas Jaya, PT Lestari Surya Gema Persada, Koperasi Kojang Jaya, Koperasi Angkutan Layanan Masyarakat Jakarta Raya)",
       "status": "operating",
       "color": null,
@@ -4754,6 +4893,7 @@
           "https://id.wikipedia.org/wiki/Transjakarta"
         ],
         "officialName": "GROGOL - POS PENGUMBEN",
+        "officialService": null,
         "osmRelationIds": [],
         "rawName": null,
         "from": null,
@@ -4767,7 +4907,7 @@
       "code": "JAK.54",
       "name": "Grogol - Benhil",
       "mode": "minibus",
-      "serviceClass": "feeder",
+      "serviceClass": "mikrotrans",
       "operator": "Koperasi Wahana Kendaraan Angkutan Lingkungan dan Pinggir Kota (KWK), Pusat Koperasi Angkutan Udara Halim Perdanakusuma (PUS), Mikrolet/APB group (PT Kencana Sakti Transport, Koperasi Mikrolet Jakarta Raya, Koperasi Angkutan Umum Budi Luhur, Koperasi Minibus Karya Jakarta Raya, Koperasi Angkutan Umum Kopamilet Jaya, Koperasi Angkutan Purimas Jaya, PT Lestari Surya Gema Persada, Koperasi Kojang Jaya, Koperasi Angkutan Layanan Masyarakat Jakarta Raya)",
       "status": "operating",
       "color": null,
@@ -4783,6 +4923,7 @@
           "https://id.wikipedia.org/wiki/Transjakarta"
         ],
         "officialName": "GROGOL - BENHIL",
+        "officialService": null,
         "osmRelationIds": [],
         "rawName": null,
         "from": null,
@@ -4796,7 +4937,7 @@
       "code": "JAK.56",
       "name": "Pesing - Srengseng",
       "mode": "minibus",
-      "serviceClass": "feeder",
+      "serviceClass": "mikrotrans",
       "operator": "Koperasi Wahana Kendaraan Angkutan Lingkungan dan Pinggir Kota (KWK), Pusat Koperasi Angkutan Udara Halim Perdanakusuma (PUS), Mikrolet/APB group (PT Kencana Sakti Transport, Koperasi Mikrolet Jakarta Raya, Koperasi Angkutan Umum Budi Luhur, Koperasi Minibus Karya Jakarta Raya, Koperasi Angkutan Umum Kopamilet Jaya, Koperasi Angkutan Purimas Jaya, PT Lestari Surya Gema Persada, Koperasi Kojang Jaya, Koperasi Angkutan Layanan Masyarakat Jakarta Raya)",
       "status": "operating",
       "color": null,
@@ -4812,6 +4953,7 @@
           "https://id.wikipedia.org/wiki/Transjakarta"
         ],
         "officialName": "PESING - SRENGSENG",
+        "officialService": null,
         "osmRelationIds": [],
         "rawName": null,
         "from": null,
@@ -4825,7 +4967,7 @@
       "code": "JAK.58",
       "name": "Cilincing - Rusun Padat Karya",
       "mode": "minibus",
-      "serviceClass": "feeder",
+      "serviceClass": "mikrotrans",
       "operator": "Koperasi Wahana Kendaraan Angkutan Lingkungan dan Pinggir Kota (KWK), Pusat Koperasi Angkutan Udara Halim Perdanakusuma (PUS), Mikrolet/APB group (PT Kencana Sakti Transport, Koperasi Mikrolet Jakarta Raya, Koperasi Angkutan Umum Budi Luhur, Koperasi Minibus Karya Jakarta Raya, Koperasi Angkutan Umum Kopamilet Jaya, Koperasi Angkutan Purimas Jaya, PT Lestari Surya Gema Persada, Koperasi Kojang Jaya, Koperasi Angkutan Layanan Masyarakat Jakarta Raya)",
       "status": "operating",
       "color": null,
@@ -4841,6 +4983,7 @@
           "https://id.wikipedia.org/wiki/Transjakarta"
         ],
         "officialName": "CILINCING - RUSUN PADAT KARYA",
+        "officialService": null,
         "osmRelationIds": [],
         "rawName": null,
         "from": null,
@@ -4854,7 +4997,7 @@
       "code": "JAK.59",
       "name": "Rawamangun - Rawa Sengon",
       "mode": "minibus",
-      "serviceClass": "feeder",
+      "serviceClass": "mikrotrans",
       "operator": "Koperasi Wahana Kendaraan Angkutan Lingkungan dan Pinggir Kota (KWK), Pusat Koperasi Angkutan Udara Halim Perdanakusuma (PUS), Mikrolet/APB group (PT Kencana Sakti Transport, Koperasi Mikrolet Jakarta Raya, Koperasi Angkutan Umum Budi Luhur, Koperasi Minibus Karya Jakarta Raya, Koperasi Angkutan Umum Kopamilet Jaya, Koperasi Angkutan Purimas Jaya, PT Lestari Surya Gema Persada, Koperasi Kojang Jaya, Koperasi Angkutan Layanan Masyarakat Jakarta Raya)",
       "status": "operating",
       "color": "#87CEEB",
@@ -4873,6 +5016,7 @@
           "https://id.wikipedia.org/wiki/Transjakarta"
         ],
         "officialName": "RAWAMANGUN - RAWA SENGON",
+        "officialService": null,
         "osmRelationIds": [
           21090931,
           21098742
@@ -4889,7 +5033,7 @@
       "code": "JAK.60",
       "name": "Kelapa Gading - Rusun Kemayoran",
       "mode": "minibus",
-      "serviceClass": "feeder",
+      "serviceClass": "mikrotrans",
       "operator": "Koperasi Wahana Kendaraan Angkutan Lingkungan dan Pinggir Kota (KWK), Pusat Koperasi Angkutan Udara Halim Perdanakusuma (PUS), Mikrolet/APB group (PT Kencana Sakti Transport, Koperasi Mikrolet Jakarta Raya, Koperasi Angkutan Umum Budi Luhur, Koperasi Minibus Karya Jakarta Raya, Koperasi Angkutan Umum Kopamilet Jaya, Koperasi Angkutan Purimas Jaya, PT Lestari Surya Gema Persada, Koperasi Kojang Jaya, Koperasi Angkutan Layanan Masyarakat Jakarta Raya)",
       "status": "operating",
       "color": null,
@@ -4905,6 +5049,7 @@
           "https://id.wikipedia.org/wiki/Transjakarta"
         ],
         "officialName": "KELAPA GADING - RUSUN KEMAYORAN",
+        "officialService": null,
         "osmRelationIds": [],
         "rawName": null,
         "from": null,
@@ -4918,7 +5063,7 @@
       "code": "JAK.61",
       "name": "Cempaka Putih-Pulo Gadung VIA Kelapa Gading",
       "mode": "minibus",
-      "serviceClass": "feeder",
+      "serviceClass": "mikrotrans",
       "operator": "Koperasi Wahana Kendaraan Angkutan Lingkungan dan Pinggir Kota (KWK), Pusat Koperasi Angkutan Udara Halim Perdanakusuma (PUS), Mikrolet/APB group (PT Kencana Sakti Transport, Koperasi Mikrolet Jakarta Raya, Koperasi Angkutan Umum Budi Luhur, Koperasi Minibus Karya Jakarta Raya, Koperasi Angkutan Umum Kopamilet Jaya, Koperasi Angkutan Purimas Jaya, PT Lestari Surya Gema Persada, Koperasi Kojang Jaya, Koperasi Angkutan Layanan Masyarakat Jakarta Raya)",
       "status": "operating",
       "color": null,
@@ -4934,6 +5079,7 @@
           "https://id.wikipedia.org/wiki/Transjakarta"
         ],
         "officialName": "CEMPAKA PUTIH-PULO GADUNG VIA KELAPA GADING",
+        "officialService": null,
         "osmRelationIds": [],
         "rawName": null,
         "from": null,
@@ -4947,7 +5093,7 @@
       "code": "JAK.64",
       "name": "Aseli - Terminal Pasar Minggu",
       "mode": "minibus",
-      "serviceClass": "feeder",
+      "serviceClass": "mikrotrans",
       "operator": "Koperasi Wahana Kendaraan Angkutan Lingkungan dan Pinggir Kota (KWK), Pusat Koperasi Angkutan Udara Halim Perdanakusuma (PUS), Mikrolet/APB group (PT Kencana Sakti Transport, Koperasi Mikrolet Jakarta Raya, Koperasi Angkutan Umum Budi Luhur, Koperasi Minibus Karya Jakarta Raya, Koperasi Angkutan Umum Kopamilet Jaya, Koperasi Angkutan Purimas Jaya, PT Lestari Surya Gema Persada, Koperasi Kojang Jaya, Koperasi Angkutan Layanan Masyarakat Jakarta Raya)",
       "status": "operating",
       "color": null,
@@ -4963,6 +5109,7 @@
           "https://id.wikipedia.org/wiki/Transjakarta"
         ],
         "officialName": "ASELI - TERMINAL PASAR MINGGU",
+        "officialService": null,
         "osmRelationIds": [],
         "rawName": null,
         "from": null,
@@ -4976,7 +5123,7 @@
       "code": "JAK.71",
       "name": "Kampung Rambutan - Pinang Ranti",
       "mode": "minibus",
-      "serviceClass": "feeder",
+      "serviceClass": "mikrotrans",
       "operator": "Koperasi Wahana Kendaraan Angkutan Lingkungan dan Pinggir Kota (KWK), Pusat Koperasi Angkutan Udara Halim Perdanakusuma (PUS), Mikrolet/APB group (PT Kencana Sakti Transport, Koperasi Mikrolet Jakarta Raya, Koperasi Angkutan Umum Budi Luhur, Koperasi Minibus Karya Jakarta Raya, Koperasi Angkutan Umum Kopamilet Jaya, Koperasi Angkutan Purimas Jaya, PT Lestari Surya Gema Persada, Koperasi Kojang Jaya, Koperasi Angkutan Layanan Masyarakat Jakarta Raya)",
       "status": "operating",
       "color": null,
@@ -4992,6 +5139,7 @@
           "https://id.wikipedia.org/wiki/Transjakarta"
         ],
         "officialName": "KAMPUNG RAMBUTAN - PINANG RANTI",
+        "officialService": null,
         "osmRelationIds": [],
         "rawName": null,
         "from": null,
@@ -5005,7 +5153,7 @@
       "code": "JAK.72",
       "name": "Kampung Rambutan - Pasar Rebo VIA Poncol",
       "mode": "minibus",
-      "serviceClass": "feeder",
+      "serviceClass": "mikrotrans",
       "operator": "Koperasi Wahana Kendaraan Angkutan Lingkungan dan Pinggir Kota (KWK), Pusat Koperasi Angkutan Udara Halim Perdanakusuma (PUS), Mikrolet/APB group (PT Kencana Sakti Transport, Koperasi Mikrolet Jakarta Raya, Koperasi Angkutan Umum Budi Luhur, Koperasi Minibus Karya Jakarta Raya, Koperasi Angkutan Umum Kopamilet Jaya, Koperasi Angkutan Purimas Jaya, PT Lestari Surya Gema Persada, Koperasi Kojang Jaya, Koperasi Angkutan Layanan Masyarakat Jakarta Raya)",
       "status": "operating",
       "color": null,
@@ -5021,6 +5169,7 @@
           "https://id.wikipedia.org/wiki/Transjakarta"
         ],
         "officialName": "KAMPUNG RAMBUTAN - PASAR REBO VIA PONCOL",
+        "officialService": null,
         "osmRelationIds": [],
         "rawName": null,
         "from": null,
@@ -5034,7 +5183,7 @@
       "code": "JAK.73",
       "name": "Jambore Cibubur - Pasar Rebo",
       "mode": "minibus",
-      "serviceClass": "feeder",
+      "serviceClass": "mikrotrans",
       "operator": "Koperasi Wahana Kendaraan Angkutan Lingkungan dan Pinggir Kota (KWK), Pusat Koperasi Angkutan Udara Halim Perdanakusuma (PUS), Mikrolet/APB group (PT Kencana Sakti Transport, Koperasi Mikrolet Jakarta Raya, Koperasi Angkutan Umum Budi Luhur, Koperasi Minibus Karya Jakarta Raya, Koperasi Angkutan Umum Kopamilet Jaya, Koperasi Angkutan Purimas Jaya, PT Lestari Surya Gema Persada, Koperasi Kojang Jaya, Koperasi Angkutan Layanan Masyarakat Jakarta Raya)",
       "status": "operating",
       "color": null,
@@ -5050,6 +5199,7 @@
           "https://id.wikipedia.org/wiki/Transjakarta"
         ],
         "officialName": "JAMBORE CIBUBUR - PASAR REBO",
+        "officialService": null,
         "osmRelationIds": [],
         "rawName": null,
         "from": null,
@@ -5063,7 +5213,7 @@
       "code": "JAK.74",
       "name": "Rawamangun - Cipinang Muara",
       "mode": "minibus",
-      "serviceClass": "feeder",
+      "serviceClass": "mikrotrans",
       "operator": "Koperasi Wahana Kendaraan Angkutan Lingkungan dan Pinggir Kota (KWK), Pusat Koperasi Angkutan Udara Halim Perdanakusuma (PUS), Mikrolet/APB group (PT Kencana Sakti Transport, Koperasi Mikrolet Jakarta Raya, Koperasi Angkutan Umum Budi Luhur, Koperasi Minibus Karya Jakarta Raya, Koperasi Angkutan Umum Kopamilet Jaya, Koperasi Angkutan Purimas Jaya, PT Lestari Surya Gema Persada, Koperasi Kojang Jaya, Koperasi Angkutan Layanan Masyarakat Jakarta Raya)",
       "status": "operating",
       "color": null,
@@ -5079,6 +5229,7 @@
           "https://id.wikipedia.org/wiki/Transjakarta"
         ],
         "officialName": "RAWAMANGUN - CIPINANG MUARA",
+        "officialService": null,
         "osmRelationIds": [],
         "rawName": null,
         "from": null,
@@ -5092,7 +5243,7 @@
       "code": "JAK.75",
       "name": "Cililitan - Kampung Pulo",
       "mode": "minibus",
-      "serviceClass": "feeder",
+      "serviceClass": "mikrotrans",
       "operator": "Koperasi Wahana Kendaraan Angkutan Lingkungan dan Pinggir Kota (KWK), Pusat Koperasi Angkutan Udara Halim Perdanakusuma (PUS), Mikrolet/APB group (PT Kencana Sakti Transport, Koperasi Mikrolet Jakarta Raya, Koperasi Angkutan Umum Budi Luhur, Koperasi Minibus Karya Jakarta Raya, Koperasi Angkutan Umum Kopamilet Jaya, Koperasi Angkutan Purimas Jaya, PT Lestari Surya Gema Persada, Koperasi Kojang Jaya, Koperasi Angkutan Layanan Masyarakat Jakarta Raya)",
       "status": "operating",
       "color": null,
@@ -5108,6 +5259,7 @@
           "https://id.wikipedia.org/wiki/Transjakarta"
         ],
         "officialName": "CILILITAN - KAMPUNG PULO",
+        "officialService": null,
         "osmRelationIds": [],
         "rawName": null,
         "from": null,
@@ -5121,7 +5273,7 @@
       "code": "JAK.76",
       "name": "Jalan Industri Raya - Asmi",
       "mode": "minibus",
-      "serviceClass": "feeder",
+      "serviceClass": "mikrotrans",
       "operator": "Koperasi Wahana Kendaraan Angkutan Lingkungan dan Pinggir Kota (KWK), Pusat Koperasi Angkutan Udara Halim Perdanakusuma (PUS), Mikrolet/APB group (PT Kencana Sakti Transport, Koperasi Mikrolet Jakarta Raya, Koperasi Angkutan Umum Budi Luhur, Koperasi Minibus Karya Jakarta Raya, Koperasi Angkutan Umum Kopamilet Jaya, Koperasi Angkutan Purimas Jaya, PT Lestari Surya Gema Persada, Koperasi Kojang Jaya, Koperasi Angkutan Layanan Masyarakat Jakarta Raya)",
       "status": "operating",
       "color": null,
@@ -5137,6 +5289,7 @@
           "https://id.wikipedia.org/wiki/Transjakarta"
         ],
         "officialName": "JALAN INDUSTRI RAYA - ASMI",
+        "officialService": null,
         "osmRelationIds": [],
         "rawName": null,
         "from": null,
@@ -5150,7 +5303,7 @@
       "code": "JAK.77",
       "name": "Tanjung Priok - Jembatan Hitam",
       "mode": "minibus",
-      "serviceClass": "feeder",
+      "serviceClass": "mikrotrans",
       "operator": "Koperasi Wahana Kendaraan Angkutan Lingkungan dan Pinggir Kota (KWK), Pusat Koperasi Angkutan Udara Halim Perdanakusuma (PUS), Mikrolet/APB group (PT Kencana Sakti Transport, Koperasi Mikrolet Jakarta Raya, Koperasi Angkutan Umum Budi Luhur, Koperasi Minibus Karya Jakarta Raya, Koperasi Angkutan Umum Kopamilet Jaya, Koperasi Angkutan Purimas Jaya, PT Lestari Surya Gema Persada, Koperasi Kojang Jaya, Koperasi Angkutan Layanan Masyarakat Jakarta Raya)",
       "status": "operating",
       "color": null,
@@ -5166,6 +5319,7 @@
           "https://id.wikipedia.org/wiki/Transjakarta"
         ],
         "officialName": "TANJUNG PRIOK - JEMBATAN HITAM",
+        "officialService": null,
         "osmRelationIds": [],
         "rawName": null,
         "from": null,
@@ -5179,7 +5333,7 @@
       "code": "JAK.79",
       "name": "Cengkareng - Tubagus Angke",
       "mode": "minibus",
-      "serviceClass": "feeder",
+      "serviceClass": "mikrotrans",
       "operator": "Koperasi Wahana Kendaraan Angkutan Lingkungan dan Pinggir Kota (KWK), Pusat Koperasi Angkutan Udara Halim Perdanakusuma (PUS), Mikrolet/APB group (PT Kencana Sakti Transport, Koperasi Mikrolet Jakarta Raya, Koperasi Angkutan Umum Budi Luhur, Koperasi Minibus Karya Jakarta Raya, Koperasi Angkutan Umum Kopamilet Jaya, Koperasi Angkutan Purimas Jaya, PT Lestari Surya Gema Persada, Koperasi Kojang Jaya, Koperasi Angkutan Layanan Masyarakat Jakarta Raya)",
       "status": "operating",
       "color": null,
@@ -5195,6 +5349,7 @@
           "https://id.wikipedia.org/wiki/Transjakarta"
         ],
         "officialName": "CENGKARENG - TUBAGUS ANGKE",
+        "officialService": null,
         "osmRelationIds": [],
         "rawName": null,
         "from": null,
@@ -5208,7 +5363,7 @@
       "code": "JAK.80",
       "name": "Rawa Buaya - Rawa Kompeni",
       "mode": "minibus",
-      "serviceClass": "feeder",
+      "serviceClass": "mikrotrans",
       "operator": "Koperasi Wahana Kendaraan Angkutan Lingkungan dan Pinggir Kota (KWK), Pusat Koperasi Angkutan Udara Halim Perdanakusuma (PUS), Mikrolet/APB group (PT Kencana Sakti Transport, Koperasi Mikrolet Jakarta Raya, Koperasi Angkutan Umum Budi Luhur, Koperasi Minibus Karya Jakarta Raya, Koperasi Angkutan Umum Kopamilet Jaya, Koperasi Angkutan Purimas Jaya, PT Lestari Surya Gema Persada, Koperasi Kojang Jaya, Koperasi Angkutan Layanan Masyarakat Jakarta Raya)",
       "status": "operating",
       "color": null,
@@ -5224,6 +5379,7 @@
           "https://id.wikipedia.org/wiki/Transjakarta"
         ],
         "officialName": "RAWA BUAYA - RAWA KOMPENI",
+        "officialService": null,
         "osmRelationIds": [],
         "rawName": null,
         "from": null,
@@ -5237,7 +5393,7 @@
       "code": "JAK.84",
       "name": "Terminal Kampung Melayu - Kapin Raya",
       "mode": "minibus",
-      "serviceClass": "feeder",
+      "serviceClass": "mikrotrans",
       "operator": "Koperasi Wahana Kendaraan Angkutan Lingkungan dan Pinggir Kota (KWK), Pusat Koperasi Angkutan Udara Halim Perdanakusuma (PUS), Mikrolet/APB group (PT Kencana Sakti Transport, Koperasi Mikrolet Jakarta Raya, Koperasi Angkutan Umum Budi Luhur, Koperasi Minibus Karya Jakarta Raya, Koperasi Angkutan Umum Kopamilet Jaya, Koperasi Angkutan Purimas Jaya, PT Lestari Surya Gema Persada, Koperasi Kojang Jaya, Koperasi Angkutan Layanan Masyarakat Jakarta Raya)",
       "status": "operating",
       "color": null,
@@ -5253,6 +5409,7 @@
           "https://id.wikipedia.org/wiki/Transjakarta"
         ],
         "officialName": "TERMINAL KAMPUNG MELAYU - KAPIN RAYA",
+        "officialService": null,
         "osmRelationIds": [],
         "rawName": null,
         "from": null,
@@ -5266,7 +5423,7 @@
       "code": "JAK.85",
       "name": "Bintara - Cipinang Indah",
       "mode": "minibus",
-      "serviceClass": "feeder",
+      "serviceClass": "mikrotrans",
       "operator": "Koperasi Wahana Kendaraan Angkutan Lingkungan dan Pinggir Kota (KWK), Pusat Koperasi Angkutan Udara Halim Perdanakusuma (PUS), Mikrolet/APB group (PT Kencana Sakti Transport, Koperasi Mikrolet Jakarta Raya, Koperasi Angkutan Umum Budi Luhur, Koperasi Minibus Karya Jakarta Raya, Koperasi Angkutan Umum Kopamilet Jaya, Koperasi Angkutan Purimas Jaya, PT Lestari Surya Gema Persada, Koperasi Kojang Jaya, Koperasi Angkutan Layanan Masyarakat Jakarta Raya)",
       "status": "operating",
       "color": "#87CEEB",
@@ -5285,6 +5442,7 @@
           "https://id.wikipedia.org/wiki/Transjakarta"
         ],
         "officialName": "BINTARA - CIPINANG INDAH",
+        "officialService": null,
         "osmRelationIds": [
           19964755,
           19966517
@@ -5301,7 +5459,7 @@
       "code": "JAK.86",
       "name": "Terminal Rawamangun - Terminal Manggarai",
       "mode": "minibus",
-      "serviceClass": "feeder",
+      "serviceClass": "mikrotrans",
       "operator": "Koperasi Wahana Kendaraan Angkutan Lingkungan dan Pinggir Kota (KWK), Pusat Koperasi Angkutan Udara Halim Perdanakusuma (PUS), Mikrolet/APB group (PT Kencana Sakti Transport, Koperasi Mikrolet Jakarta Raya, Koperasi Angkutan Umum Budi Luhur, Koperasi Minibus Karya Jakarta Raya, Koperasi Angkutan Umum Kopamilet Jaya, Koperasi Angkutan Purimas Jaya, PT Lestari Surya Gema Persada, Koperasi Kojang Jaya, Koperasi Angkutan Layanan Masyarakat Jakarta Raya)",
       "status": "operating",
       "color": "#87CEEB",
@@ -5320,6 +5478,7 @@
           "https://id.wikipedia.org/wiki/Transjakarta"
         ],
         "officialName": "TERMINAL RAWAMANGUN - TERMINAL MANGGARAI",
+        "officialService": null,
         "osmRelationIds": [
           19960654
         ],
@@ -5335,7 +5494,7 @@
       "code": "JAK.87",
       "name": "Terminal Tanjung Priok - Terminal Rawamangun",
       "mode": "minibus",
-      "serviceClass": "feeder",
+      "serviceClass": "mikrotrans",
       "operator": "Koperasi Wahana Kendaraan Angkutan Lingkungan dan Pinggir Kota (KWK), Pusat Koperasi Angkutan Udara Halim Perdanakusuma (PUS), Mikrolet/APB group (PT Kencana Sakti Transport, Koperasi Mikrolet Jakarta Raya, Koperasi Angkutan Umum Budi Luhur, Koperasi Minibus Karya Jakarta Raya, Koperasi Angkutan Umum Kopamilet Jaya, Koperasi Angkutan Purimas Jaya, PT Lestari Surya Gema Persada, Koperasi Kojang Jaya, Koperasi Angkutan Layanan Masyarakat Jakarta Raya)",
       "status": "operating",
       "color": "#87CEEB",
@@ -5354,6 +5513,7 @@
           "https://id.wikipedia.org/wiki/Transjakarta"
         ],
         "officialName": "TERMINAL TANJUNG PRIOK - TERMINAL RAWAMANGUN",
+        "officialService": null,
         "osmRelationIds": [
           19955999,
           19956467
@@ -5370,7 +5530,7 @@
       "code": "JAK.88",
       "name": "Terminal Tanjung Priok - Ancol Barat",
       "mode": "minibus",
-      "serviceClass": "feeder",
+      "serviceClass": "mikrotrans",
       "operator": "Koperasi Wahana Kendaraan Angkutan Lingkungan dan Pinggir Kota (KWK), Pusat Koperasi Angkutan Udara Halim Perdanakusuma (PUS), Mikrolet/APB group (PT Kencana Sakti Transport, Koperasi Mikrolet Jakarta Raya, Koperasi Angkutan Umum Budi Luhur, Koperasi Minibus Karya Jakarta Raya, Koperasi Angkutan Umum Kopamilet Jaya, Koperasi Angkutan Purimas Jaya, PT Lestari Surya Gema Persada, Koperasi Kojang Jaya, Koperasi Angkutan Layanan Masyarakat Jakarta Raya)",
       "status": "operating",
       "color": "#87CEEB",
@@ -5389,6 +5549,7 @@
           "https://id.wikipedia.org/wiki/Transjakarta"
         ],
         "officialName": "TERMINAL TANJUNG PRIOK - ANCOL BARAT",
+        "officialService": null,
         "osmRelationIds": [
           19959805,
           19959806
@@ -5405,7 +5566,7 @@
       "code": "JAK.89",
       "name": "Terminal Tanjung Priok - Taman Kota Intan",
       "mode": "minibus",
-      "serviceClass": "feeder",
+      "serviceClass": "mikrotrans",
       "operator": "Koperasi Wahana Kendaraan Angkutan Lingkungan dan Pinggir Kota (KWK), Pusat Koperasi Angkutan Udara Halim Perdanakusuma (PUS), Mikrolet/APB group (PT Kencana Sakti Transport, Koperasi Mikrolet Jakarta Raya, Koperasi Angkutan Umum Budi Luhur, Koperasi Minibus Karya Jakarta Raya, Koperasi Angkutan Umum Kopamilet Jaya, Koperasi Angkutan Purimas Jaya, PT Lestari Surya Gema Persada, Koperasi Kojang Jaya, Koperasi Angkutan Layanan Masyarakat Jakarta Raya)",
       "status": "operating",
       "color": null,
@@ -5421,6 +5582,7 @@
           "https://id.wikipedia.org/wiki/Transjakarta"
         ],
         "officialName": "TERMINAL TANJUNG PRIOK - TAMAN KOTA INTAN",
+        "officialService": null,
         "osmRelationIds": [],
         "rawName": null,
         "from": null,
@@ -5434,7 +5596,7 @@
       "code": "JAK.90",
       "name": "Terminal Tanjung Priok - Rusun Kemayoran",
       "mode": "minibus",
-      "serviceClass": "feeder",
+      "serviceClass": "mikrotrans",
       "operator": "Koperasi Wahana Kendaraan Angkutan Lingkungan dan Pinggir Kota (KWK), Pusat Koperasi Angkutan Udara Halim Perdanakusuma (PUS), Mikrolet/APB group (PT Kencana Sakti Transport, Koperasi Mikrolet Jakarta Raya, Koperasi Angkutan Umum Budi Luhur, Koperasi Minibus Karya Jakarta Raya, Koperasi Angkutan Umum Kopamilet Jaya, Koperasi Angkutan Purimas Jaya, PT Lestari Surya Gema Persada, Koperasi Kojang Jaya, Koperasi Angkutan Layanan Masyarakat Jakarta Raya)",
       "status": "operating",
       "color": "#87CEEB",
@@ -5453,6 +5615,7 @@
           "https://id.wikipedia.org/wiki/Transjakarta"
         ],
         "officialName": "TERMINAL TANJUNG PRIOK - RUSUN KEMAYORAN",
+        "officialService": null,
         "osmRelationIds": [
           17902930,
           17903076
@@ -5469,7 +5632,7 @@
       "code": "JAK.93",
       "name": "Jeruk Purut - Kebayoran Lama",
       "mode": "minibus",
-      "serviceClass": "feeder",
+      "serviceClass": "mikrotrans",
       "operator": "Koperasi Wahana Kendaraan Angkutan Lingkungan dan Pinggir Kota (KWK), Pusat Koperasi Angkutan Udara Halim Perdanakusuma (PUS), Mikrolet/APB group (PT Kencana Sakti Transport, Koperasi Mikrolet Jakarta Raya, Koperasi Angkutan Umum Budi Luhur, Koperasi Minibus Karya Jakarta Raya, Koperasi Angkutan Umum Kopamilet Jaya, Koperasi Angkutan Purimas Jaya, PT Lestari Surya Gema Persada, Koperasi Kojang Jaya, Koperasi Angkutan Layanan Masyarakat Jakarta Raya)",
       "status": "operating",
       "color": null,
@@ -5485,6 +5648,7 @@
           "https://id.wikipedia.org/wiki/Transjakarta"
         ],
         "officialName": "JERUK PURUT - KEBAYORAN LAMA",
+        "officialService": null,
         "osmRelationIds": [],
         "rawName": null,
         "from": null,
@@ -5498,7 +5662,7 @@
       "code": "JAK.95",
       "name": "Terminal Lebak Bulus - Terminal Pasar Minggu",
       "mode": "minibus",
-      "serviceClass": "feeder",
+      "serviceClass": "mikrotrans",
       "operator": "Koperasi Wahana Kendaraan Angkutan Lingkungan dan Pinggir Kota (KWK), Pusat Koperasi Angkutan Udara Halim Perdanakusuma (PUS), Mikrolet/APB group (PT Kencana Sakti Transport, Koperasi Mikrolet Jakarta Raya, Koperasi Angkutan Umum Budi Luhur, Koperasi Minibus Karya Jakarta Raya, Koperasi Angkutan Umum Kopamilet Jaya, Koperasi Angkutan Purimas Jaya, PT Lestari Surya Gema Persada, Koperasi Kojang Jaya, Koperasi Angkutan Layanan Masyarakat Jakarta Raya)",
       "status": "operating",
       "color": "#FF0000",
@@ -5517,6 +5681,7 @@
           "https://id.wikipedia.org/wiki/Transjakarta"
         ],
         "officialName": "TERMINAL LEBAK BULUS - TERMINAL PASAR MINGGU",
+        "officialService": null,
         "osmRelationIds": [
           17884536,
           17884628
@@ -5533,7 +5698,7 @@
       "code": "JAK.98",
       "name": "Terminal Kampung Rambutan - Munjul",
       "mode": "minibus",
-      "serviceClass": "feeder",
+      "serviceClass": "mikrotrans",
       "operator": "Koperasi Wahana Kendaraan Angkutan Lingkungan dan Pinggir Kota (KWK), Pusat Koperasi Angkutan Udara Halim Perdanakusuma (PUS), Mikrolet/APB group (PT Kencana Sakti Transport, Koperasi Mikrolet Jakarta Raya, Koperasi Angkutan Umum Budi Luhur, Koperasi Minibus Karya Jakarta Raya, Koperasi Angkutan Umum Kopamilet Jaya, Koperasi Angkutan Purimas Jaya, PT Lestari Surya Gema Persada, Koperasi Kojang Jaya, Koperasi Angkutan Layanan Masyarakat Jakarta Raya)",
       "status": "operating",
       "color": "#FF0000",
@@ -5552,6 +5717,7 @@
           "https://id.wikipedia.org/wiki/Transjakarta"
         ],
         "officialName": "TERMINAL KAMPUNG RAMBUTAN - MUNJUL",
+        "officialService": null,
         "osmRelationIds": [
           17880407,
           17880553
@@ -5568,7 +5734,7 @@
       "code": "JAK.99",
       "name": "Terminal Pulo Gadung - Lampiri",
       "mode": "minibus",
-      "serviceClass": "feeder",
+      "serviceClass": "mikrotrans",
       "operator": "Koperasi Wahana Kendaraan Angkutan Lingkungan dan Pinggir Kota (KWK), Pusat Koperasi Angkutan Udara Halim Perdanakusuma (PUS), Mikrolet/APB group (PT Kencana Sakti Transport, Koperasi Mikrolet Jakarta Raya, Koperasi Angkutan Umum Budi Luhur, Koperasi Minibus Karya Jakarta Raya, Koperasi Angkutan Umum Kopamilet Jaya, Koperasi Angkutan Purimas Jaya, PT Lestari Surya Gema Persada, Koperasi Kojang Jaya, Koperasi Angkutan Layanan Masyarakat Jakarta Raya)",
       "status": "operating",
       "color": "#FF0000",
@@ -5587,6 +5753,7 @@
           "https://id.wikipedia.org/wiki/Transjakarta"
         ],
         "officialName": "TERMINAL PULO GADUNG - LAMPIRI",
+        "officialService": null,
         "osmRelationIds": [
           17880069,
           17880233
@@ -5603,7 +5770,7 @@
       "code": "JAK.100",
       "name": "Terminal Pulo Gebang - Rusun Pinus Elok",
       "mode": "minibus",
-      "serviceClass": "feeder",
+      "serviceClass": "mikrotrans",
       "operator": "Koperasi Wahana Kendaraan Angkutan Lingkungan dan Pinggir Kota (KWK), Pusat Koperasi Angkutan Udara Halim Perdanakusuma (PUS), Mikrolet/APB group (PT Kencana Sakti Transport, Koperasi Mikrolet Jakarta Raya, Koperasi Angkutan Umum Budi Luhur, Koperasi Minibus Karya Jakarta Raya, Koperasi Angkutan Umum Kopamilet Jaya, Koperasi Angkutan Purimas Jaya, PT Lestari Surya Gema Persada, Koperasi Kojang Jaya, Koperasi Angkutan Layanan Masyarakat Jakarta Raya)",
       "status": "operating",
       "color": "#FF0000",
@@ -5622,6 +5789,7 @@
           "https://id.wikipedia.org/wiki/Transjakarta"
         ],
         "officialName": "TERMINAL PULO GEBANG - RUSUN PINUS ELOK",
+        "officialService": null,
         "osmRelationIds": [
           17828204,
           17828205
@@ -5638,7 +5806,7 @@
       "code": "JAK.102",
       "name": "Blok M - Lebak Bulus",
       "mode": "minibus",
-      "serviceClass": "feeder",
+      "serviceClass": "mikrotrans",
       "operator": "Koperasi Wahana Kendaraan Angkutan Lingkungan dan Pinggir Kota (KWK), Pusat Koperasi Angkutan Udara Halim Perdanakusuma (PUS), Mikrolet/APB group (PT Kencana Sakti Transport, Koperasi Mikrolet Jakarta Raya, Koperasi Angkutan Umum Budi Luhur, Koperasi Minibus Karya Jakarta Raya, Koperasi Angkutan Umum Kopamilet Jaya, Koperasi Angkutan Purimas Jaya, PT Lestari Surya Gema Persada, Koperasi Kojang Jaya, Koperasi Angkutan Layanan Masyarakat Jakarta Raya)",
       "status": "operating",
       "color": "#FF0000",
@@ -5657,6 +5825,7 @@
           "https://id.wikipedia.org/wiki/Transjakarta"
         ],
         "officialName": "BLOK M - LEBAK BULUS",
+        "officialService": null,
         "osmRelationIds": [
           17838857,
           17839222
@@ -5673,7 +5842,7 @@
       "code": "JAK.105",
       "name": "Stasiun Tebet - Rusun Cipinang Muara",
       "mode": "minibus",
-      "serviceClass": "feeder",
+      "serviceClass": "mikrotrans",
       "operator": "Koperasi Wahana Kendaraan Angkutan Lingkungan dan Pinggir Kota (KWK), Pusat Koperasi Angkutan Udara Halim Perdanakusuma (PUS), Mikrolet/APB group (PT Kencana Sakti Transport, Koperasi Mikrolet Jakarta Raya, Koperasi Angkutan Umum Budi Luhur, Koperasi Minibus Karya Jakarta Raya, Koperasi Angkutan Umum Kopamilet Jaya, Koperasi Angkutan Purimas Jaya, PT Lestari Surya Gema Persada, Koperasi Kojang Jaya, Koperasi Angkutan Layanan Masyarakat Jakarta Raya)",
       "status": "operating",
       "color": "#87CEEB",
@@ -5692,6 +5861,7 @@
           "https://id.wikipedia.org/wiki/Transjakarta"
         ],
         "officialName": "STASIUN TEBET - RUSUN CIPINANG MUARA",
+        "officialService": null,
         "osmRelationIds": [
           17840333,
           17840334
@@ -5708,7 +5878,7 @@
       "code": "JAK.106",
       "name": "Terminal Klender - Terminal Kampung Melayu",
       "mode": "minibus",
-      "serviceClass": "feeder",
+      "serviceClass": "mikrotrans",
       "operator": "Koperasi Wahana Kendaraan Angkutan Lingkungan dan Pinggir Kota (KWK), Pusat Koperasi Angkutan Udara Halim Perdanakusuma (PUS), Mikrolet/APB group (PT Kencana Sakti Transport, Koperasi Mikrolet Jakarta Raya, Koperasi Angkutan Umum Budi Luhur, Koperasi Minibus Karya Jakarta Raya, Koperasi Angkutan Umum Kopamilet Jaya, Koperasi Angkutan Purimas Jaya, PT Lestari Surya Gema Persada, Koperasi Kojang Jaya, Koperasi Angkutan Layanan Masyarakat Jakarta Raya)",
       "status": "operating",
       "color": "#87CEEB",
@@ -5727,6 +5897,7 @@
           "https://id.wikipedia.org/wiki/Transjakarta"
         ],
         "officialName": "TERMINAL KLENDER - TERMINAL KAMPUNG MELAYU",
+        "officialService": null,
         "osmRelationIds": [
           17847576,
           17847717
@@ -5743,7 +5914,7 @@
       "code": "JAK.107",
       "name": "Jembatan Garden - Puri Beta",
       "mode": "minibus",
-      "serviceClass": "feeder",
+      "serviceClass": "mikrotrans",
       "operator": "Koperasi Wahana Kendaraan Angkutan Lingkungan dan Pinggir Kota (KWK), Pusat Koperasi Angkutan Udara Halim Perdanakusuma (PUS), Mikrolet/APB group (PT Kencana Sakti Transport, Koperasi Mikrolet Jakarta Raya, Koperasi Angkutan Umum Budi Luhur, Koperasi Minibus Karya Jakarta Raya, Koperasi Angkutan Umum Kopamilet Jaya, Koperasi Angkutan Purimas Jaya, PT Lestari Surya Gema Persada, Koperasi Kojang Jaya, Koperasi Angkutan Layanan Masyarakat Jakarta Raya)",
       "status": "operating",
       "color": null,
@@ -5759,6 +5930,7 @@
           "https://id.wikipedia.org/wiki/Transjakarta"
         ],
         "officialName": "JEMBATAN GARDEN - PURI BETA",
+        "officialService": null,
         "osmRelationIds": [],
         "rawName": null,
         "from": null,
@@ -5772,7 +5944,7 @@
       "code": "JAK.108",
       "name": "Kramat Jati - Bambu Apus",
       "mode": "minibus",
-      "serviceClass": "feeder",
+      "serviceClass": "mikrotrans",
       "operator": "Koperasi Wahana Kendaraan Angkutan Lingkungan dan Pinggir Kota (KWK), Pusat Koperasi Angkutan Udara Halim Perdanakusuma (PUS), Mikrolet/APB group (PT Kencana Sakti Transport, Koperasi Mikrolet Jakarta Raya, Koperasi Angkutan Umum Budi Luhur, Koperasi Minibus Karya Jakarta Raya, Koperasi Angkutan Umum Kopamilet Jaya, Koperasi Angkutan Purimas Jaya, PT Lestari Surya Gema Persada, Koperasi Kojang Jaya, Koperasi Angkutan Layanan Masyarakat Jakarta Raya)",
       "status": "operating",
       "color": "#FF0000",
@@ -5791,6 +5963,7 @@
           "https://id.wikipedia.org/wiki/Transjakarta"
         ],
         "officialName": "KRAMAT JATI - BAMBU APUS",
+        "officialService": null,
         "osmRelationIds": [
           17865516,
           17865646
@@ -5807,7 +5980,7 @@
       "code": "JAK.10a",
       "name": "Gondangdia - Cikini VIA Salemba Raya",
       "mode": "minibus",
-      "serviceClass": "feeder",
+      "serviceClass": "mikrotrans",
       "operator": "Koperasi Wahana Kendaraan Angkutan Lingkungan dan Pinggir Kota (KWK), Pusat Koperasi Angkutan Udara Halim Perdanakusuma (PUS), Mikrolet/APB group (PT Kencana Sakti Transport, Koperasi Mikrolet Jakarta Raya, Koperasi Angkutan Umum Budi Luhur, Koperasi Minibus Karya Jakarta Raya, Koperasi Angkutan Umum Kopamilet Jaya, Koperasi Angkutan Purimas Jaya, PT Lestari Surya Gema Persada, Koperasi Kojang Jaya, Koperasi Angkutan Layanan Masyarakat Jakarta Raya)",
       "status": "operating",
       "color": "#87CEEB",
@@ -5826,6 +5999,7 @@
           "https://id.wikipedia.org/wiki/Transjakarta"
         ],
         "officialName": "GONDANGDIA - CIKINI VIA SALEMBA RAYA",
+        "officialService": null,
         "osmRelationIds": [
           17804852
         ],
@@ -5841,7 +6015,7 @@
       "code": "JAK.10b",
       "name": "Gondangdia - Cikini VIA Kramat Raya",
       "mode": "minibus",
-      "serviceClass": "feeder",
+      "serviceClass": "mikrotrans",
       "operator": "Koperasi Wahana Kendaraan Angkutan Lingkungan dan Pinggir Kota (KWK), Pusat Koperasi Angkutan Udara Halim Perdanakusuma (PUS), Mikrolet/APB group (PT Kencana Sakti Transport, Koperasi Mikrolet Jakarta Raya, Koperasi Angkutan Umum Budi Luhur, Koperasi Minibus Karya Jakarta Raya, Koperasi Angkutan Umum Kopamilet Jaya, Koperasi Angkutan Purimas Jaya, PT Lestari Surya Gema Persada, Koperasi Kojang Jaya, Koperasi Angkutan Layanan Masyarakat Jakarta Raya)",
       "status": "operating",
       "color": "#87CEEB",
@@ -5860,6 +6034,7 @@
           "https://id.wikipedia.org/wiki/Transjakarta"
         ],
         "officialName": "GONDANGDIA - CIKINI VIA KRAMAT RAYA",
+        "officialService": null,
         "osmRelationIds": [
           17806060
         ],
@@ -5875,7 +6050,7 @@
       "code": "JAK.112",
       "name": "Terminal Tanah Merah - Pulo Gadung",
       "mode": "minibus",
-      "serviceClass": "feeder",
+      "serviceClass": "mikrotrans",
       "operator": "Koperasi Wahana Kendaraan Angkutan Lingkungan dan Pinggir Kota (KWK), Pusat Koperasi Angkutan Udara Halim Perdanakusuma (PUS), Mikrolet/APB group (PT Kencana Sakti Transport, Koperasi Mikrolet Jakarta Raya, Koperasi Angkutan Umum Budi Luhur, Koperasi Minibus Karya Jakarta Raya, Koperasi Angkutan Umum Kopamilet Jaya, Koperasi Angkutan Purimas Jaya, PT Lestari Surya Gema Persada, Koperasi Kojang Jaya, Koperasi Angkutan Layanan Masyarakat Jakarta Raya)",
       "status": "operating",
       "color": null,
@@ -5891,6 +6066,7 @@
           "https://id.wikipedia.org/wiki/Transjakarta"
         ],
         "officialName": "TERMINAL TANAH MERAH - PULO GADUNG",
+        "officialService": null,
         "osmRelationIds": [],
         "rawName": null,
         "from": null,
@@ -5904,7 +6080,7 @@
       "code": "JAK.113",
       "name": "Tanah Merdeka - Kampung Sawah",
       "mode": "minibus",
-      "serviceClass": "feeder",
+      "serviceClass": "mikrotrans",
       "operator": "Koperasi Wahana Kendaraan Angkutan Lingkungan dan Pinggir Kota (KWK), Pusat Koperasi Angkutan Udara Halim Perdanakusuma (PUS), Mikrolet/APB group (PT Kencana Sakti Transport, Koperasi Mikrolet Jakarta Raya, Koperasi Angkutan Umum Budi Luhur, Koperasi Minibus Karya Jakarta Raya, Koperasi Angkutan Umum Kopamilet Jaya, Koperasi Angkutan Purimas Jaya, PT Lestari Surya Gema Persada, Koperasi Kojang Jaya, Koperasi Angkutan Layanan Masyarakat Jakarta Raya)",
       "status": "operating",
       "color": null,
@@ -5920,6 +6096,7 @@
           "https://id.wikipedia.org/wiki/Transjakarta"
         ],
         "officialName": "TANAH MERDEKA - KAMPUNG SAWAH",
+        "officialService": null,
         "osmRelationIds": [],
         "rawName": null,
         "from": null,
@@ -5933,7 +6110,7 @@
       "code": "JAK.115",
       "name": "Terminal Tanjung Priok - Pegangsaan II IGI",
       "mode": "minibus",
-      "serviceClass": "feeder",
+      "serviceClass": "mikrotrans",
       "operator": "Koperasi Wahana Kendaraan Angkutan Lingkungan dan Pinggir Kota (KWK), Pusat Koperasi Angkutan Udara Halim Perdanakusuma (PUS), Mikrolet/APB group (PT Kencana Sakti Transport, Koperasi Mikrolet Jakarta Raya, Koperasi Angkutan Umum Budi Luhur, Koperasi Minibus Karya Jakarta Raya, Koperasi Angkutan Umum Kopamilet Jaya, Koperasi Angkutan Purimas Jaya, PT Lestari Surya Gema Persada, Koperasi Kojang Jaya, Koperasi Angkutan Layanan Masyarakat Jakarta Raya)",
       "status": "operating",
       "color": null,
@@ -5949,6 +6126,7 @@
           "https://id.wikipedia.org/wiki/Transjakarta"
         ],
         "officialName": "TERMINAL TANJUNG PRIOK - PEGANGSAAN II IGI",
+        "officialService": null,
         "osmRelationIds": [],
         "rawName": null,
         "from": null,
@@ -5962,7 +6140,7 @@
       "code": "JAK.117",
       "name": "Tanjung Priok - Tanah Merdeka",
       "mode": "minibus",
-      "serviceClass": "feeder",
+      "serviceClass": "mikrotrans",
       "operator": "Koperasi Wahana Kendaraan Angkutan Lingkungan dan Pinggir Kota (KWK), Pusat Koperasi Angkutan Udara Halim Perdanakusuma (PUS), Mikrolet/APB group (PT Kencana Sakti Transport, Koperasi Mikrolet Jakarta Raya, Koperasi Angkutan Umum Budi Luhur, Koperasi Minibus Karya Jakarta Raya, Koperasi Angkutan Umum Kopamilet Jaya, Koperasi Angkutan Purimas Jaya, PT Lestari Surya Gema Persada, Koperasi Kojang Jaya, Koperasi Angkutan Layanan Masyarakat Jakarta Raya)",
       "status": "operating",
       "color": null,
@@ -5978,6 +6156,7 @@
           "https://id.wikipedia.org/wiki/Transjakarta"
         ],
         "officialName": "TANJUNG PRIOK - TANAH MERDEKA",
+        "officialService": null,
         "osmRelationIds": [],
         "rawName": null,
         "from": null,
@@ -5991,7 +6170,7 @@
       "code": "JAK.118",
       "name": "Taman Waduk Papanggo - Kota TUA",
       "mode": "minibus",
-      "serviceClass": "feeder",
+      "serviceClass": "mikrotrans",
       "operator": "Koperasi Wahana Kendaraan Angkutan Lingkungan dan Pinggir Kota (KWK), Pusat Koperasi Angkutan Udara Halim Perdanakusuma (PUS), Mikrolet/APB group (PT Kencana Sakti Transport, Koperasi Mikrolet Jakarta Raya, Koperasi Angkutan Umum Budi Luhur, Koperasi Minibus Karya Jakarta Raya, Koperasi Angkutan Umum Kopamilet Jaya, Koperasi Angkutan Purimas Jaya, PT Lestari Surya Gema Persada, Koperasi Kojang Jaya, Koperasi Angkutan Layanan Masyarakat Jakarta Raya)",
       "status": "operating",
       "color": null,
@@ -6007,6 +6186,7 @@
           "https://id.wikipedia.org/wiki/Transjakarta"
         ],
         "officialName": "TAMAN WADUK PAPANGGO - KOTA TUA",
+        "officialService": null,
         "osmRelationIds": [],
         "rawName": null,
         "from": null,
@@ -6020,7 +6200,7 @@
       "code": "JAK.120",
       "name": "Jakarta International Stadium-Terminal Muara Angke",
       "mode": "minibus",
-      "serviceClass": "feeder",
+      "serviceClass": "mikrotrans",
       "operator": "Koperasi Wahana Kendaraan Angkutan Lingkungan dan Pinggir Kota (KWK), Pusat Koperasi Angkutan Udara Halim Perdanakusuma (PUS), Mikrolet/APB group (PT Kencana Sakti Transport, Koperasi Mikrolet Jakarta Raya, Koperasi Angkutan Umum Budi Luhur, Koperasi Minibus Karya Jakarta Raya, Koperasi Angkutan Umum Kopamilet Jaya, Koperasi Angkutan Purimas Jaya, PT Lestari Surya Gema Persada, Koperasi Kojang Jaya, Koperasi Angkutan Layanan Masyarakat Jakarta Raya)",
       "status": "operating",
       "color": "#FF0000",
@@ -6039,6 +6219,7 @@
           "https://id.wikipedia.org/wiki/Transjakarta"
         ],
         "officialName": "JAKARTA INTERNATIONAL STADIUM-TERMINAL MUARA ANGKE",
+        "officialService": null,
         "osmRelationIds": [
           21007751
         ],
@@ -6054,7 +6235,7 @@
       "code": "JAK.43b",
       "name": "Tongtek - Tebet ECO Park - Cililitan",
       "mode": "minibus",
-      "serviceClass": "feeder",
+      "serviceClass": "mikrotrans",
       "operator": "Koperasi Wahana Kendaraan Angkutan Lingkungan dan Pinggir Kota (KWK), Pusat Koperasi Angkutan Udara Halim Perdanakusuma (PUS), Mikrolet/APB group (PT Kencana Sakti Transport, Koperasi Mikrolet Jakarta Raya, Koperasi Angkutan Umum Budi Luhur, Koperasi Minibus Karya Jakarta Raya, Koperasi Angkutan Umum Kopamilet Jaya, Koperasi Angkutan Purimas Jaya, PT Lestari Surya Gema Persada, Koperasi Kojang Jaya, Koperasi Angkutan Layanan Masyarakat Jakarta Raya)",
       "status": "operating",
       "color": null,
@@ -6070,6 +6251,7 @@
           "https://id.wikipedia.org/wiki/Transjakarta"
         ],
         "officialName": "TONGTEK - TEBET ECO PARK - CILILITAN",
+        "officialService": null,
         "osmRelationIds": [],
         "rawName": null,
         "from": null,
@@ -6083,7 +6265,7 @@
       "code": "JAK.43c",
       "name": "Sarana Jaya - Tebet ECO Park - Stasiun Cawang",
       "mode": "minibus",
-      "serviceClass": "feeder",
+      "serviceClass": "mikrotrans",
       "operator": "Koperasi Wahana Kendaraan Angkutan Lingkungan dan Pinggir Kota (KWK), Pusat Koperasi Angkutan Udara Halim Perdanakusuma (PUS), Mikrolet/APB group (PT Kencana Sakti Transport, Koperasi Mikrolet Jakarta Raya, Koperasi Angkutan Umum Budi Luhur, Koperasi Minibus Karya Jakarta Raya, Koperasi Angkutan Umum Kopamilet Jaya, Koperasi Angkutan Purimas Jaya, PT Lestari Surya Gema Persada, Koperasi Kojang Jaya, Koperasi Angkutan Layanan Masyarakat Jakarta Raya)",
       "status": "operating",
       "color": null,
@@ -6099,6 +6281,7 @@
           "https://id.wikipedia.org/wiki/Transjakarta"
         ],
         "officialName": "SARANA JAYA - TEBET ECO PARK - STASIUN CAWANG",
+        "officialService": null,
         "osmRelationIds": [],
         "rawName": null,
         "from": null,
@@ -6112,7 +6295,7 @@
       "code": "JAK.48a",
       "name": "Stasiun Tebet - Karet",
       "mode": "minibus",
-      "serviceClass": "feeder",
+      "serviceClass": "mikrotrans",
       "operator": "Koperasi Wahana Kendaraan Angkutan Lingkungan dan Pinggir Kota (KWK), Pusat Koperasi Angkutan Udara Halim Perdanakusuma (PUS), Mikrolet/APB group (PT Kencana Sakti Transport, Koperasi Mikrolet Jakarta Raya, Koperasi Angkutan Umum Budi Luhur, Koperasi Minibus Karya Jakarta Raya, Koperasi Angkutan Umum Kopamilet Jaya, Koperasi Angkutan Purimas Jaya, PT Lestari Surya Gema Persada, Koperasi Kojang Jaya, Koperasi Angkutan Layanan Masyarakat Jakarta Raya)",
       "status": "operating",
       "color": null,
@@ -6128,6 +6311,7 @@
           "https://id.wikipedia.org/wiki/Transjakarta"
         ],
         "officialName": "STASIUN TEBET - KARET",
+        "officialService": null,
         "osmRelationIds": [],
         "rawName": null,
         "from": null,
@@ -6141,7 +6325,7 @@
       "code": "JAK.78a",
       "name": "Benda - Cengkareng",
       "mode": "minibus",
-      "serviceClass": "feeder",
+      "serviceClass": "mikrotrans",
       "operator": "Koperasi Wahana Kendaraan Angkutan Lingkungan dan Pinggir Kota (KWK), Pusat Koperasi Angkutan Udara Halim Perdanakusuma (PUS), Mikrolet/APB group (PT Kencana Sakti Transport, Koperasi Mikrolet Jakarta Raya, Koperasi Angkutan Umum Budi Luhur, Koperasi Minibus Karya Jakarta Raya, Koperasi Angkutan Umum Kopamilet Jaya, Koperasi Angkutan Purimas Jaya, PT Lestari Surya Gema Persada, Koperasi Kojang Jaya, Koperasi Angkutan Layanan Masyarakat Jakarta Raya)",
       "status": "operating",
       "color": null,
@@ -6157,6 +6341,7 @@
           "https://id.wikipedia.org/wiki/Transjakarta"
         ],
         "officialName": "BENDA - CENGKARENG",
+        "officialService": null,
         "osmRelationIds": [],
         "rawName": null,
         "from": null,
@@ -6170,7 +6355,7 @@
       "code": "JAK.78b",
       "name": "Jembatan Tiga -Teluk Gong",
       "mode": "minibus",
-      "serviceClass": "feeder",
+      "serviceClass": "mikrotrans",
       "operator": "Koperasi Wahana Kendaraan Angkutan Lingkungan dan Pinggir Kota (KWK), Pusat Koperasi Angkutan Udara Halim Perdanakusuma (PUS), Mikrolet/APB group (PT Kencana Sakti Transport, Koperasi Mikrolet Jakarta Raya, Koperasi Angkutan Umum Budi Luhur, Koperasi Minibus Karya Jakarta Raya, Koperasi Angkutan Umum Kopamilet Jaya, Koperasi Angkutan Purimas Jaya, PT Lestari Surya Gema Persada, Koperasi Kojang Jaya, Koperasi Angkutan Layanan Masyarakat Jakarta Raya)",
       "status": "operating",
       "color": null,
@@ -6186,6 +6371,7 @@
           "https://id.wikipedia.org/wiki/Transjakarta"
         ],
         "officialName": "JEMBATAN TIGA -TELUK GONG",
+        "officialService": null,
         "osmRelationIds": [],
         "rawName": null,
         "from": null,
@@ -6199,7 +6385,7 @@
       "code": "JAK.110a",
       "name": "Rusun Marunda - Pulo Gebang",
       "mode": "minibus",
-      "serviceClass": "feeder",
+      "serviceClass": "mikrotrans",
       "operator": "Koperasi Wahana Kendaraan Angkutan Lingkungan dan Pinggir Kota (KWK), Pusat Koperasi Angkutan Udara Halim Perdanakusuma (PUS), Mikrolet/APB group (PT Kencana Sakti Transport, Koperasi Mikrolet Jakarta Raya, Koperasi Angkutan Umum Budi Luhur, Koperasi Minibus Karya Jakarta Raya, Koperasi Angkutan Umum Kopamilet Jaya, Koperasi Angkutan Purimas Jaya, PT Lestari Surya Gema Persada, Koperasi Kojang Jaya, Koperasi Angkutan Layanan Masyarakat Jakarta Raya)",
       "status": "operating",
       "color": null,
@@ -6215,6 +6401,7 @@
           "https://id.wikipedia.org/wiki/Transjakarta"
         ],
         "officialName": "RUSUN MARUNDA - PULO GEBANG",
+        "officialService": null,
         "osmRelationIds": [],
         "rawName": null,
         "from": null,
@@ -6228,7 +6415,7 @@
       "code": "JAK.110b",
       "name": "Rusun Komarudin - Putaran Balik Bebek TNI",
       "mode": "minibus",
-      "serviceClass": "feeder",
+      "serviceClass": "mikrotrans",
       "operator": "Koperasi Wahana Kendaraan Angkutan Lingkungan dan Pinggir Kota (KWK), Pusat Koperasi Angkutan Udara Halim Perdanakusuma (PUS), Mikrolet/APB group (PT Kencana Sakti Transport, Koperasi Mikrolet Jakarta Raya, Koperasi Angkutan Umum Budi Luhur, Koperasi Minibus Karya Jakarta Raya, Koperasi Angkutan Umum Kopamilet Jaya, Koperasi Angkutan Purimas Jaya, PT Lestari Surya Gema Persada, Koperasi Kojang Jaya, Koperasi Angkutan Layanan Masyarakat Jakarta Raya)",
       "status": "operating",
       "color": null,
@@ -6244,6 +6431,7 @@
           "https://id.wikipedia.org/wiki/Transjakarta"
         ],
         "officialName": "RUSUN KOMARUDIN - PUTARAN BALIK BEBEK TNI",
+        "officialService": null,
         "osmRelationIds": [],
         "rawName": null,
         "from": null,
@@ -6276,6 +6464,7 @@
           "https://id.wikipedia.org/wiki/Transjakarta"
         ],
         "officialName": "PESANGGRAHAN - BLOK M",
+        "officialService": "non-brt",
         "osmRelationIds": [
           17652872,
           17726336
@@ -6308,6 +6497,7 @@
           "https://id.wikipedia.org/wiki/Transjakarta"
         ],
         "officialName": "BLOK M - ANCOL",
+        "officialService": "non-brt",
         "osmRelationIds": [],
         "rawName": null,
         "from": null,
@@ -6340,6 +6530,7 @@
           "https://id.wikipedia.org/wiki/Transjakarta"
         ],
         "officialName": "SENEN - LEBAK BULUS",
+        "officialService": "non-brt",
         "osmRelationIds": [
           17248985,
           17248993
@@ -6375,6 +6566,7 @@
           "https://id.wikipedia.org/wiki/Transjakarta"
         ],
         "officialName": "KOTA - KALIADEM",
+        "officialService": "non-brt",
         "osmRelationIds": [
           17375260,
           17375481
@@ -6407,6 +6599,7 @@
           "https://id.wikipedia.org/wiki/Transjakarta"
         ],
         "officialName": "SHUTTLE HBKB ANCOL",
+        "officialService": "non-brt",
         "osmRelationIds": [],
         "rawName": null,
         "from": null,
@@ -6442,6 +6635,7 @@
           "https://jakartamrt.co.id/id/proyek/fase-2"
         ],
         "officialName": "North-South Line (Lin Utara-Selatan)",
+        "officialService": null,
         "osmRelationIds": [
           9677669,
           9677670
@@ -6480,6 +6674,7 @@
           "https://jakartamrt.co.id/id/proyek/fase-2"
         ],
         "officialName": "East-West Line (Lin Timur-Barat)",
+        "officialService": null,
         "osmRelationIds": [
           18663751,
           18663752
@@ -6518,6 +6713,7 @@
           "https://id.wikipedia.org/wiki/Stasiun_LRT_Velodrome"
         ],
         "officialName": "South Line (Lin Selatan) - Kelapa Gading to Manggarai",
+        "officialService": null,
         "osmRelationIds": [
           10693119,
           10693160
@@ -6556,6 +6752,7 @@
           "https://id.wikipedia.org/wiki/Lin_Bekasi"
         ],
         "officialName": "Cibubur Line (Lin Cibubur) - Dukuh Atas to Harjamukti",
+        "officialService": null,
         "osmRelationIds": [
           16036440,
           16036441
@@ -6594,6 +6791,7 @@
           "https://id.wikipedia.org/wiki/Lin_Bekasi"
         ],
         "officialName": "Bekasi Line (Lin Bekasi) - Dukuh Atas to Jati Mulya",
+        "officialService": null,
         "osmRelationIds": [
           16079478,
           16079479
@@ -6634,6 +6832,7 @@
           "https://commuterline.id/"
         ],
         "officialName": "Commuter Line Bogor",
+        "officialService": null,
         "osmRelationIds": [
           16877210,
           16877211,
@@ -6673,6 +6872,7 @@
           "https://commuterline.id/"
         ],
         "officialName": "Commuter Line Bogor - Nambo shuttle",
+        "officialService": null,
         "osmRelationIds": [],
         "rawName": null,
         "from": null,
@@ -6710,6 +6910,7 @@
           "https://commuterline.id/"
         ],
         "officialName": "Commuter Line Cikarang (Loop Line)",
+        "officialService": null,
         "osmRelationIds": [
           2922163,
           15094545,
@@ -6762,6 +6963,7 @@
           "https://commuterline.id/"
         ],
         "officialName": "Commuter Line Rangkasbitung",
+        "officialService": null,
         "osmRelationIds": [
           2922215,
           15094546
@@ -6802,6 +7004,7 @@
           "https://commuterline.id/"
         ],
         "officialName": "Commuter Line Tangerang",
+        "officialService": null,
         "osmRelationIds": [
           2922235,
           17193463
@@ -6841,6 +7044,7 @@
           "https://commuterline.id/"
         ],
         "officialName": "Commuter Line Tanjung Priok",
+        "officialService": null,
         "osmRelationIds": [
           2922237,
           17193008
@@ -6905,7 +7109,7 @@
       "code": "D21",
       "name": "Universitas Indonesia → Lebak Bulus",
       "mode": "bus",
-      "serviceClass": "non-brt",
+      "serviceClass": "transjabodetabek",
       "operator": "Transjakarta",
       "status": "operating",
       "color": "#8aaf6c",
@@ -6929,7 +7133,7 @@
       "code": "D11",
       "name": "Depok → Cawang Sentral via Cibubur",
       "mode": "bus",
-      "serviceClass": "non-brt",
+      "serviceClass": "transjabodetabek",
       "operator": "Transjakarta",
       "status": "operating",
       "color": "#629344",
@@ -7025,7 +7229,7 @@
       "code": "B11",
       "name": "Cawang → Summarecon Bekasi",
       "mode": "bus",
-      "serviceClass": "non-brt",
+      "serviceClass": "transjabodetabek",
       "operator": "Transjakarta",
       "status": "operating",
       "color": "#d17c2c",
@@ -7049,7 +7253,7 @@
       "code": "B21",
       "name": "Cawang → Bekasi Timur",
       "mode": "bus",
-      "serviceClass": "non-brt",
+      "serviceClass": "transjabodetabek",
       "operator": "Transjakarta",
       "status": "operating",
       "color": "#3eb39c",
@@ -7097,7 +7301,7 @@
       "code": "BW4",
       "name": "Pencakar Langit",
       "mode": "bus",
-      "serviceClass": "non-brt",
+      "serviceClass": "wisata",
       "operator": "Transjakarta",
       "status": "operating",
       "color": "#f79c41",
@@ -7119,8 +7323,8 @@
       "systemId": "transjakarta",
       "code": "2F",
       "name": "Rusun Cakung Barat → Pulo Gadung",
-      "mode": "minibus",
-      "serviceClass": "minitrans",
+      "mode": "bus",
+      "serviceClass": "rumah-susun",
       "operator": "Transjakarta",
       "status": "operating",
       "color": "#b3a5a4",
@@ -7264,7 +7468,7 @@
       "code": "SH1",
       "name": "Kalideres → Perkantoran Soekarno Hatta",
       "mode": "bus",
-      "serviceClass": "non-brt",
+      "serviceClass": "transjabodetabek",
       "operator": "Transjakarta",
       "status": "operating",
       "color": "#ecb910",
@@ -7288,7 +7492,7 @@
       "code": "S22",
       "name": "Kampung Rambutan → Ciputat",
       "mode": "bus",
-      "serviceClass": "non-brt",
+      "serviceClass": "transjabodetabek",
       "operator": "Transjakarta",
       "status": "operating",
       "color": "#dc8a27",
@@ -7312,7 +7516,7 @@
       "code": "S21",
       "name": "Kejaksaan Agung → Ciputat",
       "mode": "bus",
-      "serviceClass": "non-brt",
+      "serviceClass": "transjabodetabek",
       "operator": "Transjakarta",
       "status": "operating",
       "color": "#d8b42a",
@@ -7336,7 +7540,7 @@
       "code": "S11",
       "name": "BSD → Jelambar",
       "mode": "bus",
-      "serviceClass": "non-brt",
+      "serviceClass": "transjabodetabek",
       "operator": "Transjakarta",
       "status": "operating",
       "color": "#57a6d2",
@@ -7360,7 +7564,7 @@
       "code": "B41",
       "name": "Cawang Sentral → Vida Bekasi",
       "mode": "bus",
-      "serviceClass": "non-brt",
+      "serviceClass": "transjabodetabek",
       "operator": "Transjakarta",
       "status": "operating",
       "color": null,
@@ -229038,14 +229242,14 @@
       "transjakarta-brt": {
         "kind": "flat",
         "amount": 3500,
-        "offPeakAmount": 2000,
-        "offPeakHours": "05:00-07:00"
+        "earlyMorningAmount": 2000,
+        "earlyMorningHours": "05:00-07:00"
       },
       "transjakarta-non-brt": {
         "kind": "flat",
         "amount": 3500,
-        "offPeakAmount": 2000,
-        "offPeakHours": "05:00-07:00"
+        "earlyMorningAmount": 2000,
+        "earlyMorningHours": "05:00-07:00"
       },
       "mrt-jakarta": {
         "kind": "perStation",
@@ -229076,9 +229280,33 @@
         "perKmStepKm": 10,
         "min": 3000
       },
-      "transjakarta-feeder": {
+      "transjakarta-mikrotrans": {
         "kind": "free",
-        "note": "Mikrotrans JakLingko masih gratis bagi penumpang; tarif Rp 2.000 hanya usulan."
+        "note": "Mikrotrans JakLingko gratis bagi penumpang pada 21 Oktober 2026; penumpang tetap harus tap-in dan tap-out, dan operator dibayar per jarak tempuh. Usulan tarif Rp 2.000 mulai 1 Januari 2027 belum berlaku."
+      },
+      "transjakarta-wisata": {
+        "kind": "free",
+        "note": "Bus Wisata Transjakarta beroperasi dengan tarif Rp 0 atau gratis, demikian keterangan resmi operator untuk BW1, BW2 dan BW4."
+      },
+      "transjakarta-rumah-susun": {
+        "kind": "flat",
+        "amount": 3500,
+        "earlyMorningAmount": 2000,
+        "earlyMorningHours": "05:00-07:00"
+      },
+      "transjakarta-transjabodetabek": {
+        "kind": "flat",
+        "amount": 3500,
+        "earlyMorningAmount": 2000,
+        "earlyMorningHours": "05:00-07:00"
+      },
+      "transjakarta-royaltrans-s13": {
+        "kind": "flat",
+        "amount": 35000
+      },
+      "transjakarta-transbandara": {
+        "kind": "flat",
+        "amount": 15000
       },
       "transjakarta-royaltrans": {
         "kind": "flat",
@@ -229100,6 +229328,43 @@
         "durationMinutes": 180,
         "note": "Satu tiket untuk BRT, MRT dan LRT Jakarta, berlaku 3 jam, maksimal Rp 10.000. Mikrotrans, bus non-BRT dan KRL tidak termasuk."
       }
+    ],
+    "holidays": [
+      "2026-01-01",
+      "2026-01-16",
+      "2026-02-17",
+      "2026-03-19",
+      "2026-03-21",
+      "2026-03-22",
+      "2026-04-03",
+      "2026-04-05",
+      "2026-05-01",
+      "2026-05-14",
+      "2026-05-27",
+      "2026-05-31",
+      "2026-06-01",
+      "2026-06-16",
+      "2026-08-17",
+      "2026-08-25",
+      "2026-12-25",
+      "2027-01-01",
+      "2027-01-05",
+      "2027-02-06",
+      "2027-03-08",
+      "2027-03-10",
+      "2027-03-11",
+      "2027-03-26",
+      "2027-03-28",
+      "2027-05-01",
+      "2027-05-06",
+      "2027-05-17",
+      "2027-05-20",
+      "2027-06-01",
+      "2027-06-06",
+      "2027-08-15",
+      "2027-08-17",
+      "2027-12-25",
+      "2027-12-26"
     ]
   },
   "notes": [

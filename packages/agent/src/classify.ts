@@ -213,7 +213,7 @@ export function groundingHints(
   const uniquePlaces = [...new Set(places)].slice(0, 160);
 
   const lineNames = lines
-    .filter((line) => line.serviceClass !== "feeder")
+    .filter((line) => line.serviceClass !== "mikrotrans")
     .map((line) => `${line.code} — ${line.name}`)
     .slice(0, 80);
 

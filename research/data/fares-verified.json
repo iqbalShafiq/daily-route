@@ -1,0 +1,386 @@
+{
+  "verifiedAt": "2026-10-21",
+  "verifiedInForceOn": "2026-10-21",
+  "currency": "IDR",
+  "notes": [
+    "Seluruh angka di bawah ini adalah tarif yang berlaku pada 2026-10-21, diverifikasi dari sumber resmi operator dan pemerintah DKI Jakarta lebih dulu.",
+    "validFrom adalah tanggal mulai berlakunya tarif menurut sumber yang dipakai. Bila tanggal itu tidak dapat dipastikan, validFromNote menjelaskan batas keyakinannya.",
+    "'Tarif Rp1' pada 22 Juni 2026 adalah tarif khusus (promo) HUT ke-499 DKI Jakarta, bukan tarif umum. Lihat entri tariff-rp1-hut-499.",
+    "Tarif Transbandara Rp15.000 adalah tarif Transjabodetabek rute Blok M-Bandara Soekarno-Hatta (Kepgub No. 685 Tahun 2026), BUKAN tarif Transjakarta BRT. Rute SH1 Kalideres-Perkantoran Soekarno-Hatta tetap Rp3.500.",
+    "Penyesuaian tarif 1 Januari 2027 sudah dijadwalkan (diumumkan 29-30 September 2026) tetapi BESARNYA BELUM DIUMUMKAN. Usulan DTKJ Rp5.000 dalam kota / Rp10.000 Transjabodetabek BELUM berlaku dan tidak boleh dipakai.",
+    "Tidak ada angka yang berasal dari sumber tidak tepercaya: semua tarif di bawah berasal dari sumber resmi atau media yang dapat ditelusuri. Tidak ada angka yang ditebak."
+  ],
+  "operators": [
+    {
+      "operatorId": "transjakarta",
+      "service": "brt",
+      "operatorName": "PT Transportasi Jakarta (Transjakarta)",
+      "fares": [
+        {
+          "name": "Tarif reguler Transjakarta BRT",
+          "amountIdr": 3500,
+          "condition": "Per perjalanan, flat, semua koridor BRT. Berlaku 07.01-04.59 WIB, termasuk jam sibuk sore 16.00-19.00. Dibayar per tap-in, bukan per perjalanan gabungan.",
+          "validFrom": "2005-10-05",
+          "sourceUrl": "https://www.jakarta.go.id/transjakarta",
+          "sourceDate": "2025-02-10",
+          "sourceNote": "Halaman resmi Dinas Perhubungan DKI Jakarta, 10 Februari 2025: 'Tarif reguler Transjakarta: Rp3.500 (Pukul 07.01 - 04.59 WIB)'. Tarif tetap sejak Keputusan Gubernur 5 Oktober 2005."
+        },
+        {
+          "name": "Tarif ekonomis Transjakarta BRT",
+          "amountIdr": 2000,
+          "condition": "Jam khusus 05.00-07.00 WIB setiap hari. Ditentukan dari waktu tap-in, bukan tap-out.",
+          "validFrom": "2005-10-05",
+          "sourceUrl": "https://www.jakarta.go.id/transjakarta",
+          "sourceDate": "2025-02-10",
+          "sourceNote": "'Tarif ekonomis: Rp 2.000 (Pukul 05.00 - 07.00 WIB)'. Diperkuat oleh artikel resmi Transjakarta 22 Juni 2026 dan liputan 2026 yang menyebut tarif Rp3.500 dengan tarif khusus Rp2.000 pukul 05.00-07.00 WIB."
+        }
+      ],
+      "integrations": [
+        {
+          "name": "Integrasi Multimodal",
+          "covers": ["transjakarta", "mrt-jakarta", "lrt-jakarta"],
+          "boardingIdr": 2500,
+          "perKmIdr": 250,
+          "capIdr": 10000,
+          "windowMinutes": 180,
+          "validFrom": "2022-08-08",
+          "sourceUrl": "https://www.jaklingkoindonesia.co.id/faq-tarif-integrasi",
+          "sourceDate": "2026-10-21",
+          "sourceNote": "FAQ resmi PT JakLingko Indonesia (diperiksa 21 Oktober 2026): Tarif Awal Rp 2.500, Plafon Maksimal Rp 10.000, Durasi Validitas 180 Menit, Cakupan Moda 3 Operator - 'Integrasi resmi Transjakarta BRT koridor, MRT Jakarta, dan LRT Jakarta'. Dasar hukum: Kepgub No. 733 Tahun 2022 (berlaku 8 Agustus 2022), https://www.antaranews.com/berita/3051305/anies-tetapkan-tarif-integrasi-untuk-transportasi-massal-rp10000",
+          "conditions": [
+            "Hanya dipakai bila perjalanan memakai lebih dari satu moda; satu moda saja memakai tarif normal operator.",
+            "Jendela 180 menit dihitung mulai dari tap-out perdana hingga tap-out akhir (menurut FAQ operator JLI aktif Oktober 2026). Naskah Kepgub 733/2022 menulis 180 menit sejak tap-in pertama.",
+            "Mikrotrans, bus non-BRT (Metrotrans/Minitrans), KRL Jabodetabek dan LRT Jabodebek TIDAK dicakup; memakainya di tengah perjalanan membatalkan skema."
+          ]
+        }
+      ]
+    },
+    {
+      "operatorId": "transjakarta",
+      "service": "non-brt",
+      "operatorName": "PT Transportasi Jakarta (Transjakarta) - Metrotrans / Minitrans / Transjabodetabek",
+      "fares": [
+        {
+          "name": "Metrotrans / Minitrans - tarif reguler",
+          "amountIdr": 3500,
+          "condition": "Flat per perjalanan, sama seperti BRT. Berlaku 07.01-04.59 WIB.",
+          "validFrom": "2026-10-21",
+          "validFromNote": "Tarif non-BRT mengikuti tarif reguler Transjakarta sejak 5 Oktober 2005, tetapi tanggal mulai berlaku tarif untuk kelas Metrotrans/Minitrans tidak dipublikasikan.",
+          "sourceUrl": "https://www.jakarta.go.id/transjakarta",
+          "sourceDate": "2025-02-10"
+        },
+        {
+          "name": "Metrotrans / Minitrans - tarif ekonomis",
+          "amountIdr": 2000,
+          "condition": "Jam khusus 05.00-07.00 WIB, ditentukan dari waktu tap-in.",
+          "validFrom": "2026-10-21",
+          "validFromNote": "Lihat catatan pada entri tarif reguler di atas.",
+          "sourceUrl": "https://www.jakarta.go.id/transjakarta",
+          "sourceDate": "2025-02-10"
+        },
+        {
+          "name": "Transjabodetabek - rute SH1 Kalideres-Perkantoran Soekarno-Hatta",
+          "amountIdr": 3500,
+          "condition": "Tetap tarif reguler Transjakarta (Rp2.000 pada 05.00-07.00). Tidak tercantum dalam Kepgub No. 685 Tahun 2026.",
+          "validFrom": "2026-09-01",
+          "validFromNote": "Tanggal dipakai adalah saat tarif dikonfirmasi tetap berlaku setelah Kepgub 685/2026 ditetapkan; rutenya sendiri beroperasi lebih lama.",
+          "sourceUrl": "https://otomotif.kompas.com/read/2026/08/05/073200915/tarif-transbandara-blok-m-soetta-resmi-rp15.000-kalideres-bagaimana-",
+          "sourceDate": "2026-08-05",
+          "sourceNote": "Kepala Dishub DKI Budi Awaluddin dan Dirut Transjakarta Welfizon Yuza: rute SH1 'masih menggunakan tarif yang berlaku saat ini, yaitu Rp2.000 pada pukul 05.00 sampai 07.00 dan Rp3.500 setelah pukul 07.00'."
+        },
+        {
+          "name": "Transjabodetabek - rute selain SH1 (P11 Blok M-Bogor, B41, D11, D21, D41, S11, S21, S22, S61, T11, T12, T31, B11, B21)",
+          "amountIdr": 3500,
+          "condition": "Masih terintegrasi dengan tarif Transjakarta (Rp2.000 pada 05.00-07.00). Penyesuaian tarif Transjabodetabek dijadwalkan 1 Januari 2027, besaran belum diumumkan.",
+          "validFrom": "2026-10-21",
+          "validFromNote": "Tarif Transjabodetabek masih Rp3.500 per 5 Juni 2026; konfirmasi per 21 Oktober 2026 tidak menemukan kenaikan lain selain Transbandara.",
+          "sourceUrl": "https://rri.co.id/regional/2474542/tarif-transjabodetabek-bakal-disesuaikan-pemprov-dki-evaluasi-besaran-subsidi",
+          "sourceDate": "2026-06-05"
+        }
+      ],
+      "integrations": [
+        {
+          "name": "Integrasi Multimodal",
+          "covers": ["transjakarta", "mrt-jakarta", "lrt-jakarta"],
+          "boardingIdr": 2500,
+          "perKmIdr": 250,
+          "capIdr": 10000,
+          "windowMinutes": 180,
+          "validFrom": "2022-08-08",
+          "sourceUrl": "https://www.jaklingkoindonesia.co.id/faq-tarif-integrasi",
+          "sourceDate": "2026-10-21",
+          "conditions": [
+            "Hanya BRT koridor Transjakarta yang tercakup. Bus non-BRT (Metrotrans/Minitrans) TIDAK tercakup dan memakai bus tersebut di tengah perjalanan membatalkan skema."
+          ]
+        }
+      ]
+    },
+    {
+      "operatorId": "transjakarta",
+      "service": "transbandara",
+      "operatorName": "Transjabodetabek / Transbandara - Blok M - Bandara Soekarno-Hatta",
+      "fares": [
+        {
+          "name": "Transbandara rute Blok M-Bandara Soekarno-Hatta",
+          "amountIdr": 15000,
+          "condition": "Per perjalanan. Ditetapkan lewat Keputusan Gubernur No. 685 Tahun 2026. Ini BUKAN tarif Transjakarta BRT dan BUKAN kenaikan tarif: rute Blok M-Bandara Soekarno-Hatta adalah layanan Transjabodetabek yang sebelumnya masih dalam masa uji coba Rp3.500.",
+          "validFrom": "2026-09-01",
+          "sourceUrl": "https://jdih.jakarta.go.id/link/download-fulltext/15051",
+          "sourceDate": "2026-07-31",
+          "sourceNote": "Naskah Kepgub No. 685 Tahun 2026 (ditetapkan 31 Juli 2026, berlaku 1 September 2026). Berita resmi portalylvan DKI: https://m.beritajakarta.id/read/154429/tarif-rp15000-transbandara-blok-m-soekarno-hatta-berlaku-mulai-1-september-2026 . Kompas 31 Agustus 2026: https://megapolitan.kompas.com/read/2026/08/31/12095931/besok-tarif-rp-15000-transbandara-blok-m-bandara-soekarno-hatta-mulai"
+        }
+      ],
+      "integrations": []
+    },
+    {
+      "operatorId": "transjakarta",
+      "service": "mikrotrans",
+      "operatorName": "Mikrotrans JakLingko",
+      "fares": [
+        {
+          "name": "Mikrotrans JakLingko",
+          "amountIdr": 0,
+          "condition": "Gratis bagi penumpang; operator dibayar per jarak tempuh. Penumpang tetap harus tap-in dan tap-out dengan kartu uang elektronik.",
+          "validFrom": "2022-08-11",
+          "validFromNote": "Tanggal paling awal tarif Rp0 Mikrotrans terdokumentasi secara publik (ANTARA, 11 Agustus 2022). Tidak ada sumber operator yang menyebut tanggal mulai berlakunya tarif gratis.",
+          "sourceUrl": "https://jakarta.nu.or.id/gaya-hidup/tarif-transjakarta-mrt-dan-lrt-jakarta-rp1-pada-17-agustus-2026-ndrzO",
+          "sourceDate": "2026-08-13",
+          "sourceNote": "Laporan 13 Agustus 2026: pada kebijakan tarif Rp1 HUT RI ke-81 berlaku bagi Transjakarta/MRT/LRT, 'sejumlah layanan tetap menerapkan tarif Rp0... Mikrotrans, Transjakarta Cares, layanan penugasan transportasi Jakarta lainnya'."
+        }
+      ],
+      "integrations": []
+    },
+    {
+      "operatorId": "transjakarta",
+      "service": "royaltrans",
+      "operatorName": "Royaltrans (layanan premium Transjakarta)",
+      "fares": [
+        {
+          "name": "Royaltrans - tarif standar",
+          "amountIdr": 20000,
+          "condition": "Per perjalanan, untuk sebagian besar rute Royaltrans. Tidak bersubsidi, di luar semua skema integrasi, tidak ada diskon hari libur.",
+          "validFrom": "2025-07-01",
+          "validFromNote": "Jangkar waktu dari sumber yang menyebut jumlah rute Royaltrans saat ini ('Per Juli 2025, Royaltrans melayani 12 rute'). Operator tidak menerbitkan tabel tarif per rute dengan tanggal berlaku.",
+          "sourceUrl": "https://news.detik.com/berita/d-8008083/cara-naik-bus-royaltrans-jakarta-info-pesan-tiket-rute-dan-tarifnya",
+          "sourceDate": "2025-08-07",
+          "sourceNote": "Detik: 'Tarif Royaltrans ditentukan berdasarkan jarak rute. Sementara untuk rute-rute tertentu dengan jarak lebih jauh, tarif bisa mencapai Rp35.000.'"
+        },
+        {
+          "name": "Royaltrans rute S13 Summarecon Serpong - Tomang",
+          "amountIdr": 35000,
+          "condition": "Rute yang jauh lebih panjang; tarif Rp35.000. PENTING: tarif Royaltrans TIDAK flat Rp20.000 untuk semua rute.",
+          "validFrom": "2025-07-01",
+          "validFromNote": "Lihat catatan pada entri tarif standar; tanggal berlaku per rute tidak dipublikasikan operator.",
+          "sourceUrl": "https://www.facebook.com/Transjakarta/posts/661547699412248",
+          "sourceDate": "2025-08-17",
+          "sourceNote": "Postingan akun resmi PT Transjakarta: 'dengan Rp 35.000 kamu sudah bisa naik Royaltrans! Dengan rute: S13 Summarecon Serpong - Tomang'. Didukung Traveloka (2026): 12 rute Royaltrans, 9 rute Rp20.000 dan 2 rute Rp35.000 - https://www.traveloka.com/id-id/explore/destination/tarif-rute-royaltrans-terbaru-trp/480591"
+        }
+      ],
+      "integrations": []
+    },
+    {
+      "operatorId": "mrt-jakarta",
+      "service": "mrt",
+      "operatorName": "PT MRT Jakarta (Perseroda)",
+      "fares": [
+        {
+          "name": "MRT Jakarta - tarif minimum",
+          "amountIdr": 3000,
+          "condition": "Tarif dasar satu perjalanan; tidak ada tarif jam sibuk, harga sama sepanjang hari. Struktur: Rp3.000 minimum, +Rp1.000 untuk setiap stasiun yang dilalui.",
+          "validFrom": "2019-04-01",
+          "sourceUrl": "https://www.jakarta.go.id/jaklingko",
+          "sourceDate": "2026-10-21",
+          "sourceNote": "Halaman resmi DKI Jakarta menyebut tarif MRT maksimum Rp14.000. Akun resmi @mrtjakarta menyebut rentang 'Rp.3000-Rp14.000' - https://x.com/mrtjakarta/status/1906892056385241591 . Struktur per stasiun (tabel tarif resmi MRT) disitir dari https://id.wikipedia.org/wiki/MRT_Jakarta . Penetapan tarif: Kompas 27 Maret 2019 - https://www.kompas.com/read/2019/03/27/09420241/tarif-mrt-rp-3000-rp-14000-berlaku-1-april-2019"
+        },
+        {
+          "name": "MRT Jakarta - tarif maksimum, Lebak Bulus - Bundaran HI",
+          "amountIdr": 14000,
+          "condition": "Rute terjauh Lin Utara-Selatan, 13 stasiun. Rp3.000 + Rp1.000 per stasiun, dibatasi Rp14.000.",
+          "validFrom": "2019-04-01",
+          "sourceUrl": "https://smartcity.jakarta.go.id/id/blog/cara-beli-dan-tarif-tiket-mrt-jakarta",
+          "sourceDate": "2026-10-21",
+          "sourceNote": "Jakarta Smart City (resmi DKI): 'Untuk rute terjauh antara Stasiun Lebak Bulus Grab dan Stasiun Bundaran HI, akan dikenakan tarif sebesar Rp14.000'."
+        }
+      ],
+      "integrations": [
+        {
+          "name": "Integrasi Multimodal",
+          "covers": ["transjakarta", "mrt-jakarta", "lrt-jakarta"],
+          "boardingIdr": 2500,
+          "perKmIdr": 250,
+          "capIdr": 10000,
+          "windowMinutes": 180,
+          "validFrom": "2022-08-08",
+          "sourceUrl": "https://www.jaklingkoindonesia.co.id/faq-tarif-integrasi",
+          "sourceDate": "2026-10-21"
+        }
+      ]
+    },
+    {
+      "operatorId": "lrt-jakarta",
+      "service": "lrt",
+      "operatorName": "PT LRT Jakarta (anak usaha PT Jakarta Propertindo / Jakpro)",
+      "fares": [
+        {
+          "name": "LRT Jakarta - tarif flat",
+          "amountIdr": 5000,
+          "condition": "Rp5.000 per perjalanan, sama untuk jarak jauh maupun dekat, semua stasiun. Berlaku untuk tahap 1 Kelapa Gading (Pegangsaan Dua)-Velodrome dan untuk perluasan ke Manggarai (dibuka 18 September 2026). Tidak ada tarif jam sibuk.",
+          "validFrom": "2019-12-01",
+          "sourceUrl": "https://lrtjakarta.co.id/faq",
+          "sourceDate": "2026-10-21",
+          "sourceNote": "FAQ resmi operator: 'Tarif tiket LRT Jakarta sudah ditetapkan sejak per tanggal 1 Desember 2019 sebesar Rp 5.000 untuk satu kali perjalanan berlaku sama untuk jarak jauh maupun dekat semua stasiun.' Dikonfirmasi masih Rp5.000 per Oktober 2026: Kompas, 13 Oktober 2026 - https://megapolitan.kompas.com/read/2026/10/13/17494361/tarif-lrt-jakarta-masih-rp-5000-pramono-tarif-baru-segera-ditetapkan"
+        }
+      ],
+      "integrations": [
+        {
+          "name": "Integrasi Multimodal",
+          "covers": ["transjakarta", "mrt-jakarta", "lrt-jakarta"],
+          "boardingIdr": 2500,
+          "perKmIdr": 250,
+          "capIdr": 10000,
+          "windowMinutes": 180,
+          "validFrom": "2022-08-08",
+          "sourceUrl": "https://www.jaklingkoindonesia.co.id/faq-tarif-integrasi",
+          "sourceDate": "2026-10-21"
+        }
+      ]
+    },
+    {
+      "operatorId": "lrt-jabodebek",
+      "service": "lrt",
+      "operatorName": "LRT Jabodebek (PT Kereta Api Indonesia / KAI Commuter)",
+      "fares": [
+        {
+          "name": "LRT Jabodebek - tarif dasar",
+          "amountIdr": 5000,
+          "condition": "Untuk 1 km pertama. Selanjutnya Rp700 untuk setiap km berikutnya. Tarif sama pada semua jam.",
+          "validFrom": "2024-06-01",
+          "sourceUrl": "https://lrtjabodebek.kai.id/informasi-tarif",
+          "sourceDate": "2026-10-21",
+          "sourceNote": "Tabel tarif resmi LRT Jabodebek (diperiksa 21 Oktober 2026). Pola +Rp700/km terlihat pada kolom Dukuh Atas BNI: Rasuna Said Rp5.700, Kuningan Rp7.100. Tarif mulai berlaku 1 Juni 2024 (Detik) - https://news.detik.com/berita/d-7367817/tarif-lrt-jabodebek-mulai-1-juni-2024-ini-rinciannya"
+        },
+        {
+          "name": "LRT Jabodebek - tarif per km berikutnya",
+          "amountIdr": 700,
+          "condition": "Setiap 1 km setelah kilometer pertama. Berlaku jam sibuk maupun di luar jam sibuk.",
+          "validFrom": "2024-06-01",
+          "sourceUrl": "https://lrtjabodebek.kai.id/informasi-tarif",
+          "sourceDate": "2026-10-21"
+        },
+        {
+          "name": "LRT Jabodebek - plafon jam sibuk",
+          "amountIdr": 20000,
+          "condition": "Jam sibuk 06:00-08:59 dan 16:00-19:59, Senin-Jumat. TIDAK berlaku Sabtu, Minggu, dan hari libur nasional, ketika tarif maksimal turun menjadi Rp10.000.",
+          "validFrom": "2024-06-01",
+          "sourceUrl": "https://lrtjabodebek.kai.id/informasi-tarif",
+          "sourceDate": "2026-10-21",
+          "sourceNote": "Kutipan resmi: 'Jam Sibuk dimulai dari jam 06:00 s/d 08:59 dan 16:00 s/d 19:59' dan 'Tarif jam sibuk tidak berlaku khusus untuk Sabtu, Minggu & Hari Libur'. Operator menerbitkan tiga tabel terpisah: Tarif Diluar Jam Sibuk, Tarif Jam Sibuk, dan Tarif SML (Sabtu, Minggu & Hari Libur)."
+        },
+        {
+          "name": "LRT Jabodebek - plafon di luar jam sibuk",
+          "amountIdr": 10000,
+          "condition": "Di luar jam sibuk (bukan Senin-Jumat 06:00-08:59 dan 16:00-19:59).",
+          "validFrom": "2024-06-01",
+          "sourceUrl": "https://lrtjabodebek.kai.id/informasi-tarif",
+          "sourceDate": "2026-10-21"
+        },
+        {
+          "name": "LRT Jabodebek - plafon Sabtu, Minggu dan Hari Libur",
+          "amountIdr": 10000,
+          "condition": "Tabel SML terpisah; tarif jam sibuk tidak berlaku.",
+          "validFrom": "2024-06-01",
+          "sourceUrl": "https://lrtjabodebek.kai.id/informasi-tarif",
+          "sourceDate": "2026-10-21"
+        }
+      ],
+      "integrations": [],
+      "peakWindows": [
+        {
+          "name": "Jam sibuk",
+          "windows": ["06:00-08:59", "16:00-19:59"],
+          "days": ["mon", "tue", "wed", "thu", "fri"],
+          "excluded": ["sat", "sun", "public-holiday"],
+          "capIdr": 20000,
+          "offPeakCapIdr": 10000,
+          "sourceUrl": "https://lrtjabodebek.kai.id/informasi-tarif",
+          "sourceDate": "2026-10-21"
+        }
+      ]
+    },
+    {
+      "operatorId": "krl-jabodetabek",
+      "service": "krl",
+      "operatorName": "PT KAI Commuter - Commuter Line Jabodetabek",
+      "fares": [
+        {
+          "name": "KRL Jabodetabek - tarif dasar 25 km pertama",
+          "amountIdr": 3000,
+          "condition": "Progresif berbasis jarak, berlaku untuk semua lin (Bogor, Rangkasbitung, Tangerang, Cikarang, Tanjung Priok, Serpong, Nambo, dll). Tanpa tarif jam sibuk; harga sama sepanjang hari.",
+          "validFrom": "2020-01-01",
+          "validFromNote": "Tanggal tahun Keputusan Menteri Transporte No. 354 Tahun 2020 yang menetapkan skema ini; tanggal mulai berlaku persisnya tidak diverifikasi.",
+          "sourceUrl": "https://www.jakarta.go.id/commuter-line",
+          "sourceDate": "2023-04-14",
+          "sourceNote": "Dinas Perhubungan DKI Jakarta: 'Tarif: Rp3.000 (Berlaku untuk 25 km pertama dan tarif progresif Rp1.000 tiap 10 km berikutnya).'"
+        },
+        {
+          "name": "KRL Jabodetabek - tarif lanjutan",
+          "amountIdr": 1000,
+          "condition": "Rp1.000 untuk setiap 10 km berikutnya setelah 25 km pertama. Tidak ada plafon maksimum yang dipublikasikan operator.",
+          "validFrom": "2020-01-01",
+          "validFromNote": "Lihat catatan pada entri tarif dasar.",
+          "sourceUrl": "https://www.jakarta.go.id/commuter-line",
+          "sourceDate": "2023-04-14",
+          "sourceNote": "Diverifikasi ulang dengan kalkulator tarif resmi KAI Commuter pada 21 Oktober 2026: Manggarai - Jakarta Kota Rp3.000; Manggarai - Cikarang Rp4.000; Manggarai - Bogor Rp5.000 - https://www.kci.id/perjalanan-krl/info-tarif . Konfirmasi tarif Rp3.000 masih berlaku pada 8 Oktober 2026 - https://www.kci.id/informasi-publik/berita/kai-commuter-dukung-ekonomi-lokal-jangkau-42-ribu-masyarakat-banten-memanfaat-layanan-kereta-tani-dan-pedagang-tarif-rp-3-000-dan-14-jadwal-perjalanan-setiap-harinya-kuatkan-pengaruh-positif-pada-ekonomi-warga"
+        }
+      ],
+      "integrations": [],
+      "peakWindows": []
+    }
+  ],
+  "unconfirmed": [
+    {
+      "topic": "Besaran tarif 1 Januari 2027",
+      "whatWeCouldNotConfirm": "Tidak ada angka resmi yang dipublikasikan sampai 2026-10-21. Usulan Dewan Transportasi Kota Jakarta (DTKJ) - Rp5.000 untuk tiga jam perjalanan di dalam Jakarta (BRT, non-BRT, Mikrotrans), Rp10.000 untuk Transjabodetabek, dan Rp2.000 untuk Mikrotrans - adalah usulan, bukan keputusan. ANTARA 2 Oktober 2026 dan Kompas 13 Oktober 2026 masih menyebut besaran belum diumumkan. Sumber: https://www.antaranews.com/berita/5768293/tarif-transjakarta-2027-jadi-rp5000-ini-fakta-terbaranya"
+    },
+    {
+      "topic": "Operator yang tarifnya berubah pada 1 Januari 2027",
+      "whatWeCouldNotConfirm": "Pasti: Transjakarta dan Transjabodetabek (diumumkan Pramono Anung, 29-30 September 2026). LRT Jakarta ikut menyesuaikan menurut Kompas (rute Kelapa Gading-Manggarai). MRT Jakarta TIDAK termasuk pada 1 Januari 2027 - tarifnya ditetapkan terpisah. Nasib Mikrotrans belum jelas karena laporan berbeda. Sumber: https://www.kompas.id/artikel/transjakarta-fares-will-be-adjusted-starting-in-2027-free-transportation-access-will-be-expanded ; https://megapolitan.kompas.com/read/2026/10/13/17494361/tarif-lrt-jakarta-masih-rp-5000-pramono-tarif-baru-segera-ditetapkan"
+    },
+    {
+      "topic": "Kalender hari libur nasional untuk tarif LRT Jabodebek",
+      "whatWeCouldNotConfirm": "Operator menyebut 'Hari Libur' pada tabel SML tanpa memuat kalender. Tidak ada kalender libur nasional di repositori, sehingga aplikasi tidak dapat membedakan hari libur dari hari kerja biasa dan berpotensi menghitung plafon Rp20.000 (jam sibuk) pada hari libur yang jatuh Senin-Jumat, padahal tarif resminya Rp10.000. Sumber operator: https://lrtjabodebek.kai.id/informasi-tarif"
+    },
+    {
+      "topic": "Tabel tarif resmi per rute Royaltrans",
+      "whatWeCouldNotConfirm": "Operator tidak menerbitkan tabel tarif per rute. Hanya ada pernyataan 'Rp20.000' untuk sebagian besar rute dan 'Rp35.000' untuk rute yang lebih jauh, dengan jumlah rute yang berbeda antar sumber (12 rute menurut detik dan Traveloka; 9 rute Rp20.000 + 2 rute Rp35.000 menurut Traveloka). Yang terkonfirmasi dari akun resmi PT Transjakarta hanya S13 Summarecon Serpong-Tomang = Rp35.000. Tanggal berlaku per rute juga tidak dipublikasikan. Sumber: https://www.facebook.com/Transjakarta/posts/661547699412248 ; https://news.detik.com/berita/d-8008083/cara-naik-bus-royaltrans-jakarta-info-pesan-tiket-rute-dan-tarifnya"
+    },
+    {
+      "topic": "Tarif Minitrans",
+      "whatWeCouldNotConfirm": "Tidak ada tabel tarif resmi Minitrans di situs operator maupun sumber pemerintah. Aplikasi memperlakukannya sebagai tarif non-BRT Transjakarta (Rp3.500 / Rp2.000) berdasarkan inferensi dari kelas layanan - angka ini BELUM dikonfirmasi sumber operator."
+    },
+    {
+      "topic": "Tanggal mulai berlaku tarif gratis Mikrotrans",
+      "whatWeCouldNotConfirm": "Tidak ada sumber operator yang menyebut tanggal mulai berlakunya tarif Rp0 (pertama kali terdokumentasi di ANTARA, 11 Agustus 2022)."
+    },
+    {
+      "topic": "Tarif Transjabodetabek rute P11 Blok M-Bogor",
+      "whatWeCouldNotConfirm": "Ada wacana Rp10.000 (Kompas, 4 Juli 2026) dan penyebutan Rp8.000 di berita lain; belum ada Kepgub yang menetapkannya, dan rute ini belum ada di jaringan aplikasi. Sumber: https://megapolitan.kompas.com/read/2026/07/04/22222151/tarif-transjabodetabek-bogor-blok-m-jadi-rp-10000-penumpang-punya-syarat"
+    },
+    {
+      "topic": "Plafon maksimum tarif KRL Jabodetabek",
+      "whatWeCouldNotConfirm": "Tidak dipublikasikan. KAI Commuter hanya menerbitkan formula (Rp3.000 untuk 25 km pertama, lalu Rp1.000 setiap 10 km). Nilai plafon harus tetap kosong; jangan diisi dengan angka apa pun."
+    },
+    {
+      "topic": "Tabel tarif reguler MRT di situs resmi MRT",
+      "whatWeCouldNotConfirm": "Tidak tersedia pada 2026-10-21. Halaman jakartamrt.co.id/id/tarif-mrt-jakarta mengembalikan 404 dan kalkulator tarif di jakartamrt.co.id/rencana-perjalanan tidak menampilkan tarif (tombol 'Lihat Rute' tetap nonaktif). Nilai batas atas Rp14.000 diambil dari sumber resmi pemerintah DKI Jakarta, struktur per stasiun dari sumber sekunder."
+    },
+    {
+      "topic": "Tanggal mulai berlaku tarif peak/off-peak LRT Jabodebek",
+      "whatWeCouldNotConfirm": "Skema dasar masuk berlaku 1 Juni 2024 (Detik). Nomor peraturan yang disebut pada catatan riset aplikasi (Kepmenhub 67/2023 sebagaimana diubah KM 70/2024) tidak diverifikasi ulang secara independen dalam riset ini."
+    },
+    {
+      "topic": "Definisi jendela 180 menit Integrasi Multimodal",
+      "whatWeCouldNotConfirm": "Naskah Kepgub 733/2022 mengukur 180 menit sejak tap-in pertama, sedangkan FAQ resmi JakLingko Indonesia yang aktif pada Oktober 2026 menulis 'Jendela waktu 3 jam dihitung mulai dari tap-out perdana hingga tap-out akhir'. Ikuti FAQ operator; perbedaan ini tidak diklarifikasi lewat kanal resmi."
+    }
+  ]
+}

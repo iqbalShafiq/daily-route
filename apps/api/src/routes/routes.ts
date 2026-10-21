@@ -255,6 +255,7 @@ function fareOf(itinerary: Itinerary, rules: FareRules | null, at: Date) {
           ? fareOperatorFor({
               systemId: leg.lineId.split(":")[0] ?? "",
               serviceClass: leg.serviceClass,
+              lineCode: leg.lineCode ?? null,
             })
           : null,
       distanceKm: leg.distanceKm,

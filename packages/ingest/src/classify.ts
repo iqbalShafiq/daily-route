@@ -33,7 +33,7 @@ export const SYSTEMS: readonly SystemDefinition[] = [
     mode: "bus",
     operator: "PT Transportasi Jakarta",
     color: "#0b6b4f",
-    website: "https://www.transjakarta.co.id",
+    website: "https://transjakarta.co.id",
     description:
       "Bus operasional Transjakarta: koridor BRT, Metrotrans (non-BRT), Royaltrans, Minitrans, Mikrotrans dan Amari.",
   },
@@ -43,7 +43,7 @@ export const SYSTEMS: readonly SystemDefinition[] = [
     mode: "metro",
     operator: "PT MRT Jakarta Perseroda",
     color: "#0f5aa8",
-    website: "https://www.mrtjakarta.co.id",
+    website: "https://jakartamrt.co.id",
     description:
       "Mass Rapid Transit Jakarta. Lin Utara–Selatan telah beroperasi sejak 2019 (Lebak Bulus–Bundaran HI, 13 stasiun); Lin Timur–Barat masih dalam konstruksi (Tahap 1 Tomang–Medan Satria).",
   },
@@ -63,7 +63,7 @@ export const SYSTEMS: readonly SystemDefinition[] = [
     mode: "tram",
     operator: "PT LRT Jabodebek",
     color: "#7c3aed",
-    website: "https://www.lrtjabodebek.co.id",
+    website: "https://lrtjabodebek.kai.id",
     description:
       "LRT Jabodebek: 18 stasiun, dibuka 28 Agustus 2023. Dua cabang dari trunk Dukuh Atas–Cawang: Cibubur–Harjamukti dan Bekasi–Jati Mulya.",
   },
@@ -73,7 +73,7 @@ export const SYSTEMS: readonly SystemDefinition[] = [
     mode: "rail",
     operator: "PT Kereta Api Indonesia (KAI Commuter)",
     color: "#b45309",
-    website: "https://www.kai.id",
+    website: "https://www.kci.id",
     description:
       "Kereta api commuter Jabodetabek: Lin Bogor, Lin Cikarang, Lin Rangkasbitung, Lin Tangerang, dan Lin Tanjung Priok.",
   },
@@ -137,14 +137,23 @@ export type TransjakartaClass = {
   brand: string;
 };
 
+/**
+ * The brands the operator names on its vehicles, and the kind of service
+ * each of them is.
+ *
+ * The relation names in OpenStreetMap state the brand outright
+ * ("Minitrans 1M", "Bus Wisata 4", "Transjakarta Amari M3"), which is
+ * more precise than the fleet tier. The operator's own corridor list
+ * outranks this table where the two disagree.
+ */
 const TRANSAKARTA_CLASSES: readonly { pattern: RegExp; brand: string; serviceClass: ServiceClass }[] = [
-  { pattern: /^mikrotrans/i, brand: "Mikrotrans", serviceClass: "feeder" },
+  { pattern: /^mikrotrans/i, brand: "Mikrotrans", serviceClass: "mikrotrans" },
   { pattern: /^metrotrans/i, brand: "Metrotrans", serviceClass: "non-brt" },
   { pattern: /^royaltrans/i, brand: "Royaltrans", serviceClass: "royaltrans" },
   { pattern: /^minitrans/i, brand: "Minitrans", serviceClass: "minitrans" },
-  { pattern: /^amari/i, brand: "Amari", serviceClass: "non-brt" },
-  { pattern: /^bus wisata/i, brand: "Bus Wisata", serviceClass: "non-brt" },
-  { pattern: /^transjabodetabek/i, brand: "Transjabodetabek", serviceClass: "non-brt" },
+  { pattern: /^amari/i, brand: "Amari", serviceClass: "amari" },
+  { pattern: /^bus wisata/i, brand: "Bus Wisata", serviceClass: "wisata" },
+  { pattern: /^transjabodetabek/i, brand: "Transjabodetabek", serviceClass: "transjabodetabek" },
   { pattern: /^transjakarta\s+brt/i, brand: "BRT", serviceClass: "brt" },
   { pattern: /^transjakarta/i, brand: "Transjakarta", serviceClass: "non-brt" },
 ];

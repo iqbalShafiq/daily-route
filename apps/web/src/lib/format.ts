@@ -9,13 +9,17 @@ export type TransitMode = "bus" | "minibus" | "tram" | "metro" | "rail";
 
 export type ServiceClass =
   | "brt"
-  | "feeder"
-  | "minitrans"
   | "non-brt"
+  | "mikrotrans"
+  | "minitrans"
+  | "royaltrans"
+  | "wisata"
+  | "rumah-susun"
+  | "transjabodetabek"
+  | "amari"
   | "rapid-transit"
   | "lrt"
-  | "commuter-rail"
-  | "royaltrans";
+  | "commuter-rail";
 
 /** The label a rider would use for a mode. */
 export const MODE_LABEL: Record<TransitMode, string> = {
@@ -41,15 +45,25 @@ export const MODE_WIDTH: Record<string, number> = {
 };
 
 /** The label for a service class, which is finer than the mode. */
+/**
+ * The label for a service class, which is finer than the mode.
+ *
+ * The wording is the operator's own, so a rider recognises the service
+ * they are being told about.
+ */
 export const SERVICE_CLASS_LABEL: Record<ServiceClass, string> = {
   brt: "BRT",
-  feeder: "Mikrotrans",
+  "non-brt": "Angkutan Pengumpan",
+  mikrotrans: "Mikrotrans",
   minitrans: "MiniTrans",
-  "non-brt": "Non-BRT",
   "rapid-transit": "MRT",
   lrt: "LRT",
   "commuter-rail": "KRL",
-  "royaltrans": "Royaltrans",
+  royaltrans: "Royaltrans",
+  wisata: "Bus Wisata",
+  "rumah-susun": "Bus Rumah Susun",
+  transjabodetabek: "Transjabodetabek",
+  amari: "Bus Malam (Amari)",
 };
 
 /**
@@ -69,13 +83,17 @@ export const MODE_COLOR: Record<string, string> = {
 /** The colour of a service class. */
 export const SERVICE_CLASS_COLOR: Record<ServiceClass, string> = {
   brt: "var(--mode-bus)",
-  feeder: "var(--mode-bus)",
-  minitrans: "var(--mode-bus)",
   "non-brt": "var(--mode-bus)",
+  mikrotrans: "var(--mode-bus)",
+  minitrans: "var(--mode-bus)",
+  "rumah-susun": "var(--mode-bus)",
+  amari: "var(--mode-bus)",
   "rapid-transit": "var(--mode-metro)",
   lrt: "var(--mode-tram)",
   "commuter-rail": "var(--mode-rail)",
-  "royaltrans": "var(--mode-royaltrans, var(--mode-bus))",
+  royaltrans: "var(--mode-royaltrans, var(--mode-bus))",
+  wisata: "var(--mode-wisata, var(--mode-bus))",
+  transjabodetabek: "var(--mode-transjabodetabek, var(--mode-bus))",
 };
 
 /** `95` becomes "1 jam 35 mnt"; `8` becomes "8 mnt". */

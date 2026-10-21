@@ -11,14 +11,15 @@ import { fareOperatorFor, formatRupiah, localTimeParts, quoteFare, type FareRule
  */
 
 const rules: FareRules = {
+  holidays: ["2026-01-01", "2026-08-17", "2026-12-25"],
   modes: {
     "transjakarta-brt": {
       kind: "flat",
       amount: 3500,
-      offPeakAmount: 2000,
-      offPeakHours: "05:00-07:00",
+      earlyMorningAmount: 2000,
+      earlyMorningHours: "05:00-07:00",
     },
-    "transjakarta-feeder": { kind: "free", note: "Mikrotrans masih gratis." },
+    "transjakarta-mikrotrans": { kind: "free", note: "Mikrotrans masih gratis." },
     "transjakarta-royaltrans": { kind: "flat", amount: 20_000 },
     "mrt-jakarta": { kind: "perStation", base: 3000, perStation: 1000, max: 14_000 },
     "lrt-jakarta": { kind: "flat", amount: 5000 },
@@ -94,7 +95,7 @@ describe("quoteFare", () => {
     const quote = quoteFare({
       at: at(10),
       rules,
-      legs: [{ kind: "ride", operator: "transjakarta-feeder", distanceKm: 6, stopCount: 9 }],
+      legs: [{ kind: "ride", operator: "transjakarta-mikrotrans", distanceKm: 6, stopCount: 9 }],
     });
 
     expect(quote.totalIdr).toBe(0);
@@ -224,8 +225,8 @@ describe("fareOperatorFor", () => {
     expect(fareOperatorFor({ systemId: "transjakarta", serviceClass: "brt" })).toBe(
       "transjakarta-brt",
     );
-    expect(fareOperatorFor({ systemId: "transjakarta", serviceClass: "feeder" })).toBe(
-      "transjakarta-feeder",
+    expect(fareOperatorFor({ systemId: "transjakarta", serviceClass: "mikrotrans" })).toBe(
+      "transjakarta-mikrotrans",
     );
     expect(fareOperatorFor({ systemId: "transjakarta", serviceClass: "royaltrans" })).toBe(
       "transjakarta-royaltrans",
@@ -254,5 +255,31 @@ describe("localTimeParts", () => {
 describe("formatRupiah", () => {
   it("writes the amount the way a ticket does", () => {
     expect(formatRupiah(3500)).toBe("Rp 3.500");
+  });
+});
+
+/**
+ * The holidays decide the price of the LRT Jabodebek.
+ *
+ * The operator charges the cheaper fare on a public holiday, even when
+ * the holiday falls on a working day.
+ */
+describe("the public holidays", () => {
+  it("charges the LRT Jabodebek the cheaper fare on a public holiday", () => {
+    // Monday, 17 August 2026: Independence Day, a public holiday.
+    const holiday = quoteFare({
+      at: new Date("2026-08-17T07:30:00+07:00"),
+      rules,
+      legs: [{ kind: "ride", operator: "lrt-jabodebek", distanceKm: 30, stopCount: 8 }],
+    });
+    // Monday, 10 August 2026: an ordinary working day.
+    const workingDay = quoteFare({
+      at: new Date("2026-08-10T07:30:00+07:00"),
+      rules,
+      legs: [{ kind: "ride", operator: "lrt-jabodebek", distanceKm: 30, stopCount: 8 }],
+    });
+
+    expect(holiday.totalIdr).toBe(10_000);
+    expect(workingDay.totalIdr).toBe(20_000);
   });
 });

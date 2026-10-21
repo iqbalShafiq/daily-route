@@ -16,15 +16,28 @@ export type TransitMode = "bus" | "minibus" | "tram" | "metro" | "rail";
  * city routes. The rail classes separate the metro (MRT), the light rail
  * (LRT Jakarta, LRT Jabodebek) and the commuter rail (KRL Jabodetabek).
  */
+/**
+ * The kind of service a line belongs to.
+ *
+ * The names are the ones the operators use themselves, because the tariff
+ * and the vehicle a rider meets follow them. "Mikrotrans" is the official
+ * name of what used to be called a feeder bus; "Wisata", "Rumah Susun",
+ * "Transjabodetabek" and "Amari" are the four services the operator
+ * runs besides the corridors and the feeder buses.
+ */
 export type ServiceClass =
   | "brt"
-  | "feeder"
-  | "minitrans"
   | "non-brt"
+  | "mikrotrans"
+  | "minitrans"
+  | "royaltrans"
+  | "wisata"
+  | "rumah-susun"
+  | "transjabodetabek"
+  | "amari"
   | "rapid-transit"
   | "lrt"
-  | "commuter-rail"
-  | "royaltrans";
+  | "commuter-rail";
 
 export type LineStatus = "operating" | "planned" | "suspended" | "closed";
 

@@ -10,6 +10,7 @@ import { buildLineGeometry } from "./geometry.js";
 
 import { classifyTransjakartaRoute, railServiceClass, SYSTEMS, type SystemId } from "./classify.js";
 import { normalizeRouteCode, type CuratedLine } from "./curated.js";
+import { indexOfficialRoutes, type OfficialRoutes } from "./official.js";
 import type { OsmRoute, OsmStop } from "./osm.js";
 
 /**
@@ -158,6 +159,13 @@ export type MergeOptions = {
     code: string | null;
   }[];
   notes?: string[];
+  /**
+   * The corridor list the operator publishes.
+   *
+   * It decides the kind of service of every corridor, and the corridors
+   * that the operator runs but the data does not know yet.
+   */
+  officialRoutes?: OfficialRoutes | null;
 };
 
 /** Merge the curated reports with the OSM extraction into one network. */
@@ -218,6 +226,7 @@ export function mergeNetwork(options: MergeOptions): TransitNetworkFile {
   }
 
   const consumedOsmKeys = new Set<string>();
+  const official = indexOfficialRoutes(options.officialRoutes ?? null);
 
   // --- Curated lines ----------------------------------------------------
 
@@ -232,7 +241,8 @@ export function mergeNetwork(options: MergeOptions): TransitNetworkFile {
 
     const primary = osmRoutes?.[0];
     const osmStops = primary?.stops ?? [];
-    const serviceClass = resolveServiceClass(systemId, curated, primary);
+    const officialCorridor = official.get(normalizeRouteCode(code).toUpperCase());
+    const serviceClass = resolveServiceClass(systemId, curated, primary, officialCorridor?.service);
     const lineId = `${systemId}:${slugify(code) || "route"}`;
     const lineStatus = normalizeStatus(curated.status);
     // A planned line lists its future stations; an operating line must not
@@ -246,7 +256,7 @@ export function mergeNetwork(options: MergeOptions): TransitNetworkFile {
       id: lineId,
       systemId,
       code,
-      name: humanizeName(curated.name),
+      name: humanizeName(officialCorridor?.name ?? curated.name),
       mode: modeForServiceClass(systemId, serviceClass),
       serviceClass,
       operator: curated.operator ?? operatorFor(systemId),
@@ -258,7 +268,8 @@ export function mergeNetwork(options: MergeOptions): TransitNetworkFile {
       metadata: {
         curatedSource: curated.sourceKey,
         curatedSources: curated.sources,
-        officialName: curated.name,
+        officialName: officialCorridor?.name ?? curated.name,
+        officialService: officialCorridor?.service ?? null,
         osmRelationIds: (osmRoutes ?? []).map((route) => route.relationId),
         rawName: primary?.rawName ?? null,
         from: primary?.from ?? null,
@@ -322,7 +333,15 @@ export function mergeNetwork(options: MergeOptions): TransitNetworkFile {
     if (!primary) continue;
 
     const code = normalizeRouteCode(primary.code) || `route-${primary.relationId}`;
-    const serviceClass = resolveServiceClass(primary.systemId, undefined, primary);
+    // A line that no report covers still gets the kind of service the
+    // operator publishes for it.
+    const officialCorridor = official.get(normalizeRouteCode(code).toUpperCase());
+    const serviceClass = resolveServiceClass(
+      primary.systemId,
+      undefined,
+      primary,
+      officialCorridor?.service,
+    );
     const lineId = `${primary.systemId}:${slugify(code) || `route-${primary.relationId}`}`;
 
     if (lines.has(lineId)) continue;
@@ -536,14 +555,20 @@ export function humanizeName(value: string): string {
 /**
  * The canonical name of a service class.
  *
- * The curated reports write "mikrotrans" where the domain model writes
- * "feeder"; both mean the same service, so the domain spelling wins.
+ * The reports and the relation names spell the same service in several
+ * ways; the domain model has one spelling for each, and it is the
+ * operator's own wording.
  */
 export function normalizeServiceClass(value: string): string {
   const key = value.trim().toLowerCase();
-  if (key === "mikrotrans" || key === "feeder") return "feeder";
+  if (key === "mikrotrans" || key === "feeder") return "mikrotrans";
   if (key === "metrotrans" || key === "non-brt" || key === "nonbrt") return "non-brt";
   if (key === "minitrans") return "minitrans";
+  if (key === "royaltrans") return "royaltrans";
+  if (key === "wisata" || key === "bus-wisata" || key === "bus wisata") return "wisata";
+  if (key === "rumah-susun" || key === "rumahsusun" || key === "rusun") return "rumah-susun";
+  if (key === "transjabodetabek" || key === "trans-jabodetabek") return "transjabodetabek";
+  if (key === "amari" || key === "night") return "amari";
   if (key === "brt") return "brt";
   if (key === "rapid-transit") return "rapid-transit";
   if (key === "lrt" || key === "light-rail") return "lrt";
@@ -555,12 +580,23 @@ function resolveServiceClass(
   systemId: SystemId,
   curated: CuratedLine | undefined,
   osmRoute: OsmRoute | undefined,
+  officialService?: string,
 ): string {
   if (systemId === "transjakarta") {
     // The OSM relation name states the brand outright ("Minitrans 1M",
     // "Metrotrans 5F", "Transjakarta BRT 1"), so it outranks the curated
     // class, which is often only an inferred fleet tier.
     const fromOsm = classifyTransjakartaRoute(osmRoute?.rawName ?? "");
+    // The operator publishes the kind of service of every corridor it
+    // runs. That is the authority, because the tariff follows it.
+    if (officialService) {
+      const officialClass = normalizeServiceClass(officialService);
+      // The operator groups the MiniTrans buses with the other feeder
+      // services, but the brand is what riders call them by, and the
+      // tariff is the same either way.
+      if (officialClass === "non-brt" && fromOsm.brand === "Minitrans") return "minitrans";
+      return officialClass;
+    }
     if (fromOsm.brand !== "Transjakarta") return normalizeServiceClass(fromOsm.serviceClass);
     if (curated?.serviceClass) return normalizeServiceClass(curated.serviceClass);
     return normalizeServiceClass(fromOsm.serviceClass);
@@ -589,7 +625,7 @@ function modeForServiceClass(systemId: SystemId, serviceClass: string): string {
         ? "metro"
         : "tram";
   }
-  if (serviceClass === "feeder" || serviceClass === "minitrans") return "minibus";
+  if (serviceClass === "mikrotrans" || serviceClass === "minitrans") return "minibus";
   return "bus";
 }
 
