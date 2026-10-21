@@ -162,10 +162,21 @@ Read `DESIGN.md` before touching the interface. The short version:
   icon-only control.
 - Layout is CSS Grid. No percentage flexbox arithmetic.
 - The map owns the window. There is no bar across the top, and the
-  controls float on the map: the search card in the top left, the
+  controls float on the map: the search surface in the top left, the
   answer below it, the window controls in the top right.
   `research/tools/ux-visual/layout_check.py` reads the source and must
   report nothing.
+- The search is one surface, not a card with a form inside it. On a
+  phone it is the full width of the window. The button that runs the
+  search is the last control of the form, and the button that swaps
+  the two places sits on the hairline between the two lines.
+- The journey is framed in the room the rider can see. The margins
+  around it are the `--map-pad-*` variables in `apps/web/src/styles.css`,
+  and the map reads them when it frames a journey. The height of the
+  search bar on a phone is `--bar-h`.
+- Motion is short and purposeful: an answer rises into place, a list
+  of suggestions opens from its field, and the map moves with `easeTo`
+  and `fitBounds`. `prefers-reduced-motion` still turns all of it off.
 - Full-height regions use `dvh`, never `vh` and never a fixed pixel height.
 - Every asynchronous surface has a loading, an empty and an error state.
 - The place field is a combobox: the focus stays in the input, the active

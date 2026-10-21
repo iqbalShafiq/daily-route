@@ -13,8 +13,11 @@ import { WalkPanel } from "./walk-panel.js";
  * It is one object over the map, not a card that holds a form. The two
  * places it holds are two lines of the same surface, divided by a
  * hairline, and the button that runs the search sits at the end of the
- * second line, where a map application puts it. Nothing about the
- * search is boxed inside anything else.
+ * second line, where a thumb expects it.
+ *
+ * On a phone the surface is the full width of the window: a bar at the
+ * top of the map, with the map still behind it. On a wide screen it
+ * floats in the corner, because there the map is the wider thing.
  */
 export function RouteSearch({
   origin,
@@ -40,10 +43,19 @@ export function RouteSearch({
   walk?: PositionPlan | null | undefined;
   className?: string;
 }) {
+  const canSearch = destination.trim().length > 0;
+
   return (
     <div className={cn("flex flex-col gap-2", className)}>
-      <div className="relative rounded-[14px] bg-surface shadow-pop ring-1 ring-line">
-        <div className="flex h-14 items-center gap-3 px-4">
+      <div
+        className={cn(
+          "relative bg-surface shadow-pop ring-1 ring-line",
+          // Full width on a phone: the bar belongs to the window, so the
+          // window's corners are the only corners it has.
+          "rounded-b-[14px] lg:rounded-[14px]",
+        )}
+      >
+        <div className="flex h-12 items-center gap-3 pl-4 pr-3">
           <PlaceInput
             variant="row"
             label="Dari"
@@ -65,13 +77,21 @@ export function RouteSearch({
           />
         </div>
 
-        {/* The hairline between the two places. */}
-        <div className="h-px bg-line" />
+        {/*
+         * The hairline between the two places. It lies on the surface
+         * instead of taking room from it, so the two lines keep the
+         * same height and the surface keeps the same height on every
+         * screen.
+         */}
+        <div className="absolute inset-x-0 top-1/2 h-px bg-line" />
 
         {/*
-         * The button that swaps the two places. It sits in the middle
-         * of the surface, in the column of the icons, where it cannot
-         * cover the controls at the end of a line.
+         * The button that swaps the two places.
+         *
+         * It sits in the middle of the surface, in the column of the
+         * icons, on the hairline. It is centred on the same line as the
+         * two icons, so the three read as one column and not as three
+         * things that happen to be near each other.
          */}
         <button
           type="button"
@@ -81,12 +101,14 @@ export function RouteSearch({
           }}
           aria-label="Tukar asal dan tujuan"
           title="Tukar asal dan tujuan"
-          className="absolute top-1/2 left-3 flex size-8 -translate-y-1/2 cursor-pointer items-center justify-center rounded-full border border-line bg-surface text-ink-2 shadow-raised transition-colors hover:bg-surface-2 hover:text-ink"
+          className="absolute top-1/2 left-1 flex size-10 -translate-y-1/2 cursor-pointer items-center justify-center rounded-full text-ink-2 transition-colors hover:text-ink"
         >
-          <ArrowRightLeft aria-hidden className="size-3.5" />
+          <span className="flex size-6 items-center justify-center rounded-full border border-line bg-surface shadow-raised">
+            <ArrowRightLeft aria-hidden className="size-3" />
+          </span>
         </button>
 
-        <div className="flex h-14 items-center gap-3 px-4">
+        <div className="flex h-12 items-center gap-3 pl-4 pr-3">
           <PlaceInput
             variant="row"
             label="Ke"
@@ -102,6 +124,7 @@ export function RouteSearch({
                 aria-label="Tampilkan rute"
                 title="Tampilkan rute"
                 onClick={onSubmit}
+                disabled={!canSearch}
                 className="size-8 max-md:size-10 rounded-full"
               >
                 <ArrowRight aria-hidden className="size-4" />
@@ -112,7 +135,7 @@ export function RouteSearch({
       </div>
 
       {walk ? (
-        <div className="rounded-[14px] bg-surface px-4 py-3 shadow-pop ring-1 ring-line">
+        <div className="mx-3 rounded-[14px] bg-surface px-4 py-3 shadow-pop ring-1 ring-line lg:mx-0">
           <WalkPanel plan={walk} onChoose={onChooseOrigin} />
         </div>
       ) : null}

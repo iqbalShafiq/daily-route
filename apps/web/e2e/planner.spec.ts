@@ -138,6 +138,28 @@ test.describe("route planner", () => {
     await expect(page.getByRole("heading", { name: "Tanya asisten rute" })).toHaveCount(0);
   });
 
+  test("gives the search the whole width of a phone", async ({ page }, testInfo) => {
+    test.skip(testInfo.project.name !== "mobile", "the mobile project covers this");
+
+    await page.goto("/");
+
+    // The search surface is the width of the window, edge to edge.
+    const surface = page.getByRole("button", { name: "Tukar asal dan tujuan" }).locator("..");
+    const surfaceBox = await surface.boundingBox();
+    const width = page.viewportSize()?.width ?? 0;
+    expect(surfaceBox?.width ?? 0).toBeGreaterThan(width - 1);
+
+    // The button that runs the search is the last thing in the form.
+    const send = await page.getByRole("button", { name: "Tampilkan rute" }).boundingBox();
+    const rightEdge = (surfaceBox?.x ?? 0) + (surfaceBox?.width ?? 0);
+    expect(rightEdge - ((send?.x ?? 0) + (send?.width ?? 0))).toBeLessThanOrEqual(20);
+
+    // And it only works when there is a destination.
+    await expect(page.getByRole("button", { name: "Tampilkan rute" })).toBeDisabled();
+    await page.getByLabel("Ke").fill("Cawang");
+    await expect(page.getByRole("button", { name: "Tampilkan rute" })).toBeEnabled();
+  });
+
   test("keeps the layout usable on a small screen", async ({ page }, testInfo) => {
     test.skip(testInfo.project.name !== "mobile", "the mobile project covers this");
 

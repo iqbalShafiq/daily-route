@@ -195,7 +195,7 @@ export function RouteMap({
         center: [marker.longitude, marker.latitude],
         zoom: Math.max(map.getZoom(), 15),
         duration: 400,
-        padding: { top: 80, bottom: 80, left: 40, right: 40 },
+        padding: paddingOf(map),
         essential: false,
       });
     });
@@ -547,8 +547,39 @@ function syncLegs(map: MapLibreMap, legs: readonly MapLeg[]): void {
     .filter((leg) => !leg.dashed && leg.coordinates.length > 1)
     .flatMap((leg) => leg.coordinates);
   if (followed.length > 1) {
-    map.fitBounds(boundsOf(followed), { padding: 56, maxZoom: 15, duration: 600 });
+    map.fitBounds(boundsOf(followed), {
+      padding: paddingOf(map),
+      maxZoom: 15,
+      duration: 600,
+    });
   }
+}
+
+/**
+ * The room the map leaves around what it shows.
+ *
+ * The values come from the stylesheet, because the room is a fact about
+ * the layout: on a phone the search bar is above the map and the answer
+ * is below it, and a journey that is framed in the whole window would
+ * be hidden under both.
+ */
+function paddingOf(map: MapLibreMap): {
+  top: number;
+  bottom: number;
+  left: number;
+  right: number;
+} {
+  const style = getComputedStyle(map.getContainer());
+  const read = (name: string, fallback: number): number => {
+    const value = Number.parseFloat(style.getPropertyValue(name));
+    return Number.isFinite(value) ? value : fallback;
+  };
+  return {
+    top: read("--map-pad-top", 56),
+    bottom: read("--map-pad-bottom", 56),
+    left: read("--map-pad-left", 56),
+    right: read("--map-pad-right", 56),
+  };
 }
 
 function syncMarkers(map: MapLibreMap, markers: readonly MapMarker[]): void {

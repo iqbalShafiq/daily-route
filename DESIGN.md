@@ -96,10 +96,21 @@ There is no bar across the top of the window and no column beside the
 map. The map owns the window, and the controls float on it.
 
 - The map fills the whole window. The rider is looking at a city.
-- The search card floats in the top left corner, 400 px wide, 16 px
-  from the edge, with a shadow so it reads as a card above the map.
-- The answer opens below it, in the same column, and scrolls inside the
-  column rather than the window.
+- The search is one surface: two lines, a hairline between them, and the
+  button that runs the search at the end of the second line. It is not a
+  card with a form inside it.
+- On a wide screen the surface floats in the top left corner, 400 px
+  wide, 16 px from the edge, with a shadow so it reads as a card above
+  the map. The answer opens below it, in the same column, and scrolls
+  inside the column rather than the window.
+- On a phone the surface is the full width of the window: a bar at the
+  top of the map, edge to edge, with the map still behind it. The
+  controls of the window move below it, and the answer rises from the
+  bottom.
+- What removes the text comes first and what acts on it comes last, so
+  the button that runs the search is always the rightmost thing in the
+  form. The button that swaps the two places sits on the hairline, in
+  the column of the two icons, centred on the same line as they are.
 - The controls of the window — the theme, the state of the assistant —
   are a small stack in the top right corner, where the map's own zoom
   control used to be. The zoom moved to the bottom right, so the top
@@ -110,8 +121,10 @@ map. The map owns the window, and the controls float on it.
 - The assistant opens over the map, in a panel on the right on a wide
   screen and over the whole window on a phone. It is a second way into
   the same data, not a separate mode of the page.
-- On a phone the answer rises from the bottom of the window, over the
-  map, and the search card stays at the top.
+- The journey is framed in the room the rider can actually see: beside
+  the answer column on a wide screen, between the bar and the answer on
+  a phone. The margins are `--map-pad-*` in `styles.css`, and the map
+  reads them when it frames a journey.
 
 The reasoning, the references and the measurements are in
 `research/ux-layout-patterns.md`. `research/tools/ux-visual/layout_check.py`

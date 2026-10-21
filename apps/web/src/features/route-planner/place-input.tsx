@@ -180,45 +180,49 @@ export function PlaceInput({
     inputRef.current?.focus();
   };
 
+  /*
+   * The controls at the end of the field.
+   *
+   * The order is fixed: what removes the text comes first, what acts on
+   * it comes last. The button that runs the search is therefore always
+   * the rightmost thing in the form, which is where a thumb expects it.
+   */
   const trailing = useMemo(
-    () =>
-      trailingAction ? (
-        <span className="flex items-center gap-1">
-          {trailingAction}
-          {value.length > 0 ? (
-            <button
-              type="button"
-              aria-label="Bersihkan"
-              onClick={() => {
-                onValueChange("");
-                setOpen(false);
-              }}
-              className="flex size-6 cursor-pointer items-center justify-center rounded-md text-ink-3 transition-colors hover:bg-surface-2 hover:text-ink"
-            >
-              <X aria-hidden className="size-3.5" />
-            </button>
-          ) : null}
-        </span>
-      ) : value.length > 0 ? (
-        <button
-          type="button"
-          aria-label="Bersihkan"
-          onClick={() => {
-            onValueChange("");
-            setOpen(false);
-          }}
-          className="flex size-6 cursor-pointer items-center justify-center rounded-md text-ink-3 transition-colors hover:bg-surface-2 hover:text-ink"
-        >
-          <X aria-hidden className="size-3.5" />
-        </button>
-      ) : loading ? (
-        <Loader2 aria-hidden className="size-3.5 animate-spin text-ink-3" />
-      ) : null,
+    () => {
+      const clearButton =
+        value.length > 0 ? (
+          <button
+            type="button"
+            aria-label="Bersihkan"
+            onClick={() => {
+              onValueChange("");
+              setOpen(false);
+            }}
+            className="flex size-6 cursor-pointer items-center justify-center rounded-md text-ink-3 transition-colors hover:bg-surface-2 hover:text-ink"
+          >
+            <X aria-hidden className="size-3.5" />
+          </button>
+        ) : null;
+
+      if (trailingAction) {
+        return (
+          <span className="flex items-center gap-1">
+            {clearButton}
+            {trailingAction}
+          </span>
+        );
+      }
+      if (clearButton) return clearButton;
+      if (loading) return <Loader2 aria-hidden className="size-3.5 animate-spin text-ink-3" />;
+      return null;
+    },
     [value, onValueChange, loading, trailingAction],
   );
 
   return (
-    <div ref={containerRef} className="relative">
+    // The field fills the line it is in, so the controls at its end
+    // stand at the end of the line and not right after the text.
+    <div ref={containerRef} className="relative flex min-w-0 flex-1">
       <Input
         ref={inputRef}
         variant={variant}
@@ -258,7 +262,7 @@ export function PlaceInput({
             // On a phone the list becomes a sheet at the bottom of the
             // screen: the keyboard covers half of it, and a dropdown
             // under the field would be covered with it.
-            "absolute inset-x-0 top-full z-30 mt-2 max-h-72 overflow-y-auto overscroll-contain",
+            "list-in absolute inset-x-0 top-full z-30 mt-2 max-h-72 overflow-y-auto overscroll-contain",
             "rounded-xl border border-line bg-surface shadow-pop",
             "max-md:fixed max-md:inset-x-0 max-md:top-auto max-md:bottom-0 max-md:mt-0",
             "max-md:max-h-[60dvh] max-md:rounded-b-none max-md:rounded-t-2xl max-md:border-x-0 max-md:border-b-0",

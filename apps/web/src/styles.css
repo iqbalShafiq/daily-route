@@ -65,6 +65,27 @@
 
   --radius-card: 14px;
 
+  /*
+   * The height of the search bar on a phone: two lines of 48 px.
+   *
+   * It is written down once, because the things that float below the
+   * bar on a phone have to know where the bar ends.
+   */
+  --bar-h: 96px;
+
+  /*
+   * The room the map leaves around the journey.
+   *
+   * On a wide screen the answer stands in a column on the left, so the
+   * journey is framed to the right of it. On a phone the search bar is
+   * above the map and the answer is below it, and the journey has to
+   * fit between the two.
+   */
+  --map-pad-top: 56px;
+  --map-pad-bottom: 56px;
+  --map-pad-left: 440px;
+  --map-pad-right: 56px;
+
   /* The line that separates a route from the roads under it. */
   --map-halo: rgb(23 21 15 / 0.14);
 }
@@ -205,6 +226,57 @@
   .scroll-quiet::-webkit-scrollbar-track {
     background: transparent;
   }
+
+  /*
+   * The answer arrives.
+   *
+   * A panel that appears out of nowhere reads as a glitch. It rises a
+   * little and settles, in one short movement, so the rider sees that
+   * something came in rather than that something changed.
+   */
+  .rise-in {
+    animation: rise-in 260ms cubic-bezier(0.22, 1, 0.36, 1) both;
+  }
+
+  .fade-in {
+    animation: fade-in 160ms ease-out both;
+  }
+
+  /* The list of suggestions opens from the field it belongs to. */
+  .list-in {
+    animation: list-in 180ms cubic-bezier(0.22, 1, 0.36, 1) both;
+  }
+}
+
+@keyframes rise-in {
+  from {
+    opacity: 0;
+    transform: translate3d(0, 10px, 0);
+  }
+  to {
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
+  }
+}
+
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes list-in {
+  from {
+    opacity: 0;
+    transform: translate3d(0, -4px, 0);
+  }
+  to {
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
+  }
 }
 
 /* The popover of a point on the map. */
@@ -258,6 +330,15 @@
 
 .maplibregl-ctrl-attrib a {
   color: var(--ink-2) !important;
+}
+
+@media (max-width: 1023px) {
+  :root {
+    --map-pad-top: 120px;
+    --map-pad-bottom: 320px;
+    --map-pad-left: 24px;
+    --map-pad-right: 24px;
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {

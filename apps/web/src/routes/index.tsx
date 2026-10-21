@@ -224,7 +224,7 @@ export function PlannerPage() {
        * assistant, the state of the model and the theme are one row:
        * three small things that belong to the window, not to a bar.
        */}
-      <div className="pointer-events-none absolute top-3 right-3 z-30 flex items-center gap-2">
+      <div className="pointer-events-none absolute top-[var(--bar-h)] right-3 mt-3 z-30 flex items-center gap-2 lg:top-3 lg:mt-0">
         <Tooltip label={view === "chat" ? "Tutup asisten" : "Tanya asisten"}>
           <Button
             variant="secondary"
@@ -288,13 +288,12 @@ export function PlannerPage() {
        */}
       <div
         className={cn(
-          "pointer-events-none absolute inset-0 col-start-1 row-start-1 z-20 flex flex-col justify-between p-3 pt-16 lg:pt-3",
+          "pointer-events-none absolute inset-0 col-start-1 row-start-1 z-20 flex flex-col justify-between p-0 pb-3",
           "lg:right-auto lg:w-[400px] lg:justify-start lg:gap-4 lg:p-4",
         )}
       >
         <div className="pointer-events-auto lg:shrink-0">
           <RouteSearch
-            className="shadow-pop"
             origin={origin}
             destination={destination}
             onOriginChange={setOrigin}
@@ -342,7 +341,7 @@ export function PlannerPage() {
         {view === "route" ? (
           <div
             className={cn(
-              "pointer-events-auto max-h-[55%] overflow-y-auto lg:min-h-0 lg:max-h-none lg:flex-1",
+              "pointer-events-auto max-h-[40%] overflow-y-auto px-3 lg:min-h-0 lg:max-h-none lg:flex-1 lg:px-0",
             )}
           >
             <RouteResult
@@ -366,7 +365,7 @@ export function PlannerPage() {
         ) : null}
 
         {view === "chat" ? (
-          <div className="pointer-events-auto absolute inset-x-3 bottom-3 top-16 z-40 lg:left-auto lg:right-4 lg:w-[400px]">
+          <div className="pointer-events-auto absolute inset-x-3 bottom-3 top-[var(--bar-h)] mt-3 z-40 lg:left-auto lg:right-4 lg:top-16 lg:mt-0 lg:w-[400px]">
             <div className="relative h-full">
               <ChatPanel />
             </div>

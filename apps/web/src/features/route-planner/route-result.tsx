@@ -48,7 +48,7 @@ export function RouteResult({
   if (plan.isFetching && !data) {
     return (
       <div
-        className={cn("rounded-[14px] bg-surface p-4 shadow-pop ring-1 ring-line", className)}
+        className={cn("fade-in rounded-[14px] bg-surface p-4 shadow-pop ring-1 ring-line", className)}
         aria-busy="true"
         aria-live="polite"
       >
@@ -74,7 +74,7 @@ export function RouteResult({
     return (
       <div
         className={cn(
-          "rounded-[14px] bg-surface p-4 shadow-pop ring-1 ring-line",
+          "fade-in rounded-[14px] bg-surface p-4 shadow-pop ring-1 ring-line",
           className,
         )}
         role="alert"
@@ -105,7 +105,7 @@ export function RouteResult({
   if (data && itineraries.length === 0) {
     return (
       <div
-        className={cn("rounded-[14px] bg-surface p-4 shadow-pop ring-1 ring-line", className)}
+        className={cn("fade-in rounded-[14px] bg-surface p-4 shadow-pop ring-1 ring-line", className)}
       >
         <p className="flex items-center gap-2 text-[13px] font-semibold text-ink">
           <RouteIcon aria-hidden className="size-4 shrink-0 text-ink-3" />
@@ -149,7 +149,8 @@ export function RouteResult({
        * worth using.
        */}
       <div
-        className="relative overflow-hidden rounded-[14px] bg-surface shadow-pop ring-1 ring-line"
+        key={`${data.origin.id}:${data.destination.id}`}
+        className="rise-in relative overflow-hidden rounded-[14px] bg-surface shadow-pop ring-1 ring-line"
         aria-live="polite"
         aria-busy={plan.isFetching}
       >
