@@ -7,6 +7,7 @@ import {
   SERVICE_CLASS_LABEL,
   formatDistance,
   formatDuration,
+  stopNoun,
 } from "../../lib/format.js";
 import type { ItineraryLeg } from "../../lib/api.js";
 
@@ -49,12 +50,16 @@ export function LegList({
   }
 
   return (
-    <ol className={cn("space-y-0", dense ? "text-[13px]" : "text-sm")}>
+    <ol className={cn("space-y-0", dense ? "text-[13px]" : "text-[13px]")}>
       {legs.map((leg, index) => (
         <LegRow
           key={`${leg.fromName}-${leg.toName}-${index}`}
           leg={leg}
           last={index === legs.length - 1}
+          previousMode={legs[index - 1]?.kind === "ride" ? (legs[index - 1]?.mode ?? null) : null}
+          nextMode={
+            legs[index + 1]?.kind === "ride" ? (legs[index + 1]?.mode ?? null) : null
+          }
           legId={legIdOf(leg, index)}
           active={activeLegId === legIdOf(leg, index)}
           onSelect={onLegSelect}
@@ -77,15 +82,21 @@ function LegRow({
   active,
   onSelect,
   onStopHover,
+  previousMode,
+  nextMode,
 }: {
   leg: ItineraryLeg;
   last: boolean;
   legId: string;
   active: boolean;
+  /** The mode of the vehicle before this leg, and the one after it. */
+  previousMode?: string | null | undefined;
+  nextMode?: string | null | undefined;
   onSelect?: ((legId: string) => void) | undefined;
   onStopHover?: ((stationId: string | null) => void) | undefined;
 }) {
   const isWalk = leg.kind === "walk";
+  const noun = stopNoun(isWalk ? "walk" : leg.mode);
   const color = isWalk
     ? "var(--ink-3)"
     : SERVICE_CLASS_COLOR[(leg.serviceClass as never) ?? "brt"] ?? "var(--accent)";
@@ -113,7 +124,7 @@ function LegRow({
         {!last ? (
           <span
             aria-hidden
-            className="absolute top-9 bottom-[-12px] w-0.5 rounded-full opacity-45"
+            className="absolute top-8 bottom-[-12px] w-0.5 rounded-full opacity-45"
             style={{ backgroundColor: color }}
           />
         ) : null}
@@ -122,18 +133,18 @@ function LegRow({
       <div className="min-w-0 flex-1">
         <div className="flex flex-wrap items-baseline gap-x-2 gap-y-0.5">
           <span className="font-medium text-ink">
-            {isWalk ? "Jalan kaki" : (leg.lineName ?? MODE_LABEL[leg.mode as keyof typeof MODE_LABEL] ?? "Perjalanan")}
+            {isWalk ? "Berjalan kaki" : (leg.lineName ?? MODE_LABEL[leg.mode as keyof typeof MODE_LABEL] ?? "Perjalanan")}
           </span>
           {!isWalk && leg.lineCode ? (
             <span
-              className="rounded-md px-1.5 py-px font-mono text-[11px] leading-4 font-medium"
+              className="rounded-md px-2 py-px font-mono text-[12px] leading-4 font-medium"
               style={{ backgroundColor: `color-mix(in oklab, ${color} 12%, transparent)`, color }}
             >
               {leg.lineCode}
             </span>
           ) : null}
           {!isWalk && leg.serviceClass ? (
-            <span className="text-[11px] text-ink-3">
+            <span className="text-[12px] text-ink-3">
               {SERVICE_CLASS_LABEL[leg.serviceClass as never] ?? leg.serviceClass}
             </span>
           ) : null}
@@ -142,9 +153,9 @@ function LegRow({
           </span>
         </div>
 
-        <p className="mt-0.5 flex items-center gap-1.5 text-[13px] text-ink-2">
+        <p className="mt-0.5 flex items-center gap-2 text-[13px] text-ink-2">
           {isWalk ? (
-            <span className="truncate">{walkDescription(leg)}</span>
+            <span className="truncate">{walkDescription(leg, previousMode, nextMode)}</span>
           ) : leg.changedFrom ? (
             <span className="truncate">
               Ganti dari {leg.changedFrom} di {leg.changedAt}
@@ -164,8 +175,8 @@ function LegRow({
           <details className="group mt-2">
             <summary className="inline-flex cursor-pointer list-none items-center gap-1 rounded text-[12px] text-ink-3 transition-colors hover:text-ink-2">
               <ChevronSmall />
-              {leg.stops.length} halte · {formatDistance(leg.distanceKm)}
-              {!isWalk && leg.waitMinutes > 0 ? ` · tunggu ±${leg.waitMinutes} mnt` : ""}
+              {leg.stops.length} {noun} · {formatDistance(leg.distanceKm)}
+              {!isWalk && leg.waitMinutes > 0 ? ` · tunggu ${leg.waitMinutes} mnt` : ""}
             </summary>
 
             {/*
@@ -182,14 +193,14 @@ function LegRow({
                 return (
                   <li
                     key={`${stop.stationId}-${index}`}
-                    className="relative -ml-[5px] flex items-baseline gap-2 rounded-[4px] py-[3px] pl-3 text-[12px] transition-colors hover:bg-surface-2"
+                    className="relative -ml-1 flex items-baseline gap-2 rounded-[4px] py-1 pl-3 text-[12px] transition-colors hover:bg-surface-2"
                     onMouseEnter={() => onStopHover?.(stop.stationId)}
                     onMouseLeave={() => onStopHover?.(null)}
                   >
                     <span
                       aria-hidden
                       className={cn(
-                        "absolute top-[7px] size-[5px] shrink-0 rounded-full border",
+                        "absolute top-2 size-[5px] shrink-0 rounded-full border",
                         first || last ? "border-transparent" : "border-line",
                       )}
                       style={{ backgroundColor: first || last ? color : "var(--surface)", left: -5 }}
@@ -215,9 +226,9 @@ function LegRow({
             {isWalk
               ? formatDistance(leg.distanceKm)
               : [
-                  `${leg.stops.length} halte`,
+                  `${leg.stops.length} ${noun}`,
                   formatDistance(leg.distanceKm),
-                  leg.waitMinutes > 0 ? `tunggu ±${leg.waitMinutes} mnt` : null,
+                  leg.waitMinutes > 0 ? `tunggu ${leg.waitMinutes} mnt` : null,
                 ]
                   .filter(Boolean)
                   .join(" · ")}
@@ -235,12 +246,16 @@ function LegRow({
  * the journey. Only the walk in between asks the rider to change vehicle,
  * and only that one is worth naming.
  */
-function walkDescription(leg: ItineraryLeg): string {
+function walkDescription(
+  leg: ItineraryLeg,
+  previousMode: string | null | undefined,
+  nextMode: string | null | undefined,
+): string {
   switch (leg.walkReason) {
     case "access":
-      return `Berjalan kaki ke halte ${leg.toName}`;
+      return `Berjalan kaki ke ${stopNoun(nextMode)} ${leg.toName}`;
     case "egress":
-      return `Berjalan kaki dari halte ${leg.fromName}`;
+      return `Berjalan kaki dari ${stopNoun(previousMode)} ${leg.fromName}`;
     case "transfer":
       return leg.nextLineName
         ? `Pindah ke ${leg.nextLineName} di ${leg.fromName}`

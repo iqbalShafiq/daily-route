@@ -43,7 +43,7 @@ export function CardHeader({ title, description, actions, className, ...props }:
       <div className="min-w-0">
         <h2 className="text-[15px] font-semibold tracking-[-0.01em] text-ink">{title}</h2>
         {description ? (
-          <p className="mt-0.5 text-[13px] leading-relaxed text-ink-3">{description}</p>
+          <p className="mt-0.5 text-[13px] leading-[1.5] text-ink-3">{description}</p>
         ) : null}
       </div>
       {actions ? <div className="flex shrink-0 items-center gap-1">{actions}</div> : null}

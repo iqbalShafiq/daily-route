@@ -56,7 +56,7 @@ export function ChatPanel() {
               <li
                 key={message.id}
                 className={cn(
-                  "max-w-[92%] rounded-xl px-3 py-2 text-[13px] leading-relaxed",
+                  "max-w-[92%] rounded-xl px-3 py-2 text-[13px] leading-[1.5]",
                   message.role === "user"
                     ? "self-end bg-accent text-accent-ink"
                     : "self-start border border-line bg-surface-2 text-ink",
@@ -70,9 +70,9 @@ export function ChatPanel() {
                   </span>
                 )}
                 {message.tools.length > 0 ? (
-                  <p className="mt-1.5 flex flex-wrap gap-1 border-t border-line/60 pt-1.5 text-[10px] text-ink-3">
+                  <p className="mt-2 flex flex-wrap gap-1 border-t border-line/60 pt-2 text-[12px] text-ink-3">
                     {message.tools.map((tool) => (
-                      <span key={tool} className="rounded bg-surface-3 px-1.5 py-0.5 font-mono">
+                      <span key={tool} className="rounded bg-surface-3 px-2 py-0.5 font-mono">
                         {tool}
                       </span>
                     ))}
@@ -95,7 +95,7 @@ export function ChatPanel() {
           onChange={(event) => setDraft(event.target.value)}
           placeholder="Tulis pertanyaan…"
           aria-label="Pesan untuk asisten rute"
-          className="h-10 min-w-0 flex-1 rounded-xl border border-line bg-surface px-3 text-[14px] text-ink outline-none placeholder:text-ink-3 focus:border-accent"
+          className="h-10 min-w-0 flex-1 rounded-xl border border-line bg-surface px-3 text-[13px] text-ink outline-none placeholder:text-ink-3 focus:border-accent"
         />
         <Button
           type="submit"

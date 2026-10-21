@@ -122,8 +122,8 @@ export function PlannerPage() {
         detail: isTransfer
           ? `Pindah ke ${leg.nextLineName ?? "kendaraan lain"}`
           : leg.walkReason === "access"
-            ? "Berjalan kaki ke halte pertama"
-            : "Berjalan kaki dari halte terakhir",
+            ? "Berjalan kaki ke tempat naik pertama"
+            : "Berjalan kaki dari tempat turun terakhir",
         kind: isTransfer ? "transfer" : "stop",
         order: index + 1,
       });
@@ -233,6 +233,10 @@ export function PlannerPage() {
                   destination: destination.trim(),
                 });
               }}
+              onExample={(name) => {
+                setOrigin(name);
+                setSubmitted({ origin: name, destination: destination.trim() });
+              }}
               onChooseOrigin={(profileId) => {
                 const profile = walk?.profiles.find((item) => item.id === profileId);
                 if (!profile?.stationName) return;
@@ -298,7 +302,7 @@ function MapLegend({ legs }: { legs: readonly MapLeg[] }) {
   if (entries.length === 0 && !hasTransfer) return null;
 
   return (
-    <div className="pointer-events-none absolute inset-x-0 bottom-0 z-10 flex flex-wrap items-center gap-x-4 gap-y-1 border-t border-line bg-surface/85 px-4 py-2 text-[11px] text-ink-2 backdrop-blur">
+    <div className="pointer-events-none absolute inset-x-0 bottom-0 z-10 flex flex-wrap items-center gap-x-4 gap-y-1 border-t border-line bg-surface/85 px-4 py-2 text-[12px] text-ink-2 backdrop-blur">
       {entries.map((entry) => (
         <span key={entry.color} className="flex min-w-0 items-center gap-2">
           <span

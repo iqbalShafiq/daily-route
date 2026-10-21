@@ -3,7 +3,7 @@ import { ArrowRightLeft, LocateFixed, Navigation, Route as RouteIcon } from "luc
 import { Button } from "../../components/ui/button.js";
 import { Card, CardHeader } from "../../components/ui/card.js";
 import { EmptyState, Spinner } from "../../components/ui/feedback.js";
-import { Tab, Tabs } from "../../components/ui/tabs.js";
+import { cn } from "../../lib/cn.js";
 import { DisruptionBanner } from "../../components/transit/disruption-banner.js";
 import { LegList } from "../../components/transit/leg-list.js";
 import type { Itinerary, PlanResult, PositionPlan } from "../../lib/api.js";
@@ -45,6 +45,7 @@ export function RoutePlanner({
   onStopHover,
   onUseMyPosition,
   onChooseOrigin,
+  onExample,
   walk,
 }: {
   origin: string;
@@ -65,6 +66,8 @@ export function RoutePlanner({
   walk?: PositionPlan | null | undefined;
   /** Choose a different start: the fewest transfers, or the least walking. */
   onChooseOrigin?: ((profileId: string) => void) | undefined;
+  /** Put an example place into the origin field. */
+  onExample?: ((name: string) => void) | undefined;
 }) {
   const data: PlanResult | undefined = plan.data;
   const itineraries = data?.itineraries ?? [];
@@ -75,16 +78,7 @@ export function RoutePlanner({
   return (
     <div className="flex flex-col gap-4">
       <Card>
-        <CardHeader
-          title="Cari rute"
-          description="Transjakarta, MRT, LRT Jakarta, LRT Jabodebek, dan KRL."
-        />
-
-        {walk !== undefined ? (
-          <div className="px-4 pb-3">
-            <WalkPanel plan={walk ?? null} onChoose={onChooseOrigin} />
-          </div>
-        ) : null}
+        <CardHeader title="Cari rute" />
 
         <form
           onSubmit={(event) => {
@@ -105,7 +99,7 @@ export function RoutePlanner({
                 aria-label="Gunakan posisi saya"
                 title="Gunakan posisi saya"
                 onClick={onUseMyPosition}
-                className="flex size-7 cursor-pointer items-center justify-center rounded-md text-ink-3 transition-colors hover:bg-surface-2 hover:text-ink"
+                className="flex size-8 max-md:size-11 cursor-pointer items-center justify-center rounded-md text-ink-3 transition-colors hover:bg-surface-2 hover:text-ink"
               >
                 <LocateFixed aria-hidden className="size-4" />
               </button>
@@ -142,6 +136,12 @@ export function RoutePlanner({
             Tampilkan rute
           </Button>
         </form>
+
+        {walk !== undefined ? (
+          <div className="px-4 pb-4">
+            <WalkPanel plan={walk ?? null} onChoose={onChooseOrigin} />
+          </div>
+        ) : null}
       </Card>
 
       {plan.isFetching && !data ? (
@@ -156,7 +156,12 @@ export function RoutePlanner({
         <Card>
           <EmptyState
             title="Rute belum bisa dihitung"
-            description="Coba nama tempat yang lebih spesifik, misalnya halte terdekat dengan nama jalan."
+            description="Coba nama halte yang lebih spesifik, misalnya Halte Bundaran HI."
+            action={
+              <Button type="button" variant="secondary" onClick={() => onExample?.("Bundaran HI")}>
+                Pakai Halte Bundaran HI
+              </Button>
+            }
           />
         </Card>
       ) : null}
@@ -165,8 +170,17 @@ export function RoutePlanner({
         <Card>
           <EmptyState
             icon={<RouteIcon aria-hidden className="size-5" />}
-            title="Tidak ada rute terhubung"
+            title="Tidak ada perjalanan yang terhubung"
             description={`Tidak ditemukan perjalanan antara ${data.origin.name} dan ${data.destination.name}. Coba tempat yang lebih umum, seperti halte interchange.`}
+            action={
+              <Button
+                type="button"
+                variant="secondary"
+                onClick={() => onExample?.(data.destination.name)}
+              >
+                Coba lagi dari {data.destination.name}
+              </Button>
+            }
           />
         </Card>
       ) : null}
@@ -181,27 +195,57 @@ export function RoutePlanner({
             </div>
           ) : null}
 
+          {/*
+           * The ways of getting there.
+           *
+           * A row of tabs hides the comparison: the rider sees three
+           * names and no difference. A list shows what each way costs
+           * and what it buys, the way a list of routes does in every map
+           * worth using.
+           */}
           {routes.length > 1 ? (
-            <Tabs
-              value={String(activeIndex)}
-              onValueChange={(value) => onActiveIndexChange(Number(value))}
-            >
-              <Tab value="0" title="Rute tercepat">
-                Tercepat
-              </Tab>
-              {routes.slice(1).map((route, index) => {
-                const label = labelOfRoute(route, routes);
+            <ul className="flex flex-col gap-1">
+              {routes.slice(0, 3).map((route, index) => {
+                const label = labelOfRoute(route, routes, index);
+                const chosen = index === activeIndex;
                 return (
-                  <Tab key={index + 1} value={String(index + 1)} title={label.title}>
-                    {label.short}
-                  </Tab>
+                  <li key={index}>
+                    <button
+                      type="button"
+                      onClick={() => onActiveIndexChange(index)}
+                      aria-current={chosen ? "true" : undefined}
+                      className={cn(
+                        "flex w-full cursor-pointer items-baseline gap-2 rounded-md px-3 py-2 text-left transition-colors",
+                        chosen ? "bg-accent-soft" : "hover:bg-surface-2",
+                      )}
+                    >
+                      <span
+                        className={cn(
+                          "shrink-0 text-[13px]",
+                          chosen ? "font-semibold text-ink" : "font-medium text-ink-2",
+                        )}
+                      >
+                        {label.name}
+                      </span>
+                      <span className="min-w-0 flex-1 truncate text-[12px] text-ink-3">
+                        {label.detail}
+                      </span>
+                      <span className="shrink-0 tabular-nums text-[12px] text-ink-2">
+                        {formatDuration(route.durationMinutes)}
+                      </span>
+                    </button>
+                  </li>
                 );
               })}
-            </Tabs>
+            </ul>
           ) : null}
 
           {current ? (
-            <Card className="relative overflow-hidden">
+            <Card
+              className="relative overflow-hidden"
+              aria-live="polite"
+              aria-busy={plan.isFetching}
+            >
               {plan.isPending ? (
                 <span
                   aria-hidden
@@ -209,7 +253,10 @@ export function RoutePlanner({
                 />
               ) : null}
               <div className="px-4 pt-4 pb-3">
-                <p className="text-[11px] uppercase tracking-[0.08em] text-ink-3">
+                <p className="text-[12px] font-semibold uppercase tracking-[0.04em] text-ink-3">
+                  Perjalanan
+                </p>
+                <p className="mt-0.5 truncate text-[13px] text-ink-2">
                   {data.origin.name} → {data.destination.name}
                 </p>
                 <p className="mt-1 text-[40px] leading-[1.05] font-semibold tracking-[-0.03em] tabular-nums text-ink">
@@ -230,14 +277,14 @@ export function RoutePlanner({
                   onStopHover={onStopHover}
                 />
               </div>
-              <p className="border-t border-line px-4 py-2 text-[11px] text-ink-3">
-                Data per {formatTimestamp(data.computedAt)}
+              <p className="border-t border-line px-4 py-2 text-[12px] text-ink-3">
+                Terakhir dihitung {formatTimestamp(data.computedAt)} WIB
               </p>
               {current.fare.available && current.fare.label ? (
                 <div className="border-t border-line px-4 py-3">
                   <div className="flex items-baseline justify-between gap-3">
-                    <span className="text-[13px] text-ink-2">Perkiraan tarif</span>
-                    <span className="text-sm font-semibold tabular-nums text-ink">
+                    <span className="text-[13px] text-ink-2">Tarif</span>
+                    <span className="text-[13px] font-semibold tabular-nums text-ink">
                       {current.fare.label}
                     </span>
                   </div>
@@ -274,21 +321,37 @@ export function RoutePlanner({
  * "Alternatif 1" tells the rider nothing. The corridors it uses do, and
  * the difference in time says whether the change is worth it.
  */
-function labelOfRoute(route: Itinerary, all: readonly Itinerary[]): { short: string; title: string } {
+function labelOfRoute(
+  route: Itinerary,
+  all: readonly Itinerary[],
+  index: number,
+): { name: string; detail: string } {
   const codes = route.legs
     .filter((leg) => leg.kind === "ride" && leg.lineCode)
     .map((leg) => leg.lineCode as string);
   const unique = [...new Set(codes)];
 
   const fastest = Math.min(...all.map((entry) => entry.durationMinutes));
+  const fewestTransfers = Math.min(...all.map((entry) => entry.transferCount));
   const difference = route.durationMinutes - fastest;
-  const differenceLabel =
-    difference > 0 ? ` · +${difference} mnt` : difference < 0 ? " · paling cepat" : "";
 
-  const title = `${unique.join(" + ")}${differenceLabel}`;
+  // The name says what the way optimises, the detail says what it
+  // costs. A rider compares the two, and picks.
+  const leastWalking = Math.min(...all.map((entry) => entry.walkingKm));
 
-  return {
-    short: unique.length > 0 ? unique.slice(0, 2).join(" · ") : `Alternatif`,
-    title,
-  };
+  let name = "Rekomendasi";
+  if (index === 0) name = "Tercepat";
+  else if (route.transferCount === fewestTransfers) name = "Paling sedikit pindah";
+  else if (route.walkingKm === leastWalking) name = "Paling sedikit jalan kaki";
+
+  const parts: string[] = [];
+  if (difference > 0) parts.push(`+${difference} mnt`);
+  if (route.transferCount > fewestTransfers) {
+    parts.push(`${route.transferCount - fewestTransfers} pindah lebih banyak`);
+  }
+  if (parts.length === 0 && index === 0 && unique.length > 0) {
+    parts.push(unique.slice(0, 2).join(" · "));
+  }
+
+  return { name, detail: parts.join(" · ") };
 }

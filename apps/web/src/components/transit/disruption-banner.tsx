@@ -36,15 +36,15 @@ export function DisruptionBanner({
   }[tone];
 
   return (
-    <div className={cn("rounded-xl border px-3 py-2.5", toneClasses, className)}>
-      <div className="flex items-start gap-2.5">
+    <div className={cn("rounded-xl border px-3 py-3", toneClasses, className)}>
+      <div className="flex items-start gap-3">
         <TriangleAlert aria-hidden className="mt-0.5 size-4 shrink-0" />
         <div className="min-w-0 flex-1">
-          <p className="text-[13px] font-semibold leading-snug">{disruption.title}</p>
+          <p className="text-[13px] font-semibold leading-[1.3]">{disruption.title}</p>
           {disruption.body ? (
-            <p className="mt-0.5 text-[12px] leading-relaxed opacity-90">{disruption.body}</p>
+            <p className="mt-0.5 text-[12px] leading-[1.5] opacity-90">{disruption.body}</p>
           ) : null}
-          <p className="mt-1 flex flex-wrap items-center gap-x-2 gap-y-0.5 text-[11px] opacity-80">
+          <p className="mt-1 flex flex-wrap items-center gap-x-2 gap-y-0.5 text-[12px] opacity-80">
             <span>{DISRUPTION_KIND_LABEL[disruption.kind] ?? disruption.kind}</span>
             <span aria-hidden>·</span>
             <span>{SEVERITY_LABEL[disruption.severity] ?? disruption.severity}</span>

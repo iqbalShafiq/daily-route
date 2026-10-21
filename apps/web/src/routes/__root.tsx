@@ -25,7 +25,7 @@ export function RootLayout() {
 
   return (
     <div className="flex h-dvh min-h-0 flex-col bg-bg">
-      <header className="flex shrink-0 items-center gap-3 border-b border-line bg-surface px-4 py-2.5">
+      <header className="flex shrink-0 items-center gap-3 border-b border-line bg-surface px-4 py-3">
         <span className="flex size-8 items-center justify-center rounded-lg bg-accent text-accent-ink">
           <TrainFront aria-hidden className="size-4.5" />
         </span>
@@ -33,14 +33,14 @@ export function RootLayout() {
           <p className="truncate text-[15px] font-semibold tracking-[-0.02em] text-ink">
             Daily Route
           </p>
-          <p className="truncate text-[11px] text-ink-3">
+          <p className="truncate text-[12px] text-ink-3">
             Rute Transjakarta, MRT, LRT, dan KRL Jabodetabek
           </p>
         </div>
 
         <div className="ml-auto flex items-center gap-2">
           <span
-            className="hidden items-center gap-1.5 rounded-md bg-surface-2 px-2 py-1 text-[11px] text-ink-2 sm:inline-flex"
+            className="hidden items-center gap-2 rounded-md bg-surface-2 px-2 py-1 text-[12px] text-ink-2 sm:inline-flex"
             title={health.data?.agent ? `Model: ${health.data.model}` : "Model belum dikonfigurasi"}
           >
             <span

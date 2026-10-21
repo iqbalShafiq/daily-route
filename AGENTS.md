@@ -151,6 +151,13 @@ Read `DESIGN.md` before touching the interface. The short version:
   and no `postcss.config.js`.
 - Colours come from the tokens in `apps/web/src/styles.css`. Never write a
   hex value in a component.
+- The type scale is 40, 28, 20, 16, 15, 13 and 12 pixels, and 12 pixels
+  is the floor. `research/tools/ux-visual/typography_check.py` reads the
+  source and must report nothing: no size outside the scale, no colour
+  outside the tokens, no wording that breaks the rules in `DESIGN.md`.
+- The words follow the operators: a bus stops at a halte, a train at a
+  stasiun; a journey is a "perjalanan"; a fare is a "tarif"; the time is
+  written "10.14 WIB" and rupiah is written "Rp5.000".
 - Icons are `lucide-react`, one icon per meaning, with a tooltip on every
   icon-only control.
 - Layout is CSS Grid. No percentage flexbox arithmetic.

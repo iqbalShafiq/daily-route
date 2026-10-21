@@ -25,7 +25,7 @@ test.describe("route planner", () => {
     await page.getByRole("button", { name: "Tampilkan rute" }).click();
 
     // The itinerary arrives with a duration and at least one leg.
-    await expect(page.getByText("Perkiraan tarif")).toBeVisible({ timeout: 30_000 });
+    await expect(page.getByText("Tarif")).toBeVisible({ timeout: 30_000 });
     await expect(page.getByText(/Kelapa Gading/i).first()).toBeVisible();
 
     // The route is drawn on the map.
@@ -40,7 +40,7 @@ test.describe("route planner", () => {
     await page.keyboard.press("Escape");
     await page.getByRole("button", { name: "Tampilkan rute" }).click();
 
-    await expect(page.getByText("Perkiraan tarif")).toBeVisible({ timeout: 30_000 });
+    await expect(page.getByText("Tarif")).toBeVisible({ timeout: 30_000 });
 
     // The journey is stated first, and the rest follows it: how far it
     // is and how many changes of vehicle it takes.
@@ -105,7 +105,7 @@ test.describe("route planner", () => {
     await page.keyboard.press("Escape");
     await page.getByRole("button", { name: "Tampilkan rute" }).click();
 
-    await expect(page.getByText("Perkiraan tarif")).toBeVisible({ timeout: 30_000 });
+    await expect(page.getByText("Tarif")).toBeVisible({ timeout: 30_000 });
 
     // The legend lists the vehicles the journey uses, so the colours of
     // the map are explained.

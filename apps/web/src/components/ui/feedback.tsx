@@ -47,7 +47,7 @@ export function EmptyState({
       <div className="max-w-sm space-y-1">
         <p className="text-[15px] font-semibold text-ink">{title}</p>
         {description ? (
-          <p className="text-[13px] leading-relaxed text-ink-3">{description}</p>
+          <p className="text-[13px] leading-[1.5] text-ink-3">{description}</p>
         ) : null}
       </div>
       {action}

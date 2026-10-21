@@ -26,7 +26,7 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(function Input(
   const describedBy = hint ? `${inputId}-hint` : undefined;
 
   return (
-    <div className="flex flex-col gap-1.5">
+    <div className="flex flex-col gap-2">
       <label htmlFor={inputId} className="text-[12px] font-medium tracking-[0.01em] text-ink-3">
         {label}
       </label>
@@ -53,7 +53,7 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(function Input(
         {trailing ? <span className="shrink-0">{trailing}</span> : null}
       </div>
       {hint ? (
-        <p id={describedBy} className="text-[12px] leading-relaxed text-ink-3">
+        <p id={describedBy} className="text-[12px] leading-[1.5] text-ink-3">
           {hint}
         </p>
       ) : null}

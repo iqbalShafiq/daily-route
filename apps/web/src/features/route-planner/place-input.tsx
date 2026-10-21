@@ -253,7 +253,7 @@ export function PlaceInput({
             // On a phone the list becomes a sheet at the bottom of the
             // screen: the keyboard covers half of it, and a dropdown
             // under the field would be covered with it.
-            "absolute inset-x-0 top-full z-30 mt-1.5 max-h-72 overflow-y-auto overscroll-contain",
+            "absolute inset-x-0 top-full z-30 mt-2 max-h-72 overflow-y-auto overscroll-contain",
             "rounded-xl border border-line bg-surface shadow-pop",
             "max-md:fixed max-md:inset-x-0 max-md:top-auto max-md:bottom-0 max-md:mt-0",
             "max-md:max-h-[60dvh] max-md:rounded-b-none max-md:rounded-t-2xl max-md:border-x-0 max-md:border-b-0",
@@ -294,13 +294,13 @@ export function PlaceInput({
                   tabIndex={-1}
                   onMouseEnter={() => setHighlight(index)}
                   onClick={() => choose(suggestion)}
-                  className="flex w-full cursor-pointer items-center gap-2.5 px-3 py-2.5 text-left transition-colors"
+                  className="flex w-full cursor-pointer items-center gap-3 px-3 py-3 text-left transition-colors"
                 >
                   <MapPin aria-hidden className="size-3.5 shrink-0 text-ink-3" />
                   <span className="min-w-0 flex-1">
                     <span
                       className={cn(
-                        "block truncate text-[14px]",
+                        "block truncate text-[15px]",
                         confident ? "font-semibold text-ink" : "text-ink-2",
                       )}
                     >
@@ -309,7 +309,7 @@ export function PlaceInput({
                         ranges={suggestion.matchedRanges ?? []}
                       />
                     </span>
-                    <span className="flex items-center gap-1.5 text-[11px] text-ink-3">
+                    <span className="flex items-center gap-2 text-[12px] text-ink-3">
                       <span>{suggestion.systemName ?? suggestion.systemId}</span>
                       {suggestion.lineCount ? (
                         <span>· {suggestion.lineCount} garis</span>
@@ -318,14 +318,14 @@ export function PlaceInput({
                         <span className="truncate">· {suggestion.street}</span>
                       ) : null}
                       {!confident ? (
-                        <span className="rounded bg-surface-3 px-1.5 py-px text-[10px]">
+                        <span className="rounded bg-surface-3 px-2 py-px text-[12px]">
                           kurang yakin
                         </span>
                       ) : null}
                     </span>
                   </span>
                   {suggestion.isInterchange ? (
-                    <span className="shrink-0 rounded bg-surface-3 px-1.5 py-0.5 text-[10px] text-ink-3">
+                    <span className="shrink-0 rounded bg-surface-3 px-2 py-0.5 text-[12px] text-ink-3">
                       Transit
                     </span>
                   ) : null}

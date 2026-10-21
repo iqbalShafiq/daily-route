@@ -307,13 +307,14 @@ function resolveColor(value: string, fallback: string): string {
 /** The colours the map paints with, read from the theme tokens. */
 function themeColors() {
   return {
-    origin: resolveColor("var(--accent)", "#0b6b4f"),
-    destination: resolveColor("var(--ink)", "#17150f"),
-    stop: resolveColor("var(--ink-2, var(--ink))", "#4b4a44"),
-    transfer: resolveColor("var(--warn)", "#a85b00"),
-    casing: resolveColor("var(--surface)", "#ffffff"),
-    halo: resolveColor("var(--map-halo)", "rgb(23 21 15 / 0.14)"),
-    alternative: resolveColor("var(--warn)", "#a85b00"),
+    origin: resolveColor("var(--accent)", "var(--accent)"),
+    destination: resolveColor("var(--ink)", "var(--ink)"),
+    stop: resolveColor("var(--ink-2)", "var(--ink-2)"),
+    transfer: resolveColor("var(--warn)", "var(--warn)"),
+    casing: resolveColor("var(--surface)", "var(--surface)"),
+    halo: resolveColor("var(--map-halo)", "var(--map-halo)"),
+    alternative: resolveColor("var(--warn)", "var(--warn)"),
+    onColour: resolveColor("var(--accent-ink)", "var(--accent-ink)"),
   };
 }
 
@@ -491,10 +492,10 @@ function addMarkerLayers(map: MapLibreMap): void {
         "match",
         ["get", "kind"],
         "origin",
-        "#ffffff",
+        colors.onColour,
         "destination",
-        "#ffffff",
-        "#a85b00",
+        colors.onColour,
+        colors.transfer,
       ],
     },
   });

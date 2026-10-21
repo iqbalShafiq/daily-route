@@ -98,14 +98,54 @@ typeface the city commissioned for its own identity: it is unmistakable,
 locally right, and drawn for Latin script at the small sizes a transit
 application lives at.
 
-- Display and headings: `tracking-[-0.02em]`, weight 600.
-- Body: 15 px on desktop inputs, 13–14 px in dense lists.
-- Labels: 12 px, weight 500, `ink-3`, always above the field.
+The scale has seven steps, and nothing sits between them: **40, 28, 20,
+16, 15, 13, 12**. A fourteenth pixel would stand too close to the
+fifteenth to be a level of hierarchy of its own, so it is not in the
+scale.
+
+| Step | Use |
+| --- | --- |
+| 40 px | The duration of the journey. The only large number on the screen. |
+| 28 px | A page title. |
+| 20 px | A section title. |
+| 16 px | A card title. |
+| 15 px | A name in a list: a stop, a route. |
+| 13 px | Body text, and the text of a button. |
+| 12 px | Metadata, labels, codes. The floor: nothing is ever smaller. |
+
+- Display and headings: `tracking-[-0.03em]` to `tracking-[-0.01em]`.
+- Labels: 12 px, weight 500, `ink-3`. Uppercase only for an eyebrow and
+  for a line code, never for the name of a place: a name is a name.
 - Numbers: tabular (`tabular-nums`) so a column of durations lines up.
 - Monospace: station codes, line codes and anything the rider may read out
   loud or type into a search box.
 
 Headings use `text-wrap: balance`, paragraphs use `text-wrap: pretty`.
+
+The whole interface is checked by
+`research/tools/ux-visual/typography_check.py`, which reads the source and
+reports any size outside the scale, any colour written as a hex value in
+a component, and any wording that breaks the rules below. It must report
+nothing.
+
+### The words
+
+The language is Indonesian, and it is the language of the operators.
+
+- A **bus** stops at a **halte**; a **train** stops at a **stasiun**. The
+  word follows the vehicle: Transjakarta says "Halte BRT Senen", LRT
+  Jakarta says "Stasiun Velodrome".
+- A **journey** is a "perjalanan", not a "rute terhubung".
+- A **fare** is a "tarif", not an "perkiraan tarif": the amounts are
+  published.
+- The time is written with a dot, as the Indonesian rules of punctuation
+  say: "10.14 WIB", not "10:14".
+- Rupiah has no space: "Rp5.000".
+- A waiting time is an estimate of the headway, so it says so: "tunggu 5
+  mnt", never "±5 mnt".
+- There is no marketing copy, no exclamation mark and no emoji.
+
+The rules and their sources are in `research/ux-transit-craft.md`.
 
 ## Spacing, radius and elevation
 

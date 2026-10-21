@@ -60,6 +60,8 @@
    * popover, the sheet, the map controls.
    */
   --shadow-pop: 0 2px 6px rgb(23 21 15 / 0.08), 0 18px 48px -18px rgb(23 21 15 / 0.3);
+  /* A shadow is the colour of the ink, never of black. */
+  --shadow-raised: 0 1px 2px rgb(23 21 15 / 0.12);
 
   --radius-card: 14px;
 
@@ -99,6 +101,7 @@
   --mode-rail: #a78bfa;
 
   --shadow-pop: 0 2px 6px rgb(0 0 0 / 0.45), 0 18px 48px -18px rgb(0 0 0 / 0.8);
+  --shadow-raised: 0 1px 2px rgb(0 0 0 / 0.45);
 
   --map-halo: rgb(255 255 255 / 0.12);
 }
@@ -137,6 +140,7 @@
 
   --radius-card: var(--radius-card);
   --shadow-pop: var(--shadow-pop);
+  --shadow-raised: var(--shadow-raised);
 }
 
 @layer base {

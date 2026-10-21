@@ -46,12 +46,12 @@ export function WalkPanel({
 
   return (
     <div className={cn("px-4 pb-3", className)}>
-      <p className="flex items-center gap-1.5 text-[11px] uppercase tracking-[0.08em] text-ink-3">
+      <p className="flex items-center gap-2 text-[12px] uppercase tracking-[0.08em] text-ink-3">
         <Footprints aria-hidden className="size-3.5" />
         Mulai dari
       </p>
 
-      <ul className="mt-1.5 space-y-1">
+      <ul className="mt-2 space-y-1">
         {plan.profiles.map((profile) => {
           const chosen = profile.id === "fastest";
           return (
@@ -60,7 +60,7 @@ export function WalkPanel({
                 type="button"
                 onClick={() => onChoose?.(profile.id)}
                 className={cn(
-                  "flex w-full cursor-pointer items-baseline gap-2 rounded-md px-2 py-1.5 text-left transition-colors",
+                  "flex w-full cursor-pointer items-baseline gap-2 rounded-md px-2 py-2 text-left transition-colors",
                   chosen ? "bg-accent-soft" : "hover:bg-surface-2",
                 )}
               >
@@ -78,7 +78,7 @@ export function WalkPanel({
                 <span className="shrink-0 tabular-nums text-[12px] text-ink-2">
                   {profile.totalMinutes ?? "-"} mnt
                 </span>
-                <span className="shrink-0 tabular-nums text-[11px] text-ink-3">
+                <span className="shrink-0 tabular-nums text-[12px] text-ink-3">
                   {profile.transferCount ?? 0}×
                 </span>
               </button>

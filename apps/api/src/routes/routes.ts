@@ -33,6 +33,43 @@ const planSchema = z.object({
   limit: z.coerce.number().int().min(1).max(5).default(3),
 });
 
+/**
+ * The legs of a journey, in the shape the interface reads.
+ *
+ * The alternative routes are read exactly like the main one, so they
+ * carry the same fields: the stops, the mode, the class of service.
+ * A route that is shown but cannot be examined is not an alternative.
+ */
+function legsOf(itinerary: Itinerary) {
+  return itinerary.legs.map((leg) => ({
+    kind: leg.kind,
+    mode: leg.mode,
+    lineId: leg.lineId,
+    lineName: leg.lineName,
+    lineCode: leg.lineCode,
+    serviceClass: leg.serviceClass,
+    fromStationId: leg.fromStationId,
+    toStationId: leg.toStationId,
+    fromName: leg.fromName,
+    toName: leg.toName,
+    durationMinutes: leg.durationMinutes,
+    distanceKm: Number(leg.distanceKm.toFixed(2)),
+    walkReason: leg.walkReason,
+    nextLineName: leg.nextLineName,
+    waitMinutes: leg.waitMinutes,
+    changedFrom: leg.changedFrom,
+    changedAt: leg.changedAt,
+    // The path of this leg, so the map can draw it in its own colour.
+    geometry: leg.coordinates,
+    stops: leg.stops.map((stop) => ({
+      stationId: stop.stationId,
+      name: stop.name,
+      latitude: stop.latitude,
+      longitude: stop.longitude,
+    })),
+  }));
+}
+
 export function createRoutesRouter(deps: ApiDeps): Router {
   const router = Router();
 
@@ -114,33 +151,7 @@ export function createRoutesRouter(deps: ApiDeps): Router {
         cost: itinerary.cost,
         lines: linesUsedBy(itinerary),
         fare: fareOf(itinerary, fareRules, quotedAt),
-        legs: itinerary.legs.map((leg) => ({
-          kind: leg.kind,
-          mode: leg.mode,
-          lineId: leg.lineId,
-          lineName: leg.lineName,
-          lineCode: leg.lineCode,
-          serviceClass: leg.serviceClass,
-          fromStationId: leg.fromStationId,
-          toStationId: leg.toStationId,
-          fromName: leg.fromName,
-          toName: leg.toName,
-          durationMinutes: leg.durationMinutes,
-          distanceKm: Number(leg.distanceKm.toFixed(2)),
-          walkReason: leg.walkReason,
-          nextLineName: leg.nextLineName,
-          waitMinutes: leg.waitMinutes,
-          changedFrom: leg.changedFrom,
-          changedAt: leg.changedAt,
-          // The path of this leg, so the map can draw it in its own colour.
-          geometry: leg.coordinates,
-          stops: leg.stops.map((stop) => ({
-            stationId: stop.stationId,
-            name: stop.name,
-            latitude: stop.latitude,
-            longitude: stop.longitude,
-          })),
-        })),
+        legs: legsOf(itinerary),
         geometry: itinerary.coordinates,
       })),
       alternatives: alternatives.map((itinerary) => ({
@@ -152,14 +163,7 @@ export function createRoutesRouter(deps: ApiDeps): Router {
         lines: linesUsedBy(itinerary),
         fare: fareOf(itinerary, fareRules, quotedAt),
         geometry: itinerary.coordinates,
-        legs: itinerary.legs.map((leg) => ({
-          kind: leg.kind,
-          lineId: leg.lineId,
-          lineName: leg.lineName,
-          fromName: leg.fromName,
-          toName: leg.toName,
-          durationMinutes: leg.durationMinutes,
-        })),
+        legs: legsOf(itinerary),
       })),
       disruptions: matches.map((match) => summarize(match.disruption, match.impact)),
       computedAt: new Date().toISOString(),

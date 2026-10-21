@@ -97,6 +97,18 @@ export const SERVICE_CLASS_COLOR: Record<ServiceClass, string> = {
 };
 
 /**
+ * The word for the place a vehicle stops at.
+ *
+ * A bus stops at a halte, a train at a stasiun. The operators write it
+ * that way themselves: Transjakarta says "Halte BRT Senen", LRT Jakarta
+ * says "Stasiun Velodrome". The law says the same: a halte is where a
+ * motor vehicle lets passengers get off.
+ */
+export function stopNoun(mode: string | null | undefined): "halte" | "stasiun" {
+  return mode === "metro" || mode === "tram" || mode === "rail" ? "stasiun" : "halte";
+}
+
+/**
  * The time of a moment, as a rider would read it: "21 Okt 2026, 10.14".
  */
 export function formatTimestamp(iso: string | undefined): string {
@@ -113,8 +125,7 @@ export function formatTimestamp(iso: string | undefined): string {
     hour12: false,
   })
     .format(date)
-    .replace(" pukul ", "")
-    .replace(".", ":");
+    .replace(" pukul ", "");
 }
 
 /** `95` becomes "1 jam 35 mnt"; `8` becomes "8 mnt". */
