@@ -428,7 +428,10 @@ export function mergeNetwork(options: MergeOptions): TransitNetworkFile {
         lineId,
         direction: "forward",
         polyline: primary.polyline,
-        stops: forward,
+        // The offsets are read by position, and the positions come from
+        // the ordered stops. The stops of the relation are not in that
+        // order, so the geometry has to be built from the same list.
+        stops: ordered,
       });
       const backwardGeometry = buildLineGeometry({
         lineId,

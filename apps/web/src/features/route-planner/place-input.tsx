@@ -30,11 +30,13 @@ const MINIMUM_QUERY_LENGTH = 2;
 const MAXIMUM_RESULTS = 6;
 
 /**
- * The score above which a match is strong enough to plan a route to.
+ * The list of suggestions.
  *
- * Below it the suggestion is still shown, but it is marked as uncertain.
+ * The best match stands first and the part of the name that matched is
+ * marked. Nothing else is said about the match: a rider reads a name,
+ * not a score, and a badge that says "less sure" is a guess about how
+ * the reader feels.
  */
-const CONFIDENT_SCORE = 0.3;
 
 /** How many options the page keys move at once. */
 const PAGE_SIZE = 5;
@@ -289,7 +291,6 @@ export function PlaceInput({
           ) : null}
 
           {results.map((suggestion, index) => {
-            const confident = (suggestion.score ?? 0) >= CONFIDENT_SCORE;
             return (
               <li
                 key={suggestion.id}
@@ -308,29 +309,24 @@ export function PlaceInput({
                 >
                   <MapPin aria-hidden className="size-3.5 shrink-0 text-ink-3" />
                   <span className="min-w-0 flex-1">
-                    <span
-                      className={cn(
-                        "block truncate text-[15px]",
-                        confident ? "font-semibold text-ink" : "text-ink-2",
-                      )}
-                    >
+                    <span className="block truncate text-[15px] text-ink">
                       <Highlighted
                         text={suggestion.name}
                         ranges={suggestion.matchedRanges ?? []}
                       />
                     </span>
-                    <span className="flex items-center gap-2 text-[12px] text-ink-3">
-                      <span>{suggestion.systemName ?? suggestion.systemId}</span>
+                    {/*
+                     * One line, and it is cut at the end. The road
+                     * the place stands on is the last thing said
+                     * about it, so it is the first thing to go.
+                     */}
+                    <span className="flex items-center gap-2 overflow-hidden whitespace-nowrap text-[12px] text-ink-3">
+                      <span className="shrink-0">{suggestion.systemName ?? suggestion.systemId}</span>
                       {suggestion.lineCount ? (
-                        <span>· {suggestion.lineCount} garis</span>
+                        <span className="shrink-0">· {suggestion.lineCount} garis</span>
                       ) : null}
                       {suggestion.street ? (
                         <span className="truncate">· {suggestion.street}</span>
-                      ) : null}
-                      {!confident ? (
-                        <span className="rounded bg-surface-3 px-2 py-px text-[12px]">
-                          kurang yakin
-                        </span>
                       ) : null}
                     </span>
                   </span>

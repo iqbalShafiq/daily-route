@@ -111,10 +111,14 @@ export function distanceToSegmentKm(
 }
 
 /**
- * The index of the point on the polyline that is closest to a coordinate.
+ * The index of the point of the polyline that is closest to a coordinate.
  *
- * The returned index is the index of the segment start, so slicing between
- * two stops keeps the segment that connects them.
+ * Unlike `nearestIndexOnPolyline`, which answers with the segment the
+ * coordinate falls in, this answers with the point itself. A stop stands
+ * on the road the vehicle travels, so the place where the line is cut
+ * has to be the point of the path nearest to the stop, not the point
+ * before it. Answering with the segment start shifts every cut one
+ * point backwards, and the leg that is drawn starts at the wrong stop.
  */
 export function nearestIndexOnPolyline(
   points: readonly Coordinate[],
@@ -132,6 +136,35 @@ export function nearestIndexOnPolyline(
     const end = points[index + 1];
     if (!start || !end) continue;
     const distance = distanceToSegmentKm(target, start, end, lonScale);
+    if (distance < bestDistance) {
+      bestDistance = distance;
+      bestIndex = index;
+    }
+  }
+
+  return bestIndex;
+}
+
+/**
+ * The index of the vertex of the polyline that is closest to a coordinate.
+ */
+export function closestVertexIndexOnPolyline(
+  points: readonly Coordinate[],
+  target: Coordinate,
+): number {
+  if (points.length === 0) return 0;
+  if (points.length === 1) return 0;
+
+  const lonScale = 111.32 * Math.cos((target.latitude * Math.PI) / 180);
+  let bestIndex = 0;
+  let bestDistance = Number.POSITIVE_INFINITY;
+
+  for (let index = 0; index < points.length; index += 1) {
+    const point = points[index];
+    if (!point) continue;
+    const dx = (point.longitude - target.longitude) * lonScale;
+    const dy = (point.latitude - target.latitude) * 110.574;
+    const distance = Math.hypot(dx, dy);
     if (distance < bestDistance) {
       bestDistance = distance;
       bestIndex = index;

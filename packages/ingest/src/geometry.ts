@@ -1,6 +1,7 @@
 import { haversineKm } from "@daily-route/transit";
 import {
   distanceToSegmentKm,
+  closestVertexIndexOnPolyline,
   nearestIndexOnPolyline,
   polylineLengthKm,
   toFlatCoordinates,
@@ -18,7 +19,12 @@ import {
  */
 
 export type { Coordinate, LineGeometry };
-export { nearestIndexOnPolyline, polylineLengthKm, toFlatCoordinates };
+export {
+  closestVertexIndexOnPolyline,
+  nearestIndexOnPolyline,
+  polylineLengthKm,
+  toFlatCoordinates,
+};
 
 /**
  * The distance below which two consecutive points are treated as one.
@@ -188,11 +194,18 @@ export function buildLineGeometry(input: {
     missesStops(simplified, input.stops) ? pathThroughStops(input.stops) : simplified;
   const coordinates = toFlatCoordinates(path);
 
-  // The offsets are made monotonic: a stop that lies off the path (a
-  // temporary terminus, for instance) is placed at the closest point the
-  // path offers, and never before the stop before it.
+  /*
+   * The offsets are made monotonic: a stop that lies off the path (a
+   * temporary terminus, for instance) is placed at the closest point the
+   * path offers, and never before the stop before it.
+   *
+   * The point itself is used, not the segment it falls in. The segment
+   * start is one point before the stop, and a leg cut with it starts at
+   * the stop before the one the rider boards at, and ends one point
+   * short of the stop the rider gets off at.
+   */
   const rawOffsets = input.stops.map((stop) =>
-    nearestIndexOnPolyline(path, { latitude: stop.latitude, longitude: stop.longitude }),
+    closestVertexIndexOnPolyline(path, { latitude: stop.latitude, longitude: stop.longitude }),
   );
   const stopOffsets: number[] = [];
   let previousOffset = 0;

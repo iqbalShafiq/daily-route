@@ -111,7 +111,7 @@ rute". Di daftar saran:
 | Skor | Perlakuan di UI |
 | --- | --- |
 | ≥ 0.30 | **Kecocokan kuat** — nama dicetak semibold, subjudul memakai `ink-2`; item ini boleh langsung dipakai untuk merencanakan rute |
-| 0.08 – 0.30 | Alternatif — nama regular, subjudul `ink-3`, ada label kecil "kurang yakin" |
+| 0.08 – 0.30 | Alternatif — nama seperti biasa, subjudul `ink-3` |
 | < 0.08 | Tidak ditampilkan (membuang noise) |
 
 Kalau **tidak ada** kandidat ≥ 0.08: keadaan "tidak ada saran", bukan daftar
@@ -445,7 +445,7 @@ terang maupun gelap dan tidak bergantung pada warna saja.
 | 12 | **Keyboard terkurung** | Fokus dipaksa masuk daftar | Tab harus keluar dari field; popup di luar urutan Tab (APG) |
 | 13 | **Halaman ikut ter-scroll** saat memakai panah | Tidak ada `scrollIntoView` | `scrollIntoView({ block: "nearest" })` saat opsi aktif berubah + `overscroll-contain` pada daftar |
 | 14 | **Pengguna harus menggulir untuk menemukan yang aktif** | Opsi aktif di luar pandangan | Sama seperti #13 |
-| 15 | **Angka skor ditampilkan mentah** | Skor internal bocor ke UI | Skor 0–1 tidak bermakna bagi penumpang; tampilkan label ("Kecocokan kuat" / "kurang yakin"), bukan angka |
+| 15 | **Angka skor ditampilkan mentah** | Skor internal bocor ke UI | Skor 0–1 tidak bermakna bagi penumpang; skor tidak ditampilkan sama sekali, hanya urutan dan bagian nama yang dicoret |
 
 ### Kesenjangan di kode sekarang (`apps/web/src/features/route-planner/place-input.tsx`)
 

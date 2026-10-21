@@ -381,8 +381,9 @@ are written down in `research/ux-search.md`; the short version:
   `Enter` takes the suggestion.
 - The part of the name that matched is marked, and only that part: the
   server reports the ranges it can point at, and the client marks them.
-- A match that is strong enough to plan a route to is printed in bold; a
-  weaker one is printed in the quieter colour and marked "kurang yakin".
+- The order of the list is the only thing that says which match is the
+  better one. A rider reads a name, not a score, so no badge says how
+  sure the list is about it.
 - On a phone the list is a sheet at the bottom of the screen, because the
   keyboard covers half of it.
 
