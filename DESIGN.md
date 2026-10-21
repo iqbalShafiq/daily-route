@@ -205,6 +205,9 @@ Base UI's tooltip, wrapped. Required for every icon-only control. Delay
 MapLibre GL JS with OpenFreeMap tiles: no key, no quota, no cookie, and
 the attribution is rendered by MapLibre as the licence requires.
 
+The rules of the interaction are written down in
+`research/ux-map-interaction.md`.
+
 - The light theme uses the `positron` style, the dark theme `dark`.
 - The main route is a 5 px line with a 9 px white casing, so it stays
   legible over any map background. It follows the real path of the
@@ -218,7 +221,39 @@ the attribution is rendered by MapLibre as the licence requires.
 - The theme is one context shared by the header and the page, so the
   switch in the header changes the map as well.
 - The legend sits at the bottom left in a translucent surface with a blur,
-  and it never intercepts a pointer.
+  and it never intercepts a pointer. It lists the vehicles the journey
+  uses, in the colour they are drawn in, plus the sign of a transfer.
+- Every stop of the journey is a point on the map. The two ends are filled
+  circles, a transfer is a ring, and the stops in between are small dots.
+- A point answers a pointer that rests on it with a popover: the name of
+  the place and the vehicle that serves it. Nothing else — a duration or a
+  fare belongs to the itinerary, not to the map.
+- Clicking a point moves the map to it: a straight, four-hundred
+  millisecond move that never zooms out. The movement is skipped when the
+  reader asked for less motion.
+- The area a point can be found with is bigger than the point itself: a
+  radius of 22 pixels, which is a target a finger can find.
+- The width of a line carries the mode as well as its colour, so the route
+  is readable for a reader who cannot tell the colours apart.
+
+## The place field
+
+The field offers the stations that match what is written in it. The rules
+are written down in `research/ux-search.md`; the short version:
+
+- The suggestions come after two characters and a pause of a quarter of a
+  second, never once per letter.
+- The list never reorders while it is being read. The order is computed
+  when the query changes and not again.
+- The focus never leaves the field. The active suggestion is pointed at
+  with `aria-activedescendant`, the arrow keys move through the list, and
+  `Enter` takes the suggestion.
+- The part of the name that matched is marked, and only that part: the
+  server reports the ranges it can point at, and the client marks them.
+- A match that is strong enough to plan a route to is printed in bold; a
+  weaker one is printed in the quieter colour and marked "kurang yakin".
+- On a phone the list is a sheet at the bottom of the screen, because the
+  keyboard covers half of it.
 
 ## Motion
 

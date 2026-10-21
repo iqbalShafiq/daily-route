@@ -60,8 +60,8 @@ function LegRow({ leg, last }: { leg: ItineraryLeg; last: boolean }) {
         {!last ? (
           <span
             aria-hidden
-            className="absolute top-9 bottom-[-12px] w-px"
-            style={{ backgroundColor: "var(--line-strong)" }}
+            className="absolute top-9 bottom-[-12px] w-0.5 rounded-full opacity-45"
+            style={{ backgroundColor: color }}
           />
         ) : null}
       </div>
@@ -112,6 +112,7 @@ function LegRow({ leg, last }: { leg: ItineraryLeg; last: boolean }) {
             <summary className="inline-flex cursor-pointer list-none items-center gap-1 text-[12px] text-ink-3 hover:text-ink-2">
               <ChevronSmall />
               {leg.stops.length} halte · {formatDistance(leg.distanceKm)}
+              {!isWalk && leg.waitMinutes > 0 ? ` · tunggu ±${leg.waitMinutes} mnt` : ""}
             </summary>
             <ol className="mt-1.5 space-y-1 border-l border-line pl-3">
               {leg.stops.slice(1, -1).map((stop) => (
@@ -125,7 +126,13 @@ function LegRow({ leg, last }: { leg: ItineraryLeg; last: boolean }) {
           <p className="mt-1 text-[12px] text-ink-3">
             {isWalk
               ? formatDistance(leg.distanceKm)
-              : `${leg.stops.length} halte · ${formatDistance(leg.distanceKm)}`}
+              : [
+                  `${leg.stops.length} halte`,
+                  formatDistance(leg.distanceKm),
+                  leg.waitMinutes > 0 ? `tunggu ±${leg.waitMinutes} mnt` : null,
+                ]
+                  .filter(Boolean)
+                  .join(" · ")}
           </p>
         )}
       </div>

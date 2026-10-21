@@ -6,12 +6,21 @@ import { EmptyState, Spinner } from "../../components/ui/feedback.js";
 import { Tab, Tabs } from "../../components/ui/tabs.js";
 import { DisruptionBanner } from "../../components/transit/disruption-banner.js";
 import { LegList } from "../../components/transit/leg-list.js";
-import type { PlanResult } from "../../lib/api.js";
+import type { Itinerary, PlanResult } from "../../lib/api.js";
 import { formatDistance, formatDuration } from "../../lib/format.js";
 
 import { PlaceInput } from "./place-input.js";
 import type { UsePlanResult } from "./use-plan.js";
 
+/**
+ * The route planner.
+ *
+ * It is the deterministic half of the product: two places in, an itinerary
+ * out, with the disruptions that affect it. The assistant in the chat tab
+ * is the conversational half of the same data.
+ *
+ * The state lives in the page, because the map draws the same route.
+ */
 /**
  * The route planner.
  *
@@ -143,12 +152,17 @@ export function RoutePlanner({
               value={String(activeIndex)}
               onValueChange={(value) => onActiveIndexChange(Number(value))}
             >
-              <Tab value="0">Tercepat</Tab>
-              {routes.slice(1).map((_route, index) => (
-                <Tab key={index + 1} value={String(index + 1)}>
-                  Alternatif {index + 1}
-                </Tab>
-              ))}
+              <Tab value="0" title="Rute tercepat">
+                Tercepat
+              </Tab>
+              {routes.slice(1).map((route, index) => {
+                const label = labelOfRoute(route, routes);
+                return (
+                  <Tab key={index + 1} value={String(index + 1)} title={label.title}>
+                    {label.short}
+                  </Tab>
+                );
+              })}
             </Tabs>
           ) : null}
 
@@ -200,4 +214,29 @@ export function RoutePlanner({
       ) : null}
     </div>
   );
+}
+
+/**
+ * How an alternative route is named.
+ *
+ * "Alternatif 1" tells the rider nothing. The corridors it uses do, and
+ * the difference in time says whether the change is worth it.
+ */
+function labelOfRoute(route: Itinerary, all: readonly Itinerary[]): { short: string; title: string } {
+  const codes = route.legs
+    .filter((leg) => leg.kind === "ride" && leg.lineCode)
+    .map((leg) => leg.lineCode as string);
+  const unique = [...new Set(codes)];
+
+  const fastest = Math.min(...all.map((entry) => entry.durationMinutes));
+  const difference = route.durationMinutes - fastest;
+  const differenceLabel =
+    difference > 0 ? ` · +${difference} mnt` : difference < 0 ? " · paling cepat" : "";
+
+  const title = `${unique.join(" + ")}${differenceLabel}`;
+
+  return {
+    short: unique.length > 0 ? unique.slice(0, 2).join(" · ") : `Alternatif`,
+    title,
+  };
 }

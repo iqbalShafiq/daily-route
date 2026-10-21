@@ -16,6 +16,8 @@ export type PlaceCandidate = {
   latitude: number;
   longitude: number;
   isInterchange: boolean;
+  /** How many lines serve the station. */
+  lineCount: number;
   aliases: string[];
   /** The blended score in `[0, 1]`. */
   score: number;
@@ -25,6 +27,14 @@ export type PlaceCandidate = {
     lexical: number;
     exact: number;
   };
+  /**
+   * The parts of the name that matched the query.
+   *
+   * They are character ranges in the name, not markup, so the client can
+   * mark them itself. A candidate that only matched by meaning has no
+   * ranges: the interface must not claim a match it cannot point at.
+   */
+  matchedRanges: { start: number; end: number }[];
 };
 
 export type ResolveOptions = {
@@ -103,6 +113,7 @@ export class PlaceResolver {
         latitude: stations.latitude,
         longitude: stations.longitude,
         isInterchange: stations.isInterchange,
+        lineCount: stations.lineCount,
         aliases: stations.aliases,
         lexical: sql<number>`GREATEST(
           similarity(${stations.searchText}, ${query}),
@@ -143,6 +154,7 @@ export class PlaceResolver {
             latitude: stations.latitude,
             longitude: stations.longitude,
             isInterchange: stations.isInterchange,
+            lineCount: stations.lineCount,
             aliases: stations.aliases,
             vector: sql<number>`1 - (${stationEmbeddings.embedding} <=> ${vectorLiteral}::vector)`,
           })
@@ -177,6 +189,7 @@ export class PlaceResolver {
         Number(lexicalRow?.lexical ?? 0),
         trigramDice(query, row.name),
         aliasScore,
+        lexicalTier(query, row.name, aliases),
       );
       const vector = clamp01(Number(vectorRow?.vector ?? 0));
       const exact = exactMatch(query, row.name, aliases) ? 1 : 0;
@@ -193,15 +206,28 @@ export class PlaceResolver {
         latitude: row.latitude,
         longitude: row.longitude,
         isInterchange: row.isInterchange,
+        lineCount: row.lineCount,
         aliases,
         score,
         signals: { vector, lexical, exact },
+        matchedRanges: matchedRangesOf(query, row.name),
       });
     }
 
     return candidates
       .filter((candidate) => candidate.score > 0.1)
-      .sort((a, b) => b.score - a.score)
+      .sort(
+        (a, b) =>
+          // The score decides. Between two places that answer equally well,
+          // the one a rider is more likely to mean comes first: a place
+          // that changes lines, and then the shorter name.
+          b.score - a.score ||
+          Number(b.isInterchange) - Number(a.isInterchange) ||
+          // Between two places that answer equally well, the one with
+          // more lines through it is the one the rider meant.
+          b.lineCount - a.lineCount ||
+          a.name.localeCompare(b.name, "id"),
+      )
       .slice(0, limit);
   }
 
@@ -228,6 +254,70 @@ function exactMatch(query: string, name: string, aliases: readonly string[]): bo
   if (key.length === 0) return false;
   if (canonicalKey(name) === key) return true;
   return aliases.some((alias) => canonicalKey(alias) === key);
+}
+
+/**
+ * The parts of the name that the query matched.
+ *
+ * Only the words of the query are looked for, and only in the name: a
+ * candidate that matched through an alias is marked by its name alone.
+ */
+function matchedRangesOf(query: string, name: string): { start: number; end: number }[] {
+  const words = query
+    .trim()
+    .toLowerCase()
+    .split(/\s+/)
+    .filter((word) => word.length > 1);
+  if (words.length === 0) return [];
+
+  const haystack = name.toLowerCase();
+  const ranges: { start: number; end: number }[] = [];
+
+  for (const word of words) {
+    let cursor = 0;
+    while (cursor < name.length) {
+      const found = haystack.indexOf(word, cursor);
+      if (found === -1) break;
+      ranges.push({ start: found, end: found + word.length });
+      cursor = found + word.length;
+    }
+  }
+
+  return ranges.sort((a, b) => a.start - b.start);
+}
+
+/**
+ * How strongly a name answers to the query.
+ *
+ * Trigrams measure resemblance, but a rider who types "bundaran" wants the
+ * stations whose name *starts* with that, not the ones that merely share
+ * letters with it. The three tiers say so:
+ *
+ * - the name is the query, or the query is the name: certain;
+ * - the name starts with the query: almost certain;
+ * - the query is a whole word of the name: likely.
+ */
+function lexicalTier(query: string, name: string, aliases: readonly string[]): number {
+  const key = canonicalKey(query);
+  if (key.length === 0) return 0;
+
+  const candidates = [name, ...aliases].map((candidate) => canonicalKey(candidate));
+  for (const candidate of candidates) {
+    if (candidate.length === 0) continue;
+    if (candidate === key) return 1;
+  }
+
+  for (const candidate of candidates) {
+    if (candidate.length === 0) continue;
+    if (candidate.startsWith(key)) return 0.85;
+  }
+
+  for (const candidate of candidates) {
+    if (candidate.length === 0) continue;
+    if (candidate.includes(` ${key} `) || candidate.startsWith(`${key} `)) return 0.6;
+  }
+
+  return 0;
 }
 
 function clamp01(value: number): number {

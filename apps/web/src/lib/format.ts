@@ -26,6 +26,20 @@ export const MODE_LABEL: Record<TransitMode, string> = {
   rail: "KRL",
 };
 
+/**
+ * The width of a line on the map, in pixels.
+ *
+ * The width carries the mode as well as the colour does, so the route
+ * stays readable for a reader who cannot tell the colours apart.
+ */
+export const MODE_WIDTH: Record<string, number> = {
+  bus: 4,
+  minibus: 4,
+  tram: 5,
+  metro: 6,
+  rail: 5,
+};
+
 /** The label for a service class, which is finer than the mode. */
 export const SERVICE_CLASS_LABEL: Record<ServiceClass, string> = {
   brt: "BRT",

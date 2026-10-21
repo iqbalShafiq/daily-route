@@ -132,6 +132,8 @@ export function createRoutesRouter(deps: ApiDeps): Router {
           waitMinutes: leg.waitMinutes,
           changedFrom: leg.changedFrom,
           changedAt: leg.changedAt,
+          // The path of this leg, so the map can draw it in its own colour.
+          geometry: leg.coordinates,
           stops: leg.stops.map((stop) => ({
             stationId: stop.stationId,
             name: stop.name,

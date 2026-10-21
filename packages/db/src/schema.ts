@@ -89,6 +89,13 @@ export const stations = pgTable(
     stationType: text("station_type").notNull().default("stop"),
     zone: text("zone"),
     isInterchange: boolean("is_interchange").notNull().default(false),
+    /**
+     * How many lines serve this station.
+     *
+     * It is the measure of how well connected a place is, and it decides
+     * which of two stations of the same name a rider meant.
+     */
+    lineCount: integer("line_count").notNull().default(0),
     description: text("description").notNull().default(""),
     area: text("area"),
     aliases: jsonb("aliases").notNull().default(sql`'[]'::jsonb`),

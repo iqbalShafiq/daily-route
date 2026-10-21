@@ -156,6 +156,12 @@ Read `DESIGN.md` before touching the interface. The short version:
 - Layout is CSS Grid. No percentage flexbox arithmetic.
 - Full-height regions use `dvh`, never `vh` and never a fixed pixel height.
 - Every asynchronous surface has a loading, an empty and an error state.
+- The place field is a combobox: the focus stays in the input, the active
+  suggestion is pointed at with `aria-activedescendant`, and the matched
+  part of a name is marked only when the server reported the range.
+- The map answers a pointer with a popover and a click with a move. The
+  camera moves with `easeTo` for a point and `fitBounds` for a journey;
+  `flyTo` is for a jump between places that are far apart.
 - No emoji anywhere in code, markup or copy.
 
 ## Testing

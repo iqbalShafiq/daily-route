@@ -1,0 +1,1 @@
+ALTER TABLE "stations" ADD COLUMN "line_count" integer DEFAULT 0 NOT NULL;

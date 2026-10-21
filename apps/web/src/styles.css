@@ -188,6 +188,47 @@
   }
 }
 
+/* The popover of a point on the map. */
+.maplibregl-popup-content {
+  background: var(--surface);
+  color: var(--ink);
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  padding: 7px 10px;
+  box-shadow: var(--shadow-pop);
+  font-family: inherit;
+}
+
+.maplibregl-popup-anchor-bottom .maplibregl-popup-tip {
+  border-top-color: var(--surface);
+}
+
+.maplibregl-popup-anchor-top .maplibregl-popup-tip {
+  border-bottom-color: var(--surface);
+}
+
+.maplibregl-popup-anchor-left .maplibregl-popup-tip {
+  border-right-color: var(--surface);
+}
+
+.maplibregl-popup-anchor-right .maplibregl-popup-tip {
+  border-left-color: var(--surface);
+}
+
+.map-popup-name {
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 1.3;
+  color: var(--ink);
+}
+
+.map-popup-detail {
+  margin-top: 2px;
+  font-size: 11px;
+  line-height: 1.3;
+  color: var(--ink-3);
+}
+
 /* The MapLibre default controls are replaced by the app's own affordances. */
 .maplibregl-ctrl-attrib {
   font-size: 10px;

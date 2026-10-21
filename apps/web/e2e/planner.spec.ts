@@ -21,6 +21,7 @@ test.describe("route planner", () => {
     await origin.fill("Bundaran HI");
     await destination.fill("Kelapa Gading");
 
+    await page.keyboard.press("Escape");
     await page.getByRole("button", { name: "Tampilkan rute" }).click();
 
     // The itinerary arrives with a duration and at least one leg.
@@ -36,6 +37,7 @@ test.describe("route planner", () => {
 
     await page.getByLabel("Dari").fill("Bundaran HI");
     await page.getByLabel("Ke").fill("Kelapa Gading");
+    await page.keyboard.press("Escape");
     await page.getByRole("button", { name: "Tampilkan rute" }).click();
 
     await expect(page.getByText("Perkiraan tarif")).toBeVisible({ timeout: 30_000 });
@@ -60,6 +62,54 @@ test.describe("route planner", () => {
     const option = page.getByRole("option").first();
     await expect(option).toBeVisible({ timeout: 15_000 });
     await expect(option).toContainText(/Kelapa Gading/i);
+  });
+
+  test("moves through the suggestions with the keyboard", async ({ page }) => {
+    await page.goto("/");
+
+    // The role, not the label: the list of suggestions carries the name of
+    // the field in its own label as well.
+    const origin = page.getByRole("combobox", { name: "Dari" });
+    await origin.fill("manggarai");
+
+    const options = page.getByRole("option");
+    await expect(options.first()).toBeVisible({ timeout: 15_000 });
+
+    // The active suggestion is pointed at, and the field keeps the focus.
+    await expect(origin).toHaveAttribute("aria-activedescendant", /option-0/);
+    await origin.press("ArrowDown");
+    await expect(origin).toHaveAttribute("aria-activedescendant", /option-1/);
+
+    await origin.press("Enter");
+    await expect(origin).toHaveValue(/Manggarai/i);
+    // The list is closed, and the field still has the focus.
+    await expect(page.getByRole("option")).toHaveCount(0);
+  });
+
+  test("marks the matched part of a suggestion", async ({ page }) => {
+    await page.goto("/");
+
+    await page.getByLabel("Dari").fill("manggarai");
+
+    const option = page.getByRole("option").first();
+    await expect(option).toBeVisible({ timeout: 15_000 });
+    await expect(option.locator("mark")).toHaveText(/manggarai/i);
+  });
+
+  test("names the vehicles of the journey in the legend of the map", async ({ page }) => {
+    await page.goto("/");
+
+    await page.getByLabel("Dari").fill("Bundaran HI");
+    await page.getByLabel("Ke").fill("Kelapa Gading");
+    await page.keyboard.press("Escape");
+    await page.getByRole("button", { name: "Tampilkan rute" }).click();
+
+    await expect(page.getByText("Perkiraan tarif")).toBeVisible({ timeout: 30_000 });
+
+    // The legend lists the vehicles the journey uses, so the colours of
+    // the map are explained.
+    const legend = page.locator("text=Titik pindah kendaraan");
+    await expect(legend).toBeVisible();
   });
 
   test("swaps the origin and the destination", async ({ page }) => {

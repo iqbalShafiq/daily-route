@@ -33,7 +33,7 @@ const SIZES: Record<ButtonSize, string> = {
 const BASE =
   "inline-flex shrink-0 items-center justify-center font-medium tracking-[-0.01em] " +
   "transition-[background-color,border-color,color,transform,box-shadow] duration-150 " +
-  "disabled:pointer-events-none disabled:opacity-45";
+  "cursor-pointer disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-45";
 
 export type ButtonProps = Omit<ButtonHTMLAttributes<HTMLButtonElement>, "children"> & {
   variant?: ButtonVariant;

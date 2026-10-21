@@ -10,10 +10,25 @@ import type { ApiDeps } from "../deps.js";
  * and the stations a rider might be looking for.
  */
 
+/**
+ * The lowest score a suggestion may have.
+ *
+ * Below it the result is noise. Between it and the planner's threshold it
+ * is a weak match, and the interface says so.
+ */
+const MINIMUM_SUGGESTION_SCORE = 0.08;
+
 const stationQuerySchema = z.object({
   q: z.string().min(1).max(120).optional(),
   limit: z.coerce.number().int().min(1).max(50).default(10),
   systemId: z.string().optional(),
+  /**
+   * The lowest score a suggestion may have.
+   *
+   * The same rule the planner uses: a place that is not found well enough
+   * to plan a route to is not worth offering either.
+   */
+  minScore: z.coerce.number().min(0).max(1).optional(),
 });
 
 export function createTransitRouter(deps: ApiDeps): Router {
@@ -66,7 +81,7 @@ export function createTransitRouter(deps: ApiDeps): Router {
       return;
     }
 
-    const { q, limit, systemId } = parsed.data;
+    const { q, limit, systemId, minScore } = parsed.data;
 
     if (!q) {
       const { network } = await deps.cache.get();
@@ -92,8 +107,14 @@ export function createTransitRouter(deps: ApiDeps): Router {
       ...(systemId ? { systemId } : {}),
     });
 
+    // The list of suggestions is more generous than the rule for planning
+    // a route: a weaker match is still worth showing, as long as it is
+    // marked as such.
+    const floor = minScore ?? MINIMUM_SUGGESTION_SCORE;
     response.json(
-      candidates.map((candidate) => ({
+      candidates
+        .filter((candidate) => candidate.score >= floor)
+        .map((candidate) => ({
         id: candidate.stationId,
         name: candidate.name,
         systemId: candidate.systemId,
@@ -102,7 +123,9 @@ export function createTransitRouter(deps: ApiDeps): Router {
         latitude: candidate.latitude,
         longitude: candidate.longitude,
         isInterchange: candidate.isInterchange,
+        lineCount: candidate.lineCount,
         score: Number(candidate.score.toFixed(3)),
+        matchedRanges: candidate.matchedRanges,
       })),
     );
   });

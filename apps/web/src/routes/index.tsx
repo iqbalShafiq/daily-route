@@ -1,12 +1,13 @@
 import { MessageSquare, Route as RouteIcon } from "lucide-react";
 import { useMemo, useState } from "react";
 
-import { RouteMap, type MapMarker, type MapRoute } from "../components/map/route-map.js";
+import { RouteMap, type MapLeg, type MapMarker } from "../components/map/route-map.js";
 import { ChatPanel } from "../features/chat/chat-panel.js";
 import { RoutePlanner } from "../features/route-planner/route-planner.js";
 import { usePlan } from "../features/route-planner/use-plan.js";
 import { Tab, Tabs } from "../components/ui/tabs.js";
 import { cn } from "../lib/cn.js";
+import { MODE_WIDTH, SERVICE_CLASS_COLOR, type ServiceClass } from "../lib/format.js";
 import { useTheme } from "../lib/theme.js";
 
 /**
@@ -30,57 +31,107 @@ export function PlannerPage() {
     submitted !== null,
   );
 
-  const { routes, markers } = useMemo(() => {
+  const { legs: mapLegs, markers } = useMemo(() => {
     const data = plan.data;
-    if (!data) return { routes: [] as MapRoute[], markers: [] as MapMarker[] };
+    if (!data) return { legs: [] as MapLeg[], markers: [] as MapMarker[] };
 
     const primary = data.itineraries[activeIndex] ?? data.itineraries[0];
-    const alternative = data.alternatives[0];
 
-    const mapRoutes: MapRoute[] = [];
-    if (primary) {
-      mapRoutes.push({ id: "primary", coordinates: primary.geometry, color: "var(--mode-bus)" });
-    }
-    if (alternative) {
-      mapRoutes.push({
-        id: "alternative",
-        coordinates: alternative.geometry,
-        color: "var(--warn)",
-        dashed: true,
+    // Every leg is drawn in the colour of its own mode, so a journey that
+    // changes mode is readable on the map without a legend.
+    const legs: MapLeg[] = [];
+    for (const [index, leg] of (primary?.legs ?? []).entries()) {
+      if (leg.geometry.length < 2) continue;
+      legs.push({
+        id: `${leg.kind}-${index}`,
+        coordinates: leg.geometry,
+        color:
+          leg.kind === "walk"
+            ? "var(--ink-3)"
+            : (SERVICE_CLASS_COLOR[leg.serviceClass as ServiceClass] ?? "var(--accent)"),
+        width: leg.kind === "walk" ? 3 : (MODE_WIDTH[leg.mode] ?? 4),
+        kind: leg.kind,
+        label: leg.kind === "walk" ? "Jalan kaki" : (leg.lineName ?? leg.lineCode ?? ""),
+        order: index + 1,
       });
     }
 
-    const mapMarkers: MapMarker[] = [
+    const markers: MapMarker[] = [
       {
         id: "origin",
         latitude: data.origin.latitude,
         longitude: data.origin.longitude,
         label: data.origin.name,
+        detail: "Titik asal",
         kind: "origin",
-      },
-      {
-        id: "destination",
-        latitude: data.destination.latitude,
-        longitude: data.destination.longitude,
-        label: data.destination.name,
-        kind: "destination",
+        order: 1,
       },
     ];
 
-    for (const leg of primary?.legs ?? []) {
+    // The points where the rider changes vehicle. They are marked first,
+    // because they sit on a stop of the line before and after it.
+    const transfers: MapMarker[] = [];
+    for (const [index, leg] of (primary?.legs ?? []).entries()) {
+      if (leg.kind !== "walk") continue;
+      const first = leg.stops[0];
+      const last = leg.stops[leg.stops.length - 1];
+      if (!first || !last) continue;
+      const isTransfer = leg.walkReason === "transfer";
+      transfers.push({
+        id: `transfer-${index}`,
+        latitude: (first.latitude + last.latitude) / 2,
+        longitude: (first.longitude + last.longitude) / 2,
+        label: first.name === last.name ? first.name : `${first.name} → ${last.name}`,
+        detail: isTransfer
+          ? `Pindah ke ${leg.nextLineName ?? "kendaraan lain"}`
+          : leg.walkReason === "access"
+            ? "Berjalan kaki ke halte pertama"
+            : "Berjalan kaki dari halte terakhir",
+        kind: isTransfer ? "transfer" : "stop",
+        order: index + 1,
+      });
+    }
+
+    // The stops of every ride, except the ones a transfer already marks.
+    for (const [index, leg] of (primary?.legs ?? []).entries()) {
       if (leg.kind !== "ride") continue;
       for (const stop of leg.stops) {
-        mapMarkers.push({
-          id: stop.stationId,
+        const alreadyMarked = transfers.some(
+          (transfer) =>
+            Math.abs(transfer.latitude - stop.latitude) < 0.0003 &&
+            Math.abs(transfer.longitude - stop.longitude) < 0.0003,
+        );
+        if (alreadyMarked) continue;
+        markers.push({
+          id: `${stop.stationId}-${index}`,
           latitude: stop.latitude,
           longitude: stop.longitude,
           label: stop.name,
+          detail: leg.lineName ?? undefined,
           kind: "stop",
         });
       }
     }
 
-    return { routes: mapRoutes, markers: mapMarkers };
+    markers.push(...transfers);
+
+    if (primary) {
+      const lastLeg = primary.legs[primary.legs.length - 1];
+      const lastStop = lastLeg?.stops[lastLeg.stops.length - 1];
+      if (lastStop) {
+        markers.push({
+          id: "destination",
+          latitude: lastStop.latitude,
+          longitude: lastStop.longitude,
+          label: lastStop.name,
+          detail: "Titik tujuan",
+          kind: "destination",
+          order: primary.legs.length + 1,
+        });
+      }
+    }
+
+    return { legs, markers };
   }, [plan.data, activeIndex]);
 
   return (
@@ -126,28 +177,55 @@ export function PlannerPage() {
       </div>
 
       <div className="relative order-1 min-h-0 border-b border-line lg:order-2 lg:border-b-0">
-        <RouteMap routes={routes} markers={markers} theme={theme} />
-        <MapLegend />
+        <RouteMap legs={mapLegs} markers={markers} theme={theme} />
+        <MapLegend legs={mapLegs} />
       </div>
     </div>
   );
 }
 
-function MapLegend() {
+/**
+ * The legend of the map.
+ *
+ * It lists the vehicles the journey uses, in the colour they are drawn in,
+ * so the rider can read the map without guessing what a colour means.
+ */
+function MapLegend({ legs }: { legs: readonly MapLeg[] }) {
+  const entries = useMemo(() => {
+    const seen = new Map<string, { color: string; label: string }>();
+    for (const leg of legs) {
+      if (leg.kind !== "ride" || seen.has(leg.color)) continue;
+      seen.set(leg.color, { color: leg.color, label: leg.label });
+    }
+    return [...seen.values()];
+  }, [legs]);
+
+  const hasTransfer = legs.some((leg) => leg.kind === "walk");
+
+  if (entries.length === 0 && !hasTransfer) return null;
+
   return (
-    <div className="pointer-events-none absolute bottom-3 left-3 z-10 flex flex-col gap-1 rounded-xl border border-line bg-surface/90 px-2.5 py-2 text-[11px] text-ink-2 backdrop-blur">
-      <span className="flex items-center gap-2">
-        <span aria-hidden className="h-1 w-4 rounded-full" style={{ backgroundColor: "var(--mode-bus)" }} />
-        Rute utama
-      </span>
-      <span className="flex items-center gap-2">
-        <span
-          aria-hidden
-          className="h-0 w-4 border-t-2 border-dashed"
-          style={{ borderColor: "var(--warn)" }}
-        />
-        Rute alternatif
-      </span>
+    <div className="pointer-events-none absolute bottom-3 left-3 z-10 flex max-w-[min(220px,60%)] flex-col gap-1 rounded-xl border border-line bg-surface/90 px-2.5 py-2 text-[11px] text-ink-2 backdrop-blur">
+      {entries.map((entry) => (
+        <span key={entry.color} className="flex items-center gap-2">
+          <span
+            aria-hidden
+            className="h-1 w-4 shrink-0 rounded-full"
+            style={{ backgroundColor: entry.color }}
+          />
+          <span className="truncate">{entry.label}</span>
+        </span>
+      ))}
+      {hasTransfer ? (
+        <span className="flex items-center gap-2">
+          <span
+            aria-hidden
+            className="size-2.5 shrink-0 rounded-full border-2"
+            style={{ borderColor: "var(--warn)" }}
+          />
+          <span className="truncate">Titik pindah kendaraan</span>
+        </span>
+      ) : null}
     </div>
   );
 }

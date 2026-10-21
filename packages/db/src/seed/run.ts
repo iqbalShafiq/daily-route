@@ -143,6 +143,15 @@ async function main(): Promise<void> {
     })),
   );
 
+  // How many lines serve each station decides which of two stations of
+  // the same name a rider meant, so it is counted before they are written.
+  const linesPerStation = new Map<string, Set<string>>();
+  for (const stop of snapshot.lineStops) {
+    const set = linesPerStation.get(stop.stationId) ?? new Set<string>();
+    set.add(stop.lineId);
+    linesPerStation.set(stop.stationId, set);
+  }
+
   console.log(`· inserting ${snapshot.stations.length} stations`);
   await db.insert(stations).values(
     snapshot.stations.map((station) => ({
@@ -154,6 +163,7 @@ async function main(): Promise<void> {
       longitude: station.longitude,
       stationType: station.stationType,
       isInterchange: station.isInterchange,
+      lineCount: linesPerStation.get(station.id)?.size ?? 0,
       description: station.description,
       area: station.area,
       aliases: station.aliases,

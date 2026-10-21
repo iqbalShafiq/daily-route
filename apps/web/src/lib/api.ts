@@ -34,6 +34,8 @@ async function request<T>(path: string, init?: RequestInit): Promise<T> {
   return (await response.json()) as T;
 }
 
+export type MatchedRange = { start: number; end: number };
+
 export type StationSummary = {
   id: string;
   name: string;
@@ -43,7 +45,11 @@ export type StationSummary = {
   latitude: number;
   longitude: number;
   isInterchange: boolean;
+  /** How many lines serve the station. */
+  lineCount?: number;
   score?: number;
+  /** The parts of the name that matched the query. */
+  matchedRanges?: MatchedRange[];
 };
 
 export type SystemSummary = {
@@ -101,6 +107,8 @@ export type ItineraryLeg = {
   changedFrom: string | null;
   /** Where the rider changes vehicle. */
   changedAt: string | null;
+  /** The path of this leg, along the road the vehicle travels. */
+  geometry: { latitude: number; longitude: number }[];
 };
 
 export type FareBreakdownItem = {
@@ -190,13 +198,20 @@ export const api = {
   lines: (systemId?: string) =>
     request<LineSummary[]>(`/lines${systemId ? `?systemId=${encodeURIComponent(systemId)}` : ""}`),
 
-  stations: (params: { q?: string; limit?: number; systemId?: string }) => {
+  stations: (
+    params: { q?: string; limit?: number; systemId?: string; minScore?: number },
+    signal?: AbortSignal,
+  ) => {
     const search = new URLSearchParams();
     if (params.q) search.set("q", params.q);
     if (params.limit) search.set("limit", String(params.limit));
     if (params.systemId) search.set("systemId", params.systemId);
+    if (params.minScore !== undefined) search.set("minScore", String(params.minScore));
     const query = search.toString();
-    return request<StationSummary[]>(`/stations${query ? `?${query}` : ""}`);
+    return request<StationSummary[]>(
+      `/stations${query ? `?${query}` : ""}`,
+      signal ? { signal } : undefined,
+    );
   },
 
   station: (id: string) => request<StationDetail>(`/stations/${encodeURIComponent(id)}`),
