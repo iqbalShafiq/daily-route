@@ -26,7 +26,7 @@ test.describe("route planner", () => {
 
     // The itinerary arrives with a duration and at least one leg.
     await expect(page.getByText("Tarif")).toBeVisible({ timeout: 30_000 });
-    await expect(page.getByText(/Kelapa Gading/i).first()).toBeVisible();
+    await expect(page.getByText(/→ Kelapa Gading$/).first()).toBeVisible();
 
     // The route is drawn on the map.
     await expect(page.locator("canvas.maplibregl-canvas").first()).toBeVisible();
@@ -97,7 +97,11 @@ test.describe("route planner", () => {
     await expect(option.locator("mark")).toHaveText(/manggarai/i);
   });
 
-  test("names the vehicles of the journey in the legend of the map", async ({ page }) => {
+  test("names the vehicles of the journey in the legend of the map", async ({ page }, testInfo) => {
+    // The legend is a map control for a wide screen. On a phone the list
+    // of the journey names the vehicle and shows its colour.
+    test.skip(testInfo.project.name !== "desktop", "the legend belongs to the wide layout");
+
     await page.goto("/");
 
     await page.getByLabel("Dari").fill("Bundaran HI");
@@ -124,14 +128,14 @@ test.describe("route planner", () => {
     await expect(page.getByLabel("Ke")).toHaveValue("Senen");
   });
 
-  test("switches between the planner and the assistant", async ({ page }) => {
+  test("opens the assistant over the map and closes it again", async ({ page }) => {
     await page.goto("/");
 
-    await page.getByRole("tab", { name: "Tanya" }).click();
+    await page.getByRole("button", { name: "Tanya" }).click();
     await expect(page.getByRole("heading", { name: "Tanya asisten rute" })).toBeVisible();
 
-    await page.getByRole("tab", { name: "Rute" }).click();
-    await expect(page.getByRole("heading", { name: "Cari rute" })).toBeVisible();
+    await page.getByRole("button", { name: "Tutup asisten" }).click();
+    await expect(page.getByRole("heading", { name: "Tanya asisten rute" })).toHaveCount(0);
   });
 
   test("keeps the layout usable on a small screen", async ({ page }, testInfo) => {
@@ -139,7 +143,7 @@ test.describe("route planner", () => {
 
     await page.goto("/");
 
-    await expect(page.getByRole("heading", { name: "Cari rute" })).toBeVisible();
+    await expect(page.getByLabel("Dari")).toBeVisible();
     await expect(page.getByRole("button", { name: "Tampilkan rute" })).toBeVisible();
 
     // Nothing may overflow the viewport horizontally.
@@ -167,7 +171,9 @@ test.describe("walking from the reader's place", () => {
 
     // The stop to start from, the distance, and the ways of starting.
     await expect(page.getByText("Mulai dari")).toBeVisible({ timeout: 30_000 });
-    await expect(page.getByRole("button", { name: /^Tercepat / })).toBeVisible();
+    await expect(
+      page.getByRole("list", { name: "Pilihan mulai" }).getByRole("button", { name: /^Tercepat/ }),
+    ).toBeVisible();
     await expect(page.getByText(/Berjalan .* ke /).first()).toBeVisible({ timeout: 30_000 });
 
     // The journey starts from that stop.

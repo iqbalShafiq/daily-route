@@ -25,13 +25,7 @@ export function WalkPanel({
   /** Choose a different start, by its profile. */
   onChoose?: ((profileId: string) => void) | undefined;
 }) {
-  if (!plan) {
-    return (
-      <p className="px-4 pb-3 text-[12px] text-ink-3">
-        Tekan ikon lokasi di kolom &quot;Dari&quot; untuk mulai dari tempat Anda berada.
-      </p>
-    );
-  }
+  if (!plan) return null;
 
   if (plan.needsDestination) {
     return (
@@ -51,7 +45,7 @@ export function WalkPanel({
         Mulai dari
       </p>
 
-      <ul className="mt-2 space-y-1">
+      <ul className="mt-2 space-y-1" aria-label="Pilihan mulai">
         {plan.profiles.map((profile) => {
           const chosen = profile.id === "fastest";
           return (

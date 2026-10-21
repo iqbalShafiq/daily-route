@@ -1,0 +1,516 @@
+<!doctype html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Daily Route — Konsep C: cari dulu, peta setelah hasil</title>
+<style>
+/* ==========================================================================
+   Daily Route — Konsep C (search first)
+   Sumber angka: research/ux-layout-patterns.spec.json
+   ========================================================================== */
+
+:root {
+  --bg: #fbfaf8;
+  --surface: #ffffff;
+  --surface-2: #f4f2ee;
+  --surface-3: #ebe8e1;
+  --ink: #17150f;
+  --ink-2: #4a4740;
+  --ink-3: #6f6b61;
+  --line: #e5e1d8;
+  --line-strong: #cfcabe;
+  --accent: #0b6b4f;
+  --accent-hover: #095a42;
+  --accent-ink: #ffffff;
+  --accent-soft: #e6f1ec;
+
+  --mode-bus: #1d4ed8;
+  --mode-metro: #b91c1c;
+  --mode-tram: #b45309;
+  --mode-lrt-jabodebek: #0e7490;
+  --mode-rail: #334155;
+
+  --shadow-pop: 0 2px 6px rgb(23 21 15 / 0.08), 0 18px 48px -18px rgb(23 21 15 / 0.3);
+  --shadow-raised: 0 1px 2px rgb(23 21 15 / 0.12);
+  --radius-card: 14px;
+
+  /* Angka spesifikasi konsep C */
+  --appbar-h: 0px;      /* tidak ada app bar */
+  --form-w: 480px;      /* kolom pencarian, desktop */
+  --dock-h: 104px;      /* dock hasil ringkas, desktop */
+  --card-h: 190px;      /* kartu hasil ringkas, mobile */
+  --radius: 14px;
+  --bp: 900px;
+}
+
+*, *::before, *::after { box-sizing: border-box; }
+html, body { margin: 0; padding: 0; }
+body {
+  background: var(--bg); color: var(--ink);
+  font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  font-size: 15px; line-height: 1.45; -webkit-font-smoothing: antialiased;
+}
+
+/* Harness peramban */
+.harness { position: sticky; top: 0; z-index: 50; background: var(--surface); border-bottom: 1px solid var(--line); padding: 10px 16px; }
+.harness__row { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+.harness__title { font-size: 13px; font-weight: 600; letter-spacing: -0.01em; }
+.harness__title span { font-weight: 400; color: var(--ink-3); }
+.harness__seg { display: inline-flex; border: 1px solid var(--line); border-radius: 10px; overflow: hidden; }
+.harness__seg button {
+  appearance: none; border: 0; background: transparent; color: var(--ink-2);
+  font: inherit; font-size: 13px; padding: 6px 12px; cursor: pointer; min-height: 32px;
+}
+.harness__seg button + button { border-left: 1px solid var(--line); }
+.harness__seg button[aria-pressed="true"] { background: var(--accent-soft); color: var(--accent); font-weight: 600; }
+.harness__note { font-size: 12px; color: var(--ink-3); }
+
+.stage { display: grid; gap: 24px; padding: 24px; align-items: start; }
+.stage[data-mode="desktop"], .stage[data-mode="mobile"] { grid-template-columns: minmax(0, 1fr); }
+.stage[data-mode="both"] { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.frame-wrap { min-width: 0; }
+.frame-wrap[hidden] { display: none; }
+.frame-label { font-size: 12px; color: var(--ink-3); margin: 0 0 6px 2px; }
+.frame-clip { overflow: hidden; }
+.frame {
+  position: relative; overflow: hidden; background: var(--bg);
+  border: 1px solid var(--line); border-radius: 12px; box-shadow: var(--shadow-raised);
+  transform-origin: top left; container-type: inline-size;
+}
+.frame--desktop { width: 1440px; height: 900px; }
+.frame--mobile { width: 390px; height: 844px; }
+
+/* Aplikasi */
+.app { position: absolute; inset: 0; overflow: hidden; background: var(--bg); }
+.brand { position: absolute; top: 20px; left: 24px; z-index: 4; display: flex; align-items: center; gap: 8px; }
+.brand__mark { width: 28px; height: 28px; border-radius: 8px; background: var(--accent); color: var(--accent-ink); display: grid; place-items: center; font-size: 13px; }
+.brand__name { font-size: 15px; font-weight: 600; letter-spacing: -0.01em; }
+
+/* ---- Layar pencarian ---- */
+.search-screen { position: absolute; inset: 0; display: grid; grid-template-columns: var(--form-w) minmax(0, 1fr); }
+.search-pane { padding: 68px 40px 32px 24px; display: flex; flex-direction: column; min-width: 0; }
+.search-pane h1 { font-size: 28px; font-weight: 650; letter-spacing: -0.03em; margin: 0 0 6px; }
+.search-pane .lede { font-size: 13px; color: var(--ink-2); margin: 0 0 24px; max-width: 34ch; }
+.search { display: flex; flex-direction: column; gap: 6px; }
+.field {
+  display: grid; grid-template-columns: 14px 1fr; gap: 10px; align-items: center;
+  background: var(--surface); border: 1px solid var(--line); border-radius: 10px;
+  padding: 10px 12px; min-height: 52px;
+}
+.field:focus-within { border-color: var(--accent); }
+.field__label { font-size: 12px; color: var(--ink-3); }
+.field__value { font-size: 15px; }
+.field__value.is-empty { color: var(--ink-3); }
+.dot { width: 10px; height: 10px; border-radius: 9999px; }
+.dot--origin { background: var(--ink); }
+.dot--dest { background: var(--accent); }
+.search__actions { display: flex; gap: 8px; align-items: center; margin-top: 12px; }
+.btn {
+  appearance: none; font: inherit; font-size: 13px; cursor: pointer;
+  border-radius: 10px; border: 1px solid var(--line); background: var(--surface);
+  color: var(--ink); padding: 0 14px; min-height: 40px; display: inline-flex;
+  align-items: center; gap: 6px;
+}
+.btn--primary { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); font-weight: 600; }
+.btn--primary:hover { background: var(--accent-hover); }
+.btn--quiet { background: transparent; color: var(--ink-2); border-color: transparent; }
+.assistant-note { font-size: 12px; color: var(--ink-3); margin-top: 10px; }
+.recents { margin-top: 28px; }
+.recents__title { font-size: 12px; color: var(--ink-3); margin: 0 0 8px; }
+.recent {
+  display: flex; align-items: baseline; gap: 8px; width: 100%; text-align: left;
+  background: transparent; border: 0; border-bottom: 1px solid var(--line);
+  padding: 10px 2px; cursor: pointer; font: inherit; color: var(--ink);
+}
+.recent__from { font-size: 15px; font-weight: 600; }
+.recent__to { font-size: 13px; color: var(--ink-2); }
+.recent__meta { margin-left: auto; font-size: 12px; color: var(--ink-3); }
+
+/* Panel kanan: diagram jaringan, bukan peta */
+.network {
+  border-left: 1px solid var(--line); background: var(--surface);
+  padding: 68px 48px 32px 40px; display: flex; flex-direction: column; justify-content: center; gap: 20px;
+}
+.network__title { font-size: 20px; font-weight: 600; letter-spacing: -0.02em; margin: 0; }
+.network__sub { font-size: 13px; color: var(--ink-2); margin: 0; max-width: 48ch; }
+.network svg { width: 100%; height: auto; display: block; }
+.network__legend { display: flex; flex-wrap: wrap; gap: 16px; font-size: 12px; color: var(--ink-2); }
+.network__legend span { display: flex; align-items: center; gap: 6px; }
+.network__legend i { display: block; width: 18px; height: 3px; border-radius: 9999px; }
+
+/* ---- Layar hasil ---- */
+.map { position: absolute; inset: 0; }
+.map__svg { position: absolute; inset: 0; display: block; width: 100%; height: 100%; }
+.map__svg--mobile { display: none; }
+.map-controls { position: absolute; top: 20px; right: 20px; z-index: 3; display: flex; flex-direction: column; gap: 8px; }
+.map-btn {
+  width: 40px; height: 40px; border-radius: 10px; border: 1px solid var(--line);
+  background: var(--surface); color: var(--ink-2); box-shadow: var(--shadow-raised);
+  display: grid; place-items: center; cursor: pointer; font-size: 13px;
+}
+.pill {
+  position: absolute; top: 20px; left: 20px; z-index: 4; display: flex; align-items: center; gap: 10px;
+  background: var(--surface); border: 1px solid var(--line); border-radius: 9999px;
+  box-shadow: var(--shadow-raised); padding: 6px 8px 6px 14px; font-size: 13px;
+}
+.pill__route { color: var(--ink); font-weight: 600; }
+.pill button { appearance: none; border: 1px solid var(--line); background: var(--surface-2); color: var(--ink-2); font: inherit; font-size: 12px; border-radius: 9999px; padding: 4px 10px; min-height: 28px; cursor: pointer; }
+
+/* Dock hasil ringkas, desktop */
+.dock {
+  position: absolute; left: 16px; right: 16px; bottom: 16px; z-index: 5;
+  height: var(--dock-h); background: var(--surface); border: 1px solid var(--line);
+  border-radius: var(--radius); box-shadow: var(--shadow-pop);
+  display: grid; grid-template-columns: auto minmax(0, 1fr) auto; gap: 24px; align-items: center;
+  padding: 0 20px;
+}
+.dock__time { font-size: 28px; font-weight: 650; letter-spacing: -0.03em; font-variant-numeric: tabular-nums; line-height: 1.1; margin: 0; }
+.dock__meta { font-size: 12px; color: var(--ink-2); margin: 0; }
+.dock__fare { font-size: 13px; color: var(--ink-2); }
+.ribbon { display: flex; align-items: center; gap: 10px; min-width: 0; overflow: hidden; }
+.ribbon__leg { display: flex; align-items: center; gap: 6px; font-size: 13px; color: var(--ink); white-space: nowrap; }
+.ribbon__badge {
+  width: 24px; height: 24px; border-radius: 9999px; color: #ffffff; display: grid; place-items: center;
+  font-size: 12px; font-weight: 700; flex: 0 0 auto;
+}
+.ribbon__sep { width: 14px; height: 2px; background: var(--line); flex: 0 0 auto; }
+.dock__actions { display: flex; align-items: center; gap: 8px; }
+
+/* Kartu hasil ringkas, mobile */
+.card {
+  position: absolute; left: 12px; right: 12px; bottom: 12px; z-index: 5;
+  height: var(--card-h); background: var(--surface); border: 1px solid var(--line);
+  border-radius: 12px; box-shadow: var(--shadow-pop);
+  padding: 12px 14px; display: flex; flex-direction: column; justify-content: space-between;
+}
+.card__row { display: flex; align-items: baseline; gap: 10px; }
+.card__time { font-size: 28px; font-weight: 650; letter-spacing: -0.03em; font-variant-numeric: tabular-nums; line-height: 1.1; }
+.card__meta { font-size: 12px; color: var(--ink-2); }
+.ribbon__min { color: var(--ink-2); }
+
+@container (max-width: 899px) {
+  .search-screen { grid-template-columns: minmax(0, 1fr); }
+  .search-pane { padding: 60px 16px 16px; }
+  .network { border-left: 0; border-top: 1px solid var(--line); padding: 20px 16px 24px; }
+  .brand { top: 12px; left: 16px; }
+  .pill { top: 12px; left: 12px; right: 12px; border-radius: 12px; padding: 8px 8px 8px 12px; }
+  .map__svg--desktop { display: none; }
+  .map__svg--mobile { display: block; }
+  .map-controls { top: 60px; right: 12px; flex-direction: row; }
+  .dock {
+    left: 12px; right: 12px; bottom: 12px; height: var(--card-h);
+    grid-template-columns: minmax(0, 1fr); grid-template-rows: auto auto auto;
+    gap: 10px; padding: 12px 14px; align-items: start;
+  }
+  .dock__time { font-size: 28px; }
+  .dock__actions { justify-content: flex-end; }
+  .ribbon__min { display: none; }
+  .map-btn { width: 36px; height: 36px; }
+}
+</style>
+</head>
+<body data-spec="C" data-spec-appbar="null" data-spec-form-width="480" data-spec-dock-height="104"
+      data-spec-card-height="190" data-spec-radius="14" data-spec-breakpoint="900">
+
+<div class="harness">
+  <div class="harness__row">
+    <div class="harness__title">Konsep C <span>— cari dulu, peta muncul setelah hasil</span></div>
+    <div class="harness__seg" role="group" aria-label="Perangkat">
+      <button type="button" data-mode="desktop" aria-pressed="false">Desktop 1440&times;900</button>
+      <button type="button" data-mode="mobile" aria-pressed="false">Mobile 390&times;844</button>
+      <button type="button" data-mode="both" aria-pressed="true">Bersamaan</button>
+    </div>
+    <div class="harness__note">Kerangka peramban saja &mdash; bukan bagian dari aplikasi.</div>
+  </div>
+</div>
+
+<div class="stage" data-mode="both">
+
+  <div class="frame-wrap" data-device="desktop">
+    <p class="frame-label">Desktop &middot; 1440 &times; 900 &middot; keadaan 1: pencarian</p>
+    <div class="frame-clip"><div class="frame frame--desktop" data-frame="desktop-search"></div></div>
+  </div>
+  <div class="frame-wrap" data-device="desktop">
+    <p class="frame-label">Desktop &middot; 1440 &times; 900 &middot; keadaan 2: hasil</p>
+    <div class="frame-clip"><div class="frame frame--desktop" data-frame="desktop-result"></div></div>
+  </div>
+
+  <div class="frame-wrap" data-device="mobile">
+    <p class="frame-label">Mobile &middot; 390 &times; 844 &middot; keadaan 1: pencarian</p>
+    <div class="frame-clip"><div class="frame frame--mobile" data-frame="mobile-search"></div></div>
+  </div>
+  <div class="frame-wrap" data-device="mobile">
+    <p class="frame-label">Mobile &middot; 390 &times; 844 &middot; keadaan 2: hasil</p>
+    <div class="frame-clip"><div class="frame frame--mobile" data-frame="mobile-result"></div></div>
+  </div>
+
+</div>
+
+<!-- ======================================================================
+     Keadaan 1: layar pencarian
+     ====================================================================== -->
+<template id="tpl-search">
+  <div class="app">
+    <div class="brand">
+      <span class="brand__mark" aria-hidden="true">D</span>
+      <span class="brand__name">Daily Route</span>
+    </div>
+
+    <div class="search-screen">
+      <section class="search-pane">
+        <h1>Ke mana hari ini?</h1>
+        <p class="lede">Rute GAAP untuk Transjakarta, MRT Jakarta, LRT Jakarta, LRT Jabodebek, dan KRL Jabodetabek.</p>
+
+        <div class="search">
+          <div class="field">
+            <span class="dot dot--origin" aria-hidden="true"></span>
+            <div>
+              <div class="field__label">Dari</div>
+              <div class="field__value">Bundaran HI</div>
+            </div>
+          </div>
+          <div class="field">
+            <span class="dot dot--dest" aria-hidden="true"></span>
+            <div>
+              <div class="field__label">Ke</div>
+              <div class="field__value is-empty">Masukkan tempat tujuan</div>
+            </div>
+          </div>
+        </div>
+        <div class="search__actions">
+          <button class="btn btn--primary" type="button">Tampilkan rute</button>
+          <button class="btn btn--quiet" type="button">Tanya</button>
+        </div>
+        <p class="assistant-note">Asisten nonaktif &middot; jawaban rute dihitung dari data jaringan.</p>
+
+        <div class="recents">
+          <p class="recents__title">Perjalanan terakhir</p>
+          <button class="recent" type="button">
+            <span class="recent__from">Bundaran HI</span>
+            <span class="recent__to">&rarr; Kelapa Gading</span>
+            <span class="recent__meta">1 jam 17 mnt</span>
+          </button>
+          <button class="recent" type="button">
+            <span class="recent__from">Cempaka Mas</span>
+            <span class="recent__to">&rarr; Taman Kota</span>
+            <span class="recent__meta">34 mnt</span>
+          </button>
+          <button class="recent" type="button">
+            <span class="recent__from">Stasiun Manggarai</span>
+            <span class="recent__to">&rarr; Bundaran HI</span>
+            <span class="recent__meta">28 mnt</span>
+          </button>
+        </div>
+      </section>
+
+      <section class="network">
+        <h2 class="network__title">Satu jaringan, lima operator.</h2>
+        <p class="network__sub">Diagram berikut bukan peta. Ia menunjukkan operator yang ditangani dan titik tumpuk yang paling sering dipakai.</p>
+        <svg viewBox="0 0 720 360" role="img" aria-label="Diagram jaringan operator">
+          <g font-family="system-ui, sans-serif" font-size="13" fill="#4a4740">
+            <text x="8" y="40">MRT Jakarta</text>
+            <text x="8" y="112">LRT Jabodebek</text>
+            <text x="8" y="184">LRT Jakarta</text>
+            <text x="8" y="256">KRL Jabodetabek</text>
+            <text x="8" y="328">Transjakarta</text>
+          </g>
+          <g stroke-linecap="round" fill="none" stroke-width="5">
+            <path d="M130 36 H640" stroke="#b91c1c"/>
+            <path d="M130 108 H640" stroke="#0e7490"/>
+            <path d="M130 180 H640" stroke="#b45309"/>
+            <path d="M130 252 H640" stroke="#334155"/>
+            <path d="M130 324 H640" stroke="#1d4ed8"/>
+          </g>
+          <g fill="#ffffff" stroke-width="3">
+            <g stroke="#b91c1c"><circle cx="200" cy="36" r="6"/><circle cx="330" cy="36" r="6"/><circle cx="470" cy="36" r="6"/></g>
+            <g stroke="#0e7490"><circle cx="250" cy="108" r="6"/><circle cx="400" cy="108" r="6"/><circle cx="560" cy="108" r="6"/></g>
+            <g stroke="#b45309"><circle cx="180" cy="180" r="6"/><circle cx="360" cy="180" r="6"/><circle cx="520" cy="180" r="6"/></g>
+            <g stroke="#334155"><circle cx="280" cy="252" r="6"/><circle cx="450" cy="252" r="6"/></g>
+            <g stroke="#1d4ed8"><circle cx="160" cy="324" r="6"/><circle cx="300" cy="324" r="6"/><circle cx="440" cy="324" r="6"/><circle cx="580" cy="324" r="6"/></g>
+          </g>
+          <g stroke="#cfcabe" stroke-width="2" stroke-dasharray="4 6">
+            <path d="M330 36 V324" fill="none"/>
+            <path d="M400 108 V252" fill="none"/>
+          </g>
+        </svg>
+        <div class="network__legend">
+          <span><i style="background:#1d4ed8"></i> Transjakarta</span>
+          <span><i style="background:#b91c1c"></i> MRT Jakarta</span>
+          <span><i style="background:#b45309"></i> LRT Jakarta</span>
+          <span><i style="background:#0e7490"></i> LRT Jabodebek</span>
+          <span><i style="background:#334155"></i> KRL Jabodetabek</span>
+        </div>
+      </section>
+    </div>
+  </div>
+</template>
+
+<!-- ======================================================================
+     Keadaan 2: peta + panel hasil ringkas
+     ====================================================================== -->
+<template id="tpl-result">
+  <div class="app">
+    <div class="map">
+      <svg class="map__svg map__svg--desktop" viewBox="0 0 1000 625" preserveAspectRatio="xMidYMid slice" role="img" aria-label="Peta rute dari Bundaran HI ke Kelapa Gading">
+        <rect width="1000" height="625" fill="#eae7e0"/>
+        <g stroke="#e0dcd3" stroke-width="3" fill="none">
+          <path d="M0 90 H1000"/><path d="M0 210 H1000"/><path d="M0 330 H1000"/><path d="M0 450 H1000"/><path d="M0 570 H1000"/>
+          <path d="M110 0 V625"/><path d="M310 0 V625"/><path d="M520 0 V625"/><path d="M760 0 V625"/>
+        </g>
+        <g stroke="#d8d3c8" stroke-width="8" fill="none" opacity=".8">
+          <path d="M-20 570 C 180 530, 300 450, 420 400 S 640 310, 760 230 S 900 110, 1020 60"/>
+          <path d="M40 20 C 200 100, 300 180, 420 280 S 700 460, 960 600"/>
+        </g>
+        <path d="M330 470 L370 448" stroke="#6f6b61" stroke-width="3" stroke-dasharray="6 5" fill="none"/>
+        <path d="M370 448 L420 414 L480 382 L550 350 L610 320" stroke="#ffffff" stroke-width="9" fill="none" opacity=".85"/>
+        <path d="M370 448 L420 414 L480 382 L550 350 L610 320" stroke="#1d4ed8" stroke-width="5" fill="none" stroke-linecap="round"/>
+        <path d="M610 320 L634 306" stroke="#6f6b61" stroke-width="3" stroke-dasharray="6 5" fill="none"/>
+        <path d="M634 306 L680 278 L730 250 L778 224 L830 202" stroke="#ffffff" stroke-width="9" fill="none" opacity=".85"/>
+        <path d="M634 306 L680 278 L730 250 L778 224 L830 202" stroke="#1d4ed8" stroke-width="5" fill="none" stroke-linecap="round"/>
+        <path d="M830 202 L854 194" stroke="#6f6b61" stroke-width="3" stroke-dasharray="6 5" fill="none"/>
+        <path d="M854 194 L884 180 L914 166" stroke="#ffffff" stroke-width="9" fill="none" opacity=".85"/>
+        <path d="M854 194 L884 180 L914 166" stroke="#1d4ed8" stroke-width="5" fill="none" stroke-linecap="round"/>
+        <path d="M914 166 L930 160" stroke="#6f6b61" stroke-width="3" stroke-dasharray="6 5" fill="none"/>
+        <path d="M930 160 L948 152 L964 144" stroke="#ffffff" stroke-width="9" fill="none" opacity=".85"/>
+        <path d="M930 160 L948 152 L964 144" stroke="#0e7490" stroke-width="5" fill="none" stroke-linecap="round"/>
+        <g fill="#ffffff" stroke="#1d4ed8" stroke-width="3">
+          <circle cx="370" cy="448" r="5"/><circle cx="420" cy="414" r="5"/><circle cx="480" cy="382" r="5"/>
+          <circle cx="550" cy="350" r="5"/><circle cx="610" cy="320" r="5"/>
+          <circle cx="634" cy="306" r="5"/><circle cx="680" cy="278" r="5"/><circle cx="730" cy="250" r="5"/>
+          <circle cx="778" cy="224" r="5"/><circle cx="830" cy="202" r="5"/>
+          <circle cx="854" cy="194" r="5"/><circle cx="884" cy="180" r="5"/><circle cx="914" cy="166" r="5"/>
+        </g>
+        <g fill="#ffffff" stroke="#0e7490" stroke-width="3">
+          <circle cx="930" cy="160" r="5"/><circle cx="948" cy="152" r="5"/><circle cx="964" cy="144" r="5"/>
+        </g>
+        <circle cx="330" cy="470" r="9" fill="#17150f"/>
+        <circle cx="964" cy="144" r="9" fill="#0b6b4f"/>
+        <g font-family="system-ui, sans-serif" font-size="15" fill="#17150f">
+          <text x="336" y="500" text-anchor="start">Bundaran HI</text>
+          <text x="990" y="126" text-anchor="end">Kelapa Gading</text>
+        </g>
+      </svg>
+
+      <svg class="map__svg map__svg--mobile" viewBox="0 0 390 844" preserveAspectRatio="xMidYMid slice" role="img" aria-label="Peta rute dari Bundaran HI ke Kelapa Gading">
+        <rect width="390" height="844" fill="#eae7e0"/>
+        <g stroke="#e0dcd3" stroke-width="2" fill="none">
+          <path d="M0 130 H390"/><path d="M0 270 H390"/><path d="M0 410 H390"/><path d="M0 550 H390"/><path d="M0 690 H390"/>
+          <path d="M70 0 V844"/><path d="M170 0 V844"/><path d="M265 0 V844"/><path d="M345 0 V844"/>
+        </g>
+        <g stroke="#d8d3c8" stroke-width="6" fill="none" opacity=".8">
+          <path d="M-10 760 C 90 690, 150 590, 210 480 S 300 300, 400 210"/>
+          <path d="M20 60 C 90 140, 150 250, 230 360 S 330 520, 400 640"/>
+        </g>
+        <path d="M40 640 L62 616" stroke="#6f6b61" stroke-width="3" stroke-dasharray="6 5" fill="none"/>
+        <path d="M62 616 L94 572 L128 526 L160 476 L188 430" stroke="#ffffff" stroke-width="8" fill="none" opacity=".85"/>
+        <path d="M62 616 L94 572 L128 526 L160 476 L188 430" stroke="#1d4ed8" stroke-width="4" fill="none" stroke-linecap="round"/>
+        <path d="M188 430 L202 414" stroke="#6f6b61" stroke-width="3" stroke-dasharray="6 5" fill="none"/>
+        <path d="M202 414 L228 382 L254 348 L276 312 L292 282" stroke="#ffffff" stroke-width="8" fill="none" opacity=".85"/>
+        <path d="M202 414 L228 382 L254 348 L276 312 L292 282" stroke="#1d4ed8" stroke-width="4" fill="none" stroke-linecap="round"/>
+        <path d="M292 282 L302 272" stroke="#6f6b61" stroke-width="3" stroke-dasharray="6 5" fill="none"/>
+        <path d="M302 272 L314 260 L324 250" stroke="#ffffff" stroke-width="8" fill="none" opacity=".85"/>
+        <path d="M302 272 L314 260 L324 250" stroke="#1d4ed8" stroke-width="4" fill="none" stroke-linecap="round"/>
+        <path d="M324 250 L330 244" stroke="#6f6b61" stroke-width="3" stroke-dasharray="6 5" fill="none"/>
+        <path d="M330 244 L336 238 L340 234" stroke="#ffffff" stroke-width="8" fill="none" opacity=".85"/>
+        <path d="M330 244 L336 238 L340 234" stroke="#0e7490" stroke-width="4" fill="none" stroke-linecap="round"/>
+        <g fill="#ffffff" stroke="#1d4ed8" stroke-width="2.5">
+          <circle cx="62" cy="616" r="4"/><circle cx="94" cy="572" r="4"/><circle cx="128" cy="526" r="4"/>
+          <circle cx="160" cy="476" r="4"/><circle cx="188" cy="430" r="4"/>
+          <circle cx="202" cy="414" r="4"/><circle cx="228" cy="382" r="4"/><circle cx="254" cy="348" r="4"/>
+          <circle cx="276" cy="312" r="4"/><circle cx="292" cy="282" r="4"/>
+          <circle cx="302" cy="272" r="4"/><circle cx="314" cy="260" r="4"/><circle cx="324" cy="250" r="4"/>
+        </g>
+        <g fill="#ffffff" stroke="#0e7490" stroke-width="2.5">
+          <circle cx="330" cy="244" r="4"/><circle cx="336" cy="238" r="4"/><circle cx="340" cy="234" r="4"/>
+        </g>
+        <circle cx="40" cy="640" r="8" fill="#17150f"/>
+        <circle cx="340" cy="234" r="8" fill="#0b6b4f"/>
+        <g font-family="system-ui, sans-serif" font-size="13" fill="#17150f">
+          <text x="40" y="664" text-anchor="middle">Bundaran HI</text>
+          <text x="318" y="222" text-anchor="end">Kelapa Gading</text>
+        </g>
+      </svg>
+    </div>
+
+    <div class="map-controls">
+      <button class="map-btn" type="button" title="Lokasi saya">◎</button>
+      <button class="map-btn" type="button" title="Lapisan">▤</button>
+      <button class="map-btn" type="button" title="Tema">◐</button>
+    </div>
+
+    <div class="pill">
+      <span class="pill__route">Bundaran HI &rarr; Kelapa Gading</span>
+      <button type="button">Ubah</button>
+    </div>
+
+    <!-- Dock hasil ringkas, desktop -->
+    <section class="dock" aria-label="Ringkasan hasil">
+      <div>
+        <p class="dock__time">1 jam 17 mnt</p>
+        <p class="dock__meta">14,6 km &middot; 3 kali pindah &middot; <span class="dock__fare">Rp7.000</span></p>
+      </div>
+      <div class="ribbon">
+        <span class="ribbon__leg"><span class="ribbon__badge" style="background:#1d4ed8">6B</span><span class="ribbon__min">21 mnt</span></span>
+        <span class="ribbon__sep"></span>
+        <span class="ribbon__leg"><span class="ribbon__badge" style="background:#1d4ed8">2A</span><span class="ribbon__min">20 mnt</span></span>
+        <span class="ribbon__sep"></span>
+        <span class="ribbon__leg"><span class="ribbon__badge" style="background:#1d4ed8">4D</span><span class="ribbon__min">12 mnt</span></span>
+        <span class="ribbon__sep"></span>
+        <span class="ribbon__leg"><span class="ribbon__badge" style="background:#0e7490">S</span><span class="ribbon__min">9 mnt</span></span>
+      </div>
+      <div class="dock__actions">
+        <button class="btn" type="button">Rincian</button>
+      </div>
+    </section>
+  </div>
+</template>
+
+<script>
+(function () {
+  var stage = document.querySelector(".stage");
+  var searchTpl = document.getElementById("tpl-search");
+  var resultTpl = document.getElementById("tpl-result");
+  var wraps = Array.prototype.slice.call(document.querySelectorAll(".frame-wrap"));
+
+  wraps.forEach(function (wrap) {
+    var frame = wrap.querySelector(".frame");
+    var kind = frame.getAttribute("data-frame");
+    var tpl = kind.indexOf("search") !== -1 ? searchTpl : resultTpl;
+    frame.appendChild(tpl.content.cloneNode(true));
+  });
+
+  function layout() {
+    var mode = stage.getAttribute("data-mode");
+    wraps.forEach(function (wrap) {
+      var device = wrap.getAttribute("data-device");
+      var visible = mode === "both" || mode === device;
+      wrap.hidden = !visible;
+      if (!visible) return;
+      var frame = wrap.querySelector(".frame");
+      var fw = frame.offsetWidth, fh = frame.offsetHeight;
+      var avail = wrap.clientWidth || fw;
+      var scale = Math.min(1, avail / fw);
+      frame.style.transform = "scale(" + scale + ")";
+      var clip = wrap.querySelector(".frame-clip");
+      clip.style.width = Math.round(fw * scale) + "px";
+      clip.style.height = Math.round(fh * scale) + "px";
+    });
+  }
+
+  Array.prototype.forEach.call(document.querySelectorAll(".harness__seg button[data-mode]"), function (btn) {
+    btn.addEventListener("click", function () {
+      stage.setAttribute("data-mode", btn.getAttribute("data-mode"));
+      Array.prototype.forEach.call(document.querySelectorAll(".harness__seg button[data-mode]"), function (other) {
+        other.setAttribute("aria-pressed", other === btn ? "true" : "false");
+      });
+      layout();
+    });
+  });
+
+  window.addEventListener("resize", layout);
+  layout();
+})();
+</script>
+</body>
+</html>

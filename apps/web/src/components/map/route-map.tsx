@@ -112,7 +112,7 @@ export function RouteMap({
       cooperativeGestures: false,
     });
 
-    map.addControl(new NavigationControl({ showCompass: false }), "top-right");
+    map.addControl(new NavigationControl({ showCompass: false }), "bottom-right");
 
     // The popover of a point. It lives with the map, because the handlers
     // that show it belong to the map too.

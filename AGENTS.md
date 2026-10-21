@@ -161,6 +161,11 @@ Read `DESIGN.md` before touching the interface. The short version:
 - Icons are `lucide-react`, one icon per meaning, with a tooltip on every
   icon-only control.
 - Layout is CSS Grid. No percentage flexbox arithmetic.
+- The map owns the window. There is no bar across the top, and the
+  controls float on the map: the search card in the top left, the
+  answer below it, the window controls in the top right.
+  `research/tools/ux-visual/layout_check.py` reads the source and must
+  report nothing.
 - Full-height regions use `dvh`, never `vh` and never a fixed pixel height.
 - Every asynchronous surface has a loading, an empty and an error state.
 - The place field is a combobox: the focus stays in the input, the active

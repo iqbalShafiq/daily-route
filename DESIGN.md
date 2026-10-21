@@ -90,6 +90,33 @@ line width, and a rider-facing label.
 There is no pure black anywhere: `#17150f` is the darkest ink, and
 `#111310` is the darkest surface.
 
+## The frame
+
+There is no bar across the top of the window and no column beside the
+map. The map owns the window, and the controls float on it.
+
+- The map fills the whole window. The rider is looking at a city.
+- The search card floats in the top left corner, 400 px wide, 16 px
+  from the edge, with a shadow so it reads as a card above the map.
+- The answer opens below it, in the same column, and scrolls inside the
+  column rather than the window.
+- The controls of the window — the theme, the state of the assistant —
+  are a small stack in the top right corner, where the map's own zoom
+  control used to be. The zoom moved to the bottom right, so the top
+  right corner is free.
+- The legend of the modes is a pill on the map, not a bar across it. On
+  a phone the legend is gone: the list of the journey names every
+  vehicle and shows its colour.
+- The assistant opens over the map, in a panel on the right on a wide
+  screen and over the whole window on a phone. It is a second way into
+  the same data, not a separate mode of the page.
+- On a phone the answer rises from the bottom of the window, over the
+  map, and the search card stays at the top.
+
+The reasoning, the references and the measurements are in
+`research/ux-layout-patterns.md`. `research/tools/ux-visual/layout_check.py`
+reads the source and must report nothing.
+
 ## Typography
 
 **Plus Jakarta Sans** (variable) for the interface, **JetBrains Mono**

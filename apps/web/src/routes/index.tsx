@@ -1,14 +1,15 @@
-import { MessageSquare, Route as RouteIcon } from "lucide-react";
+import { X } from "lucide-react";
 import { useMemo, useState } from "react";
 
 import { RouteMap, type MapLeg, type MapMarker } from "../components/map/route-map.js";
 import { legIdOf } from "../components/transit/leg-list.js";
 import { ChatPanel } from "../features/chat/chat-panel.js";
-import { RoutePlanner } from "../features/route-planner/route-planner.js";
+import { RouteResult } from "../features/route-planner/route-result.js";
+import { RouteSearch } from "../features/route-planner/route-search.js";
 import { usePlan } from "../features/route-planner/use-plan.js";
 import { api } from "../lib/api.js";
 import type { PositionPlan } from "../lib/api.js";
-import { Tab, Tabs } from "../components/ui/tabs.js";
+import { Button } from "../components/ui/button.js";
 import { cn } from "../lib/cn.js";
 import { MODE_WIDTH, SERVICE_CLASS_COLOR, type ServiceClass } from "../lib/format.js";
 import { useTheme } from "../lib/theme.js";
@@ -173,88 +174,15 @@ export function PlannerPage() {
   }, [plan.data, activeIndex, activeLeg, walk]);
 
   return (
-    <div
-      className={cn(
-        "grid h-full min-h-0 grid-cols-1 grid-rows-[42vh_minmax(0,1fr)]",
-        "lg:grid-cols-[minmax(380px,440px)_1fr] lg:grid-rows-1",
-      )}
-    >
-      <div className="order-2 flex min-h-0 flex-col border-line lg:order-1 lg:border-r">
-        <div className="flex items-center justify-between gap-3 border-b border-line px-4 py-3">
-          <Tabs value={view} onValueChange={setView}>
-            <Tab value="route">
-              <RouteIcon aria-hidden className="size-3.5" />
-              Rute
-            </Tab>
-            <Tab value="chat">
-              <MessageSquare aria-hidden className="size-3.5" />
-              Tanya
-            </Tab>
-          </Tabs>
-        </div>
-
-        <div className="scroll-quiet min-h-0 flex-1 overflow-y-auto px-4 py-4">
-          {view === "route" ? (
-            <RoutePlanner
-              origin={origin}
-              destination={destination}
-              onOriginChange={setOrigin}
-              onDestinationChange={setDestination}
-              onSubmit={() => {
-                setActiveIndex(0);
-                setSubmitted({ origin: origin.trim(), destination: destination.trim() });
-              }}
-              plan={plan}
-              activeIndex={activeIndex}
-              onActiveIndexChange={setActiveIndex}
-              activeLeg={activeLeg}
-              onLegSelect={setActiveLeg}
-              onStopHover={setHoveredStation}
-              walk={walk}
-              onUseMyPosition={async () => {
-                if (typeof navigator === "undefined" || !navigator.geolocation) return;
-                const position = await new Promise<GeolocationPosition | null>((resolve) => {
-                  navigator.geolocation.getCurrentPosition(resolve, () => resolve(null), {
-                    enableHighAccuracy: true,
-                    timeout: 15_000,
-                  });
-                });
-                if (!position) return;
-                const result = await api.planFromPosition(
-                  { latitude: position.coords.latitude, longitude: position.coords.longitude },
-                  destination.trim(),
-                );
-                setWalk(result);
-                if (!result.stationName) return;
-                setOrigin(result.stationName);
-                setActiveIndex(0);
-                setSubmitted({
-                  origin: result.stationName,
-                  destination: destination.trim(),
-                });
-              }}
-              onExample={(name) => {
-                setOrigin(name);
-                setSubmitted({ origin: name, destination: destination.trim() });
-              }}
-              onChooseOrigin={(profileId) => {
-                const profile = walk?.profiles.find((item) => item.id === profileId);
-                if (!profile?.stationName) return;
-                setOrigin(profile.stationName);
-                setActiveIndex(0);
-                setSubmitted({
-                  origin: profile.stationName,
-                  destination: destination.trim(),
-                });
-              }}
-            />
-          ) : (
-            <ChatPanel />
-          )}
-        </div>
-      </div>
-
-      <div className="relative order-1 min-h-0 border-b border-line lg:order-2 lg:border-b-0">
+    <div className="grid h-full min-h-0 grid-cols-1 grid-rows-1 overflow-hidden bg-bg">
+      {/*
+       * The map owns the window.
+       *
+       * The rider is looking at a city, and the controls float on top
+       * of it. A bar across the top would take the map away from the
+       * reader for the sake of a logo.
+       */}
+      <div className="col-start-1 row-start-1 min-h-0">
         <RouteMap
           legs={mapLegs}
           markers={markers}
@@ -276,6 +204,109 @@ export function PlannerPage() {
           }}
         />
         <MapLegend legs={mapLegs} />
+      </div>
+
+      {/*
+       * The controls float on the map.
+       *
+       * On a wide screen the search card sits in the top left corner and
+       * the answer opens below it, so the map keeps the rest of the
+       * window. On a phone the search card stays at the top and the
+       * answer rises from the bottom as a sheet, the way every map on
+       * a phone behaves.
+       */}
+      <div
+        className={cn(
+          "pointer-events-none absolute inset-0 col-start-1 row-start-1 z-20 flex flex-col justify-between p-3",
+          "lg:right-auto lg:w-[400px] lg:justify-start lg:gap-4 lg:p-4",
+        )}
+      >
+        <div className="pointer-events-auto mr-12 lg:shrink-0 lg:mr-0">
+          <RouteSearch
+            className="shadow-pop"
+            origin={origin}
+            destination={destination}
+            onOriginChange={setOrigin}
+            onDestinationChange={setDestination}
+            onSubmit={() => {
+              setActiveIndex(0);
+              setSubmitted({ origin: origin.trim(), destination: destination.trim() });
+            }}
+            onUseMyPosition={async () => {
+              if (typeof navigator === "undefined" || !navigator.geolocation) return;
+              const position = await new Promise<GeolocationPosition | null>((resolve) => {
+                navigator.geolocation.getCurrentPosition(resolve, () => resolve(null), {
+                  enableHighAccuracy: true,
+                  timeout: 15_000,
+                });
+              });
+              if (!position) return;
+              const result = await api.planFromPosition(
+                { latitude: position.coords.latitude, longitude: position.coords.longitude },
+                destination.trim(),
+              );
+              setWalk(result);
+              if (!result.stationName) return;
+              setOrigin(result.stationName);
+              setActiveIndex(0);
+              setSubmitted({
+                origin: result.stationName,
+                destination: destination.trim(),
+              });
+            }}
+            onChooseOrigin={(profileId) => {
+              const profile = walk?.profiles.find((item) => item.id === profileId);
+              if (!profile?.stationName) return;
+              setOrigin(profile.stationName);
+              setActiveIndex(0);
+              setSubmitted({
+                origin: profile.stationName,
+                destination: destination.trim(),
+              });
+            }}
+            walk={walk}
+            onOpenAssistant={() => setView("chat")}
+          />
+        </div>
+
+        {view === "route" ? (
+          <div
+            className={cn(
+              "pointer-events-auto max-h-[55%] overflow-y-auto lg:min-h-0 lg:max-h-none lg:flex-1",
+            )}
+          >
+            <RouteResult
+              plan={plan}
+              activeIndex={activeIndex}
+              onActiveIndexChange={setActiveIndex}
+              activeLeg={activeLeg}
+              onLegSelect={setActiveLeg}
+              onStopHover={setHoveredStation}
+              onExample={(name) => {
+                setOrigin(name);
+                setSubmitted({ origin: name, destination: destination.trim() });
+              }}
+            />
+          </div>
+        ) : null}
+
+        {view === "chat" ? (
+          <div className="pointer-events-auto absolute inset-x-3 bottom-3 top-16 z-40 lg:left-auto lg:right-4 lg:w-[400px]">
+            <div className="relative h-full">
+              <ChatPanel />
+              <Button
+                variant="secondary"
+                size="icon"
+                aria-label="Tutup asisten"
+                onClick={() => setView("route")}
+                className="absolute top-3 right-3 z-10 bg-surface/90 shadow-raised backdrop-blur"
+              >
+                <X aria-hidden className="size-4" />
+              </Button>
+            </div>
+          </div>
+        ) : null}
+
       </div>
     </div>
   );
@@ -302,7 +333,7 @@ function MapLegend({ legs }: { legs: readonly MapLeg[] }) {
   if (entries.length === 0 && !hasTransfer) return null;
 
   return (
-    <div className="pointer-events-none absolute inset-x-0 bottom-0 z-10 flex flex-wrap items-center gap-x-4 gap-y-1 border-t border-line bg-surface/85 px-4 py-2 text-[12px] text-ink-2 backdrop-blur">
+    <div className="pointer-events-none absolute bottom-3 left-1/2 z-10 hidden max-w-[min(560px,calc(100%-24px))] -translate-x-1/2 flex-wrap items-center justify-center gap-x-4 gap-y-1 rounded-lg border border-line bg-surface/90 px-3 py-2 text-[12px] text-ink-2 shadow-pop backdrop-blur lg:flex">
       {entries.map((entry) => (
         <span key={entry.color} className="flex min-w-0 items-center gap-2">
           <span

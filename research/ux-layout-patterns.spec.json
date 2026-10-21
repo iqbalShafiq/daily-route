@@ -1,0 +1,371 @@
+{
+  "version": "1.0",
+  "generatedAt": "2026-10-21",
+  "project": "Daily Route",
+  "title": "Spesifikasi tata letak aplikasi rute transit",
+  "reasoning": "research/ux-layout-patterns.md",
+  "prototypes": {
+    "A": "research/prototypes/layout-a-map-first.html",
+    "B": "research/prototypes/layout-b-sheet.html",
+    "C": "research/prototypes/layout-c-search-first.html"
+  },
+  "tokens": {
+    "colour": {
+      "bg": "#fbfaf8",
+      "surface": "#ffffff",
+      "surface-2": "#f4f2ee",
+      "surface-3": "#ebe8e1",
+      "ink": "#17150f",
+      "ink-2": "#4a4740",
+      "ink-3": "#6f6b61",
+      "line": "#e5e1d8",
+      "line-strong": "#cfcabe",
+      "accent": "#0b6b4f",
+      "accent-soft": "#e6f1ec",
+      "mode-bus": "#1d4ed8",
+      "mode-metro": "#b91c1c",
+      "mode-tram": "#b45309",
+      "mode-lrt-jabodebek": "#0e7490",
+      "mode-rail": "#334155",
+      "accent-hover": "#095a42"
+    },
+    "mapCanvas": {
+      "ground": "#eae7e0",
+      "street": "#e0dcd3",
+      "arterial": "#d8d3c8"
+    },
+    "fontFamily": "system-ui",
+    "typeScalePx": [
+      40,
+      28,
+      20,
+      16,
+      15,
+      13,
+      12
+    ],
+    "typeScaleFloorPx": 12,
+    "radiusScalePx": [
+      0,
+      3,
+      4,
+      6,
+      8,
+      10,
+      12,
+      14,
+      16,
+      18,
+      9999
+    ],
+    "touchTargetMinPx": 44,
+    "touchTargetAndroidPx": 48,
+    "maxTextMeasureCh": 70,
+    "maxTextMeasurePx": 640
+  },
+  "breakpoints": {
+    "compactMaxPx": 599,
+    "mediumMaxPx": 839,
+    "expandedMinPx": 840,
+    "appCompactMaxPx": 899,
+    "appExpandedMinPx": 900,
+    "note": "Nilai 900 px adalah breakpoint aplikasi Daily Route, bukan breakpoint Material. Ia memakai titik tengah antara expanded (840 dp) dan lebar panel mengambang yang nyaman."
+  },
+  "concepts": {
+    "A": {
+      "name": "Peta pertama dengan panel mengambang",
+      "oneLine": "Peta penuh bleed; kartu pencarian melayang di kiri atas; panel hasil mengambang di kiri bawah; tidak ada app bar.",
+      "appBarHeightPx": null,
+      "desktop": {
+        "appBarHeightPx": null,
+        "mapFullBleed": true,
+        "resultsPanelWidthPx": 400,
+        "resultsPanelMaxHeightPercent": 58,
+        "resultsPanelInsetPx": 20,
+        "searchCardWidthPx": 420,
+        "searchCardInsetPx": 20,
+        "panelRadiusPx": 14,
+        "mapControlCluster": {
+          "position": "top-right",
+          "insetPx": 20,
+          "buttonPx": 40,
+          "radiusPx": 10
+        },
+        "legendPlacement": "inside-results-panel"
+      },
+      "mobile": {
+        "appBarHeightPx": null,
+        "searchCardInsetPx": 12,
+        "searchCardRadiusPx": 12,
+        "resultsPanelWidthPx": null,
+        "resultsPanelMaxHeightPercent": 46,
+        "resultsPanelInsetPx": 12,
+        "resultsPanelRadiusPx": 12,
+        "sheet": null,
+        "sheetNote": "Konsep A sengaja tidak memakai sheet yang bisa ditarik; panel hasil adalah kartu mengambang."
+      },
+      "breakpointPx": 900,
+      "prototype": "research/prototypes/layout-a-map-first.html",
+      "specAttributes": {
+        "appbar": "null",
+        "panelWidth": "400",
+        "searchWidth": "420",
+        "radius": "14",
+        "breakpoint": "900"
+      },
+      "rationale": [
+        "Memakai kanvas peta sepenuhnya, seperti Citymapper, Transit, dan Moovit yang menempatkan peta sebagai layar utama.",
+        "Kartu pencarian tetap terlihat tanpa memakan baris penuh seperti app bar.",
+        "Panel hasil mengambang bisa ditutup atau digeser tanpa memindahkan chrome apa pun."
+      ],
+      "risks": [
+        "Panel mengambang menutupi peta; pada layar kecil area peta yang terlihat tinggal sekitar 40%.",
+        "Dua permukaan mengambang (pencarian dan hasil) dapat saling tumpang tindih pada lebar kecil.",
+        "Tidak ada tempat alami untuk status fitur (mis. 'Asisten nonaktif') selain catatan kecil di dalam kartu."
+      ]
+    },
+    "B": {
+      "name": "Peta penuh dan bottom sheet",
+      "oneLine": "Peta menutupi layar; satu sheet membawa pencarian, hasil, dan rincian; di desktop sheet berubah menjadi panel samping.",
+      "appBarHeightPx": null,
+      "desktop": {
+        "appBarHeightPx": null,
+        "mapFullBleed": true,
+        "sheet": null,
+        "sideSheetWidthPx": 420,
+        "sideSheetInsetPx": 16,
+        "sideSheetRadiusPx": 16,
+        "sideSheetFullHeight": true,
+        "mapControlCluster": {
+          "position": "top-right",
+          "insetPx": 20,
+          "buttonPx": 40,
+          "radiusPx": 10
+        },
+        "legendPlacement": "map-overlay-top-right"
+      },
+      "mobile": {
+        "appBarHeightPx": null,
+        "sheet": {
+          "peekPercent": 30,
+          "halfPercent": 55,
+          "fullPercent": 92,
+          "radiusPx": 16,
+          "handleHeightPx": 22,
+          "handleWidthPx": 36,
+          "handleThicknessPx": 4,
+          "handleHitTargetPx": 48,
+          "modal": false,
+          "scrim": false,
+          "safeAreaBottom": "env(safe-area-inset-bottom)"
+        },
+        "searchInsideSheet": true
+      },
+      "breakpointPx": 900,
+      "prototype": "research/prototypes/layout-b-sheet.html",
+      "specAttributes": {
+        "appbar": "null",
+        "sheetPeek": "30%",
+        "sheetHalf": "55%",
+        "sheetFull": "92%",
+        "sheetWidth": "420",
+        "radius": "16",
+        "breakpoint": "900"
+      },
+      "rationale": [
+        "Material 3 menetapkan sheet sebagai cara presenting konten sekunder di compact width, dan sheet standar (non-modal) tidak memblokir peta.",
+        "Apple HIG menyebut detent medium dan large sebagai pola progresif untuk isi yang banyak.",
+        "Di desktop, sheet berubah menjadi side sheet; Material 3 menempatkan side sheet di medium dan expanded width.",
+        "Satu permukaan membuat hierarki jelas: pencarian, lalu hasil, lalu rincian."
+      ],
+      "risks": [
+        "Detent adalah perangkat sentuh; pada desktop tidak berlaku sehingga harus ada padanan.",
+        "Sheet non-modal yang Isi panjang membuat scroll chaining antara daftar dan peta mudah terjadi.",
+        "Jika pencarian berada di dalam sheet, pengguna harus membuka sheet dulu untuk mencari."
+      ]
+    },
+    "C": {
+      "name": "Cari dulu, peta setelah hasil",
+      "oneLine": "Layar pencarian terpisah; peta dan panel hasil ringkas baru muncul setelah rute ditemukan.",
+      "appBarHeightPx": null,
+      "desktop": {
+        "appBarHeightPx": null,
+        "searchScreen": {
+          "formColumnWidthPx": 480,
+          "leftPaddingPx": 24,
+          "topOffsetPx": 68,
+          "mapVisible": false
+        },
+        "resultDock": {
+          "heightPx": 104,
+          "insetPx": 16,
+          "radiusPx": 14,
+          "containsLegRibbon": true
+        },
+        "mapFullBleed": true
+      },
+      "mobile": {
+        "appBarHeightPx": null,
+        "searchScreen": {
+          "paddingPx": 16,
+          "mapVisible": false
+        },
+        "resultCard": {
+          "heightPx": 190,
+          "insetPx": 12,
+          "radiusPx": 12
+        },
+        "topPill": {
+          "insetPx": 12,
+          "radiusPx": 12
+        }
+      },
+      "breakpointPx": 900,
+      "prototype": "research/prototypes/layout-c-search-first.html",
+      "specAttributes": {
+        "appbar": "null",
+        "formWidth": "480",
+        "dockHeight": "104",
+        "cardHeight": "190",
+        "radius": "14",
+        "breakpoint": "900"
+      },
+      "rationale": [
+        "Pola 'search first' dipakai ketika titik awal belum diketahui, seperti yang dipakai SNCF Connect dan Transit.",
+        "Menghilangkan app bar: layar pencarian punya hierarki sendiri dan tidak butuh navigasi global.",
+        "Hasil tetap terlihat sebagai peta penuh dengan panel ringkas sehingga daftar dan peta tetap satu sistem."
+      ],
+      "risks": [
+        "Pengguna harus lewat satu layar sebelum melihat peta; rasa lambat pada koneksi lambat.",
+        "Layar penuh tanpa peta bisa terasa seperti formulir, bukan alat navigasi.",
+        "Butuh state kedua (hasil) yang harus dijaga agar tetap konsisten dengan peta."
+      ]
+    }
+  },
+  "current": {
+    "label": "Pola yang dipakai sebelum perubahan",
+    "appBarHeightPx": 64,
+    "appBarHeightNote": "Estimasi dari token padding py-3 (12 px atas dan bawah) plus isi header; angka 60 px pada brief adalah pendekatan. Belum diukur di peramban.",
+    "desktopPanelWidthPx": 440,
+    "desktopPanelWidthRangePx": [
+      380,
+      440
+    ],
+    "desktopPanelRule": "lg:grid-cols-[minmax(380px,440px)_1fr]",
+    "mobileMapHeightPercent": 42,
+    "mobileRule": "grid-rows-[42vh_minmax(0,1fr)]",
+    "legendStrip": "strip tipis di bawah peta, absolute inset-x-0 bottom-0",
+    "problems": [
+      "App bar occupies a full row for a brand line that repeats on every screen.",
+      "The left panel is a fixed column, so the map can never be the whole screen.",
+      "On mobile the map is cut to 42vh and the panel takes the rest, so the rider sees a strip of map."
+    ]
+  },
+  "rules": [
+    {
+      "id": "no-top-app-bar",
+      "severity": "error",
+      "scope": "prototypes",
+      "description": "Tidak boleh ada app bar di atas (elemen header yang tetap di shell aplikasi).",
+      "appliesTo": [
+        "A",
+        "B",
+        "C"
+      ]
+    },
+    {
+      "id": "no-fixed-width-sidebar",
+      "severity": "error",
+      "scope": "prototypes",
+      "description": "Tidak boleh ada kolom kiri dengan lebar piksel tetap; hasil dan pencarian harus mengambang atau menjadi sheet.",
+      "appliesTo": [
+        "A",
+        "B",
+        "C"
+      ]
+    },
+    {
+      "id": "map-before-results",
+      "severity": "error",
+      "scope": "prototypes",
+      "description": "Peta harus lebih dulu dalam urutan DOM; panel hasil menumpuk di atasnya.",
+      "appliesTo": [
+        "A",
+        "B",
+        "C"
+      ]
+    },
+    {
+      "id": "radius-on-scale",
+      "severity": "error",
+      "scope": "prototypes",
+      "description": "Semua radius harus ada di skala radius.",
+      "appliesTo": [
+        "A",
+        "B",
+        "C"
+      ]
+    },
+    {
+      "id": "type-on-scale",
+      "severity": "error",
+      "scope": "prototypes",
+      "description": "Semua ukuran huruf harus ada di skala tipografi dan tidak boleh di bawah 12 px.",
+      "appliesTo": [
+        "A",
+        "B",
+        "C"
+      ]
+    },
+    {
+      "id": "tokens-only",
+      "severity": "error",
+      "scope": "prototypes",
+      "description": "Warna hanya boleh memakai token antarmuka, warna mode, dan abu-abu kanvas peta.",
+      "appliesTo": [
+        "A",
+        "B",
+        "C"
+      ]
+    },
+    {
+      "id": "sheet-detents-match-spec",
+      "severity": "error",
+      "scope": "prototypes",
+      "description": "Tinggi sheet harus sama dengan peek/half/full pada spesifikasi konsep.",
+      "appliesTo": [
+        "B"
+      ]
+    },
+    {
+      "id": "no-draggable-sheet-in-A",
+      "severity": "error",
+      "scope": "prototypes",
+      "description": "Konsep A tidak boleh memakai sheet yang bisa ditarik.",
+      "appliesTo": [
+        "A"
+      ]
+    },
+    {
+      "id": "feature-status-not-in-chrome",
+      "severity": "warning",
+      "scope": "application",
+      "description": "Status fitur yang belum aktif (mis. 'Asisten nonaktif') tidak boleh berada di chrome atas; ia pindah ke permukaan yang memakainya.",
+      "appliesTo": []
+    },
+    {
+      "id": "legend-not-a-strip",
+      "severity": "warning",
+      "scope": "application",
+      "description": "Legenda tidak boleh menjadi strip tipis penuh di bawah peta; ia pindah ke panel hasil atau ke kontrol peta.",
+      "appliesTo": []
+    },
+    {
+      "id": "full-height-uses-dvh",
+      "severity": "warning",
+      "scope": "application",
+      "description": "Wilayah setinggi layar memakai dvh, bukan vh dan bukan tinggi piksel tetap.",
+      "appliesTo": []
+    }
+  ]
+}

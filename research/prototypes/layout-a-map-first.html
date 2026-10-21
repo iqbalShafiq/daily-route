@@ -1,0 +1,552 @@
+<!doctype html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Daily Route — Konsep A: peta pertama, panel mengambang</title>
+<style>
+/* ==========================================================================
+   Daily Route — Konsep A (map-first, panel mengambang)
+   Sumber angka: research/ux-layout-patterns.spec.json
+   Palet dan tipografi mengikuti DESIGN.md. Tanpa build, tanpa CDN, tanpa font
+   eksternal. Semua ukuran dalam px.
+   ========================================================================== */
+
+:root {
+  --bg: #fbfaf8;
+  --surface: #ffffff;
+  --surface-2: #f4f2ee;
+  --surface-3: #ebe8e1;
+  --ink: #17150f;
+  --ink-2: #4a4740;
+  --ink-3: #6f6b61;
+  --line: #e5e1d8;
+  --line-strong: #cfcabe;
+  --accent: #0b6b4f;
+  --accent-hover: #095a42;
+  --accent-ink: #ffffff;
+  --accent-soft: #e6f1ec;
+
+  --mode-bus: #1d4ed8;
+  --mode-metro: #b91c1c;
+  --mode-tram: #b45309;
+  --mode-lrt-jabodebek: #0e7490;
+  --mode-rail: #334155;
+
+  --shadow-pop: 0 2px 6px rgb(23 21 15 / 0.08), 0 18px 48px -18px rgb(23 21 15 / 0.3);
+  --shadow-raised: 0 1px 2px rgb(23 21 15 / 0.12);
+  --radius-card: 14px;
+  --map-halo: rgb(23 21 15 / 0.14);
+
+  /* Angka spesifikasi konsep A */
+  --appbar-h: 0px;      /* tidak ada app bar */
+  --panel-w: 400px;     /* panel hasil mengambang, desktop */
+  --search-w: 420px;    /* kartu search melayang, desktop */
+  --radius: 14px;
+  --bp: 900px;          /* compact | expanded */
+}
+
+*, *::before, *::after { box-sizing: border-box; }
+html, body { margin: 0; padding: 0; }
+body {
+  background: var(--bg);
+  color: var(--ink);
+  font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  font-size: 15px;
+  line-height: 1.45;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* --------------------------------------------------------------------------
+   Harness peramban (bukan bagian dari aplikasi)
+   -------------------------------------------------------------------------- */
+
+.harness {
+  position: sticky; top: 0; z-index: 50;
+  background: var(--surface);
+  border-bottom: 1px solid var(--line);
+  padding: 10px 16px;
+}
+.harness__row { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+.harness__title { font-size: 13px; font-weight: 600; letter-spacing: -0.01em; }
+.harness__title span { font-weight: 400; color: var(--ink-3); }
+.harness__seg { display: inline-flex; border: 1px solid var(--line); border-radius: 10px; overflow: hidden; }
+.harness__seg button {
+  appearance: none; border: 0; background: transparent; color: var(--ink-2);
+  font: inherit; font-size: 13px; padding: 6px 12px; cursor: pointer; min-height: 32px;
+}
+.harness__seg button + button { border-left: 1px solid var(--line); }
+.harness__seg button[aria-pressed="true"] { background: var(--accent-soft); color: var(--accent); font-weight: 600; }
+.harness__note { font-size: 12px; color: var(--ink-3); }
+
+.stage { display: grid; gap: 24px; padding: 24px; align-items: start; }
+.stage[data-mode="desktop"], .stage[data-mode="mobile"] { grid-template-columns: minmax(0, 1fr); }
+.stage[data-mode="both"] { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.frame-wrap { min-width: 0; }
+.frame-wrap[hidden] { display: none; }
+.frame-label { font-size: 12px; color: var(--ink-3); margin: 0 0 6px 2px; }
+.frame-clip { overflow: hidden; }
+.frame {
+  position: relative; overflow: hidden; background: var(--bg);
+  border: 1px solid var(--line); border-radius: 12px;
+  box-shadow: var(--shadow-raised);
+  transform-origin: top left;
+  container-type: inline-size;
+}
+.frame--desktop { width: 1440px; height: 900px; }
+.frame--mobile { width: 390px; height: 844px; }
+
+/* --------------------------------------------------------------------------
+   Aplikasi
+   -------------------------------------------------------------------------- */
+
+.app { position: absolute; inset: 0; overflow: hidden; background: var(--bg); }
+
+.map { position: absolute; inset: 0; }
+.map__svg { position: absolute; inset: 0; display: block; width: 100%; height: 100%; }
+.map__svg--mobile { display: none; }
+
+/* Kontrol peta di kanan atas: tema, lokasi, lapisan. */
+.map-controls {
+  position: absolute; top: 20px; right: 20px; z-index: 3;
+  display: flex; flex-direction: column; gap: 8px;
+}
+.map-btn {
+  width: 40px; height: 40px; border-radius: 10px; border: 1px solid var(--line);
+  background: var(--surface); color: var(--ink-2); box-shadow: var(--shadow-raised);
+  display: grid; place-items: center; cursor: pointer; font-size: 13px;
+}
+.map-legend {
+  position: absolute; right: 20px; bottom: 20px; z-index: 3;
+  background: var(--surface); border: 1px solid var(--line); border-radius: 10px;
+  box-shadow: var(--shadow-raised); padding: 8px 10px;
+  display: flex; flex-direction: column; gap: 4px; font-size: 12px; color: var(--ink-2);
+}
+.map-legend span { display: flex; align-items: center; gap: 6px; }
+.map-legend i { display: block; width: 18px; height: 3px; border-radius: 9999px; }
+
+/* Kartu search melayang di kiri atas. */
+.search-card {
+  position: absolute; left: 20px; top: 20px; z-index: 4;
+  width: var(--search-w); max-width: calc(100% - 40px);
+  background: var(--surface); border: 1px solid var(--line);
+  border-radius: var(--radius); box-shadow: var(--shadow-pop);
+  padding: 12px;
+}
+.search-card__fields { display: flex; flex-direction: column; gap: 6px; }
+.field {
+  display: grid; grid-template-columns: 14px 1fr; gap: 10px; align-items: center;
+  background: var(--surface-2); border: 1px solid transparent; border-radius: 10px;
+  padding: 8px 10px; min-height: 44px;
+}
+.field:focus-within { border-color: var(--accent); background: var(--surface); }
+.field__label { font-size: 12px; color: var(--ink-3); }
+.field__value { font-size: 15px; color: var(--ink); }
+.field__value.is-empty { color: var(--ink-3); }
+.dot { width: 10px; height: 10px; border-radius: 9999px; }
+.dot--origin { background: var(--ink); }
+.dot--dest { background: var(--accent); }
+.field-row { display: flex; gap: 8px; align-items: center; margin-top: 10px; }
+.btn {
+  appearance: none; font: inherit; font-size: 13px; cursor: pointer;
+  border-radius: 10px; border: 1px solid var(--line); background: var(--surface);
+  color: var(--ink); padding: 0 12px; min-height: 36px; display: inline-flex;
+  align-items: center; gap: 6px;
+}
+.btn--primary { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); font-weight: 600; flex: 1; justify-content: center; }
+.btn--primary:hover { background: var(--accent-hover); }
+.btn--quiet { background: transparent; color: var(--ink-2); border-color: transparent; }
+.search-card__note { font-size: 12px; color: var(--ink-3); margin-top: 8px; }
+
+/* Panel hasil mengambang di kiri bawah. */
+.results {
+  position: absolute; left: 20px; bottom: 20px; z-index: 4;
+  width: var(--panel-w); max-width: calc(100% - 40px);
+  max-height: 58%; overflow: hidden;
+  display: flex; flex-direction: column;
+  background: var(--surface); border: 1px solid var(--line);
+  border-radius: var(--radius); box-shadow: var(--shadow-pop);
+}
+.results__fade {
+  position: absolute; left: 1px; right: 1px; bottom: 1px; height: 32px; pointer-events: none;
+  background: linear-gradient(to bottom, rgba(255, 255, 255, 0), var(--surface));
+  border-radius: 0 0 var(--radius) var(--radius);
+}
+.results__head { flex: 0 0 auto; padding: 12px 14px 8px; border-bottom: 1px solid var(--line); }
+.results__eyebrow { font-size: 12px; color: var(--ink-3); }
+.results__title { font-size: 16px; font-weight: 600; letter-spacing: -0.01em; }
+.results__body { flex: 1 1 auto; min-height: 0; overflow-y: auto; padding: 8px 14px 14px; }
+
+.summary { display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap; }
+.summary__time { font-size: 40px; font-weight: 650; letter-spacing: -0.03em; line-height: 1.05; font-variant-numeric: tabular-nums; }
+.summary__meta { font-size: 13px; color: var(--ink-2); }
+.summary__fare { font-size: 13px; color: var(--ink-2); margin-top: 2px; }
+
+.alts { margin: 12px 0 4px; display: flex; flex-direction: column; gap: 6px; }
+.alt {
+  display: grid; grid-template-columns: auto 1fr auto; gap: 10px; align-items: center;
+  border: 1px solid var(--line); border-radius: 10px; padding: 8px 10px; background: var(--surface);
+}
+.alt[aria-current="true"] { border-color: var(--accent); background: var(--accent-soft); }
+.alt__time { font-size: 15px; font-weight: 600; font-variant-numeric: tabular-nums; }
+.alt__meta { font-size: 12px; color: var(--ink-3); }
+.alt__tag { font-size: 12px; color: var(--ink-2); }
+
+.legs { list-style: none; margin: 12px 0 0; padding: 0; }
+.leg { display: grid; grid-template-columns: 24px 1fr; gap: 10px; padding-bottom: 12px; position: relative; }
+.leg:not(:last-child)::before {
+  content: ""; position: absolute; left: 9px; top: 18px; bottom: 0; width: 2px; background: var(--line);
+}
+.leg__icon { width: 24px; height: 24px; border-radius: 9999px; display: grid; place-items: center; font-size: 12px; font-weight: 700; color: #ffffff; z-index: 1; }
+.leg__icon--walk { background: var(--ink-3); }
+.leg__icon--bus { background: var(--mode-bus); }
+.leg__icon--lrt { background: var(--mode-lrt-jabodebek); }
+.leg__title { font-size: 15px; font-weight: 600; }
+.leg__sub { font-size: 12px; color: var(--ink-3); }
+.leg__time { font-size: 13px; color: var(--ink-2); font-variant-numeric: tabular-nums; }
+.leg--transfer .leg__title { font-weight: 500; color: var(--ink-2); font-size: 13px; }
+
+.legend-inline { margin-top: 12px; padding-top: 10px; border-top: 1px solid var(--line); display: flex; flex-wrap: wrap; gap: 12px; font-size: 12px; color: var(--ink-2); }
+.legend-inline span { display: flex; align-items: center; gap: 6px; }
+.legend-inline i { display: block; width: 18px; height: 3px; border-radius: 9999px; }
+
+/* --------------------------------------------------------------------------
+   Compact (mobile 390 x 844)
+   -------------------------------------------------------------------------- */
+@container (max-width: 899px) {
+  .search-card {
+    left: 12px; right: 12px; top: 12px; width: auto; max-width: none;
+    padding: 10px; border-radius: 12px;
+  }
+  .results {
+    left: 12px; right: 12px; bottom: 12px; width: auto; max-width: none;
+    max-height: 46%; border-radius: 12px;
+  }
+  .map__svg--desktop { display: none; }
+  .map__svg--mobile { display: block; }
+  .map-controls { top: 12px; right: 12px; flex-direction: row; }
+  .map-btn { width: 36px; height: 36px; }
+  .map-legend { display: none; }
+  .summary__time { font-size: 28px; }
+  .results__head { padding: 10px 12px 8px; }
+  .results__body { padding: 8px 12px 12px; }
+}
+</style>
+</head>
+<body data-spec="A" data-spec-appbar="null" data-spec-panel-width="400" data-spec-search-width="420"
+      data-spec-radius="14" data-spec-breakpoint="900">
+
+<div class="harness">
+  <div class="harness__row">
+    <div class="harness__title">Konsep A <span>— peta penuh, panel mengambang, tanpa app bar</span></div>
+    <div class="harness__seg" role="group" aria-label="Perangkat">
+      <button type="button" data-mode="desktop" aria-pressed="false">Desktop 1440&times;900</button>
+      <button type="button" data-mode="mobile" aria-pressed="false">Mobile 390&times;844</button>
+      <button type="button" data-mode="both" aria-pressed="true">Bersamaan</button>
+    </div>
+    <div class="harness__note">Kerangka peramban saja &mdash; bukan bagian dari aplikasi.</div>
+  </div>
+</div>
+
+<div class="stage" data-mode="both">
+
+  <!-- ===================== Desktop 1440 x 900 ===================== -->
+  <div class="frame-wrap" data-device="desktop">
+    <p class="frame-label">Desktop &middot; 1440 &times; 900 &middot; keadaan: hasil</p>
+    <div class="frame-clip"><div class="frame frame--desktop" data-frame="desktop"></div></div>
+  </div>
+
+  <!-- ===================== Mobile 390 x 844 ===================== -->
+  <div class="frame-wrap" data-device="mobile">
+    <p class="frame-label">Mobile &middot; 390 &times; 844 &middot; keadaan: hasil</p>
+    <div class="frame-clip"><div class="frame frame--mobile" data-frame="mobile"></div></div>
+  </div>
+
+</div>
+
+<!-- ========================================================================
+     Kerangka (template) aplikasi
+     ======================================================================== -->
+
+<template id="tpl-app">
+  <div class="app">
+
+    <!-- Peta -->
+    <div class="map">
+      <svg class="map__svg map__svg--desktop" viewBox="0 0 1000 625" preserveAspectRatio="xMidYMid slice" role="img" aria-label="Peta rute dari Bundaran HI ke Kelapa Gading">
+        <rect width="1000" height="625" fill="#eae7e0"/>
+        <g stroke="#e0dcd3" stroke-width="3" fill="none">
+          <path d="M0 90 H1000"/><path d="M0 210 H1000"/><path d="M0 330 H1000"/><path d="M0 450 H1000"/><path d="M0 570 H1000"/>
+          <path d="M110 0 V625"/><path d="M310 0 V625"/><path d="M520 0 V625"/><path d="M760 0 V625"/>
+        </g>
+        <g stroke="#d8d3c8" stroke-width="8" fill="none" opacity=".8">
+          <path d="M-20 570 C 180 530, 300 450, 420 400 S 640 310, 760 230 S 900 110, 1020 60"/>
+          <path d="M40 20 C 200 100, 300 180, 420 280 S 700 460, 960 600"/>
+        </g>
+        <path d="M330 470 L370 448" stroke="#6f6b61" stroke-width="3" stroke-dasharray="6 5" fill="none"/>
+        <path d="M370 448 L420 414 L480 382 L550 350 L610 320" stroke="#ffffff" stroke-width="9" fill="none" opacity=".85"/>
+        <path d="M370 448 L420 414 L480 382 L550 350 L610 320" stroke="#1d4ed8" stroke-width="5" fill="none" stroke-linecap="round"/>
+        <path d="M610 320 L634 306" stroke="#6f6b61" stroke-width="3" stroke-dasharray="6 5" fill="none"/>
+        <path d="M634 306 L680 278 L730 250 L778 224 L830 202" stroke="#ffffff" stroke-width="9" fill="none" opacity=".85"/>
+        <path d="M634 306 L680 278 L730 250 L778 224 L830 202" stroke="#1d4ed8" stroke-width="5" fill="none" stroke-linecap="round"/>
+        <path d="M830 202 L854 194" stroke="#6f6b61" stroke-width="3" stroke-dasharray="6 5" fill="none"/>
+        <path d="M854 194 L884 180 L914 166" stroke="#ffffff" stroke-width="9" fill="none" opacity=".85"/>
+        <path d="M854 194 L884 180 L914 166" stroke="#1d4ed8" stroke-width="5" fill="none" stroke-linecap="round"/>
+        <path d="M914 166 L930 160" stroke="#6f6b61" stroke-width="3" stroke-dasharray="6 5" fill="none"/>
+        <path d="M930 160 L948 152 L964 144" stroke="#ffffff" stroke-width="9" fill="none" opacity=".85"/>
+        <path d="M930 160 L948 152 L964 144" stroke="#0e7490" stroke-width="5" fill="none" stroke-linecap="round"/>
+        <g fill="#ffffff" stroke="#1d4ed8" stroke-width="3">
+          <circle cx="370" cy="448" r="5"/><circle cx="420" cy="414" r="5"/><circle cx="480" cy="382" r="5"/>
+          <circle cx="550" cy="350" r="5"/><circle cx="610" cy="320" r="5"/>
+          <circle cx="634" cy="306" r="5"/><circle cx="680" cy="278" r="5"/><circle cx="730" cy="250" r="5"/>
+          <circle cx="778" cy="224" r="5"/><circle cx="830" cy="202" r="5"/>
+          <circle cx="854" cy="194" r="5"/><circle cx="884" cy="180" r="5"/><circle cx="914" cy="166" r="5"/>
+        </g>
+        <g fill="#ffffff" stroke="#0e7490" stroke-width="3">
+          <circle cx="930" cy="160" r="5"/><circle cx="948" cy="152" r="5"/><circle cx="964" cy="144" r="5"/>
+        </g>
+        <circle cx="330" cy="470" r="9" fill="#17150f"/>
+        <circle cx="964" cy="144" r="9" fill="#0b6b4f"/>
+        <g font-family="system-ui, sans-serif" font-size="15" fill="#17150f">
+          <text x="336" y="500" text-anchor="start">Bundaran HI</text>
+          <text x="990" y="126" text-anchor="end">Kelapa Gading</text>
+        </g>
+      </svg>
+
+      <svg class="map__svg map__svg--mobile" viewBox="0 0 390 844" preserveAspectRatio="xMidYMid slice" role="img" aria-label="Peta rute dari Bundaran HI ke Kelapa Gading">
+        <rect width="390" height="844" fill="#eae7e0"/>
+        <g stroke="#e0dcd3" stroke-width="2" fill="none">
+          <path d="M0 130 H390"/><path d="M0 270 H390"/><path d="M0 410 H390"/><path d="M0 550 H390"/><path d="M0 690 H390"/>
+          <path d="M70 0 V844"/><path d="M170 0 V844"/><path d="M265 0 V844"/><path d="M345 0 V844"/>
+        </g>
+        <g stroke="#d8d3c8" stroke-width="6" fill="none" opacity=".8">
+          <path d="M-10 760 C 90 690, 150 590, 210 480 S 300 300, 400 210"/>
+          <path d="M20 60 C 90 140, 150 250, 230 360 S 330 520, 400 640"/>
+        </g>
+        <path d="M40 640 L62 616" stroke="#6f6b61" stroke-width="3" stroke-dasharray="6 5" fill="none"/>
+        <path d="M62 616 L94 572 L128 526 L160 476 L188 430" stroke="#ffffff" stroke-width="8" fill="none" opacity=".85"/>
+        <path d="M62 616 L94 572 L128 526 L160 476 L188 430" stroke="#1d4ed8" stroke-width="4" fill="none" stroke-linecap="round"/>
+        <path d="M188 430 L202 414" stroke="#6f6b61" stroke-width="3" stroke-dasharray="6 5" fill="none"/>
+        <path d="M202 414 L228 382 L254 348 L276 312 L292 282" stroke="#ffffff" stroke-width="8" fill="none" opacity=".85"/>
+        <path d="M202 414 L228 382 L254 348 L276 312 L292 282" stroke="#1d4ed8" stroke-width="4" fill="none" stroke-linecap="round"/>
+        <path d="M292 282 L302 272" stroke="#6f6b61" stroke-width="3" stroke-dasharray="6 5" fill="none"/>
+        <path d="M302 272 L314 260 L324 250" stroke="#ffffff" stroke-width="8" fill="none" opacity=".85"/>
+        <path d="M302 272 L314 260 L324 250" stroke="#1d4ed8" stroke-width="4" fill="none" stroke-linecap="round"/>
+        <path d="M324 250 L330 244" stroke="#6f6b61" stroke-width="3" stroke-dasharray="6 5" fill="none"/>
+        <path d="M330 244 L336 238 L340 234" stroke="#ffffff" stroke-width="8" fill="none" opacity=".85"/>
+        <path d="M330 244 L336 238 L340 234" stroke="#0e7490" stroke-width="4" fill="none" stroke-linecap="round"/>
+        <g fill="#ffffff" stroke="#1d4ed8" stroke-width="2.5">
+          <circle cx="62" cy="616" r="4"/><circle cx="94" cy="572" r="4"/><circle cx="128" cy="526" r="4"/>
+          <circle cx="160" cy="476" r="4"/><circle cx="188" cy="430" r="4"/>
+          <circle cx="202" cy="414" r="4"/><circle cx="228" cy="382" r="4"/><circle cx="254" cy="348" r="4"/>
+          <circle cx="276" cy="312" r="4"/><circle cx="292" cy="282" r="4"/>
+          <circle cx="302" cy="272" r="4"/><circle cx="314" cy="260" r="4"/><circle cx="324" cy="250" r="4"/>
+        </g>
+        <g fill="#ffffff" stroke="#0e7490" stroke-width="2.5">
+          <circle cx="330" cy="244" r="4"/><circle cx="336" cy="238" r="4"/><circle cx="340" cy="234" r="4"/>
+        </g>
+        <circle cx="40" cy="640" r="8" fill="#17150f"/>
+        <circle cx="340" cy="234" r="8" fill="#0b6b4f"/>
+        <g font-family="system-ui, sans-serif" font-size="13" fill="#17150f">
+          <text x="40" y="664" text-anchor="middle">Bundaran HI</text>
+          <text x="318" y="222" text-anchor="end">Kelapa Gading</text>
+        </g>
+      </svg>
+    </div>
+
+    <!-- Kontrol peta: tema, lokasi, lapisan -->
+    <div class="map-controls">
+      <button class="map-btn" type="button" title="Lokasi saya">◎</button>
+      <button class="map-btn" type="button" title="Lapisan">▤</button>
+      <button class="map-btn" type="button" title="Tema">◐</button>
+    </div>
+
+    <!-- Legenda dipindah ke dalam panel hasil, bukan strip tipis di bawah peta -->
+    <div class="map-legend">
+      <span><i style="background:#1d4ed8"></i> Transjakarta</span>
+      <span><i style="background:#0e7490"></i> LRT Jabodebek</span>
+      <span><i style="background:#6f6b61"></i> Jalan kaki</span>
+    </div>
+
+    <!-- Kartu search melayang di kiri atas -->
+    <section class="search-card" aria-label="Cari rute">
+      <div class="search-card__fields">
+        <div class="field">
+          <span class="dot dot--origin" aria-hidden="true"></span>
+          <div>
+            <div class="field__label">Dari</div>
+            <div class="field__value">Bundaran HI</div>
+          </div>
+        </div>
+        <div class="field">
+          <span class="dot dot--dest" aria-hidden="true"></span>
+          <div>
+            <div class="field__label">Ke</div>
+            <div class="field__value">Kelapa Gading</div>
+          </div>
+        </div>
+      </div>
+      <div class="field-row">
+        <button class="btn btn--primary" type="button">Tampilkan rute</button>
+        <button class="btn btn--quiet" type="button">Tanya</button>
+      </div>
+      <p class="search-card__note">Asisten nonaktif &middot; jawaban rute dihitung dari data jaringan.</p>
+    </section>
+
+    <!-- Panel hasil mengambang di kiri bawah -->
+    <section class="results" aria-label="Hasil rute">
+      <header class="results__head">
+        <p class="results__eyebrow">Paling cepat</p>
+        <p class="results__title">Bundaran HI &rarr; Kelapa Gading</p>
+      </header>
+      <div class="results__body">
+
+        <div class="summary">
+          <span class="summary__time">1 jam 17 mnt</span>
+          <span class="summary__meta">14,6 km &middot; 3 kali pindah</span>
+        </div>
+        <p class="summary__fare">Tarif Rp7.000 &middot; berangkat 10.14 WIB</p>
+
+        <div class="alts">
+          <div class="alt" aria-current="true">
+            <span class="alt__time">1 jam 17 mnt</span>
+            <span class="alt__meta">3 kali pindah &middot; 14,6 km</span>
+            <span class="alt__tag">Rp7.000</span>
+          </div>
+          <div class="alt">
+            <span class="alt__time">1 jam 31 mnt</span>
+            <span class="alt__meta">2 kali pindah &middot; 15,8 km</span>
+            <span class="alt__tag">Rp7.000</span>
+          </div>
+          <div class="alt">
+            <span class="alt__time">1 jam 44 mnt</span>
+            <span class="alt__meta">1 kali pindah &middot; 17,2 km</span>
+            <span class="alt__tag">Rp7.000</span>
+          </div>
+        </div>
+
+        <ol class="legs">
+          <li class="leg">
+            <span class="leg__icon leg__icon--walk" aria-hidden="true">↗</span>
+            <div>
+              <p class="leg__title">Jalan kaki</p>
+              <p class="leg__sub">Bundaran HI Bank Jakarta &rarr; Halte Bundaran HI ASTRA</p>
+              <p class="leg__time">3 mnt &middot; 170 m</p>
+            </div>
+          </li>
+          <li class="leg">
+            <span class="leg__icon leg__icon--bus" aria-hidden="true">6B</span>
+            <div>
+              <p class="leg__title">Ragunan - Balai Kota VIA Semanggi</p>
+              <p class="leg__sub">Transjakarta 6B &middot; 8 halte &middot; Halte Bundaran HI ASTRA &rarr; Halte Balai Kota</p>
+              <p class="leg__time">21 mnt</p>
+            </div>
+          </li>
+          <li class="leg leg--transfer">
+            <span class="leg__icon leg__icon--walk" aria-hidden="true">↗</span>
+            <div>
+              <p class="leg__title">Pindah kendaraan</p>
+              <p class="leg__sub">Halte Balai Kota &middot; 3 mnt</p>
+            </div>
+          </li>
+          <li class="leg">
+            <span class="leg__icon leg__icon--bus" aria-hidden="true">2A</span>
+            <div>
+              <p class="leg__title">Pulo Gadung - Rawa Buaya</p>
+              <p class="leg__sub">Transjakarta 2A &middot; 12 halte &middot; Halte Balai Kota &rarr; Halte Pulo Gadung</p>
+              <p class="leg__time">20 mnt</p>
+            </div>
+          </li>
+          <li class="leg leg--transfer">
+            <span class="leg__icon leg__icon--walk" aria-hidden="true">↗</span>
+            <div>
+              <p class="leg__title">Pindah kendaraan</p>
+              <p class="leg__sub">Halte Pulo Gadung &middot; 4 mnt</p>
+            </div>
+          </li>
+          <li class="leg">
+            <span class="leg__icon leg__icon--bus" aria-hidden="true">4D</span>
+            <div>
+              <p class="leg__title">Pulo Gadung - Kuningan</p>
+              <p class="leg__sub">Transjakarta 4D &middot; 5 halte &middot; Halte Pulo Gadung &rarr; Halte Rawamangun</p>
+              <p class="leg__time">12 mnt</p>
+            </div>
+          </li>
+          <li class="leg leg--transfer">
+            <span class="leg__icon leg__icon--walk" aria-hidden="true">↗</span>
+            <div>
+              <p class="leg__title">Pindah kendaraan</p>
+              <p class="leg__sub">Stasiun LRT Rawamangun &middot; 5 mnt</p>
+            </div>
+          </li>
+          <li class="leg">
+            <span class="leg__icon leg__icon--lrt" aria-hidden="true">S</span>
+            <div>
+              <p class="leg__title">South Line (Lin Selatan) - Kelapa Gading to Manggarai</p>
+              <p class="leg__sub">LRT Jabodebek S &middot; 7 halte &middot; Stasiun LRT Rawamangun &rarr; Stasiun LRT Kelapa Gading</p>
+              <p class="leg__time">9 mnt</p>
+            </div>
+          </li>
+        </ol>
+
+        <div class="legend-inline">
+          <span><i style="background:#1d4ed8"></i> Transjakarta</span>
+          <span><i style="background:#0e7490"></i> LRT Jabodebek</span>
+          <span><i style="background:#6f6b61"></i> Jalan kaki</span>
+        </div>
+      </div>
+      <div class="results__fade" aria-hidden="true"></div>
+    </section>
+
+  </div>
+</template>
+
+<script>
+/* --------------------------------------------------------------------------
+   Peramban: menyalin kerangka ke dua bingkai dan menghitung skala tampilan.
+   Tidak mengubah isi kerangka aplikasi.
+   -------------------------------------------------------------------------- */
+(function () {
+  var stage = document.querySelector(".stage");
+  var tpl = document.getElementById("tpl-app");
+  var wraps = Array.prototype.slice.call(document.querySelectorAll(".frame-wrap"));
+
+  wraps.forEach(function (wrap) {
+    var frame = wrap.querySelector(".frame");
+    frame.appendChild(tpl.content.cloneNode(true));
+  });
+
+  function layout() {
+    var mode = stage.getAttribute("data-mode");
+    wraps.forEach(function (wrap) {
+      var device = wrap.getAttribute("data-device");
+      var visible = mode === "both" || mode === device;
+      wrap.hidden = !visible;
+      if (!visible) return;
+      var frame = wrap.querySelector(".frame");
+      var fw = frame.offsetWidth, fh = frame.offsetHeight;
+      var avail = wrap.clientWidth || fw;
+      var scale = Math.min(1, avail / fw);
+      frame.style.transform = "scale(" + scale + ")";
+      var clip = wrap.querySelector(".frame-clip");
+      clip.style.width = Math.round(fw * scale) + "px";
+      clip.style.height = Math.round(fh * scale) + "px";
+    });
+  }
+
+  Array.prototype.forEach.call(document.querySelectorAll(".harness__seg button"), function (btn) {
+    btn.addEventListener("click", function () {
+      stage.setAttribute("data-mode", btn.getAttribute("data-mode"));
+      Array.prototype.forEach.call(document.querySelectorAll(".harness__seg button"), function (other) {
+        other.setAttribute("aria-pressed", other === btn ? "true" : "false");
+      });
+      layout();
+    });
+  });
+
+  window.addEventListener("resize", layout);
+  layout();
+})();
+</script>
+</body>
+</html>
