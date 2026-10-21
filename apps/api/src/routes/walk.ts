@@ -13,7 +13,7 @@
 import { Router } from "express";
 
 import { findStationsNear } from "@daily-route/db";
-import { planRoutes } from "@daily-route/transit";
+import { planRoutes, walkingMinutes } from "@daily-route/transit";
 
 import type { ApiDeps } from "../deps.js";
 
@@ -43,27 +43,100 @@ export type WalkRoute = {
   geometry: { latitude: number; longitude: number }[];
 };
 
-const OSRM_ENDPOINT = "https://router.project-osrm.org/route/v1/foot";
+/**
+ * How a journey is weighed.
+ *
+ * The numbers are the ones the research settled on, and they are
+ * arguments rather than constants: the profiles below are the same
+ * journeys weighed differently. A change of vehicle is worth three
+ * minutes, the walk to the first stop is worth more than the walk in
+ * the middle, because that is the walk the rider did not choose.
+ */
+export type OriginWeights = {
+  /** Minutes added per change of vehicle. */
+  transfer: number;
+  /** Minutes added per kilometre walked anywhere in the journey. */
+  walkPerKm: number;
+  /** Minutes added per kilometre walked to the first stop. */
+  accessWalkPerKm: number;
+  /** Minutes added per kilometre of the whole journey. */
+  distancePerKm: number;
+};
+
+const DEFAULT_WEIGHTS: OriginWeights = {
+  transfer: 3,
+  walkPerKm: 1,
+  accessWalkPerKm: 2,
+  distancePerKm: 0.4,
+};
+
+const ORIGIN_PROFILES: Record<string, OriginWeights> = {
+  fastest: DEFAULT_WEIGHTS,
+  "fewer-transfers": { ...DEFAULT_WEIGHTS, transfer: 8 },
+  "less-walking": { ...DEFAULT_WEIGHTS, walkPerKm: 4, accessWalkPerKm: 4 },
+};
+
+const PROFILE_LABELS: Record<string, string> = {
+  fastest: "Tercepat",
+  "fewer-transfers": "Paling sedikit transit",
+  "less-walking": "Paling sedikit jalan kaki",
+};
+
+type OriginCandidate = {
+  stationId: string;
+  stationName: string;
+  latitude: number;
+  longitude: number;
+  accessWalkKm: number;
+  accessWalkMinutes: number;
+  totalMinutes: number;
+  transferCount: number;
+  walkingKm: number;
+  distanceKm: number;
+  itinerary: ReturnType<typeof planRoutes>[number];
+};
+
+/** The score of a candidate under a set of weights. */
+function scoreOf(candidate: OriginCandidate, weights: OriginWeights): number {
+  return (
+    candidate.totalMinutes +
+    weights.transfer * candidate.transferCount +
+    weights.walkPerKm * candidate.walkingKm +
+    weights.accessWalkPerKm * candidate.accessWalkKm +
+    weights.distancePerKm * candidate.distanceKm
+  );
+}
+
+/**
+ * The pedestrian router.
+ *
+ * The public OpenStreetMap instance walks on footpaths, on walkways and
+ * on crossings, and it names every street on the way. The driving
+ * profile of the OSRM demo server is not used here: it answers with car
+ * routes, and a rider needs feet.
+ */
+const VALHALLA_ENDPOINT = "https://valhalla1.openstreetmap.de";
 const REQUEST_TIMEOUT_MS = 20_000;
 
-type OsrmResponse = {
-  code: string;
-  routes?: {
-    distance: number;
-    duration: number;
-    geometry?: { coordinates?: [number, number][] };
+type ValhallaResponse = {
+  trip?: {
+    summary?: { length?: number; time?: number };
     legs?: {
-      steps?: {
-        distance: number;
-        name?: string;
-        maneuver?: { type?: string; modifier?: string };
+      shape?: string;
+      maneuvers?: {
+        instruction?: string;
+        street_names?: string[];
+        length?: number;
+        time?: number;
+        type?: number;
       }[];
     }[];
-  }[];
+  };
+  error?: string;
 };
 
 /**
- * Ask the router for the walk from one place to another.
+ * Ask the pedestrian router for the walk from one place to another.
  *
  * Returns null when the router has no answer, so the caller can report
  * that instead of inventing a straight line.
@@ -77,8 +150,17 @@ export async function fetchWalkingRoute(
   steps: WalkStep[];
   geometry: { latitude: number; longitude: number }[];
 } | null> {
-  const coordinates = `${from.longitude},${from.latitude};${to.longitude},${to.latitude}`;
-  const url = `${OSRM_ENDPOINT}/${coordinates}?overview=full&geometries=geojson&steps=true`;
+  const request = {
+    locations: [
+      { lat: from.latitude, lon: from.longitude },
+      { lat: to.latitude, lon: to.longitude },
+    ],
+    costing: "pedestrian",
+    directions_options: { units: "kilometers" },
+  };
+  const url = `${VALHALLA_ENDPOINT}/route?${new URLSearchParams({
+    json: JSON.stringify(request),
+  }).toString()}`;
 
   try {
     const response = await fetch(url, {
@@ -86,25 +168,22 @@ export async function fetchWalkingRoute(
       signal: AbortSignal.timeout(REQUEST_TIMEOUT_MS),
     });
     if (!response.ok) return null;
-    const payload = (await response.json()) as OsrmResponse;
-    if (payload.code !== "Ok") return null;
-    const route = payload.routes?.[0];
-    if (!route) return null;
+    const payload = (await response.json()) as ValhallaResponse;
+    const trip = payload.trip;
+    if (!trip) return null;
 
-    const steps = (route.legs?.[0]?.steps ?? []).map((step) => ({
-      instruction: instructionOf(step),
-      street: step.name && step.name.length > 0 ? step.name : null,
-      distanceKm: Number((step.distance / 1000).toFixed(3)),
+    const leg = trip.legs?.[0];
+    const steps = (leg?.maneuvers ?? []).map((maneuver) => ({
+      instruction: instructionOf(maneuver),
+      street: maneuver.street_names?.[0] ?? null,
+      distanceKm: Number((maneuver.length ?? 0).toFixed(3)),
     }));
 
-    const geometry = (route.geometry?.coordinates ?? []).map(([longitude, latitude]) => ({
-      latitude,
-      longitude,
-    }));
+    const geometry = decodeShape(leg?.shape ?? "");
 
     return {
-      distanceKm: Number((route.distance / 1000).toFixed(3)),
-      durationMinutes: Math.max(1, Math.round(route.duration / 60)),
+      distanceKm: Number((trip.summary?.length ?? 0).toFixed(3)),
+      durationMinutes: Math.max(1, Math.round((trip.summary?.time ?? 0) / 60)),
       steps,
       geometry,
     };
@@ -113,29 +192,116 @@ export async function fetchWalkingRoute(
   }
 }
 
-/** The instruction of a step, in the words of a rider. */
-function instructionOf(step: {
-  distance: number;
-  name?: string;
-  maneuver?: { type?: string; modifier?: string };
+/**
+ * Decode the path the router sends.
+ *
+ * The path is a polyline, the same encoding the map uses: a series of
+ * numbers that stand for points, with the difference from one point to
+ * the next.
+ */
+function decodeShape(shape: string): { latitude: number; longitude: number }[] {
+  if (shape.length === 0) return [];
+  const points: { latitude: number; longitude: number }[] = [];
+  let index = 0;
+  let latitude = 0;
+  let longitude = 0;
+
+  while (index < shape.length) {
+    let result = 0;
+    let shift = 0;
+    let byte: number;
+    do {
+      byte = shape.charCodeAt(index++) - 63;
+      result |= (byte & 0x1f) << shift;
+      shift += 5;
+    } while (byte >= 0x20);
+    latitude += result & 1 ? ~(result >> 1) : result >> 1;
+
+    result = 0;
+    shift = 0;
+    do {
+      byte = shape.charCodeAt(index++) - 63;
+      result |= (byte & 0x1f) << shift;
+      shift += 5;
+    } while (byte >= 0x20);
+    longitude += result & 1 ? ~(result >> 1) : result >> 1;
+
+    points.push({ latitude: latitude / 1e6, longitude: longitude / 1e6 });
+  }
+  return points;
+}
+
+/**
+ * The instruction of a step, in the words of a rider.
+ *
+ * The router says what happens in its own words; the rider reads it in
+ * Indonesian, and the street is named.
+ */
+function instructionOf(maneuver: {
+  instruction?: string;
+  street_names?: string[];
+  type?: number;
 }): string {
-  const modifier = step.maneuver?.modifier ?? "";
-  const street = step.name && step.name.length > 0 ? ` ke ${step.name}` : "";
-  switch (modifier) {
-    case "left":
-      return `Belok kiri${street}`;
-    case "right":
-      return `Belok kanan${street}`;
-    case "slight left":
-      return `Belok sedikit ke kiri${street}`;
-    case "slight right":
-      return `Belok sedikit ke kanan${street}`;
-    case "straight":
-      return `Lurus${street}`;
-    case "uturn":
+  const street = maneuver.street_names?.[0] ?? null;
+  const onto = street ? ` ke ${street}` : "";
+  switch (maneuver.type) {
+    case 1:
+      return street ? `Mulai di ${street}` : "Mulai berjalan";
+    case 2:
+      return `Berjalan ke kanan${onto}`;
+    case 3:
+      return `Berjalan ke kiri${onto}`;
+    case 4:
+    case 5:
+    case 6:
+      return "Tiba di tujuan";
+    case 7:
+      return `Berubah menjadi${onto}`;
+    case 8:
+      return `Lurus${onto}`;
+    case 9:
+      return `Belok sedikit ke kanan${onto}`;
+    case 10:
+      return `Belok kanan${onto}`;
+    case 11:
+      return `Belok tajam ke kanan${onto}`;
+    case 12:
+    case 13:
       return "Putar balik";
+    case 14:
+      return `Belok tajam ke kiri${onto}`;
+    case 15:
+      return `Belok kiri${onto}`;
+    case 16:
+      return `Belok sedikit ke kiri${onto}`;
+    case 17:
+      return `Naik ramp${onto}`;
+    case 18:
+      return `Ambil ramp kanan${onto}`;
+    case 19:
+      return `Ambil ramp kiri${onto}`;
+    case 20:
+      return `Keluar ke kanan${onto}`;
+    case 21:
+      return `Keluar ke kiri${onto}`;
+    case 22:
+      return `Tetap lurus${onto}`;
+    case 23:
+      return `Tetap ke kanan${onto}`;
+    case 24:
+      return `Tetap ke kiri${onto}`;
+    case 25:
+      return `Gabung${onto}`;
+    case 26:
+      return `Masuk bundaran${onto}`;
+    case 27:
+      return `Keluar bundaran${onto}`;
+    case 28:
+      return "Naik feri";
+    case 29:
+      return "Turun feri";
     default:
-      return step.name && step.name.length > 0 ? `Lanjut ke ${step.name}` : "Lanjut jalan";
+      return street ? `Lanjut ke ${street}` : "Lanjut jalan";
   }
 }
 
@@ -279,97 +445,156 @@ export function createWalkRouter(deps: ApiDeps): Router {
       return;
     }
 
-    const nearby = await findStationsNear(deps.db, { latitude, longitude }, {
-      radiusKm: 1.2,
-      limit: 8,
-    });
-    if (nearby.length === 0) {
-      response.status(404).json({ error: "Tidak ada halte dalam radius 1,2 km" });
-      return;
-    }
-
-    // A stop that serves more lines is worth a little more walking.
-    const candidates = nearby
-      .map((candidate) => ({
-        candidate,
-        score: candidate.distanceKm - (candidate.isInterchange ? 0.1 : 0),
-      }))
-      .sort((a, b) => a.score - b.score)
-      .slice(0, 4);
-
     const { network } = await deps.cache.get();
     const destinationCandidates = destination
       ? await deps.resolver.resolve(destination, { limit: 3 })
       : [];
     const destinationStation = destinationCandidates[0];
 
-    const evaluated = [];
-    for (const entry of candidates) {
-      const walk = await fetchWalkingRoute(
-        { latitude, longitude },
-        { latitude: entry.candidate.latitude, longitude: entry.candidate.longitude },
-      );
-      if (!walk) continue;
+    /*
+     * Every stop around the reader is a candidate.
+     *
+     * The nearest stop is not always the right one: a stop a little
+     * further away may serve the line that goes straight to the
+     * destination, while the nearest one may only lead the rider the
+     * long way round. So no stop is ruled out before its journey has
+     * been measured. On a real case in Jakarta the right answer was
+     * twenty-fifth by distance.
+     */
+    const nearby = await findStationsNear(deps.db, { latitude, longitude }, {
+      radiusKm: 1.5,
+      limit: 60,
+    });
+    if (nearby.length === 0) {
+      response.status(404).json({ error: "Tidak ada halte dalam radius 1,5 km" });
+      return;
+    }
 
-      const itineraries = destinationStation
-        ? planRoutes(network, entry.candidate.id, destinationStation.stationId, {
-            maxAlternatives: 1,
-          })
-        : [];
+    /*
+     * Without a destination there is no journey to weigh, and ranking
+     * the stops would only say which one is nearest. The reader is
+     * asked for a destination first.
+     */
+    const nearest = nearby[0];
+    if (!nearest) {
+      response.status(404).json({ error: "Tidak ada halte dalam radius 1,5 km" });
+      return;
+    }
+    if (!destinationStation) {
+      response.json({
+        needsDestination: true,
+        nearest: {
+          stationId: nearest.id,
+          stationName: nearest.name,
+          accessWalkKm: Number(nearest.distanceKm.toFixed(3)),
+        },
+        candidates: [],
+        profiles: [],
+      });
+      return;
+    }
+
+    const evaluated: OriginCandidate[] = [];
+    for (const candidate of nearby) {
+      const itineraries = planRoutes(network, candidate.id, destinationStation.stationId, {
+        maxAlternatives: 1,
+      });
       const itinerary = itineraries[0];
+      if (!itinerary) continue;
 
-      // The journey is judged as a whole: the walk, the waiting and the
-      // ride together. A change of vehicle is worth more than a minute
-      // of walking, but not more than a good quarter of an hour.
-      const totalMinutes = (itinerary?.durationMinutes ?? 0) + walk.durationMinutes;
-      const transferCount = itinerary?.transferCount ?? 0;
+      // The walk to the first stop, estimated the way the planner
+      // estimates every other walk.
+      const accessWalkKm = Number(candidate.distanceKm.toFixed(3));
+      const accessWalkMinutes = walkingMinutes(accessWalkKm);
+      const totalMinutes = itinerary.durationMinutes + accessWalkMinutes;
+
       evaluated.push({
-        stationId: entry.candidate.id,
-        stationName: entry.candidate.name,
-        walkDistanceKm: walk.distanceKm,
-        walkDurationMinutes: walk.durationMinutes,
+        stationId: candidate.id,
+        stationName: candidate.name,
+        latitude: candidate.latitude,
+        longitude: candidate.longitude,
+        accessWalkKm,
+        accessWalkMinutes,
         totalMinutes,
-        transferCount,
-        score: Math.round(totalMinutes + transferCount * 3),
-        walk,
-        itinerary: itinerary ?? null,
+        transferCount: itinerary.transferCount,
+        walkingKm: itinerary.walkingKm,
+        distanceKm: itinerary.distanceKm,
+        itinerary,
       });
     }
 
     if (evaluated.length === 0) {
-      response.status(503).json({ error: "Rute jalan kaki belum bisa dihitung" });
+      response.status(404).json({ error: "Tidak ada perjalanan dari halte di sekitar situ" });
       return;
     }
 
-    evaluated.sort((a, b) => a.score - b.score);
-    const best = evaluated[0];
-    if (!best) {
-      response.status(503).json({ error: "Rute jalan kaki belum bisa dihitung" });
+    /*
+     * The profiles.
+     *
+     * Each one asks a different question of the same journeys: the
+     * soonest, the one with the fewest changes of vehicle, and the one
+     * that asks the reader to walk the least. They often disagree about
+     * which stop to start from, which is the point.
+     */
+    const profiles = Object.entries(ORIGIN_PROFILES).map(([id, weights]) => {
+      const ranked = [...evaluated].sort(
+        (a, b) => scoreOf(a, weights) - scoreOf(b, weights),
+      );
+      const winner = ranked[0];
+      return {
+        id,
+        label: PROFILE_LABELS[id] ?? id,
+        stationId: winner?.stationId ?? null,
+        stationName: winner?.stationName ?? null,
+        score: winner ? Math.round(scoreOf(winner, weights) * 10) / 10 : null,
+        totalMinutes: winner?.totalMinutes ?? null,
+        transferCount: winner?.transferCount ?? null,
+        accessWalkKm: winner?.accessWalkKm ?? null,
+      };
+    });
+
+    const fastest = profiles.find((profile) => profile.id === "fastest");
+    const winner = evaluated.find((candidate) => candidate.stationId === fastest?.stationId);
+    if (!winner) {
+      response.status(404).json({ error: "Tidak ada perjalanan dari halte di sekitar situ" });
       return;
     }
+
+    // The real path of the walk, for the map and for the directions.
+    const walk = await fetchWalkingRoute(
+      { latitude, longitude },
+      { latitude: winner.latitude, longitude: winner.longitude },
+    );
 
     response.json({
-      walk: {
-        stationId: best.stationId,
-        stationName: best.stationName,
-        stationLatitude: best.walk.geometry[best.walk.geometry.length - 1]?.latitude ?? null,
-        distanceKm: best.walkDistanceKm,
-        durationMinutes: best.walkDurationMinutes,
-        steps: best.walk.steps,
-        geometry: best.walk.geometry,
-      },
-      totalMinutes: best.totalMinutes,
-      transferCount: best.transferCount,
-      candidates: evaluated.map((entry) => ({
-        stationId: entry.stationId,
-        stationName: entry.stationName,
-        walkDistanceKm: entry.walkDistanceKm,
-        walkDurationMinutes: entry.walkDurationMinutes,
-        totalMinutes: entry.totalMinutes,
-        transferCount: entry.transferCount,
-        score: entry.score,
-      })),
-      destinationStationId: destinationStation?.stationId ?? null,
+      needsDestination: false,
+      stationId: winner.stationId,
+      stationName: winner.stationName,
+      totalMinutes: winner.totalMinutes,
+      transferCount: winner.transferCount,
+      distanceKm: winner.distanceKm,
+      walkingKm: winner.walkingKm,
+      accessWalkKm: winner.accessWalkKm,
+      walk: walk
+        ? {
+            distanceKm: walk.distanceKm,
+            durationMinutes: walk.durationMinutes,
+            steps: walk.steps,
+            geometry: walk.geometry,
+          }
+        : null,
+      profiles,
+      candidates: evaluated
+        .map((candidate) => ({
+          stationId: candidate.stationId,
+          stationName: candidate.stationName,
+          accessWalkKm: candidate.accessWalkKm,
+          totalMinutes: candidate.totalMinutes,
+          transferCount: candidate.transferCount,
+          score: Math.round(scoreOf(candidate, DEFAULT_WEIGHTS) * 10) / 10,
+        }))
+        .sort((a, b) => a.score - b.score)
+        .slice(0, 6),
     });
   });
 

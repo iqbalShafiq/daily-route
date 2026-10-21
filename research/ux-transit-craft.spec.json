@@ -1,0 +1,487 @@
+{
+  "version": "1.0.0",
+  "title": "Daily Route — spesifikasi craft UI rute transit",
+  "lang": "id-ID",
+  "updated": "2026-10-21",
+  "report": "research/ux-transit-craft.md",
+  "description": "Spesifikasi yang bisa dipakai mesin untuk memeriksa apps/web/src. Semua angka berasal dari laporan riset dan diberi sumber di `report`; tidak ada angka tanpa sumber.",
+  "scope": {
+    "appliesTo": "apps/web/src",
+    "excludes": [
+      "apps/web/e2e",
+      "packages/**",
+      "research/**"
+    ],
+    "note": "Skrip pemeriksaan hanya membaca berkas. Ia tidak pernah menulis, memindahkan, atau mengubah berkas sumber apa pun."
+  },
+
+  "typography": {
+    "family": {
+      "sans": "Plus Jakarta Sans Variable",
+      "mono": "JetBrains Mono Variable",
+      "note": "Kedua wajah berlisensi OFL-1.1. Jangan menambahkan Inter, Roboto, atau Geist."
+    },
+    "scale": [
+      {
+        "token": "display",
+        "px": 40,
+        "rem": 2.5,
+        "lineHeight": 1.05,
+        "lineHeightPx": 42,
+        "weight": 700,
+        "tracking": "-0.03em",
+        "numeric": true,
+        "usage": "Durasi perjalanan. Satu-satunya angka besar di layar.",
+        "tailwind": "text-[40px] leading-[1.05] font-semibold tracking-[-0.03em] tabular-nums"
+      },
+      {
+        "token": "h1",
+        "px": 28,
+        "rem": 1.75,
+        "lineHeight": 1.2,
+        "lineHeightPx": 34,
+        "weight": 700,
+        "tracking": "-0.025em",
+        "numeric": false,
+        "usage": "Judul panel dan judul halaman.",
+        "tailwind": "text-[28px] leading-[1.2] font-bold tracking-[-0.025em]"
+      },
+      {
+        "token": "h2",
+        "px": 20,
+        "rem": 1.25,
+        "lineHeight": 1.3,
+        "lineHeightPx": 26,
+        "weight": 600,
+        "tracking": "-0.02em",
+        "numeric": false,
+        "usage": "Judul bagian di dalam kartu (Tarif, Perjalanan).",
+        "tailwind": "text-[20px] leading-[1.3] font-semibold tracking-[-0.02em]"
+      },
+      {
+        "token": "h3",
+        "px": 16,
+        "rem": 1,
+        "lineHeight": 1.35,
+        "lineHeightPx": 22,
+        "weight": 600,
+        "tracking": "-0.01em",
+        "numeric": false,
+        "usage": "Nama jalur, nama tempat, nama halte utama.",
+        "tailwind": "text-[16px] leading-[1.35] font-semibold tracking-[-0.01em]"
+      },
+      {
+        "token": "body",
+        "px": 15,
+        "rem": 0.9375,
+        "lineHeight": 1.55,
+        "lineHeightPx": 23,
+        "weight": 400,
+        "tracking": "0",
+        "numeric": false,
+        "usage": "Teks isi, baris detail kaki perjalanan, isi form.",
+        "tailwind": "text-[15px] leading-[1.55]"
+      },
+      {
+        "token": "body-sm",
+        "px": 13,
+        "rem": 0.8125,
+        "lineHeight": 1.5,
+        "lineHeightPx": 20,
+        "weight": 400,
+        "tracking": "0",
+        "numeric": false,
+        "usage": "Daftar halte, catatan kaki, teks sekunder, isi tooltip.",
+        "tailwind": "text-[13px] leading-[1.5]"
+      },
+      {
+        "token": "label",
+        "px": 12,
+        "rem": 0.75,
+        "lineHeight": 1.35,
+        "lineHeightPx": 16,
+        "weight": 600,
+        "tracking": "0.04em",
+        "numeric": false,
+        "usage": "Label field dan eyebrow uppercase. Eyebrow hanya berisi KATA KIASAN, tidak pernah nama tempat.",
+        "tailwind": "text-[12px] leading-[1.35] font-semibold tracking-[0.04em] uppercase"
+      },
+      {
+        "token": "meta",
+        "px": 12,
+        "rem": 0.75,
+        "lineHeight": 1.45,
+        "lineHeightPx": 17,
+        "weight": 500,
+        "tracking": "0",
+        "numeric": true,
+        "usage": "Timestamp, atribusi, sumber, stempel waktu data.",
+        "tailwind": "text-[12px] leading-[1.45] font-medium tabular-nums"
+      },
+      {
+        "token": "code",
+        "px": 12,
+        "rem": 0.75,
+        "lineHeight": 1.2,
+        "lineHeightPx": 14,
+        "weight": 500,
+        "tracking": "0.01em",
+        "numeric": true,
+        "usage": "Kode halte dan kode jalur, JetBrains Mono.",
+        "tailwind": "font-mono text-[12px] leading-[1.2] font-medium tracking-[0.01em] tabular-nums"
+      }
+    ],
+    "allowedFontSizesPx": [40, 28, 20, 16, 15, 13, 12],
+    "nearScaleFontSizesPx": [24, 18, 14],
+    "forbiddenFontSizesPx": [11, 10, 9, 8],
+    "allowedLineHeights": [1.05, 1.2, 1.3, 1.35, 1.45, 1.5, 1.55],
+    "allowedTracking": ["-0.03em", "-0.025em", "-0.02em", "-0.01em", "0", "0.01em", "0.04em", "0.08em"],
+    "minimumBodyPx": 13,
+    "minimumLabelPx": 12,
+    "minimumNote": "Teks isi minimal 13 px; label, metadata, kode, dan anotasi minimal 12 px. Di bawah 12 px tidak pernah dipakai, bahkan untuk catatan.",
+    "numericRule": {
+      "require": "tabular-nums",
+      "note": "Setiap angka yang dapat dibandingkan dengan angka lain memakai tabular-nums: durasi, jarak, jumlah halte, tarif, jam, nomor halte.",
+      "exempt": "Nomor urut di dalam daftar statis dan angka di dalam nama orang atau nama jalan."
+    },
+    "maxLineLengthChars": {
+      "min": 45,
+      "max": 75,
+      "preferred": "48-52",
+      "note": "Kolom kiri 400-440 px dengan body 15 px menghasilkan 48-52 karakter. Jangan justify."
+    }
+  },
+
+  "spacing": {
+    "basePx": 4,
+    "allowedPx": [0, 1, 2, 4, 8, 12, 16, 20, 24, 32, 40, 48, 64],
+    "nearPx": [6, 10, 14, 18, 22, 26, 28, 30, 36, 44, 56, 72, 80, 96],
+    "halfStepPx": [6, 10, 14],
+    "subScalePx": [3, 5, 7, 9, 11, 13, 15],
+    "scale": [
+      { "token": "space-0", "px": 0 },
+      { "token": "space-px", "px": 1, "use": "Garis pemisah 1 px" },
+      { "token": "space-1", "px": 4, "use": "Padding dalam chip" },
+      { "token": "space-2", "px": 8, "use": "Jarak ikon-teks, padding baris rapat" },
+      { "token": "space-3", "px": 12, "use": "Jarak antar baris kaki, padding vertikal baris" },
+      { "token": "space-4", "px": 16, "use": "Padding kartu, padding ponsel" },
+      { "token": "space-5", "px": 20, "use": "Padding atas panel" },
+      { "token": "space-6", "px": 24, "use": "Jarak antar blok di kolom kiri, padding panel" },
+      { "token": "space-8", "px": 32, "use": "Padding bawah panel" },
+      { "token": "space-10", "px": 40 },
+      { "token": "space-12", "px": 48 },
+      { "token": "space-16", "px": 64 }
+    ],
+    "density": {
+      "leftPanelDesktop": {
+        "columnWidthPx": "minmax(380px, 440px)",
+        "panelPaddingPx": 24,
+        "blockGapPx": 24,
+        "cardPaddingPx": 16,
+        "legRowPaddingPx": 12,
+        "legRowMinHeightPx": 56,
+        "stopRowHeightPx": 32
+      },
+      "leftPanelPhone": {
+        "mapHeight": "42dvh",
+        "horizontalPaddingPx": 16,
+        "legRowMinHeightPx": 64,
+        "buttonHeightPx": 48,
+        "inputFontPx": 16
+      }
+    }
+  },
+
+  "radius": {
+    "allowedPx": [0, 3, 4, 6, 8, 10, 12, 14, 18, 9999],
+    "nearPx": [2, 5, 7, 9, 15, 16, 20],
+    "scale": [
+      { "token": "radius-xs", "px": 3, "use": "Sorotan submencocokan, titik" },
+      { "token": "radius-sm", "px": 6, "use": "Tombol ikon, kontrol peta, popover peta" },
+      { "token": "radius-md", "px": 10, "use": "Tombol, input, chip" },
+      { "token": "radius-lg", "px": 14, "use": "Kartu, panel itinerary" },
+      { "token": "radius-xl", "px": 18, "use": "Bottom sheet, dialog" },
+      { "token": "radius-full", "px": 9999, "use": "Pil, avatar, penanda peta" }
+    ],
+    "rule": {
+      "maxVisibleRadiiPerScreen": 3,
+      "note": "Radius mengikuti ukuran permukaan. Kartu 14 px, chip 6-10 px, titik 9999 px. Kartu tidak pernah memakai radius penuh."
+    }
+  },
+
+  "tailwindNamed": {
+    "text-xs": 12,
+    "text-sm": 14,
+    "text-base": 16,
+    "text-lg": 18,
+    "text-xl": 20,
+    "text-2xl": 24,
+    "text-3xl": 30,
+    "text-4xl": 36,
+    "rounded-none": 0,
+    "rounded-sm": 4,
+    "rounded-md": 6,
+    "rounded-lg": 8,
+    "rounded-xl": 12,
+    "rounded-2xl": 16,
+    "rounded-3xl": 24,
+    "rounded-full": 9999,
+    "leading-none": 1,
+    "leading-tight": 1.25,
+    "leading-snug": 1.375,
+    "leading-normal": 1.5,
+    "leading-relaxed": 1.625,
+    "leading-loose": 2,
+    "tracking-tighter": "-0.05em",
+    "tracking-tight": "-0.025em",
+    "tracking-normal": "0",
+    "tracking-wide": "0.025em",
+    "tracking-wider": "0.05em",
+    "tracking-widest": "0.1em"
+  },
+
+  "copy": {
+    "lang": "id-ID",
+    "principles": [
+      "Tidak ada copy pemasaran, tidak ada tanda seru, tidak ada emoji, tidak ada em-dash.",
+      "Bahasa Indonesia resmi: angka ribuan memakai titik, desimal memakai koma, jam memakai titik, rupiah tanpa spasi.",
+      "Istilah mengikuti operator: halte untuk bus, stasiun untuk MRT, LRT Jakarta, LRT Jabodebek, dan KRL.",
+      "Label mengikuti kapitalisasi kalimat. Uppercase hanya untuk eyebrow dan kode jalur.",
+      "Setiap keadaan kosong menyebut apa yang terjadi dan apa yang bisa dilakukan berikutnya."
+    ],
+    "rules": [
+      {
+        "id": "C01",
+        "surface": "apps/web/src/components/transit/leg-list.tsx",
+        "direction": "change",
+        "before": "re:Berjalan kaki ke halte",
+        "after": "Berjalan kaki ke {Stasiun|Halte} <nama>, mengikuti moda kendaraan berikutnya",
+        "why": "Satu kata untuk semua moda terdengar salah. Bus berhenti di halte, kereta berhenti di stasiun. Aturan: bus = halte, MRT/LRT/KRL = stasiun.",
+        "source": "UU 22/2009 tentang Lalang Jalan; lrtjakarta.co.id menulis 'Stasiun Velodrome'; id.wikipedia.org/wiki/Transjakarta menulis 'Halte BRT Senen'"
+      },
+      {
+        "id": "C02",
+        "surface": "apps/web/src/components/transit/leg-list.tsx",
+        "direction": "change",
+        "before": "re:\\{leg\\.stops\\.length\\} halte",
+        "after": "{n} {stasiun|halte} sesuai moda kendaraan",
+        "why": "Jumlah perhentian antara dihitung dengan kata yang salah bila kendaraannya kereta.",
+        "source": "id.wikipedia.org/wiki/Stasiun_kereta_api; id.wikipedia.org/wiki/LRT_Jabodebek"
+      },
+      {
+        "id": "C03",
+        "surface": "apps/web/src/features/route-planner/route-planner.tsx",
+        "direction": "change",
+        "before": "Perkiraan tarif",
+        "after": "Tarif",
+        "why": "Tarif yang dipublikasikan operator bukan perkiraan. 'Perkiraan' menutupi ketidakjelasan sumber angka.",
+        "source": "AGENTS.md: 'Nothing invents'; research/ux-visual-language.md bagian 8.4"
+      },
+      {
+        "id": "C04",
+        "surface": "apps/web/src/components/transit/leg-list.tsx",
+        "direction": "change",
+        "before": "re:tunggu ±",
+        "after": "tunggu {n} mnt",
+        "why": "Tanda plus-minus bukan kebiasan pembaca Indonesia di UI dan membuat angka terlihat tidak pasti.",
+        "source": "PUEBI (tanda baca dan lambang bilangan)"
+      },
+      {
+        "id": "C05",
+        "surface": "apps/web/src/components/transit/leg-list.tsx",
+        "direction": "change",
+        "before": "re:\"Jalan kaki\"",
+        "after": "\"Berjalan kaki\"",
+        "why": "Nama kaki perjalanan memakai bentuk kata kerja yang sama dengan kalimat di bawahnya.",
+        "source": "Ejaan Bahasa Indonesia: kata kerja berimbuhan me- mengimapkan bentuk baku"
+      },
+      {
+        "id": "C06",
+        "surface": "apps/web/src/features/route-planner/route-planner.tsx",
+        "direction": "change",
+        "before": "Transjakarta, MRT, LRT Jakarta, LRT Jabodebek, dan KRL.",
+        "after": "Hapus dari deskripsi kartu; daftar operator sudah ada di legenda peta dan di chip mode.",
+        "why": "Deskripsi kartu harus memberi tahu apa yang harus diketik, bukan mendaftar operator.",
+        "source": "DESIGN.md: 'No marketing copy'"
+      },
+      {
+        "id": "C07",
+        "surface": "apps/web/src/features/route-planner/route-planner.tsx",
+        "direction": "change",
+        "before": "Coba nama tempat yang lebih spesifik, misalnya halte terdekat dengan nama jalan.",
+        "after": "Coba nama halte yang lebih spesifik, misalnya Halte Bundaran HI.",
+        "why": "Kalimat lama tidak masuk akal ('halte terdekat dengan nama jalan') dan tidak memberi contoh yang bisa diklik.",
+        "source": "NN/g: 'Use Empty States to Provide Learning Cues' dan 'Provide direct pathways'"
+      },
+      {
+        "id": "C08",
+        "surface": "apps/web/src/features/route-planner/route-planner.tsx",
+        "direction": "change",
+        "before": "Tidak ada rute terhubung",
+        "after": "Tidak ada perjalanan yang terhubung",
+        "why": "Frasa yang lebih natural dan mudah dicari; kata 'perjalanan' adalah kata kunci penumpang.",
+        "source": "PUEBI: kapitalisasi kalimat dan pilihan kata dalam konteks"
+      },
+      {
+        "id": "C09",
+        "surface": "apps/web/src/features/route-planner/route-planner.tsx",
+        "direction": "change",
+        "before": "Data per ",
+        "after": "Terakhir dihitung 21 Okt 2026, 10.14 WIB",
+        "why": "Menyebutkan waktu mutlak dan zona waktu, plus waktu relatif bila perlu.",
+        "source": "PUEBI III.A.3: tanda titik sebagai pemisah jam dan menit; research/ux-visual-language.md bagian 8.3"
+      },
+      {
+        "id": "C10",
+        "surface": "apps/web/src/features/route-planner/route-planner.tsx",
+        "direction": "change",
+        "before": "Rute tercepat",
+        "after": "Tercepat",
+        "why": "Tab pertama dan label tab harus sama; 'Rute tercepat' menggandakan kata yang sudah ada di dalam chip.",
+        "source": "Google Maps routeLabels (DEFAULT_ROUTE): label rute adalah tujuan optimasi"
+      },
+      {
+        "id": "C11",
+        "surface": "apps/web/src/features/route-planner/route-planner.tsx",
+        "direction": "change",
+        "before": "re:`Alternatif`",
+        "after": "Paling sedikit pindah / Rekomendasi",
+        "why": "'Alternatif' tidak memberi tahu apa yang berbeda; label harus menyebut tujuan optimasinya.",
+        "source": "developers.google.com/maps/documentation/routes/alternative-routes (routeLabels)"
+      },
+      {
+        "id": "C12",
+        "surface": "apps/web/src/routes/index.tsx",
+        "direction": "change",
+        "before": "Berjalan kaki ke halte pertama",
+        "after": "Berjalan kaki ke halte pertama (kata 'halte' ikut moda)",
+        "why": "Legenda peta harus memakai istilah operator yang sama dengan daftar perjalanan.",
+        "source": "lrtjakarta.co.id; jaklingkoindonesia.co.id"
+      },
+      {
+        "id": "C13",
+        "surface": "apps/web/src/features/route-planner/route-planner.tsx",
+        "direction": "keep",
+        "before": "re:\\{current\\.transferCount\\} kali pindah",
+        "after": "Tetap: '{n} kali pindah'",
+        "why": "Bentuk ini sudah benar. Jangan menjadi '2x Pindah' atau '2 Kali Pindah'.",
+        "source": "PUEBI II.I.4: angka dipakai untuk menyatakan waktu; research/ux-visual-language.md bagian 1.1"
+      },
+      {
+        "id": "C14",
+        "surface": "apps/web/src/lib/format.ts",
+        "direction": "keep",
+        "before": "re:toLocaleString\\(\"id-ID\"\\)",
+        "after": "Tetap: pemisah ribuan titik dan desimal koma",
+        "why": "Format Indonesia: 15.200 dan 15,2 km.",
+        "source": "PUEBI III.A.5 dan PUEBI II.I.4"
+      },
+      {
+        "id": "C15",
+        "surface": "apps/api/src/routes/routes.ts",
+        "direction": "change",
+        "before": "re:Rp ",
+        "after": "Rp5.000",
+        "why": "Lambang rupiah ditulis tanpa spasi dan tanpa titik setelah Rp.",
+        "source": "PUEBI II.H.5: lambang mata uang tidak diikuti tanda titik dan melekat pada angka"
+      }
+    ]
+  },
+
+  "states": {
+    "loading": {
+      "rule": "Rute sebelumnya tidak boleh hilang saat rute baru dihitung. Tampilkan garis progres 2 px di tepi atas panel itinerary, tidak spinner penuh.",
+      "progressBarPx": 2,
+      "durationMs": 240,
+      "slowThresholdMs": 3000,
+      "slowMessage": "Perhitungan lambat. Menyederhanakan\u2026",
+      "aria": "aria-busy=\"true\" pada panel itinerary, aria-live=\"polite\" untuk pengumuman"
+    },
+    "empty": {
+      "rule": "Setiap keadaan kosong menyebut status dan memberi satu jalan keluar yang bisa diklik. Contoh yang bisa diklik selalu berisi nama halte nyata.",
+      "example": "Bundaran HI \u2192 Kota Tua",
+      "minPaddingPx": 48
+    },
+    "error": {
+      "rule": "Pesan error muncul dekat titik kegagalan, menyebut penyebab, dan memberi aksi. Jangan menaruh error global di atas layar.",
+      "source": "NN/g 'Cancel vs Close': error harus muncul dekat tempat kegagalan"
+    },
+    "disruption": {
+      "rule": "Banner gangguan berada di atas itinerary, menyebut tingkat keparahan sebagai kata, waktu publikasi, dan sumber.",
+      "severityOrder": ["info", "warning", "severe", "critical"],
+      "severityLabel": { "info": "Informasi", "warning": "Waspada", "severe": "Serius", "critical": "Kritis" }
+    },
+    "alternatives": {
+      "rule": "Alternatif ditampilkan sebagai daftar baris dengan tujuan optimasi, bukan tab yang menyembunyikan perbandingan.",
+      "labels": ["Tercepat", "Paling sedikit pindah", "Rekomendasi"],
+      "secondary": "Selisih waktu dan selisih jumlah pindah ditulis sebagai trade-off, contoh '+6 mnt, 1 pindah lebih banyak'.",
+      "maxVisible": 3
+    },
+    "focus": {
+      "rule": "Fokus berpindah ke panel itinerary ketika hasil rute muncul, dan fokus tidak pernah hilang saat state berubah.",
+      "focusRingPx": 2,
+      "focusRingOffsetPx": 2
+    },
+    "permission": {
+      "rule": "Tombol lokasi di dalam field, bukan di peta. Permintaan izin hanya setelah pengguna menekan tombol; hasil penolakan dijelaskan di bawah field, bukan dialog.",
+      "control": "Ikon LocateFixed 16 px di kanan field 'Dari', aria-label 'Gunakan posisi saya'",
+      "minTargetPx": 32
+    }
+  },
+
+  "checks": [
+    { "id": "type.size", "severity": "error", "appliesTo": ["tsx", "ts"], "description": "Ukuran huruf harus ada di skala tipografi." },
+    { "id": "type.size.warn", "severity": "warn", "appliesTo": ["tsx", "ts"], "description": "Ukuran huruf di dekat skala, bukan di skala." },
+    { "id": "type.size.floor", "severity": "error", "appliesTo": ["tsx", "ts"], "description": "Ukuran huruf di bawah lantai 12 px." },
+    { "id": "type.lineHeight", "severity": "warn", "appliesTo": ["tsx", "ts"], "description": "Line-height di luar daftar yang diizinkan." },
+    { "id": "type.tracking", "severity": "warn", "appliesTo": ["tsx", "ts"], "description": "Tracking di luar daftar yang diizinkan." },
+    { "id": "space.scale", "severity": "error", "appliesTo": ["tsx", "ts"], "description": "Nilai spasi di luar skala 4 px." },
+    { "id": "space.subscale", "severity": "warn", "appliesTo": ["tsx", "ts"], "description": "Nilai spasi di bawah 4 px (sub-skala)." },
+    { "id": "radius.scale", "severity": "error", "appliesTo": ["tsx", "ts"], "description": "Radius di luar skala radius." },
+    { "id": "radius.near", "severity": "warn", "appliesTo": ["tsx", "ts"], "description": "Radius di dekat skala, bukan di skala." },
+    { "id": "colour.hexInComponent", "severity": "error", "appliesTo": ["tsx", "ts"], "description": "Hex di dalam komponen. Warna hanya lewat token di styles.css." },
+    { "id": "copy.emoji", "severity": "error", "appliesTo": ["tsx", "ts", "css"], "description": "Emoji di dalam kode, markup, atau copy." },
+    { "id": "copy.exclamation", "severity": "error", "appliesTo": ["tsx", "ts"], "description": "Tanda seru di dalam copy." },
+    { "id": "copy.emDash", "severity": "warn", "appliesTo": ["tsx", "ts"], "description": "Em-dash atau en-dash di dalam copy Indonesia." },
+    { "id": "copy.terminology", "severity": "error", "appliesTo": ["tsx", "ts"], "description": "Istilah yang harus diubah menurut aturan copy." },
+    { "id": "numeric.tabular", "severity": "warn", "appliesTo": ["tsx"], "description": "Angka yang dapat dibandingkan dengan angka lain tanpa tabular-nums." }
+  ],
+
+  "sourceIndex": {
+    "officialDocs": [
+      "https://designsystem.nsw.gov.au/core/typography",
+      "https://www.digital.nsw.gov.au/delivery/accessibility-and-inclusivity-toolkit/design/typography",
+      "https://developer.apple.com/design/human-interface-guidelines/typography",
+      "https://www.carbondesignsystem.com/building-blocks/foundations/spacing/overview",
+      "https://www.carbondesignsystem.com/building-blocks/foundations/typography/type-sets",
+      "https://v10.carbondesignsystem.com/patterns/loading-pattern",
+      "https://github.com/Shopify/polaris-tokens",
+      "https://designsystems.surf/articles/typography-system-101-a-step-by-step-guide",
+      "https://repositori.kemendikdasmen.go.id/270/1/PUEBI.pdf",
+      "https://ivanlanin.github.io/puebi/kata/angka-dan-bilangan",
+      "https://ivanlanin.github.io/puebi/tanda-baca/tanda-titik",
+      "https://jdih.kemenkeu.go.id/kamus-hukum/halte?id=10d118b2ba587e83e1654a25a8648367",
+      "https://bpiw.pu.go.id/bankdata/dictionary/words?q=Halte&id=591",
+      "https://www.transjakarta.co.id/",
+      "https://lrtjakarta.co.id/",
+      "https://jaklingkoindonesia.co.id/",
+      "https://tfl.gov.uk/info-for/suppliers-and-contractors/design-standards",
+      "https://content.tfl.gov.uk/tfl-colour-standard.pdf",
+      "https://www.lta.gov.sg/content/ltagov/en/getting_around/public_transport/plan_your_journey.html",
+      "https://developers.google.com/maps/documentation/routes/alternative-routes",
+      "https://www.nngroup.com/articles/empty-state-interface-design",
+      "https://www.nngroup.com/articles/confirmation-dialog",
+      "https://www.nngroup.com/articles/cancel-vs-close",
+      "https://www.nngroup.com/articles/visual-hierarchy-ux-definition",
+      "https://ux.redhat.com/elements/popover/guidelines"
+    ],
+    "designerOpinion": [
+      "https://ixd.prattsi.org/2026/02/design-critique-citymapper-ios-app",
+      "https://www.modeshift.com/mobile-ui-ux-public-transit-systems",
+      "https://www.useronboard.com/onboarding-ux-patterns/permission-priming",
+      "https://www.smashingmagazine.com/2024/09/how-manage-dangerous-actions-user-interfaces",
+      "https://medium.com/design-bootcamp/hicks-law-be293c9d460e",
+      "https://www.parallelhq.com/blog/ux-laws-design-principles"
+    ]
+  }
+}

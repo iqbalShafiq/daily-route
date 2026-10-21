@@ -6,7 +6,7 @@ import { EmptyState, Spinner } from "../../components/ui/feedback.js";
 import { Tab, Tabs } from "../../components/ui/tabs.js";
 import { DisruptionBanner } from "../../components/transit/disruption-banner.js";
 import { LegList } from "../../components/transit/leg-list.js";
-import type { Itinerary, PlanResult, WalkRoute } from "../../lib/api.js";
+import type { Itinerary, PlanResult, PositionPlan } from "../../lib/api.js";
 import { formatDistance, formatDuration, formatTimestamp } from "../../lib/format.js";
 
 import { PlaceInput } from "./place-input.js";
@@ -43,8 +43,8 @@ export function RoutePlanner({
   activeLeg,
   onLegSelect,
   onStopHover,
-  onWalkReady,
   onUseMyPosition,
+  onChooseOrigin,
   walk,
 }: {
   origin: string;
@@ -59,11 +59,12 @@ export function RoutePlanner({
   onLegSelect?: ((legId: string) => void) | undefined;
   /** Pointing at a stop in the list points at that stop on the map. */
   onStopHover?: ((stationId: string | null) => void) | undefined;
-  onWalkReady?: ((walk: WalkRoute) => void) | undefined;
   /** Ask the browser where the reader is, and plan from there. */
   onUseMyPosition?: (() => void) | undefined;
   /** The walk from the reader's place to the stop, when it is known. */
-  walk?: WalkRoute | null | undefined;
+  walk?: PositionPlan | null | undefined;
+  /** Choose a different start: the fewest transfers, or the least walking. */
+  onChooseOrigin?: ((profileId: string) => void) | undefined;
 }) {
   const data: PlanResult | undefined = plan.data;
   const itineraries = data?.itineraries ?? [];
@@ -79,9 +80,9 @@ export function RoutePlanner({
           description="Transjakarta, MRT, LRT Jakarta, LRT Jabodebek, dan KRL."
         />
 
-        {onWalkReady ? (
+        {walk !== undefined ? (
           <div className="px-4 pb-3">
-            <WalkPanel walk={walk ?? null} />
+            <WalkPanel plan={walk ?? null} onChoose={onChooseOrigin} />
           </div>
         ) : null}
 

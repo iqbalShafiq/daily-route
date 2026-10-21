@@ -207,25 +207,47 @@ export type WalkRoute = {
   geometry: { latitude: number; longitude: number }[];
 };
 
+/** The journey planned from the reader's own position. */
+export type PositionPlan = {
+  needsDestination: boolean;
+  stationId: string | null;
+  stationName: string | null;
+  totalMinutes: number | null;
+  transferCount: number | null;
+  distanceKm: number | null;
+  walkingKm: number | null;
+  accessWalkKm: number | null;
+  walk: {
+    distanceKm: number;
+    durationMinutes: number;
+    steps: { instruction: string; street: string | null; distanceKm: number }[];
+    geometry: { latitude: number; longitude: number }[];
+  } | null;
+  profiles: {
+    id: string;
+    label: string;
+    stationId: string | null;
+    stationName: string | null;
+    score: number | null;
+    totalMinutes: number | null;
+    transferCount: number | null;
+    accessWalkKm: number | null;
+  }[];
+  candidates: {
+    stationId: string;
+    stationName: string;
+    accessWalkKm: number;
+    totalMinutes: number;
+    transferCount: number;
+    score: number;
+  }[];
+};
+
 export const api = {
   health: () => request<{ status: string; agent: boolean; model: string }>("/health"),
 
   planFromPosition: (coordinates: { latitude: number; longitude: number }, destination: string) =>
-    request<{
-      walk: WalkRoute;
-      totalMinutes: number;
-      transferCount: number;
-      destinationStationId: string | null;
-      candidates: {
-        stationId: string;
-        stationName: string;
-        walkDistanceKm: number;
-        walkDurationMinutes: number;
-        totalMinutes: number;
-        transferCount: number;
-        score: number;
-      }[];
-    }>(
+    request<PositionPlan>(
       `/walk/plan?latitude=${coordinates.latitude}&longitude=${coordinates.longitude}` +
         `&destination=${encodeURIComponent(destination)}`,
     ),

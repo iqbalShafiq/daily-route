@@ -159,11 +159,16 @@ test.describe("walking from the reader's place", () => {
   test("finds the stop to walk to and the way there", async ({ page }) => {
     await page.goto("/");
 
+    // A journey needs a destination before the start can be weighed.
+    await page.getByLabel("Ke").fill("Kelapa Gading");
+    await page.keyboard.press("Escape");
+
     await page.getByRole("button", { name: "Gunakan posisi saya" }).click();
 
-    // The walk names the stop, the distance and the streets on the way.
+    // The stop to start from, the distance, and the ways of starting.
+    await expect(page.getByText("Mulai dari")).toBeVisible({ timeout: 30_000 });
+    await expect(page.getByRole("button", { name: /^Tercepat / })).toBeVisible();
     await expect(page.getByText(/Berjalan .* ke /).first()).toBeVisible({ timeout: 30_000 });
-    await expect(page.getByText(/Jalan|Boulevard|Gang|Tol /).first()).toBeVisible({ timeout: 30_000 });
 
     // The journey starts from that stop.
     await expect(page.getByLabel("Dari")).toHaveValue(/.+/);

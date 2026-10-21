@@ -1,69 +1,113 @@
-import { LocateFixed } from "lucide-react";
-import { useState } from "react";
+import { Footprints } from "lucide-react";
 
-import type { WalkRoute } from "../../lib/api.js";
+import type { PositionPlan } from "../../lib/api.js";
 import { cn } from "../../lib/cn.js";
 import { formatDistance } from "../../lib/format.js";
 
 /**
- * Walking from where the reader is.
+ * Where the journey starts from the reader's own position.
  *
- * A rider who is standing somewhere needs to know two things: which stop
- * to walk to, and how to get there. The panel asks the browser where
- * they are, asks the server for the walk to the stop that serves that
- * place, and shows the street names along the way.
+ * The nearest stop is not always the right one, so the server weighs
+ * every stop around the reader and answers with the journeys that come
+ * out of them. Each one is a different question: the soonest, the one
+ * with the fewest changes of vehicle, the one that asks the reader to
+ * walk the least. They often start from different stops, and the reader
+ * is the one who knows which they prefer.
  */
 export function WalkPanel({
-  walk,
+  plan,
   className,
+  onChoose,
 }: {
-  /** The walk the server worked out, when there is one. */
-  walk: WalkRoute | null;
+  /** The journey the server worked out, when there is one. */
+  plan: PositionPlan | null;
   className?: string;
+  /** Choose a different start, by its profile. */
+  onChoose?: ((profileId: string) => void) | undefined;
 }) {
-  const [message] = useState<string | null>(null);
+  if (!plan) {
+    return (
+      <p className="px-4 pb-3 text-[12px] text-ink-3">
+        Tekan ikon lokasi di kolom &quot;Dari&quot; untuk mulai dari tempat Anda berada.
+      </p>
+    );
+  }
+
+  if (plan.needsDestination) {
+    return (
+      <p className="px-4 pb-3 text-[12px] text-ink-3">
+        Tulis tujuan dulu, lalu tekan ikon lokasi untuk mencari rute terbaik dari
+        tempat Anda berada.
+      </p>
+    );
+  }
+
+  const walk = plan.walk;
 
   return (
-    <div className={cn("rounded-card border border-line bg-surface-2/60 px-3 py-2.5", className)}>
-      <div className="flex items-center gap-2">
-        <LocateFixed aria-hidden className="size-4 shrink-0 text-ink-3" />
-        <p className="min-w-0 flex-1 text-[13px] text-ink-2">
-          {walk
-            ? `Berjalan ${formatDistance(walk.distanceKm)} ke ${walk.stationName}`
-            : "Mulai dari tempat Anda berada?"}
-        </p>
-      </div>
+    <div className={cn("px-4 pb-3", className)}>
+      <p className="flex items-center gap-1.5 text-[11px] uppercase tracking-[0.08em] text-ink-3">
+        <Footprints aria-hidden className="size-3.5" />
+        Mulai dari
+      </p>
 
-      {message ? <p className="mt-1.5 text-[12px] text-danger">{message}</p> : null}
-      {!walk && !message ? (
-        <p className="mt-1.5 text-[12px] text-ink-3">
-          Tekan ikon lokasi di kolom &quot;Dari&quot; untuk mulai dari tempat Anda berada.
-        </p>
-      ) : null}
+      <ul className="mt-1.5 space-y-1">
+        {plan.profiles.map((profile) => {
+          const chosen = profile.id === "fastest";
+          return (
+            <li key={profile.id}>
+              <button
+                type="button"
+                onClick={() => onChoose?.(profile.id)}
+                className={cn(
+                  "flex w-full cursor-pointer items-baseline gap-2 rounded-md px-2 py-1.5 text-left transition-colors",
+                  chosen ? "bg-accent-soft" : "hover:bg-surface-2",
+                )}
+              >
+                <span
+                  className={cn(
+                    "min-w-0 flex-1 truncate text-[13px]",
+                    chosen ? "font-medium text-ink" : "text-ink-2",
+                  )}
+                >
+                  {profile.label}
+                </span>
+                <span className="shrink-0 truncate text-[12px] text-ink-3">
+                  {profile.stationName}
+                </span>
+                <span className="shrink-0 tabular-nums text-[12px] text-ink-2">
+                  {profile.totalMinutes ?? "-"} mnt
+                </span>
+                <span className="shrink-0 tabular-nums text-[11px] text-ink-3">
+                  {profile.transferCount ?? 0}×
+                </span>
+              </button>
+            </li>
+          );
+        })}
+      </ul>
 
       {walk ? (
-        <ol className="mt-2 space-y-1 border-t border-line pt-2">
-          <li className="flex items-baseline justify-between gap-3 text-[12px] text-ink-2">
-            <span className="min-w-0 truncate">
-              Berjalan ke <span className="font-medium text-ink">{walk.stationName}</span>
-            </span>
-            <span className="shrink-0 tabular-nums text-ink-3">
-              {formatDistance(walk.distanceKm)} · {walk.durationMinutes} mnt
-            </span>
-          </li>
-          {walk.steps
-            .filter((step) => step.distanceKm > 0.005)
-            .slice(0, 6)
-            .map((step, index) => (
-              <li key={`${step.instruction}-${index}`} className="flex items-baseline gap-2 text-[12px]">
-                <span aria-hidden className="mt-1 size-1 shrink-0 rounded-full bg-ink-3" />
-                <span className="min-w-0 flex-1 truncate text-ink-2">{step.instruction}</span>
-                <span className="shrink-0 tabular-nums text-ink-3">
-                  {formatDistance(step.distanceKm)}
-                </span>
-              </li>
-            ))}
-        </ol>
+        <div className="mt-2 border-t border-line pt-2">
+          <p className="text-[12px] text-ink-2">
+            Berjalan {formatDistance(walk.distanceKm)} ke {plan.stationName},{" "}
+            {walk.durationMinutes} mnt
+          </p>
+          <ol className="mt-1 space-y-0.5">
+            {walk.steps
+              .filter((step) => step.distanceKm > 0.005)
+              .slice(0, 5)
+              .map((step, index) => (
+                <li key={`${step.instruction}-${index}`} className="flex items-baseline gap-2 text-[12px]">
+                  <span aria-hidden className="mt-1 size-1 shrink-0 rounded-full bg-ink-3" />
+                  <span className="min-w-0 flex-1 truncate text-ink-2">{step.instruction}</span>
+                  <span className="shrink-0 tabular-nums text-ink-3">
+                    {formatDistance(step.distanceKm)}
+                  </span>
+                </li>
+              ))}
+          </ol>
+        </div>
       ) : null}
     </div>
   );

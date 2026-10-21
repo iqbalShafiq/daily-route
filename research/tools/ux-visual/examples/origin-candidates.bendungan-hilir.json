@@ -1,0 +1,843 @@
+{
+  "meta": {
+    "source": "data/transit-network.json",
+    "userPosition": {
+      "latitude": -6.2170527,
+      "longitude": 106.815326
+    },
+    "userPlace": "berdiri di halte Bendungan Hilir (transjakarta)",
+    "destination": {
+      "stationId": "mrt-jakarta:tomang",
+      "name": "Tomang",
+      "systemId": "mrt-jakarta"
+    },
+    "candidateRadiusKm": 1.2,
+    "note": "Durasi dan jarak kendaraan dihitung dengan aritmetika yang sama dengan packages/transit/src/graph.ts (kecepatan rata-rata per mode, dwell 0,6 menit, waktu tunggu rata-rata per mode, penalti 3 menit per pindah). Jarak jalan kaki adalah jarak lurus x 1,25, bukan rute kaki OSRM.",
+    "generator": "research/tools/ux-visual/make_origin_example.py"
+  },
+  "candidates": [
+    {
+      "stationId": "transjakarta:bendungan-hilir",
+      "stationName": "Bendungan Hilir",
+      "systemId": "transjakarta",
+      "straightDistanceKm": 0.0,
+      "walkDistanceKm": 0.0,
+      "walkDurationMinutes": 1,
+      "walkDistanceSource": "straight-line x 1.25 detour factor (proxy)",
+      "totalMinutes": 60.1,
+      "transferCount": 2,
+      "distanceKm": 9.21,
+      "walkingKm": 0.36,
+      "waitMinutes": 15.0,
+      "lines": [
+        "transjakarta:1",
+        "transjakarta:2a",
+        "transjakarta:t12"
+      ]
+    },
+    {
+      "stationId": "transjakarta:benhil-1",
+      "stationName": "Benhil 1",
+      "systemId": "transjakarta",
+      "straightDistanceKm": 0.021,
+      "walkDistanceKm": 0.027,
+      "walkDurationMinutes": 1,
+      "walkDistanceSource": "straight-line x 1.25 detour factor (proxy)",
+      "totalMinutes": 61.1,
+      "transferCount": 4,
+      "distanceKm": 6.88,
+      "walkingKm": 0.38,
+      "waitMinutes": 24.0,
+      "lines": [
+        "transjakarta:4c",
+        "transjakarta:6d",
+        "transjakarta:jak-09",
+        "transjakarta:8m",
+        "transjakarta:t12"
+      ]
+    },
+    {
+      "stationId": "transjakarta:benhil-2",
+      "stationName": "Benhil 2",
+      "systemId": "transjakarta",
+      "straightDistanceKm": 0.034,
+      "walkDistanceKm": 0.042,
+      "walkDurationMinutes": 1,
+      "walkDistanceSource": "straight-line x 1.25 detour factor (proxy)",
+      "totalMinutes": 60.1,
+      "transferCount": 4,
+      "distanceKm": 6.75,
+      "walkingKm": 0.39,
+      "waitMinutes": 24.0,
+      "lines": [
+        "transjakarta:4c",
+        "transjakarta:6d",
+        "transjakarta:jak-09",
+        "transjakarta:8m",
+        "transjakarta:t12"
+      ]
+    },
+    {
+      "stationId": "transjakarta:benhil-3",
+      "stationName": "Benhil 3",
+      "systemId": "transjakarta",
+      "straightDistanceKm": 0.164,
+      "walkDistanceKm": 0.205,
+      "walkDurationMinutes": 3,
+      "walkDistanceSource": "straight-line x 1.25 detour factor (proxy)",
+      "totalMinutes": 60.7,
+      "transferCount": 4,
+      "distanceKm": 6.61,
+      "walkingKm": 0.55,
+      "waitMinutes": 24.0,
+      "lines": [
+        "transjakarta:1b",
+        "transjakarta:6d",
+        "transjakarta:jak-09",
+        "transjakarta:8m",
+        "transjakarta:t12"
+      ]
+    },
+    {
+      "stationId": "transjakarta:plaza-sentral",
+      "stationName": "Plaza Sentral",
+      "systemId": "transjakarta",
+      "straightDistanceKm": 0.178,
+      "walkDistanceKm": 0.222,
+      "walkDurationMinutes": 3,
+      "walkDistanceSource": "straight-line x 1.25 detour factor (proxy)",
+      "totalMinutes": 54.7,
+      "transferCount": 3,
+      "distanceKm": 6.48,
+      "walkingKm": 0.57,
+      "waitMinutes": 19.0,
+      "lines": [
+        "transjakarta:6d",
+        "transjakarta:jak-09",
+        "transjakarta:8m",
+        "transjakarta:t12"
+      ]
+    },
+    {
+      "stationId": "mrt-jakarta:bendungan-hilir",
+      "stationName": "Bendungan Hilir",
+      "systemId": "mrt-jakarta",
+      "straightDistanceKm": 0.369,
+      "walkDistanceKm": 0.461,
+      "walkDurationMinutes": 6,
+      "walkDistanceSource": "straight-line x 1.25 detour factor (proxy)",
+      "totalMinutes": 69.1,
+      "transferCount": 5,
+      "distanceKm": 8.83,
+      "walkingKm": 1.25,
+      "waitMinutes": 27.0,
+      "lines": [
+        "mrt-jakarta:ns",
+        "krl-jabodetabek:c",
+        "transjakarta:jak-08",
+        "transjakarta:jak-13",
+        "transjakarta:8m",
+        "transjakarta:t12"
+      ]
+    },
+    {
+      "stationId": "transjakarta:sampoerna-strategic",
+      "stationName": "Sampoerna Strategic",
+      "systemId": "transjakarta",
+      "straightDistanceKm": 0.401,
+      "walkDistanceKm": 0.501,
+      "walkDurationMinutes": 7,
+      "walkDistanceSource": "straight-line x 1.25 detour factor (proxy)",
+      "totalMinutes": 66.4,
+      "transferCount": 3,
+      "distanceKm": 7.84,
+      "walkingKm": 0.85,
+      "waitMinutes": 19.0,
+      "lines": [
+        "transjakarta:6k",
+        "transjakarta:jak-09",
+        "transjakarta:8m",
+        "transjakarta:t12"
+      ]
+    },
+    {
+      "stationId": "transjakarta:flyover-karet-2",
+      "stationName": "Flyover Karet 2",
+      "systemId": "transjakarta",
+      "straightDistanceKm": 0.424,
+      "walkDistanceKm": 0.53,
+      "walkDurationMinutes": 7,
+      "walkDistanceSource": "straight-line x 1.25 detour factor (proxy)",
+      "totalMinutes": 64.7,
+      "transferCount": 4,
+      "distanceKm": 6.51,
+      "walkingKm": 0.88,
+      "waitMinutes": 24.0,
+      "lines": [
+        "transjakarta:9d",
+        "transjakarta:6d",
+        "transjakarta:jak-09",
+        "transjakarta:8m",
+        "transjakarta:t12"
+      ]
+    },
+    {
+      "stationId": "transjakarta:seberang-standard-chartered",
+      "stationName": "Seberang Standard Chartered",
+      "systemId": "transjakarta",
+      "straightDistanceKm": 0.448,
+      "walkDistanceKm": 0.56,
+      "walkDurationMinutes": 7,
+      "walkDistanceSource": "straight-line x 1.25 detour factor (proxy)",
+      "totalMinutes": 65.6,
+      "transferCount": 3,
+      "distanceKm": 7.46,
+      "walkingKm": 0.91,
+      "waitMinutes": 19.0,
+      "lines": [
+        "transjakarta:5f",
+        "transjakarta:jak-09",
+        "transjakarta:8m",
+        "transjakarta:t12"
+      ]
+    },
+    {
+      "stationId": "transjakarta:semanggi",
+      "stationName": "Semanggi",
+      "systemId": "transjakarta",
+      "straightDistanceKm": 0.471,
+      "walkDistanceKm": 0.589,
+      "walkDurationMinutes": 8,
+      "walkDistanceSource": "straight-line x 1.25 detour factor (proxy)",
+      "totalMinutes": 70.2,
+      "transferCount": 4,
+      "distanceKm": 7.34,
+      "walkingKm": 0.94,
+      "waitMinutes": 24.0,
+      "lines": [
+        "transjakarta:9d",
+        "transjakarta:6d",
+        "transjakarta:jak-09",
+        "transjakarta:8m",
+        "transjakarta:t12"
+      ]
+    },
+    {
+      "stationId": "transjakarta:viva-futsal",
+      "stationName": "Viva Futsal",
+      "systemId": "transjakarta",
+      "straightDistanceKm": 0.496,
+      "walkDistanceKm": 0.62,
+      "walkDurationMinutes": 8,
+      "walkDistanceSource": "straight-line x 1.25 detour factor (proxy)",
+      "totalMinutes": 70.9,
+      "transferCount": 3,
+      "distanceKm": 8.48,
+      "walkingKm": 0.97,
+      "waitMinutes": 19.0,
+      "lines": [
+        "transjakarta:6k",
+        "transjakarta:jak-09",
+        "transjakarta:8m",
+        "transjakarta:t12"
+      ]
+    },
+    {
+      "stationId": "transjakarta:komdak-2",
+      "stationName": "Komdak 2",
+      "systemId": "transjakarta",
+      "straightDistanceKm": 0.554,
+      "walkDistanceKm": 0.693,
+      "walkDurationMinutes": 9,
+      "walkDistanceSource": "straight-line x 1.25 detour factor (proxy)",
+      "totalMinutes": 72.2,
+      "transferCount": 4,
+      "distanceKm": 7.39,
+      "walkingKm": 1.04,
+      "waitMinutes": 24.0,
+      "lines": [
+        "transjakarta:9d",
+        "transjakarta:6d",
+        "transjakarta:jak-09",
+        "transjakarta:8m",
+        "transjakarta:t12"
+      ]
+    },
+    {
+      "stationId": "transjakarta:komdak-1",
+      "stationName": "Komdak 1",
+      "systemId": "transjakarta",
+      "straightDistanceKm": 0.598,
+      "walkDistanceKm": 0.747,
+      "walkDurationMinutes": 10,
+      "walkDistanceSource": "straight-line x 1.25 detour factor (proxy)",
+      "totalMinutes": 79.0,
+      "transferCount": 5,
+      "distanceKm": 8.13,
+      "walkingKm": 1.1,
+      "waitMinutes": 29.0,
+      "lines": [
+        "transjakarta:1t",
+        "transjakarta:1b",
+        "transjakarta:6d",
+        "transjakarta:jak-09",
+        "transjakarta:8m",
+        "transjakarta:t12"
+      ]
+    },
+    {
+      "stationId": "transjakarta:jalan-karet-pasar-baru-barat-vii",
+      "stationName": "Jalan Karet Pasar Baru Barat VII",
+      "systemId": "transjakarta",
+      "straightDistanceKm": 0.623,
+      "walkDistanceKm": 0.779,
+      "walkDurationMinutes": 10,
+      "walkDistanceSource": "straight-line x 1.25 detour factor (proxy)",
+      "totalMinutes": 58.9,
+      "transferCount": 2,
+      "distanceKm": 7.09,
+      "walkingKm": 1.13,
+      "waitMinutes": 14.0,
+      "lines": [
+        "transjakarta:jak-09",
+        "transjakarta:8m",
+        "transjakarta:t12"
+      ]
+    },
+    {
+      "stationId": "transjakarta:karet-sudirman-2",
+      "stationName": "Karet Sudirman 2",
+      "systemId": "transjakarta",
+      "straightDistanceKm": 0.631,
+      "walkDistanceKm": 0.789,
+      "walkDurationMinutes": 11,
+      "walkDistanceSource": "straight-line x 1.25 detour factor (proxy)",
+      "totalMinutes": 67.4,
+      "transferCount": 3,
+      "distanceKm": 7.35,
+      "walkingKm": 1.14,
+      "waitMinutes": 19.0,
+      "lines": [
+        "transjakarta:6d",
+        "transjakarta:jak-09",
+        "transjakarta:8m",
+        "transjakarta:t12"
+      ]
+    },
+    {
+      "stationId": "transjakarta:karet-sudirman-1",
+      "stationName": "Karet Sudirman 1",
+      "systemId": "transjakarta",
+      "straightDistanceKm": 0.673,
+      "walkDistanceKm": 0.842,
+      "walkDurationMinutes": 11,
+      "walkDistanceSource": "straight-line x 1.25 detour factor (proxy)",
+      "totalMinutes": 70.8,
+      "transferCount": 4,
+      "distanceKm": 7.04,
+      "walkingKm": 1.19,
+      "waitMinutes": 24.0,
+      "lines": [
+        "transjakarta:1p",
+        "transjakarta:6d",
+        "transjakarta:jak-09",
+        "transjakarta:8m",
+        "transjakarta:t12"
+      ]
+    },
+    {
+      "stationId": "transjakarta:polda-metro-jaya",
+      "stationName": "Polda Metro Jaya",
+      "systemId": "transjakarta",
+      "straightDistanceKm": 0.715,
+      "walkDistanceKm": 0.893,
+      "walkDurationMinutes": 12,
+      "walkDistanceSource": "straight-line x 1.25 detour factor (proxy)",
+      "totalMinutes": 74.7,
+      "transferCount": 2,
+      "distanceKm": 10.1,
+      "walkingKm": 1.25,
+      "waitMinutes": 15.0,
+      "lines": [
+        "transjakarta:1",
+        "transjakarta:2a",
+        "transjakarta:t12"
+      ]
+    },
+    {
+      "stationId": "transjakarta:sahid-sudirman-center",
+      "stationName": "Sahid Sudirman Center",
+      "systemId": "transjakarta",
+      "straightDistanceKm": 0.718,
+      "walkDistanceKm": 0.898,
+      "walkDurationMinutes": 12,
+      "walkDistanceSource": "straight-line x 1.25 detour factor (proxy)",
+      "totalMinutes": 58.8,
+      "transferCount": 2,
+      "distanceKm": 6.54,
+      "walkingKm": 1.25,
+      "waitMinutes": 14.0,
+      "lines": [
+        "transjakarta:jak-09",
+        "transjakarta:8m",
+        "transjakarta:t12"
+      ]
+    },
+    {
+      "stationId": "transjakarta:karet",
+      "stationName": "Karet",
+      "systemId": "transjakarta",
+      "straightDistanceKm": 0.731,
+      "walkDistanceKm": 0.914,
+      "walkDurationMinutes": 12,
+      "walkDistanceSource": "straight-line x 1.25 detour factor (proxy)",
+      "totalMinutes": 69.7,
+      "transferCount": 4,
+      "distanceKm": 6.51,
+      "walkingKm": 1.26,
+      "waitMinutes": 24.0,
+      "lines": [
+        "transjakarta:1b",
+        "transjakarta:6d",
+        "transjakarta:jak-09",
+        "transjakarta:8m",
+        "transjakarta:t12"
+      ]
+    },
+    {
+      "stationId": "transjakarta:karet-sudirman-3",
+      "stationName": "Karet Sudirman 3",
+      "systemId": "transjakarta",
+      "straightDistanceKm": 0.757,
+      "walkDistanceKm": 0.946,
+      "walkDurationMinutes": 13,
+      "walkDistanceSource": "straight-line x 1.25 detour factor (proxy)",
+      "totalMinutes": 73.8,
+      "transferCount": 5,
+      "distanceKm": 5.5,
+      "walkingKm": 1.3,
+      "waitMinutes": 28.0,
+      "lines": [
+        "transjakarta:1p",
+        "transjakarta:14b",
+        "transjakarta:1p",
+        "transjakarta:jak-10b",
+        "transjakarta:8m",
+        "transjakarta:t12"
+      ]
+    },
+    {
+      "stationId": "transjakarta:otorita-asahan",
+      "stationName": "Otorita Asahan",
+      "systemId": "transjakarta",
+      "straightDistanceKm": 0.772,
+      "walkDistanceKm": 0.965,
+      "walkDurationMinutes": 13,
+      "walkDistanceSource": "straight-line x 1.25 detour factor (proxy)",
+      "totalMinutes": 78.7,
+      "transferCount": 4,
+      "distanceKm": 7.74,
+      "walkingKm": 1.31,
+      "waitMinutes": 24.0,
+      "lines": [
+        "transjakarta:9d",
+        "transjakarta:6d",
+        "transjakarta:jak-09",
+        "transjakarta:8m",
+        "transjakarta:t12"
+      ]
+    },
+    {
+      "stationId": "transjakarta:karet-pedurenan-2",
+      "stationName": "Karet Pedurenan 2",
+      "systemId": "transjakarta",
+      "straightDistanceKm": 0.793,
+      "walkDistanceKm": 0.992,
+      "walkDurationMinutes": 13,
+      "walkDistanceSource": "straight-line x 1.25 detour factor (proxy)",
+      "totalMinutes": 76.6,
+      "transferCount": 3,
+      "distanceKm": 8.5,
+      "walkingKm": 1.34,
+      "waitMinutes": 19.0,
+      "lines": [
+        "transjakarta:6d",
+        "transjakarta:jak-09",
+        "transjakarta:8m",
+        "transjakarta:t12"
+      ]
+    },
+    {
+      "stationId": "transjakarta:polda-metro-jaya-1",
+      "stationName": "Polda Metro Jaya 1",
+      "systemId": "transjakarta",
+      "straightDistanceKm": 0.8,
+      "walkDistanceKm": 1.0,
+      "walkDurationMinutes": 13,
+      "walkDistanceSource": "straight-line x 1.25 detour factor (proxy)",
+      "totalMinutes": 74.1,
+      "transferCount": 4,
+      "distanceKm": 6.94,
+      "walkingKm": 1.35,
+      "waitMinutes": 24.0,
+      "lines": [
+        "transjakarta:4c",
+        "transjakarta:6d",
+        "transjakarta:jak-09",
+        "transjakarta:8m",
+        "transjakarta:t12"
+      ]
+    },
+    {
+      "stationId": "transjakarta:karet-pedurenan-1",
+      "stationName": "Karet Pedurenan 1",
+      "systemId": "transjakarta",
+      "straightDistanceKm": 0.818,
+      "walkDistanceKm": 1.022,
+      "walkDurationMinutes": 14,
+      "walkDistanceSource": "straight-line x 1.25 detour factor (proxy)",
+      "totalMinutes": 76.9,
+      "transferCount": 3,
+      "distanceKm": 8.17,
+      "walkingKm": 1.37,
+      "waitMinutes": 19.0,
+      "lines": [
+        "transjakarta:5f",
+        "transjakarta:jak-09",
+        "transjakarta:8m",
+        "transjakarta:t12"
+      ]
+    },
+    {
+      "stationId": "transjakarta:direktorat-jenderal-pajak",
+      "stationName": "Direktorat Jenderal Pajak",
+      "systemId": "transjakarta",
+      "straightDistanceKm": 0.847,
+      "walkDistanceKm": 1.059,
+      "walkDurationMinutes": 14,
+      "walkDistanceSource": "straight-line x 1.25 detour factor (proxy)",
+      "totalMinutes": 80.8,
+      "transferCount": 4,
+      "distanceKm": 7.9,
+      "walkingKm": 1.41,
+      "waitMinutes": 24.0,
+      "lines": [
+        "transjakarta:9d",
+        "transjakarta:6d",
+        "transjakarta:jak-09",
+        "transjakarta:8m",
+        "transjakarta:t12"
+      ]
+    },
+    {
+      "stationId": "transjakarta:gerbang-pemuda",
+      "stationName": "Gerbang Pemuda",
+      "systemId": "transjakarta",
+      "straightDistanceKm": 0.849,
+      "walkDistanceKm": 1.061,
+      "walkDurationMinutes": 14,
+      "walkDistanceSource": "straight-line x 1.25 detour factor (proxy)",
+      "totalMinutes": 78.0,
+      "transferCount": 4,
+      "distanceKm": 8.13,
+      "walkingKm": 1.41,
+      "waitMinutes": 24.0,
+      "lines": [
+        "transjakarta:1b",
+        "transjakarta:6d",
+        "transjakarta:jak-09",
+        "transjakarta:8m",
+        "transjakarta:t12"
+      ]
+    },
+    {
+      "stationId": "transjakarta:city-walk-sudirman",
+      "stationName": "City Walk Sudirman",
+      "systemId": "transjakarta",
+      "straightDistanceKm": 0.891,
+      "walkDistanceKm": 1.114,
+      "walkDurationMinutes": 15,
+      "walkDistanceSource": "straight-line x 1.25 detour factor (proxy)",
+      "totalMinutes": 60.5,
+      "transferCount": 2,
+      "distanceKm": 6.29,
+      "walkingKm": 1.46,
+      "waitMinutes": 14.0,
+      "lines": [
+        "transjakarta:jak-09",
+        "transjakarta:8m",
+        "transjakarta:t12"
+      ]
+    },
+    {
+      "stationId": "transjakarta:grand-sahid",
+      "stationName": "Grand Sahid",
+      "systemId": "transjakarta",
+      "straightDistanceKm": 0.899,
+      "walkDistanceKm": 1.123,
+      "walkDurationMinutes": 15,
+      "walkDistanceSource": "straight-line x 1.25 detour factor (proxy)",
+      "totalMinutes": 70.4,
+      "transferCount": 3,
+      "distanceKm": 7.22,
+      "walkingKm": 1.47,
+      "waitMinutes": 19.0,
+      "lines": [
+        "transjakarta:6d",
+        "transjakarta:jak-09",
+        "transjakarta:8m",
+        "transjakarta:t12"
+      ]
+    },
+    {
+      "stationId": "transjakarta:jalan-karet-pasar-baru-barat-iv",
+      "stationName": "Jalan Karet Pasar Baru Barat IV",
+      "systemId": "transjakarta",
+      "straightDistanceKm": 0.911,
+      "walkDistanceKm": 1.139,
+      "walkDurationMinutes": 15,
+      "walkDistanceSource": "straight-line x 1.25 detour factor (proxy)",
+      "totalMinutes": 66.5,
+      "transferCount": 3,
+      "distanceKm": 6.34,
+      "walkingKm": 1.49,
+      "waitMinutes": 19.0,
+      "lines": [
+        "transjakarta:5f",
+        "transjakarta:jak-09",
+        "transjakarta:8m",
+        "transjakarta:t12"
+      ]
+    },
+    {
+      "stationId": "mrt-jakarta:istora-mandiri",
+      "stationName": "Istora Mandiri",
+      "systemId": "mrt-jakarta",
+      "straightDistanceKm": 0.949,
+      "walkDistanceKm": 1.187,
+      "walkDurationMinutes": 16,
+      "walkDistanceSource": "straight-line x 1.25 detour factor (proxy)",
+      "totalMinutes": 80.3,
+      "transferCount": 5,
+      "distanceKm": 9.1,
+      "walkingKm": 1.98,
+      "waitMinutes": 27.0,
+      "lines": [
+        "mrt-jakarta:ns",
+        "krl-jabodetabek:c",
+        "transjakarta:jak-08",
+        "transjakarta:jak-13",
+        "transjakarta:8m",
+        "transjakarta:t12"
+      ]
+    },
+    {
+      "stationId": "transjakarta:chase-plaza",
+      "stationName": "Chase Plaza",
+      "systemId": "transjakarta",
+      "straightDistanceKm": 0.962,
+      "walkDistanceKm": 1.203,
+      "walkDurationMinutes": 16,
+      "walkDistanceSource": "straight-line x 1.25 detour factor (proxy)",
+      "totalMinutes": 77.4,
+      "transferCount": 4,
+      "distanceKm": 7.37,
+      "walkingKm": 1.55,
+      "waitMinutes": 24.0,
+      "lines": [
+        "transjakarta:9d",
+        "transjakarta:6d",
+        "transjakarta:jak-09",
+        "transjakarta:8m",
+        "transjakarta:t12"
+      ]
+    },
+    {
+      "stationId": "transjakarta:menara-mulia",
+      "stationName": "Menara Mulia",
+      "systemId": "transjakarta",
+      "straightDistanceKm": 0.963,
+      "walkDistanceKm": 1.204,
+      "walkDurationMinutes": 16,
+      "walkDistanceSource": "straight-line x 1.25 detour factor (proxy)",
+      "totalMinutes": 83.9,
+      "transferCount": 4,
+      "distanceKm": 8.05,
+      "walkingKm": 1.55,
+      "waitMinutes": 24.0,
+      "lines": [
+        "transjakarta:9d",
+        "transjakarta:6d",
+        "transjakarta:jak-09",
+        "transjakarta:8m",
+        "transjakarta:t12"
+      ]
+    },
+    {
+      "stationId": "transjakarta:jalan-karet-pasar-baru-timur-5",
+      "stationName": "Jalan Karet Pasar Baru Timur 5",
+      "systemId": "transjakarta",
+      "straightDistanceKm": 1.085,
+      "walkDistanceKm": 1.357,
+      "walkDurationMinutes": 18,
+      "walkDistanceSource": "straight-line x 1.25 detour factor (proxy)",
+      "totalMinutes": 71.8,
+      "transferCount": 3,
+      "distanceKm": 6.94,
+      "walkingKm": 1.71,
+      "waitMinutes": 19.0,
+      "lines": [
+        "transjakarta:6d",
+        "transjakarta:jak-09",
+        "transjakarta:8m",
+        "transjakarta:t12"
+      ]
+    },
+    {
+      "stationId": "transjakarta:lotte-mall-kuningan-1",
+      "stationName": "Lotte Mall Kuningan 1",
+      "systemId": "transjakarta",
+      "straightDistanceKm": 1.087,
+      "walkDistanceKm": 1.359,
+      "walkDurationMinutes": 18,
+      "walkDistanceSource": "straight-line x 1.25 detour factor (proxy)",
+      "totalMinutes": 84.1,
+      "transferCount": 3,
+      "distanceKm": 8.81,
+      "walkingKm": 1.71,
+      "waitMinutes": 19.0,
+      "lines": [
+        "transjakarta:6d",
+        "transjakarta:jak-09",
+        "transjakarta:8m",
+        "transjakarta:t12"
+      ]
+    },
+    {
+      "stationId": "transjakarta:satrio-6",
+      "stationName": "Satrio 6",
+      "systemId": "transjakarta",
+      "straightDistanceKm": 1.09,
+      "walkDistanceKm": 1.362,
+      "walkDurationMinutes": 18,
+      "walkDistanceSource": "straight-line x 1.25 detour factor (proxy)",
+      "totalMinutes": 83.3,
+      "transferCount": 3,
+      "distanceKm": 8.47,
+      "walkingKm": 1.71,
+      "waitMinutes": 19.0,
+      "lines": [
+        "transjakarta:5f",
+        "transjakarta:jak-09",
+        "transjakarta:8m",
+        "transjakarta:t12"
+      ]
+    },
+    {
+      "stationId": "transjakarta:gatot-subroto-lipi-1",
+      "stationName": "Gatot Subroto LIPI 1",
+      "systemId": "transjakarta",
+      "straightDistanceKm": 1.111,
+      "walkDistanceKm": 1.389,
+      "walkDurationMinutes": 19,
+      "walkDistanceSource": "straight-line x 1.25 detour factor (proxy)",
+      "totalMinutes": 87.9,
+      "transferCount": 4,
+      "distanceKm": 8.14,
+      "walkingKm": 1.74,
+      "waitMinutes": 24.0,
+      "lines": [
+        "transjakarta:9d",
+        "transjakarta:6d",
+        "transjakarta:jak-09",
+        "transjakarta:8m",
+        "transjakarta:t12"
+      ]
+    },
+    {
+      "stationId": "mrt-jakarta:setiabudi-astra",
+      "stationName": "Setiabudi Astra",
+      "systemId": "mrt-jakarta",
+      "straightDistanceKm": 1.135,
+      "walkDistanceKm": 1.419,
+      "walkDurationMinutes": 19,
+      "walkDistanceSource": "straight-line x 1.25 detour factor (proxy)",
+      "totalMinutes": 80.1,
+      "transferCount": 5,
+      "distanceKm": 8.14,
+      "walkingKm": 2.21,
+      "waitMinutes": 27.0,
+      "lines": [
+        "mrt-jakarta:ns",
+        "krl-jabodetabek:c",
+        "transjakarta:jak-08",
+        "transjakarta:jak-13",
+        "transjakarta:8m",
+        "transjakarta:t12"
+      ]
+    },
+    {
+      "stationId": "transjakarta:karet-tengsin",
+      "stationName": "Karet Tengsin",
+      "systemId": "transjakarta",
+      "straightDistanceKm": 1.136,
+      "walkDistanceKm": 1.42,
+      "walkDurationMinutes": 19,
+      "walkDistanceSource": "straight-line x 1.25 detour factor (proxy)",
+      "totalMinutes": 69.3,
+      "transferCount": 3,
+      "distanceKm": 6.19,
+      "walkingKm": 1.77,
+      "waitMinutes": 19.0,
+      "lines": [
+        "transjakarta:5f",
+        "transjakarta:jak-09",
+        "transjakarta:8m",
+        "transjakarta:t12"
+      ]
+    },
+    {
+      "stationId": "transjakarta:gatot-subroto-lipi-2",
+      "stationName": "Gatot Subroto LIPI 2",
+      "systemId": "transjakarta",
+      "straightDistanceKm": 1.158,
+      "walkDistanceKm": 1.448,
+      "walkDurationMinutes": 19,
+      "walkDistanceSource": "straight-line x 1.25 detour factor (proxy)",
+      "totalMinutes": 89.1,
+      "transferCount": 4,
+      "distanceKm": 8.31,
+      "walkingKm": 1.8,
+      "waitMinutes": 24.0,
+      "lines": [
+        "transjakarta:9d",
+        "transjakarta:6d",
+        "transjakarta:jak-09",
+        "transjakarta:8m",
+        "transjakarta:t12"
+      ]
+    },
+    {
+      "stationId": "transjakarta:widya-chandra-telkomsel",
+      "stationName": "Widya Chandra Telkomsel",
+      "systemId": "transjakarta",
+      "straightDistanceKm": 1.163,
+      "walkDistanceKm": 1.454,
+      "walkDurationMinutes": 19,
+      "walkDistanceSource": "straight-line x 1.25 detour factor (proxy)",
+      "totalMinutes": 89.3,
+      "transferCount": 5,
+      "distanceKm": 8.1,
+      "walkingKm": 1.8,
+      "waitMinutes": 29.0,
+      "lines": [
+        "transjakarta:9c",
+        "transjakarta:9d",
+        "transjakarta:6d",
+        "transjakarta:jak-09",
+        "transjakarta:8m",
+        "transjakarta:t12"
+      ]
+    }
+  ]
+}

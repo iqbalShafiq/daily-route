@@ -7,7 +7,7 @@ import { ChatPanel } from "../features/chat/chat-panel.js";
 import { RoutePlanner } from "../features/route-planner/route-planner.js";
 import { usePlan } from "../features/route-planner/use-plan.js";
 import { api } from "../lib/api.js";
-import type { WalkRoute } from "../lib/api.js";
+import type { PositionPlan } from "../lib/api.js";
 import { Tab, Tabs } from "../components/ui/tabs.js";
 import { cn } from "../lib/cn.js";
 import { MODE_WIDTH, SERVICE_CLASS_COLOR, type ServiceClass } from "../lib/format.js";
@@ -30,7 +30,7 @@ export function PlannerPage() {
    * The walk from the reader's place to the stop the journey starts
    * from. It is drawn on the map as the first part of the journey.
    */
-  const [walk, setWalk] = useState<WalkRoute | null>(null);
+  const [walk, setWalk] = useState<PositionPlan | null>(null);
   const { theme } = useTheme();
 
   const plan = usePlan(
@@ -80,10 +80,10 @@ export function PlannerPage() {
      * The walk comes first: it is how the journey begins, and it is the
      * part the reader has to do on foot.
      */
-    if (walk) {
+    if (walk?.walk && walk.stationName) {
       legs.unshift({
         id: "walk-from-here",
-        coordinates: walk.geometry,
+        coordinates: walk.walk.geometry,
         color: "var(--ink-3)",
         width: 3,
         kind: "walk",
@@ -224,19 +224,24 @@ export function PlannerPage() {
                   { latitude: position.coords.latitude, longitude: position.coords.longitude },
                   destination.trim(),
                 );
-                setWalk(result.walk);
-                setOrigin(result.walk.stationName);
+                setWalk(result);
+                if (!result.stationName) return;
+                setOrigin(result.stationName);
                 setActiveIndex(0);
                 setSubmitted({
-                  origin: result.walk.stationName,
+                  origin: result.stationName,
                   destination: destination.trim(),
                 });
               }}
-              onWalkReady={(next) => {
-                setWalk(next);
-                setOrigin(next.stationName);
+              onChooseOrigin={(profileId) => {
+                const profile = walk?.profiles.find((item) => item.id === profileId);
+                if (!profile?.stationName) return;
+                setOrigin(profile.stationName);
                 setActiveIndex(0);
-                setSubmitted({ origin: next.stationName, destination: destination.trim() });
+                setSubmitted({
+                  origin: profile.stationName,
+                  destination: destination.trim(),
+                });
               }}
             />
           ) : (
