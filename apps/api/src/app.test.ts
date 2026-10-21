@@ -85,8 +85,12 @@ describe("GET /api/lines", () => {
     const response = await request(app).get("/api/lines?systemId=transjakarta");
     expect(response.status).toBe(200);
     const classes = new Set(response.body.map((line: { serviceClass: string }) => line.serviceClass));
+    // The kinds of service the operator runs, with the operator's own
+    // names.
     expect(classes).toContain("brt");
-    expect(classes).toContain("feeder");
+    expect(classes).toContain("mikrotrans");
+    expect(classes).toContain("non-brt");
+    expect(classes).toContain("royaltrans");
   });
 });
 

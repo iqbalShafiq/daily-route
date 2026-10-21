@@ -1,6 +1,7 @@
 import {
   canonicalKey,
   haversineKm,
+  nearestIndexOnPolyline,
   tokenize,
   type Coordinate,
   type FareRules,
@@ -143,6 +144,8 @@ type MergedStop = {
   longitude: number;
   code: string | null;
   distanceFromOriginKm: number | null;
+  /** Where the stop stands in the relation, when the relation names it. */
+  osmPosition?: number;
 };
 
 export type MergeOptions = {
@@ -278,32 +281,36 @@ export function mergeNetwork(options: MergeOptions): TransitNetworkFile {
       },
     });
 
-    const forward = buildStops({
-      systemId,
-      curatedStations,
-      osmStops,
-      ensureStation,
-    });
-    const backward = buildStops({
-      systemId,
-      curatedStations: [...curatedStations].reverse(),
-      osmStops: [...osmStops].reverse(),
-      ensureStation,
-    });
-
-    // The path of the line. The curated report owns the order of the stops,
-    // so the path of the relation is flipped when the two disagree.
-    if (primary && primary.polyline.length > 1) {
-      const forwardPolyline = directionMatches(primary, curatedStations[0])
-        ? primary.polyline
-        : reversePolyline(primary.polyline);
-      const secondary = osmRoutes?.[1];
-      const backwardPolyline = secondary
+    // The path of the line. The curated report owns the order of the
+    // stops, so the path of the relation is flipped when the two
+    // disagree.
+    const secondary = osmRoutes?.[1];
+    const forwardPolyline =
+      primary && primary.polyline.length > 1
+        ? directionMatches(primary, curatedStations[0])
+          ? primary.polyline
+          : reversePolyline(primary.polyline)
+        : [];
+    const backwardPolyline =
+      secondary && secondary.polyline.length > 1
         ? directionMatches(secondary, curatedStations[curatedStations.length - 1])
           ? secondary.polyline
           : reversePolyline(secondary.polyline)
         : reversePolyline(forwardPolyline);
 
+    const forward = buildStops({
+      systemId,
+      curatedStations,
+      osmStops,
+      ensureStation,
+      extraStations: options.extraStations,
+      polyline: forwardPolyline,
+    });
+    // The other direction is the same line travelled backwards, so the
+    // two lists are exact mirrors of each other.
+    const backward = [...forward].reverse();
+
+    if (primary && primary.polyline.length > 1) {
       const forwardGeometry = buildLineGeometry({
         lineId,
         direction: "forward",
@@ -374,19 +381,10 @@ export function mergeNetwork(options: MergeOptions): TransitNetworkFile {
       osmStops: primary.stops,
       ensureStation,
     });
-    // The opposite direction is its own relation. When that relation
-    // resolves to no stops at all, the forward relation is reversed, so the
-    // line can still be travelled the other way.
-    const backwardStops =
-      osmRoutes[1] && osmRoutes[1].stops.length > 0
-        ? osmRoutes[1].stops
-        : [...primary.stops].reverse();
-    const backward = buildStops({
-      systemId: primary.systemId,
-      curatedStations: [],
-      osmStops: backwardStops,
-      ensureStation,
-    });
+    // The opposite direction is the same line travelled backwards. A
+    // relation may list the stops in any order, so the mirror of the
+    // forward list is the one that is certainly right.
+    const backward = [...forward].reverse();
 
     if (primary.polyline.length > 1) {
       const backwardPolyline =
@@ -611,10 +609,17 @@ function resolveServiceClass(
  * Whether a station note marks the station as not open yet.
  *
  * The research notes are explicit about it: "Phase 2A, underground
- * (planned)", "under construction". Those stations must not be routable.
+ * (planned)", "Phase 3B planned, elevated". Those stations must not be
+ * routable.
+ *
+ * Only the part of the note that describes the station counts. A note
+ * that mentions another line being planned — "Eastern terminus of the
+ * Cikarang line. Interchange: MRT East-West Line (planned)" — says
+ * nothing about this station, which is open.
  */
 export function isPlanned(note: string): boolean {
-  return /\(planned\)|under construction|belum dibangun|direncanakan/i.test(note);
+  const head = note.split(/interchange/i)[0] ?? note;
+  return /\(planned|under construction|belum dibangun|direncanakan|\bplanned\b/i.test(head);
 }
 
 function modeForServiceClass(systemId: SystemId, serviceClass: string): string {
@@ -684,9 +689,28 @@ function buildStops(input: {
   curatedStations: CuratedLine["stations"];
   osmStops: OsmStop[];
   ensureStation: EnsureStation;
+  /** The stations the operator lists but no route relation names. */
+  extraStations?:
+    | readonly { name: string; latitude: number; longitude: number; code: string | null }[]
+    | undefined;
+  /**
+   * The path the line travels.
+   *
+   * A stop the report misses is put back where the path says it is: the
+   * order of the members of a relation is not always the order the
+   * vehicle travels.
+   */
+  polyline?: readonly { latitude: number; longitude: number }[] | undefined;
 }): MergedStop[] {
   const { systemId, curatedStations, osmStops, ensureStation } = input;
   const stops: MergedStop[] = [];
+
+  // A station that no relation names can still be found by name: the
+  // operator's own list of stations knows where Cikarang and the airport
+  // station are, even when the relation forgets them.
+  const extraByName = new Map(
+    (input.extraStations ?? []).map((station) => [station.name.trim().toLowerCase(), station]),
+  );
 
   const osmByName = new Map<string, OsmStop[]>();
   for (const stop of osmStops) {
@@ -697,13 +721,27 @@ function buildStops(input: {
   }
 
   const usedOsm = new Set<number>();
+  // The position of every stop in the relation, so a stop the report
+  // misses can be put back where it belongs.
+  const osmIndex = new Map<number, number>();
+  osmStops.forEach((stop, index) => osmIndex.set(stop.nodeId, index));
+
+  // Where a stop stands along the path the vehicle travels.
+  const polyline = input.polyline ?? [];
+  const placeOnPath = (latitude: number, longitude: number): number =>
+    polyline.length > 1
+      ? nearestIndexOnPolyline(polyline, { latitude, longitude })
+      : 0;
 
   for (const curatedStation of curatedStations) {
     const candidates = osmByName.get(curatedStation.name.trim().toLowerCase()) ?? [];
     const match = candidates.find((candidate) => !usedOsm.has(candidate.nodeId));
 
-    const latitude = curatedStation.latitude ?? match?.latitude ?? null;
-    const longitude = curatedStation.longitude ?? match?.longitude ?? null;
+    // A station the report names but the relation does not still has a
+    // place, when the operator's own list of stations knows it.
+    const known = match ?? extraByName.get(curatedStation.name.trim().toLowerCase());
+    const latitude = curatedStation.latitude ?? known?.latitude ?? null;
+    const longitude = curatedStation.longitude ?? known?.longitude ?? null;
     if (latitude === null || longitude === null) continue;
 
     const stationId = ensureStation({
@@ -737,11 +775,16 @@ function buildStops(input: {
       longitude,
       code: curatedStation.code ?? match?.code ?? null,
       distanceFromOriginKm: null,
+      ...(match ? { osmPosition: placeOnPath(latitude, longitude) } : {}),
     });
   }
 
-  for (const osmStop of osmStops) {
-    if (usedOsm.has(osmStop.nodeId)) continue;
+  // The stops the report does not mention keep the place they have in the
+  // relation: a stop the report missed must not end up at the end of the
+  // line, because that would send the rider the wrong way round.
+  const leftovers = osmStops.filter((osmStop) => !usedOsm.has(osmStop.nodeId));
+
+  for (const osmStop of leftovers) {
     const stationId = ensureStation({
       systemId,
       name: osmStop.name,
@@ -756,14 +799,19 @@ function buildStops(input: {
         routeRefs: osmStop.routeRefs,
       },
     });
-    stops.push({
+
+    const position = placeOnPath(osmStop.latitude, osmStop.longitude);
+    const entry = {
       stationId,
       name: osmStop.name,
       latitude: osmStop.latitude,
       longitude: osmStop.longitude,
       code: osmStop.code,
       distanceFromOriginKm: null,
-    });
+      osmPosition: position,
+    };
+
+    stops.push(entry);
   }
 
   return withCumulativeDistance(stops);

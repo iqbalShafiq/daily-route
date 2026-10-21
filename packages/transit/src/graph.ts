@@ -178,6 +178,10 @@ export function buildGraph(network: TransitNetwork): Graph {
     const forward = stops.forward;
     const backward = stops.backward.length > 0 ? stops.backward : [...forward].reverse();
 
+    // A line with a single stop cannot be travelled: there is nowhere to
+    // board and nowhere to leave.
+    if (forward.length < 2) continue;
+
     connectStops(
       push,
       stations,
