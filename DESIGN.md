@@ -65,11 +65,27 @@ A mode is data, and its colour is constant across the interface.
 
 | Mode | Token | Light | Dark |
 | --- | --- | --- | --- |
-| Transjakarta (all classes) | `mode-bus` | `#0b6b4f` | `#4ade9e` |
-| MRT Jakarta | `mode-metro` | `#1d4ed8` | `#93b4fd` |
-| LRT Jakarta | `mode-tram` | `#c2410c` | `#fb923c` |
-| LRT Jabodebek | `mode-lrt-jabodebek` | `#6d28d9` | `#a78bfa` |
-| KRL Jabodetabek | `mode-rail` | `#334155` | `#94a3b8` |
+| Transjakarta (all classes) | `mode-bus` | `#1d4ed8` | `#38bdf8` |
+| MRT Jakarta | `mode-metro` | `#b91c1c` | `#f43f5e` |
+| LRT Jakarta | `mode-tram` | `#b45309` | `#f59e0b` |
+| LRT Jabodebek | `mode-lrt-jabodebek` | `#0e7490` | `#2dd4bf` |
+| KRL Jabodetabek | `mode-rail` | `#334155` | `#a78bfa` |
+
+Two rules hold the set together, and both were checked with a colour
+audit rather than by eye:
+
+- **No mode shares a colour with the interface.** The accent is jade and
+  the information colour is blue; the modes use the five colours above.
+  One colour may mean one thing.
+- **No two modes are hard to tell apart.** The set separates the modes
+  by ΔE00 of 4.6 in the light theme and 3.7 in the dark one, where the
+  older palette reached 1.0 under protanopia.
+
+The colour of a mode is a taxonomy of the *system*, not the livery of the
+vehicles: LRT Jakarta and KRL are both red on the road, and Transjakarta
+and LRT Jabodebek are both blue. Because five colours can never be
+enough on their own, a mode is always encoded twice — colour **and**
+line width, and a rider-facing label.
 
 There is no pure black anywhere: `#17150f` is the darkest ink, and
 `#111310` is the darkest surface.
@@ -159,6 +175,10 @@ An error state replaces the border with `danger` and is announced through
 
 ### Card
 
+A card has a one pixel border and no shadow. A shadow belongs to what
+floats above the page — the popover, the sheet, the map controls — and
+not to a box that sits on it.
+
 A card is a surface with a border and one shadow. Cards do not nest. When
 two pieces of information belong together, use spacing or a divider
 (`border-t`), not another card.
@@ -205,6 +225,14 @@ Base UI's tooltip, wrapped. Required for every icon-only control. Delay
 MapLibre GL JS with OpenFreeMap tiles: no key, no quota, no cookie, and
 the attribution is rendered by MapLibre as the licence requires.
 
+A route is drawn in three layers, in this order: a **halo** in the
+colour opposite the basemap, a **casing** in the colour of the surface,
+and the **line** in the colour of the mode. A white casing alone would
+do nothing — white on a light map is a contrast of 1.14 to one — so the
+halo does the separating. The width of the line carries the mode as
+well: 6.5 pixels for the rail, 5 for the bus, 3 and dashed for the
+walk.
+
 The rules of the interaction are written down in
 `research/ux-map-interaction.md`.
 
@@ -220,9 +248,10 @@ The rules of the interaction are written down in
   otherwise.
 - The theme is one context shared by the header and the page, so the
   switch in the header changes the map as well.
-- The legend sits at the bottom left in a translucent surface with a blur,
-  and it never intercepts a pointer. It lists the vehicles the journey
-  uses, in the colour they are drawn in, plus the sign of a transfer.
+- The legend is a thin bar along the bottom of the map, without a
+  shadow, and it never intercepts a pointer. It lists the vehicles the
+  journey uses, in the colour they are drawn in, plus the sign of a
+  transfer.
 - Every stop of the journey is a point on the map. The two ends are filled
   circles, a transfer is a ring, and the stops in between are small dots.
 - A point answers a pointer that rests on it with a popover: the name of

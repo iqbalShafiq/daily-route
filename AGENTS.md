@@ -162,6 +162,11 @@ Read `DESIGN.md` before touching the interface. The short version:
 - The map answers a pointer with a popover and a click with a move. The
   camera moves with `easeTo` for a point and `fitBounds` for a journey;
   `flyTo` is for a jump between places that are far apart.
+- The list of the journey and the map are one system: pointing at a leg
+  in the list keeps that leg bright on the map.
+- The mode colours are the operator's taxonomy, not the livery of the
+  vehicles, and they are checked for colour-blind separation. A mode is
+  encoded twice: colour and line width.
 - No emoji anywhere in code, markup or copy.
 
 ## Testing
