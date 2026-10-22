@@ -7,7 +7,7 @@ import {
   type FareRules,
   type LineGeometry,
 } from "@daily-route/transit";
-import { buildLineGeometry } from "./geometry.js";
+import { buildLineGeometry, distanceToPathKm } from "./geometry.js";
 
 import { classifyTransjakartaRoute, railServiceClass, SYSTEMS, type SystemId } from "./classify.js";
 import { normalizeRouteCode, type CuratedLine } from "./curated.js";
@@ -242,8 +242,9 @@ export function mergeNetwork(options: MergeOptions): TransitNetworkFile {
     const osmRoutes = osmGroups.get(osmKey) ?? findOsmByName(osmGroups, systemId, curated.name);
     if (osmRoutes) consumedOsmKeys.add(`${osmRoutes[0]?.systemId}::${normalizeRouteCode(osmRoutes[0]?.code ?? "").toLowerCase()}`);
 
-    const primary = osmRoutes?.[0];
-    const osmStops = primary?.stops ?? [];
+    // The relation that keeps the line on the road, not the first one.
+    const primary = bestOsmRoute(osmRoutes ?? []);
+    const osmStops = stopsOfRelations(primary, osmRoutes ?? []);
     const officialCorridor = official.get(normalizeRouteCode(code).toUpperCase());
     const serviceClass = resolveServiceClass(systemId, curated, primary, officialCorridor?.service);
     const lineId = `${systemId}:${slugify(code) || "route"}`;
@@ -327,7 +328,9 @@ export function mergeNetwork(options: MergeOptions): TransitNetworkFile {
 
     // The other direction is the same line travelled backwards, so the
     // two lists are exact mirrors of each other.
-    const backward = [...ordered].reverse();
+    // The mirror is a copy: the two directions have their own distance
+    // from the start, and one list of stops cannot carry both.
+    const backward = [...ordered].reverse().map((stop) => ({ ...stop }));
 
     if (primary && primary.polyline.length > 1) {
       const forwardGeometry = buildLineGeometry({
@@ -355,7 +358,7 @@ export function mergeNetwork(options: MergeOptions): TransitNetworkFile {
 
   for (const [key, osmRoutes] of osmGroups) {
     if (consumedOsmKeys.has(key)) continue;
-    const primary = osmRoutes[0];
+    const primary = bestOsmRoute(osmRoutes);
     if (!primary) continue;
 
     const code = normalizeRouteCode(primary.code) || `route-${primary.relationId}`;
@@ -397,7 +400,7 @@ export function mergeNetwork(options: MergeOptions): TransitNetworkFile {
     const forward = buildStops({
       systemId: primary.systemId,
       curatedStations: [],
-      osmStops: primary.stops,
+      osmStops: stopsOfRelations(primary, osmRoutes),
       ensureStation,
       polyline: primary.polyline,
     });
@@ -418,7 +421,9 @@ export function mergeNetwork(options: MergeOptions): TransitNetworkFile {
     // The opposite direction is the same line travelled backwards. A
     // relation may list the stops in any order, so the mirror of the
     // forward list is the one that is certainly right.
-    const backward = [...ordered].reverse();
+    // The mirror is a copy: the two directions have their own distance
+    // from the start, and one list of stops cannot carry both.
+    const backward = [...ordered].reverse().map((stop) => ({ ...stop }));
 
     if (primary.polyline.length > 1) {
       // The other direction is the same road, the other way round.
@@ -524,6 +529,116 @@ function directionMatches(
 
   const target = { latitude: station.latitude, longitude: station.longitude };
   return haversineKm(target, first) <= haversineKm(target, last) * 1.05;
+}
+
+/**
+ * The relation that describes the line best.
+ *
+ * OpenStreetMap holds more than one relation for a corridor: one for each
+ * direction, and sometimes an older one that no longer covers the whole
+ * line. The first one that comes out of the search is not necessarily the
+ * right one, and a relation that misses a stretch of the line makes every
+ * leg of that line a straight line between two stops.
+ *
+ * Every candidate is scored on how many of the corridor's stops it knows
+ * and on how far its own stops stray from its own path. The relation that
+ * keeps the line on the road wins.
+ */
+function bestOsmRoute(routes: readonly OsmRoute[]): OsmRoute | undefined {
+  if (routes.length === 0) return undefined;
+  if (routes.length === 1) return routes[0];
+
+  const scored = routes.map((route) => ({
+    route,
+    stray: farthestStopFromPathKm(route),
+  }));
+  /*
+   * A corridor has one relation per direction, and one of them may leave
+   * out a stretch of the road. The stop that stands there then ends up
+   * hundreds of metres off the path, and the relation does not trace the
+   * line at all. A relation whose stops stand on its own path is the one
+   * that traces the line; the other one is left out even when it knows
+   * more stops, because the stops it lost are the ones on the road the
+   * relation forgot.
+   */
+  const complete = scored.filter((entry) => entry.stray <= 0.5);
+  const pool = complete.length > 0 ? complete : scored;
+
+  let best: OsmRoute | undefined;
+  let bestScore = Number.NEGATIVE_INFINITY;
+
+  for (const entry of pool) {
+    // The relation that knows the most stops is the one that knows the
+    // line best, and it keeps the stations the other one would lose.
+    const score = entry.route.stops.length * 1000 - entry.stray;
+    if (score > bestScore) {
+      bestScore = score;
+      best = entry.route;
+    }
+  }
+
+  return best;
+}
+
+/**
+ * How far the stop that strays most from the path stands from it.
+ *
+ * The stops of a relation belong to the relation, so a stop that is far
+ * from the relation's own path is a sign that the path is broken and not
+ * that the stop is misplaced.
+ */
+/**
+ * Every stop the relations of a corridor know.
+ *
+ * A corridor has one relation per direction, and the two do not always
+ * list the same stops: one of them may leave out a stretch of the road
+ * and the stops on that stretch with it. The stations of a corridor are
+ * places that exist, so none of them may be dropped because the
+ * relation that traces the road forgot one of them.
+ */
+function stopsOfRelations(
+  primary: OsmRoute | undefined,
+  routes: readonly OsmRoute[],
+): OsmStop[] {
+  if (!primary) return [];
+  const stops = [...primary.stops];
+  const seen = new Set(primary.stops.map((stop) => stop.nodeId));
+
+  for (const route of routes) {
+    if (route === primary) continue;
+    for (const stop of route.stops) {
+      if (seen.has(stop.nodeId)) continue;
+      /*
+       * The other direction lists the same places under the name of its
+       * own platform, so a stop that stands close to one of the stops of
+       * the relation that traces the road is that place and not a new
+       * one. Only a stop that stands away from all of them is a place
+       * of its own, and that is the stop of a stretch of road the
+       * relation forgot.
+       */
+      const near = primary.stops.some(
+        (other) =>
+          haversineKm(
+            { latitude: stop.latitude, longitude: stop.longitude },
+            { latitude: other.latitude, longitude: other.longitude },
+          ) < 0.15,
+      );
+      if (near) continue;
+      seen.add(stop.nodeId);
+      stops.push(stop);
+    }
+  }
+
+  return stops;
+}
+
+function farthestStopFromPathKm(route: OsmRoute): number {
+  let worst = 0;
+  for (const stop of route.stops) {
+    const distance = distanceToPathKm(route.polyline, stop);
+    if (distance > worst) worst = distance;
+  }
+  return worst;
 }
 
 /** Find OSM routes of a system whose name matches a curated line name. */

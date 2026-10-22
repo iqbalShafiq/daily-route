@@ -120,6 +120,24 @@ every stop along it. The planner measures the distance between two stops
 **along that path**, so the time it estimates is the time the vehicle
 needs, and the line drawn on the map follows the road.
 
+Three rules keep that path honest:
+
+- The relation that traces the line is the one whose stops stand on its
+  own path, not the one that came first. A corridor has one relation
+  per direction, and one of them may leave out a stretch of the road.
+- The stops of every relation of the corridor are kept, so a place is
+  never lost because one relation forgot it. A stop that stands close
+  to a stop of the chosen relation is that same place, and is not
+  counted twice.
+- The path is drawn as straight lines only when **most** of the stops
+  stand far from it. One stop a few hundred metres off does not throw
+  twenty-five kilometres of road away.
+
+The street of a stop is found by where the stop stands, not by the
+order of the members of the relation: a relation in the second version
+of the public transport tagging lists every stop before every way. The
+findings are in `research/osm-geometry.md`.
+
 When you change the pipeline, re-run `pnpm data:ingest && pnpm db:seed &&
 pnpm data:embed`, and check `data/transit-network.json` in the diff. A
 shrinking station count is a red flag, not a cleanup.

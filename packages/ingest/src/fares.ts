@@ -136,26 +136,45 @@ function integrationOf(entry: Record<string, unknown>): IntegrationRule | null {
   if (entry["verified"] === false) return null;
   if (price.amount <= 0) return null;
 
+  // The operators the scheme covers are named explicitly: the prose
+  // mentions the operators it excludes just as often as the ones it
+  // includes.
+  const covers = Array.isArray(entry["covers"])
+    ? entry["covers"].filter((value): value is string => typeof value === "string")
+    : [];
+  const durationMinutes =
+    typeof entry["durationHours"] === "number" ? entry["durationHours"] * 60 : 180;
+  const note = text(entry["note"]) ?? text(entry["includes"]) ?? "";
+
+  if (text(entry["kind"]) === "operatorContinuation") {
+    // The continuation ticket only has a price for the rider who holds
+    // the card the operator names, so without that card the rule cannot
+    // be offered.
+    const requiresCard = text(entry["requiresCard"]);
+    if (!requiresCard) return null;
+
+    return {
+      kind: "operatorContinuation",
+      id,
+      label,
+      max: price.amount,
+      covers,
+      durationMinutes,
+      note,
+      requiresCard,
+    };
+  }
+
   return {
+    kind: "multiModal",
     id,
-    // The label is what the rider reads on the ticket, so it is kept short;
-    // the research document keeps the full description.
-    label: id === "jakpro-multimodal" ? "Integrasi Multimodal (JakLingko)" : label,
+    label,
     boardingAmount: boarding?.amount ?? price.amount,
     perKm: perKm?.amount ?? 0,
     max: price.amount,
-    // The operators the scheme covers are named explicitly: the prose
-    // mentions the operators it excludes just as often as the ones it
-    // includes.
-    covers: Array.isArray(entry["covers"])
-      ? entry["covers"].filter((value): value is string => typeof value === "string")
-      : [],
-    durationMinutes:
-      typeof entry["durationHours"] === "number" ? entry["durationHours"] * 60 : 180,
-    note:
-      id === "jakpro-multimodal"
-        ? "Satu tiket untuk BRT, MRT dan LRT Jakarta, berlaku 3 jam, maksimal Rp 10.000. Mikrotrans, bus non-BRT dan KRL tidak termasuk."
-        : (text(entry["note"]) ?? text(entry["includes"]) ?? ""),
+    covers,
+    durationMinutes,
+    note,
   };
 }
 

@@ -82,22 +82,49 @@ export type FareRules = {
   holidays: readonly string[];
 };
 
-export type IntegrationRule = {
-  id: string;
-  label: string;
-  /** The amount that starts the journey. */
-  boardingAmount: number;
-  /** The amount for every kilometre of the whole journey. */
-  perKm: number;
-  /** The highest amount for the whole journey. */
-  max: number;
-  /** The operators the ticket covers. */
-  covers: string[];
-  /** How long the ticket is valid, in minutes. */
-  durationMinutes: number;
-  /** The note that explains the limits. */
-  note: string;
-};
+/**
+ * A combined ticket.
+ *
+ * Two kinds exist, and they are not the same thing. The multimodal ticket
+ * joins different operators and its price grows with the distance of the
+ * whole journey. The continuation ticket keeps one operator's own
+ * services together and caps what a rider pays when they change vehicles
+ * inside a window; that price only exists when the rider holds the card
+ * the operator names.
+ */
+export type IntegrationRule =
+  | {
+      kind: "multiModal";
+      id: string;
+      label: string;
+      /** The amount that starts the journey. */
+      boardingAmount: number;
+      /** The amount for every kilometre of the whole journey. */
+      perKm: number;
+      /** The highest amount for the whole journey. */
+      max: number;
+      /** The operators the ticket covers. */
+      covers: string[];
+      /** How long the ticket is valid, in minutes. */
+      durationMinutes: number;
+      /** The note that explains the limits. */
+      note: string;
+    }
+  | {
+      kind: "operatorContinuation";
+      id: string;
+      label: string;
+      /** The highest amount for the whole journey. */
+      max: number;
+      /** The operators the ticket covers. */
+      covers: string[];
+      /** How long the ticket is valid, in minutes. */
+      durationMinutes: number;
+      /** The note that explains the limits. */
+      note: string;
+      /** The card the rider has to hold for this price. */
+      requiresCard: string;
+    };
 
 /** One leg of a journey, as the fare engine sees it. */
 export type FareLeg = {
@@ -116,12 +143,26 @@ export type FareBreakdownItem = {
   detail?: string;
 };
 
+/**
+ * Another price that is legal for the same journey.
+ *
+ * A price that depends on the card the rider holds is not one number but
+ * two, and hiding the second one would tell the rider the wrong amount.
+ */
+export type FareAlternative = {
+  label: string;
+  amountIdr: number;
+  note: string;
+};
+
 export type FareQuote = {
   /** The amount the rider pays, in rupiah. */
   totalIdr: number;
   breakdown: FareBreakdownItem[];
   /** The combined ticket, when it is the better way to travel. */
   integration: { id: string; label: string; amountIdr: number; note: string } | null;
+  /** The other legal prices, each with the condition that makes it apply. */
+  alternatives: FareAlternative[];
   /** The remarks the rider should know. */
   notes: string[];
   /** The rules that could not be confirmed by the operator. */
@@ -132,7 +173,7 @@ const RUPIAH = "Rp";
 
 /** Format an amount the way a ticket does. */
 export function formatRupiah(amount: number): string {
-  return `${RUPIAH} ${Math.round(amount).toLocaleString("id-ID")}`;
+  return `${RUPIAH}${Math.round(amount).toLocaleString("id-ID")}`;
 }
 
 /**
@@ -326,24 +367,58 @@ export function quoteFare(input: {
 
   // The combined ticket, when every vehicle of the journey is covered.
   let integration: FareQuote["integration"] = null;
+  const alternatives: FareAlternative[] = [];
   const totalDistance = rides.reduce((total, leg) => total + leg.distanceKm, 0);
 
   for (const candidate of input.rules.integrations) {
-    const covered = rides.every((leg) => leg.operator && candidate.covers.includes(leg.operator));
-    if (!covered) continue;
-    /*
-     * The scheme exists to combine modes, not to make one mode cheaper.
-     * Two buses of the same operator are two fares, not one journey
-     * across two modes, so the scheme is only offered when the journey
-     * really does use more than one mode.
-     */
-    const modes = new Set(rides.map((leg) => leg.operator));
-    if (modes.size < 2) continue;
+    if (candidate.kind === "multiModal") {
+      const covered = rides.every(
+        (leg) => leg.operator && candidate.covers.includes(leg.operator),
+      );
+      if (!covered) continue;
+      /*
+       * The scheme exists to combine modes, not to make one mode cheaper.
+       * Two buses of the same operator are two fares, not one journey
+       * across two modes, so the scheme is only offered when the journey
+       * really does use more than one operator.
+       */
+      const operators = new Set(rides.map((leg) => leg.operator));
+      if (operators.size < 2) continue;
 
-    const amount = Math.min(
-      candidate.max,
-      candidate.boardingAmount + totalDistance * candidate.perKm,
+      const amount = Math.min(
+        candidate.max,
+        candidate.boardingAmount + totalDistance * candidate.perKm,
+      );
+      if (amount >= separateTotal) continue;
+
+      integration = {
+        id: candidate.id,
+        label: candidate.label,
+        amountIdr: Math.round(amount),
+        note: candidate.note,
+      };
+      notes.push(candidate.note);
+      break;
+    }
+
+    /*
+     * The continuation ticket caps what one operator charges when the
+     * rider changes vehicles inside the window. It needs more than one
+     * vehicle, every vehicle of the journey has to be one the ticket
+     * covers, and the price only exists for a rider who holds the card
+     * the operator names. Without that card every vehicle is charged on
+     * its own, so that price is offered as well.
+     */
+    const coveredRides = rides.filter(
+      (leg) => leg.operator && candidate.covers.includes(leg.operator),
     );
+    if (coveredRides.length < 2) continue;
+    const everyRideCovered = rides.every(
+      (leg) => leg.operator && candidate.covers.includes(leg.operator),
+    );
+    if (!everyRideCovered) continue;
+
+    const amount = Math.min(candidate.max, separateTotal);
     if (amount >= separateTotal) continue;
 
     integration = {
@@ -353,6 +428,11 @@ export function quoteFare(input: {
       note: candidate.note,
     };
     notes.push(candidate.note);
+    alternatives.push({
+      label: `Tanpa ${candidate.requiresCard}`,
+      amountIdr: Math.round(separateTotal),
+      note: "Setiap kendaraan ditagih dengan tarifnya sendiri.",
+    });
     break;
   }
 
@@ -376,6 +456,7 @@ export function quoteFare(input: {
         ]
       : breakdown,
     integration,
+    alternatives,
     notes,
     unverified,
   };
@@ -396,10 +477,10 @@ export function fareOperatorFor(leg: {
   const code = (leg.lineCode ?? "").replace(/\./g, "").toUpperCase();
 
   // Two services are priced per route rather than per kind of service.
-  // The Royaltrans to Serpong is more than double the usual price, and
-  // the Transbandara to the airport was set at its own tariff.
-  if (leg.serviceClass === "royaltrans" && code === "S13") {
-    return "transjakarta-royaltrans-s13";
+  // The Royaltrans to Summarecon Serpong is more than double the usual
+  // price, and the Transbandara to the airport was set at its own tariff.
+  if (leg.serviceClass === "royaltrans" && code === "S14") {
+    return "transjakarta-royaltrans-s14";
   }
   if (leg.serviceClass === "transjabodetabek" && code === "SH2") {
     return "transjakarta-transbandara";
@@ -439,7 +520,7 @@ export function fareOperatorFor(leg: {
 
 /** The names the operators are known by, for the breakdown. */
 export const FARE_OPERATOR_LABELS: Record<string, string> = {
-  "transjakarta-royaltrans-s13": "Royaltrans Summarecon Serpong - Tomang",
+  "transjakarta-royaltrans-s14": "Royaltrans Lebak Bulus - Summarecon Serpong",
   "transjakarta-transbandara": "Transbandara Blok M - Bandara Soekarno-Hatta",
   "transjakarta-brt": "Transjakarta BRT (Jakpro)",
   "transjakarta-non-brt": "Transjakarta Metrotrans / Minitrans",

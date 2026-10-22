@@ -192,6 +192,11 @@ The language is Indonesian, and it is the language of the operators.
 - The time is written with a dot, as the Indonesian rules of punctuation
   say: "10.14 WIB", not "10:14".
 - Rupiah has no space: "Rp5.000".
+- A price that depends on the card the rider holds is written as two
+  prices: the one with the card, and the one without it. The smaller
+  one is the total, the other one is a line under it: "Tanpa kartu
+  berlogo JakLingko · Rp7.000". One number would be wrong for one of
+  the two riders.
 - A waiting time is an estimate of the headway, so it says so: "tunggu 5
   mnt", never "±5 mnt".
 - There is no marketing copy, no exclamation mark and no emoji.

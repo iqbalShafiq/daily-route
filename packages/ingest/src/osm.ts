@@ -1,6 +1,10 @@
 import { bboxClause, overpass, type OverpassElement } from "./overpass.js";
 import { systemForRelation, type SystemId } from "./classify.js";
-import { appendWay, type Coordinate } from "./geometry.js";
+import {
+  appendWay,
+  closestVertexIndexOnPolyline,
+  type Coordinate,
+} from "./geometry.js";
 
 /**
  * Extraction of the transit network from OpenStreetMap.
@@ -46,7 +50,7 @@ export type OsmRoute = {
   /** The path the vehicles travel, in order. */
   polyline: Coordinate[];
   /** The index in the polyline of every stop, by OpenStreetMap node id. */
-  stopOffsets: Map<number, number>;
+
 };
 
 /**
@@ -213,7 +217,6 @@ export function toOsmRoute(
   // stops. Walking them together yields the polyline and the offset of
   // every stop in one pass.
   const polyline: Coordinate[] = [];
-  const stopOffsets = new Map<number, number>();
   const stopByNodeId = new Map(resolved.map((stop) => [stop.nodeId, stop]));
 
   /*
@@ -237,14 +240,22 @@ export function toOsmRoute(
     }
     if (member.type === "node" && member.role === "stop") {
       if (!stopByNodeId.has(member.ref)) continue;
-      stopOffsets.set(member.ref, Math.max(0, polyline.length - 1));
     }
   }
 
-  // Every stop is given the name of the road the path runs on there.
+  /*
+   * Every stop is given the name of the road the path runs on there.
+   *
+   * The place a stop stands decides where along the path it is, not the
+   * order of the members. A relation in the second version of the public
+   * transport tagging lists every stop before every way, so the order of
+   * the members says nothing about the position of a stop.
+   */
   for (const stop of resolved) {
-    const offset = stopOffsets.get(stop.nodeId);
-    if (offset === undefined) continue;
+    const offset = closestVertexIndexOnPolyline(polyline, {
+      latitude: stop.latitude,
+      longitude: stop.longitude,
+    });
     const wayId = wayAtIndex[Math.min(offset, wayAtIndex.length - 1)] ?? null;
     const tags = wayId === null ? undefined : wayTags.get(wayId);
     stop.street = tags?.name ?? null;
@@ -263,7 +274,6 @@ export function toOsmRoute(
     operator: tags["operator"] ?? null,
     stops: resolved,
     polyline,
-    stopOffsets,
   };
 }
 

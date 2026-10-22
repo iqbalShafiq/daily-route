@@ -5,7 +5,12 @@ import { DisruptionBanner } from "../../components/transit/disruption-banner.js"
 import { LegList } from "../../components/transit/leg-list.js";
 import { cn } from "../../lib/cn.js";
 import { ApiError, type Itinerary, type PlanResult } from "../../lib/api.js";
-import { formatDistance, formatDuration, formatTimestamp } from "../../lib/format.js";
+import {
+  formatDistance,
+  formatDuration,
+  formatRupiah,
+  formatTimestamp,
+} from "../../lib/format.js";
 
 import type { UsePlanResult } from "./use-plan.js";
 
@@ -237,6 +242,11 @@ export function RouteResult({
               <p key={index} className="mt-1 text-[12px] text-ink-3">
                 {item.label}
                 {item.detail ? ` · ${item.detail}` : ""}
+              </p>
+            ))}
+            {current.fare.alternatives.map((alternative, index) => (
+              <p key={index} className="mt-1 text-[12px] text-ink-3">
+                {alternative.label} · {formatRupiah(alternative.amountIdr)}
               </p>
             ))}
             {current.fare.notes.map((note, index) => (

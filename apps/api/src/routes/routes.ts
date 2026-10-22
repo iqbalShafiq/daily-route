@@ -245,6 +245,7 @@ function fareOf(itinerary: Itinerary, rules: FareRules | null, at: Date) {
       totalIdr: null,
       label: null,
       breakdown: [],
+      alternatives: [],
       notes: ["Tarif belum tersedia di data jaringan."],
     };
   }
@@ -273,6 +274,7 @@ function fareOf(itinerary: Itinerary, rules: FareRules | null, at: Date) {
     totalIdr: quote.totalIdr,
     label: formatRupiah(quote.totalIdr),
     breakdown: quote.breakdown,
+    alternatives: quote.alternatives,
     notes: quote.notes,
   };
 }

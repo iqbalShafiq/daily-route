@@ -208,3 +208,8 @@ export const DISRUPTION_KIND_LABEL: Record<string, string> = {
   weather: "Cuaca",
   unknown: "Pemberitahuan",
 };
+
+/** Format an amount of rupiah the way a ticket does. */
+export function formatRupiah(amount: number): string {
+  return `Rp${Math.round(amount).toLocaleString("id-ID")}`;
+}

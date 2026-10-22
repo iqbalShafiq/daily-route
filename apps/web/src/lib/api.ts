@@ -119,12 +119,20 @@ export type FareBreakdownItem = {
   detail?: string;
 };
 
+/** Another price that is legal for the same journey. */
+export type FareAlternative = {
+  label: string;
+  amountIdr: number;
+  note: string;
+};
+
 export type FareQuote = {
   /** Whether the snapshot carries the published tariffs. */
   available: boolean;
   totalIdr: number | null;
   label: string | null;
   breakdown: FareBreakdownItem[];
+  alternatives: FareAlternative[];
   notes: string[];
 };
 

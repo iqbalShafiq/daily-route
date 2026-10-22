@@ -45,6 +45,7 @@ const rules: FareRules = {
   },
   integrations: [
     {
+      kind: "multiModal" as const,
       id: "jakpro-multimodal",
       label: "Integrasi Multimodal (JakLingko)",
       boardingAmount: 2500,
@@ -53,6 +54,16 @@ const rules: FareRules = {
       covers: ["transjakarta-brt", "mrt-jakarta", "lrt-jakarta"],
       durationMinutes: 180,
       note: "Satu tiket untuk BRT, MRT dan LRT Jakarta.",
+    },
+    {
+      kind: "operatorContinuation" as const,
+      id: "okotrip",
+      label: "Integrasi Transjakarta (kartu JakLingko)",
+      max: 5000,
+      covers: ["transjakarta-brt", "transjakarta-non-brt"],
+      durationMinutes: 180,
+      note: "Tarif maksimal Rp5.000 dalam 3 jam dengan kartu berlogo JakLingko.",
+      requiresCard: "kartu berlogo JakLingko",
     },
   ],
 };
@@ -196,6 +207,39 @@ describe("quoteFare", () => {
     expect(quote.totalIdr).toBe(3500 + 3000);
   });
 
+  it("caps the Transjakarta fare when the rider changes buses", () => {
+    const legs = [
+      { kind: "ride" as const, operator: "transjakarta-brt", distanceKm: 5, stopCount: 6 },
+      { kind: "ride" as const, operator: "transjakarta-brt", distanceKm: 4, stopCount: 5 },
+    ];
+
+    const quote = quoteFare({ at: at(10), rules, legs });
+
+    // Two buses of the same operator are one journey for the rider who
+    // holds the card, and two fares for everybody else.
+    expect(quote.integration?.id).toBe("okotrip");
+    expect(quote.totalIdr).toBe(5000);
+    expect(quote.alternatives).toHaveLength(1);
+    expect(quote.alternatives[0]?.amountIdr).toBe(7000);
+    expect(quote.alternatives[0]?.label).toContain("JakLingko");
+  });
+
+  it("keeps the Transjakarta cap out of a journey with another operator", () => {
+    const quote = quoteFare({
+      at: at(10),
+      rules,
+      legs: [
+        { kind: "ride", operator: "transjakarta-brt", distanceKm: 5, stopCount: 6 },
+        { kind: "ride", operator: "mrt-jakarta", distanceKm: 5, stopCount: 4 },
+      ],
+    });
+
+    // The multi-mode ticket covers this journey, the Transjakarta cap
+    // does not: it would leave the MRT ride uncapped.
+    expect(quote.integration?.id).toBe("jakpro-multimodal");
+    expect(quote.alternatives).toHaveLength(0);
+  });
+
   it("never charges for walking", () => {
     const quote = quoteFare({
       at: at(10),
@@ -254,7 +298,7 @@ describe("localTimeParts", () => {
 
 describe("formatRupiah", () => {
   it("writes the amount the way a ticket does", () => {
-    expect(formatRupiah(3500)).toBe("Rp 3.500");
+    expect(formatRupiah(3500)).toBe("Rp3.500");
   });
 });
 
