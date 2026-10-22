@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-10-22T02:03:25.371Z",
+  "generatedAt": "2026-10-22T02:27:47.974Z",
   "sources": [
     "OpenStreetMap (ODbL) via the Overpass API — station coordinates, route relations and stop order",
     "research/data/transjakarta.json — official corridor names, operators, service hours and stop lists",
@@ -233015,11 +233015,11 @@
       },
       "transjakarta-mikrotrans": {
         "kind": "free",
-        "note": "Mikrotrans JakLingko gratis bagi penumpang pada 21 Oktober 2026; penumpang tetap harus tap-in dan tap-out, dan operator dibayar per jarak tempuh. Usulan tarif Rp 2.000 mulai 1 Januari 2027 belum berlaku."
+        "note": "Mikrotrans JakLingko gratis bagi penumpang pada 21 Oktober 2026; penumpang tetap harus tap-in dan tap-out, dan operator dibayar per jarak tempuh. Usulan tarif Rp2.000 mulai 1 Januari 2027 belum berlaku."
       },
       "transjakarta-wisata": {
         "kind": "free",
-        "note": "Bus Wisata Transjakarta beroperasi dengan tarif Rp 0 atau gratis, demikian keterangan resmi operator untuk BW1, BW2 dan BW4."
+        "note": "Bus Wisata Transjakarta beroperasi dengan tarif Rp0 atau gratis, demikian keterangan resmi operator untuk BW1, BW2 dan BW4."
       },
       "transjakarta-rumah-susun": {
         "kind": "flat",
