@@ -1,6 +1,7 @@
 import { relations, sql } from "drizzle-orm";
 import {
   boolean,
+  check,
   doublePrecision,
   index,
   integer,
@@ -543,3 +544,98 @@ export const usageEvents = pgTable(
     index("usage_events_kind_idx").on(table.kind, table.createdAt),
   ],
 );
+
+/**
+ * Accounts.
+ *
+ * These tables carry the rider's account, the session behind the cookie and
+ * the places the rider asked to keep. They reference no transit table on
+ * purpose: `pnpm db:seed` truncates the network with CASCADE, and a foreign
+ * key from a memory item to a station would delete the rider's data with the
+ * seed. The station reference in a payload is a read-time lookup, not a key.
+ */
+export const users = pgTable(
+  "users",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    /**
+     * The address the rider signed up with, stored already trimmed and
+     * lowercased by the writer. The column does not transform it, so a
+     * lookup can use the exact string the writer produced.
+     */
+    email: text("email").notNull(),
+    /** Produced outside this package; the layer stores the string only. */
+    passwordHash: text("password_hash").notNull(),
+    ...timestamps,
+  },
+  (table) => [uniqueIndex("users_email_unique").on(table.email)],
+);
+
+export const sessions = pgTable(
+  "sessions",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    userId: uuid("user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    /**
+     * A SHA-256 hex of the raw cookie, never the token itself, so a leaked
+     * database snapshot does not hand out live sessions.
+     */
+    tokenHash: text("token_hash").notNull(),
+    expiresAt: timestamp("expires_at", { withTimezone: true }).notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+    lastSeenAt: timestamp("last_seen_at", { withTimezone: true }).notNull().defaultNow(),
+  },
+  (table) => [
+    uniqueIndex("sessions_token_hash_unique").on(table.tokenHash),
+    index("sessions_user_idx").on(table.userId),
+  ],
+);
+
+/**
+ * The rider's saved and recent state, kept as an opaque payload per item.
+ *
+ * A write that removes an item sets `deleted_at` instead of deleting the
+ * row, so a browser that syncs incrementally can learn that the item is
+ * gone. The cap on each kind is enforced by tombstoning the oldest rows.
+ */
+export const riderMemoryItems = pgTable(
+  "rider_memory_items",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    userId: uuid("user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    kind: text("kind").notNull(),
+    itemKey: text("item_key").notNull(),
+    payload: jsonb("payload").notNull().default(sql`'{}'::jsonb`),
+    deletedAt: timestamp("deleted_at", { withTimezone: true }),
+    ...timestamps,
+  },
+  (table) => [
+    uniqueIndex("rider_memory_items_user_kind_key_unique").on(
+      table.userId,
+      table.kind,
+      table.itemKey,
+    ),
+    index("rider_memory_items_user_updated_idx").on(table.userId, table.updatedAt),
+    check(
+      "rider_memory_items_kind_check",
+      sql`${table.kind} in ('saved-place', 'recent-place', 'recent-journey', 'watch')`,
+    ),
+  ],
+);
+
+export const usersRelations = relations(users, ({ many }) => ({
+  sessions: many(sessions),
+  memoryItems: many(riderMemoryItems),
+}));
+
+export const sessionsRelations = relations(sessions, ({ one }) => ({
+  user: one(users, { fields: [sessions.userId], references: [users.id] }),
+}));
+
+export const riderMemoryItemsRelations = relations(riderMemoryItems, ({ one }) => ({
+  user: one(users, { fields: [riderMemoryItems.userId], references: [users.id] }),
+}));
