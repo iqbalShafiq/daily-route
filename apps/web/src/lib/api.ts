@@ -20,6 +20,9 @@ export class ApiError extends Error {
 async function request<T>(path: string, init?: RequestInit): Promise<T> {
   const response = await fetch(`${BASE_URL}${path}`, {
     ...init,
+    // The session is a cookie, so every call carries it. The browser only
+    // ever talks to the application API; the cookie never leaves this origin.
+    credentials: "include",
     headers: {
       ...(init?.body ? { "Content-Type": "application/json" } : {}),
       ...init?.headers,
@@ -31,8 +34,39 @@ async function request<T>(path: string, init?: RequestInit): Promise<T> {
     throw new ApiError(payload?.error ?? `Permintaan gagal (${response.status})`, response.status);
   }
 
+  // A 204 is a complete answer with no body. Parsing it as JSON would turn
+  // a successful sign-out or password change into a failure.
+  if (response.status === 204) {
+    return undefined as T;
+  }
+
   return (await response.json()) as T;
 }
+
+/** The signed-in rider. The account API returns this shape under `user`. */
+export type AccountUser = { id: string; email: string };
+
+export type AccountMemoryKind = "saved-place" | "recent-place" | "recent-journey" | "watch";
+
+/**
+ * One row of the rider's memory as the account API stores it.
+ *
+ * The web package owns this shape: it may not import the database package.
+ */
+export type AccountMemoryItem = {
+  kind: AccountMemoryKind;
+  itemKey: string;
+  payload: unknown;
+  updatedAt: string;
+  deletedAt: string | null;
+};
+
+export type AccountMemoryWrite = {
+  kind: AccountMemoryKind;
+  itemKey: string;
+  payload?: unknown;
+  deleted?: boolean;
+};
 
 export type MatchedRange = { start: number; end: number };
 
@@ -588,4 +622,58 @@ export const api = {
 
   agentTools: () =>
     request<{ configured: boolean; model: string; provider: string }>("/agent/tools"),
+
+  /**
+   * The signed-in rider, or null.
+   *
+   * A 401 is the answer "nobody is signed in", not a failure: the planner
+   * works without an account, so the panel must open in its signed-out
+   * shape rather than show an error.
+   */
+  account: async (): Promise<AccountUser | null> => {
+    try {
+      const payload = await request<{ user: AccountUser }>("/account");
+      return payload.user;
+    } catch (error) {
+      if (error instanceof ApiError && error.status === 401) return null;
+      throw error;
+    }
+  },
+
+  signUp: (email: string, password: string) =>
+    request<{ user: AccountUser }>("/account", {
+      method: "POST",
+      body: JSON.stringify({ email, password }),
+    }),
+
+  signIn: (email: string, password: string) =>
+    request<{ user: AccountUser }>("/account/session", {
+      method: "POST",
+      body: JSON.stringify({ email, password }),
+    }),
+
+  signOut: () => request<void>("/account/session", { method: "DELETE" }),
+
+  changePassword: (currentPassword: string, password: string) =>
+    request<void>("/account/password", {
+      method: "POST",
+      body: JSON.stringify({ currentPassword, password }),
+    }),
+
+  deleteAccount: (password: string) =>
+    request<void>("/account", {
+      method: "DELETE",
+      body: JSON.stringify({ password }),
+    }),
+
+  accountMemory: (after?: string) =>
+    request<{ items: AccountMemoryItem[] }>(
+      `/account/memory${after ? `?after=${encodeURIComponent(after)}` : ""}`,
+    ),
+
+  putAccountMemory: (items: AccountMemoryWrite[]) =>
+    request<{ items: AccountMemoryItem[] }>("/account/memory", {
+      method: "PUT",
+      body: JSON.stringify({ items }),
+    }),
 };

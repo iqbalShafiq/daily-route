@@ -14,23 +14,31 @@ export function Tabs({
   value,
   onValueChange,
   children,
+  panels,
   className,
 }: {
   value: string;
   onValueChange: (value: string) => void;
   children: ReactNode;
+  /** The panels that belong to the list, rendered underneath it. */
+  panels?: ReactNode;
   className?: string;
 }) {
   return (
-    <BaseTabs.Root value={value} onValueChange={(next) => onValueChange(next as string)}>
+    <BaseTabs.Root
+      value={value}
+      onValueChange={(next) => onValueChange(next as string)}
+      className="flex flex-col gap-3"
+    >
       <BaseTabs.List
         className={cn(
-          "inline-flex items-center gap-0.5 rounded-lg border border-line-strong bg-surface-2 p-0.5",
+          "inline-flex w-fit items-center gap-0.5 rounded-lg border border-line-strong bg-surface-2 p-0.5",
           className,
         )}
       >
         {children}
       </BaseTabs.List>
+      {panels}
     </BaseTabs.Root>
   );
 }

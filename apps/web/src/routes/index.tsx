@@ -1,4 +1,4 @@
-import { ArrowRight, MessageSquare, Moon, Sun, X } from "lucide-react";
+import { ArrowRight, MessageSquare, Moon, Sun, UserRound, X } from "lucide-react";
 import { useEffect, useMemo, useRef, useState } from "react";
 
 import {
@@ -15,15 +15,17 @@ import {
   NetworkDock,
   type NetworkDockTab,
 } from "../components/layout/network-dock.js";
+import { AccountPanel } from "../features/account/account-panel.js";
+import { useAccount } from "../features/account/use-account.js";
+import { useRiderMemory } from "../features/account/use-rider-memory.js";
 import { ChatPanel } from "../features/chat/chat-panel.js";
 import type { ChatAction } from "../features/chat/use-chat.js";
 import type { DisruptionSummary } from "../lib/api.js";
 import { RouteResult } from "../features/route-planner/route-result.js";
 import { RouteSearch } from "../features/route-planner/route-search.js";
-import { usePlaceMemory, type ChosenPlace } from "../features/route-planner/place-memory.js";
+import type { ChosenPlace } from "../features/route-planner/place-memory.js";
 import type { MemorySuggestion } from "../features/route-planner/place-input.js";
 import { usePlan, type PlanRequest } from "../features/route-planner/use-plan.js";
-import { useWatch } from "../features/route-planner/use-watch.js";
 import { api } from "../lib/api.js";
 import type { PositionPlan } from "../lib/api.js";
 import { Button } from "../components/ui/button.js";
@@ -116,6 +118,8 @@ export function PlannerPage() {
     }).format(new Date());
   });
   const [nightSafe, setNightSafe] = useState(isNightNow);
+  const account = useAccount();
+  const riderMemory = useRiderMemory(account.user?.id ?? null);
   const {
     saved,
     recentPlaces,
@@ -123,8 +127,15 @@ export function PlannerPage() {
     toggleSaved,
     rememberJourney,
     isSaved,
-  } = usePlaceMemory();
+    toggle: toggleWatch,
+    isWatching,
+    memoryError,
+    memoryLoadFailed,
+    retryMemory,
+    resetLocal,
+  } = riderMemory;
   const [view, setView] = useState("route");
+  const [accountOpen, setAccountOpen] = useState(false);
   const [mobileTab, setMobileTab] = useState<MobileTab>("plan");
   const [resultExpanded, setResultExpanded] = useState(true);
   const isDesktop = useMediaQuery("(min-width: 1024px)");
@@ -134,6 +145,7 @@ export function PlannerPage() {
 
   const openChat = (): void => {
     if (chatTimer.current !== null) window.clearTimeout(chatTimer.current);
+    setAccountOpen(false);
     setChatClosing(false);
     setMobileTab("assistant");
     setView("chat");
@@ -150,6 +162,23 @@ export function PlannerPage() {
     }, 180);
   };
 
+  /** The account sheet and the assistant never share the corner. */
+  const openAccount = (): void => {
+    setAccountOpen(true);
+    setMobileTab("plan");
+    if (view === "chat") closeChat();
+  };
+
+  const signOutAccount = async (): Promise<void> => {
+    await account.signOut();
+    resetLocal();
+  };
+
+  const deleteAccount = async (password: string): Promise<void> => {
+    await account.deleteAccount(password);
+    resetLocal();
+  };
+
   /**
    * The bottom bar is the phone's way around the window.
    *
@@ -158,6 +187,7 @@ export function PlannerPage() {
    * journey stay where the reader left them.
    */
   const changeMobileTab = (tab: MobileTab): void => {
+    setAccountOpen(false);
     if (tab === "assistant") {
       openChat();
       return;
@@ -312,7 +342,6 @@ export function PlannerPage() {
 
   const planAt = departureMode === "at" ? departureAt(departureTime) : undefined;
   const plan = usePlan(submitted ? requestOf(submitted, planAt, nightSafe) : null);
-  const tripWatch = useWatch();
 
   useEffect(() => {
     if (!plan.data || !submitted) return;
@@ -348,10 +377,10 @@ export function PlannerPage() {
     plan.data && watchedLines.length > 0
       ? `${plan.data.origin.id}>${plan.data.destination.id}:${watchedLines.join(",")}`
       : null;
-  const watching = tripWatch.isWatching(watchKey);
-  const toggleWatch = (): void => {
+  const watching = isWatching(watchKey);
+  const toggleWatchTrip = (): void => {
     if (!plan.data || !watchKey) return;
-    tripWatch.toggle({
+    toggleWatch({
       key: watchKey,
       origin: plan.data.origin.name,
       destination: plan.data.destination.name,
@@ -701,6 +730,18 @@ export function PlannerPage() {
           </Button>
         </Tooltip>
 
+        <Tooltip label="Account">
+          <Button
+            variant="secondary"
+            size="icon"
+            aria-label="Account"
+            onClick={openAccount}
+            className="pointer-events-auto size-10 rounded-lg border-line-strong bg-surface/95 shadow-pop backdrop-blur"
+          >
+            <UserRound aria-hidden className="size-4" />
+          </Button>
+        </Tooltip>
+
         <Tooltip label={theme === "dark" ? "Light mode" : "Dark mode"}>
           <Button
             variant="secondary"
@@ -718,9 +759,20 @@ export function PlannerPage() {
         </Tooltip>
       </div>
 
-      {/* The theme switch stays on the map on a phone; the bottom bar owns
-          the assistant. */}
-      <div className={cn("pointer-events-none absolute right-3 top-[calc(var(--bar-h)+8px)] z-30 lg:hidden", view === "chat" && "max-lg:hidden")}>
+      {/* The theme switch and the account stay on the map on a phone; the
+          bottom bar owns the assistant. */}
+      <div className={cn("pointer-events-none absolute right-3 top-[calc(var(--bar-h)+8px)] z-30 flex items-center gap-2 lg:hidden", (view === "chat" || accountOpen) && "max-lg:hidden")}>
+        <Tooltip label="Account">
+          <Button
+            variant="secondary"
+            size="icon"
+            onClick={openAccount}
+            aria-label="Account"
+            className="pointer-events-auto size-9 rounded-lg border-line-strong bg-surface/95 shadow-raised"
+          >
+            <UserRound aria-hidden className="size-4" />
+          </Button>
+        </Tooltip>
         <Tooltip label={theme === "dark" ? "Light mode" : "Dark mode"}>
           <Button
             variant="secondary"
@@ -923,7 +975,7 @@ export function PlannerPage() {
                 setSubmitted((current) => (current ? { ...current } : null));
               }}
               watching={watching}
-              onToggleWatch={toggleWatch}
+              onToggleWatch={toggleWatchTrip}
               onClose={() => {
                 setSubmitted(null);
                 setWalk(null);
@@ -995,6 +1047,25 @@ export function PlannerPage() {
             destination={destination.trim() || undefined}
             at={planAt}
             nightSafe={nightSafe}
+          />
+        </div>
+      ) : null}
+
+      {accountOpen ? (
+        <div className="pointer-events-none fixed inset-x-2 bottom-[calc(var(--bottom-bar-h)+env(safe-area-inset-bottom)+8px)] z-40 flex flex-col justify-end lg:inset-auto lg:bottom-auto lg:right-3 lg:top-16 lg:w-[320px] chat-sheet-in">
+          <AccountPanel
+            key={account.user?.id ?? "signed-out"}
+            user={account.user}
+            pending={account.pending}
+            memoryError={memoryError}
+            memoryLoadFailed={memoryLoadFailed}
+            onSignUp={account.signUp}
+            onSignIn={account.signIn}
+            onSignOut={signOutAccount}
+            onChangePassword={account.changePassword}
+            onDeleteAccount={deleteAccount}
+            onRetryMemory={retryMemory}
+            onClose={() => setAccountOpen(false)}
           />
         </div>
       ) : null}

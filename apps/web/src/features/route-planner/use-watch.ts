@@ -17,26 +17,34 @@ export type WatchedTrip = {
   savedAt: string;
 };
 
-function read(): WatchedTrip[] {
+export function isWatchedTrip(value: unknown): value is WatchedTrip {
+  if (!value || typeof value !== "object") return false;
+  const row = value as Record<string, unknown>;
+  return (
+    typeof row["key"] === "string" &&
+    typeof row["origin"] === "string" &&
+    typeof row["destination"] === "string" &&
+    Array.isArray(row["lines"]) &&
+    typeof row["savedAt"] === "string"
+  );
+}
+
+export function readStoredWatches(): WatchedTrip[] {
   if (typeof localStorage === "undefined") return [];
   try {
     const raw = localStorage.getItem(KEY);
     if (!raw) return [];
     const value = JSON.parse(raw) as unknown;
     if (!Array.isArray(value)) return [];
-    return value.filter((entry): entry is WatchedTrip => {
-      if (!entry || typeof entry !== "object") return false;
-      const row = entry as Record<string, unknown>;
-      return (
-        typeof row["key"] === "string" &&
-        typeof row["origin"] === "string" &&
-        typeof row["destination"] === "string" &&
-        Array.isArray(row["lines"])
-      );
-    });
+    return value.filter(isWatchedTrip);
   } catch {
     return [];
   }
+}
+
+export function clearStoredWatches(): void {
+  if (typeof localStorage === "undefined") return;
+  localStorage.removeItem(KEY);
 }
 
 function write(trips: WatchedTrip[]): void {
@@ -45,7 +53,7 @@ function write(trips: WatchedTrip[]): void {
 }
 
 export function useWatch() {
-  const [trips, setTrips] = useState<WatchedTrip[]>(read);
+  const [trips, setTrips] = useState<WatchedTrip[]>(readStoredWatches);
   const toggle = useCallback((trip: WatchedTrip) => {
     setTrips((current) => {
       const exists = current.some((entry) => entry.key === trip.key);
@@ -60,5 +68,12 @@ export function useWatch() {
     (key: string | null) => (key ? trips.some((entry) => entry.key === key) : false),
     [trips],
   );
-  return { trips, toggle, isWatching };
+
+  /** Forget the local watches after the account has taken them over. */
+  const reset = useCallback(() => {
+    setTrips([]);
+    clearStoredWatches();
+  }, []);
+
+  return { trips, toggle, isWatching, reset };
 }
