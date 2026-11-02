@@ -1,6 +1,6 @@
 import { createDb } from "@daily-route/db";
 import { parseEnv } from "@daily-route/env";
-import { createEmbeddingProvider, PlaceResolver } from "@daily-route/semantic";
+import { createEmbeddingProvider, PlaceResolver, RoadLookup } from "@daily-route/semantic";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 
 import { NetworkCache, type TransitAgentContext } from "./context.js";
@@ -18,7 +18,7 @@ const db = createDb(env.DATABASE_URL);
 const resolver = new PlaceResolver(db, createEmbeddingProvider(env));
 const context: TransitAgentContext = { db, resolver };
 const cache = new NetworkCache(context);
-const tools = createTools(context, cache, { enabled: false });
+const tools = createTools(context, cache, { enabled: false }, new RoadLookup());
 
 /**
  * A tool, typed by the shape of its result.
@@ -46,14 +46,14 @@ afterAll(async () => {
   await db.$client.end({ timeout: 5 });
 });
 
-describe("cari_tempat", () => {
+describe("resolve_place", () => {
   it("returns candidates for a place", async () => {
     const placeTool = tool<
-      { text: string; limit?: number },
+      { query: string; limit?: number },
       { candidates: { name: string; stationId: string; score: number }[] }
-    >("cari_tempat");
+    >("resolve_place");
 
-    const result = await placeTool({ text: "Bundaran HI", limit: 5 });
+    const result = await placeTool({ query: "Bundaran HI", limit: 5 });
 
     expect(result.candidates.length).toBeGreaterThan(0);
     expect(result.candidates[0]?.stationId).toContain(":");
@@ -61,17 +61,17 @@ describe("cari_tempat", () => {
   });
 });
 
-describe("rencana_rute", () => {
+describe("plan_journey", () => {
   it("plans a journey and reports the legs", async () => {
     const routeTool = tool<
-      { asal: string; tujuan: string },
+      { origin: string; destination: string },
       {
         rute: { legs: { dari: string; ke: string }[]; durasiMenit: number }[];
         catatan: string[];
       }
-    >("rencana_rute");
+    >("plan_journey");
 
-    const result = await routeTool({ asal: "Bundaran HI", tujuan: "Kelapa Gading" });
+    const result = await routeTool({ origin: "Bundaran HI", destination: "Kelapa Gading" });
 
     expect(result.rute.length).toBeGreaterThan(0);
     const first = result.rute[0];
@@ -81,23 +81,23 @@ describe("rencana_rute", () => {
 
   it("asks for a more specific name when a place is not found", async () => {
     const routeTool = tool<
-      { asal: string; tujuan: string },
+      { origin: string; destination: string },
       { rute: unknown[]; catatan: string[] }
-    >("rencana_rute");
+    >("plan_journey");
 
-    const result = await routeTool({ asal: "xyzzyplugh", tujuan: "Senen" });
+    const result = await routeTool({ origin: "xyzzyplugh", destination: "Senen" });
 
     expect(result.rute).toEqual([]);
     expect(result.catatan.join(" ")).toMatch(/spesifik/);
   });
 });
 
-describe("detail_stasiun", () => {
+describe("get_station", () => {
   it("reports the lines that serve a station", async () => {
     const stationTool = tool<
       { stationId: string },
       { ditemukan: boolean; lines: { code: string; name: string }[] }
-    >("detail_stasiun");
+    >("get_station");
 
     const { network } = await cache.get();
     const station = network.stations.find((candidate) => candidate.isInterchange);
@@ -110,30 +110,85 @@ describe("detail_stasiun", () => {
   });
 
   it("reports an unknown station as not found", async () => {
-    const stationTool = tool<{ stationId: string }, { ditemukan: boolean }>("detail_stasiun");
+    const stationTool = tool<{ stationId: string }, { ditemukan: boolean }>("get_station");
 
     expect((await stationTool({ stationId: "tidak-ada" })).ditemukan).toBe(false);
   });
 });
 
-describe("cek_gangguan", () => {
+describe("list_active_disruptions", () => {
   it("answers with the list of active disruptions", async () => {
-    const disruptionTool = tool<{ lineIds?: string[] }, { total: number }>("cek_gangguan");
+    const disruptionTool = tool<{ lineIds?: string[] }, { total: number }>("list_active_disruptions");
 
     const result = await disruptionTool({});
     expect(typeof result.total).toBe("number");
   });
 });
 
-describe("cari_berita", () => {
-  it("says the news source is unavailable when it is not configured", async () => {
-    const newsTool = tool<
-      { query: string },
-      { tersedia: boolean; pesan: string }
-    >("cari_berita");
+describe("search_news", () => {
+  it("is not offered when the news source is not configured", () => {
+    expect(tools.map((candidate) => candidate.name)).not.toContain("search_news");
+  });
+});
 
-    const result = await newsTool({ query: "gangguan Transjakarta" });
-    expect(result.tersedia).toBe(false);
-    expect(result.pesan.length).toBeGreaterThan(0);
+describe("find_line and list_line_stops", () => {
+  it("resolves a corridor code and lists its stops", async () => {
+    const findLine = tool<
+      { codeOrName: string },
+      { lines: { lineId: string; code: string }[] }
+    >("find_line");
+    const found = await findLine({ codeOrName: "1" });
+    expect(found.lines[0]?.code).toBe("1");
+
+    const listStops = tool<
+      { lineId: string },
+      {
+        found: boolean;
+        directions: {
+          direction: string;
+          label: string;
+          stops: { stationId: string; name: string }[];
+        }[];
+      }
+    >("list_line_stops");
+    const first = found.lines[0];
+    expect(first).toBeTruthy();
+    const stops = await listStops({ lineId: first?.lineId ?? "" });
+    expect(stops.found).toBe(true);
+    expect(stops.directions.length).toBeGreaterThan(0);
+    expect(stops.directions[0]?.stops.length).toBeGreaterThan(2);
+    expect(stops.directions[0]?.label).toContain("→");
+  });
+
+  it("reports that a scheduled one-way line has finished its window", async () => {
+    const findLine = tool<
+      { codeOrName: string; at?: string },
+      {
+        lines: {
+          code: string;
+          directions: { direction: string; service: { active: boolean; detail: string | null } | null }[];
+        }[];
+      }
+    >("find_line");
+
+    const afternoon = await findLine({ codeOrName: "7R", at: "2026-10-27T15:18:00+07:00" });
+    const afternoonDirection = afternoon.lines[0]?.directions[0];
+    expect(afternoonDirection?.service?.active).toBe(false);
+    expect(afternoonDirection?.service?.detail).toContain("05:00");
+
+    const morning = await findLine({ codeOrName: "7R", at: "2026-10-27T05:30:00+07:00" });
+    expect(morning.lines[0]?.directions[0]?.service?.active).toBe(true);
+  });
+});
+
+describe("list_notice_history", () => {
+  it("reads closed notices as well as active ones", async () => {
+    const history = tool<
+      { query: string; status: "active" | "resolved" | "all"; limit: number },
+      { total: number; notices: { status: string; resolvedAt: string | null }[] }
+    >("list_notice_history");
+    const result = await history({ query: "Jakarta Running Festival", status: "all", limit: 10 });
+    expect(result.total).toBeGreaterThan(0);
+    expect(result.notices.some((notice) => notice.status === "resolved")).toBe(true);
   });
 });

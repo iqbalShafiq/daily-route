@@ -19,8 +19,14 @@ export type NewsSearchOptions = {
   maxResults?: number;
   /** Restrict the search to these domains. */
   includeDomains?: string[];
+  /** Leave these domains out. */
+  excludeDomains?: string[];
+  /** "basic" is enough for a snippet; "advanced" for a table or a long page. */
+  searchDepth?: "basic" | "advanced";
   /** "day" | "week" | "month" */
   timeRange?: "day" | "week" | "month";
+  /** "news" for current reporting, "general" for official schedules. */
+  topic?: "general" | "news";
 };
 
 export type NewsSearch = (options: NewsSearchOptions) => Promise<NewsResult[]>;
@@ -52,8 +58,8 @@ export function createNewsSearch(apiKey: string | undefined): NewsSearch | null 
       },
       body: JSON.stringify({
         query: options.query,
-        topic: "news",
-        search_depth: "basic",
+        topic: options.topic ?? "news",
+        search_depth: options.searchDepth ?? "basic",
         max_results: Math.min(options.maxResults ?? 8, 20),
         include_answer: false,
         include_raw_content: false,
@@ -62,6 +68,7 @@ export function createNewsSearch(apiKey: string | undefined): NewsSearch | null 
         ...(options.includeDomains?.length
           ? { include_domains: options.includeDomains, include_domains_mode: "prefer" }
           : {}),
+        ...(options.excludeDomains?.length ? { exclude_domains: options.excludeDomains } : {}),
       }),
       signal: AbortSignal.timeout(30_000),
     });

@@ -1,14 +1,18 @@
 import { Agent } from "@anvia/core";
 import { hasAgentProvider, type Env } from "@daily-route/env";
-import type { Database } from "@daily-route/db";
-import { createEmbeddingProvider } from "@daily-route/semantic";
+import { createUsageSink, type Database } from "@daily-route/db";
+
+import { setUsageSink } from "./usage.js";
+import { createEmbeddingProvider, RoadLookup } from "@daily-route/semantic";
 import { PlaceResolver } from "@daily-route/semantic";
 
 import { NetworkCache, type TransitAgentContext } from "./context.js";
-import { ROUTE_AGENT_INSTRUCTIONS } from "./instructions.js";
-import { createCompletionModel, modelConfigFromEnv } from "./model.js";
+import { ROUTE_AGENT_INSTRUCTIONS } from "./prompts/route-assistant.js";
+import { createCompletionModel, MEDIUM_REASONING, modelConfigFromEnv } from "./model.js";
 import { createNewsSearch } from "./news.js";
+import { cachedNewsSearch, SharedWork } from "./shared.js";
 import { createTools } from "./tools.js";
+import { langfuseObservability } from "./tracing.js";
 
 /**
  * The routing assistant.
@@ -33,17 +37,27 @@ export type CreateRouteAgentOptions = {
 
 export function createRouteAgent(options: CreateRouteAgentOptions): RouteAgentBundle {
   const { env, db } = options;
+  const usageSink = createUsageSink(db);
+  setUsageSink(usageSink);
 
   const provider = createEmbeddingProvider(env);
   const resolver = new PlaceResolver(db, provider);
   const context: TransitAgentContext = { db, resolver };
   const cache = new NetworkCache(context);
 
-  const newsSearch = createNewsSearch(env.TAVILY_API_KEY);
-  const tools = createTools(context, cache, {
-    enabled: newsSearch !== null,
-    search: newsSearch ?? undefined,
-  });
+  const work = new SharedWork(2);
+  const rawNews = createNewsSearch(env.TAVILY_API_KEY);
+  const newsSearch = cachedNewsSearch(rawNews, work);
+  const roads = new RoadLookup();
+  const tools = createTools(
+    context,
+    cache,
+    {
+      enabled: newsSearch !== null,
+      search: newsSearch ?? undefined,
+    },
+    roads,
+  );
 
   // The provider client refuses to exist without a key, so the agent is
   // only constructed when one is configured. Everything else — the tools,
@@ -52,7 +66,9 @@ export function createRouteAgent(options: CreateRouteAgentOptions): RouteAgentBu
     return { agent: null, cache, context, toolNames: tools.map((tool) => tool.name) };
   }
 
-  const model = createCompletionModel(modelConfigFromEnv(env));
+  const model = createCompletionModel(modelConfigFromEnv(env), "chat");
+
+  const observability = langfuseObservability(env);
 
   const agent = new Agent({
     id: "daily-route-assistant",
@@ -61,9 +77,11 @@ export function createRouteAgent(options: CreateRouteAgentOptions): RouteAgentBu
       "Menjawab pertanyaan rute perjalanan di Jabodetabek dan memberi tahu pengalihan atau penutupan jalur.",
     model,
     instructions: ROUTE_AGENT_INSTRUCTIONS,
+    maxTokens: 16384,
     tools,
-    maxTurns: 12,
-    temperature: 0.2,
+    maxTurns: 8,
+    providerOptions: MEDIUM_REASONING,
+    ...(observability ? { observability } : {}),
   });
 
   return { agent, cache, context, toolNames: tools.map((tool) => tool.name) };

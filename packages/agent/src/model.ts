@@ -2,6 +2,9 @@ import { OpenAIClient } from "@anvia/openai";
 
 import type { Env } from "@daily-route/env";
 
+import { withCheapestProvider } from "./provider-routing.js";
+import { withUsage } from "./usage.js";
+
 /**
  * The model factory.
  *
@@ -49,11 +52,61 @@ export function createProviderClient(config: ModelConfig): OpenAIClient {
   });
 }
 
+/**
+ * Ask OpenRouter for the cheapest endpoint of the model, every request.
+ *
+ * `sort: "price"` disables the router's normal load balancing and tries the
+ * providers in live price order. `allow_fallbacks` keeps the request alive
+ * when the cheapest endpoint is down; `require_parameters` drops providers
+ * that would silently ignore tools or the output schema. The order is
+ * evaluated by OpenRouter per request, so a provider that raises its price
+ * stops being first on the next call without a deploy.
+ */
+export const CHEAPEST_PROVIDER = {
+  provider: {
+    sort: "price",
+    allow_fallbacks: true,
+    require_parameters: true,
+  },
+} as const;
+
+/**
+ * Reasoning effort for every agent call.
+ *
+ * OpenRouter reads `reasoning.effort` on the chat-completions body. The
+ * typed OpenAI control only applies to known OpenAI model ids, and the
+ * model here is whatever `AGENT_MODEL` names, so the effort travels as a
+ * provider option instead.
+ */
+export const MEDIUM_REASONING = {
+  reasoning: { effort: "medium" },
+  ...CHEAPEST_PROVIDER,
+} as const;
+
+/**
+ * The effort for an agent whose tools do the hard part.
+ *
+ * The grounder chooses between tool results and ids; it does not reason
+ * about the announcement's prose. Reasoning is asked for only where it
+ * decides something, so a poll does not pay for a long deliberation on
+ * every street name.
+ */
+export const LOW_REASONING = {
+  reasoning: { effort: "low" },
+  ...CHEAPEST_PROVIDER,
+} as const;
+
 /** Create the completion model used by the routing agent. */
-export function createCompletionModel(config: ModelConfig) {
+export function createCompletionModel(config: ModelConfig, operation = "unknown") {
   const client = createProviderClient(config);
-  return client.completionModel({
+  const model = client.completionModel({
     modelId: config.model,
     api: config.api,
   });
+  // Only OpenRouter exposes live endpoint prices; another OpenAI-compatible
+  // provider is left untouched.
+  const routed = config.baseUrl.includes("openrouter.ai")
+    ? withCheapestProvider(model, config)
+    : model;
+  return withUsage(routed, { operation, modelId: config.model });
 }
