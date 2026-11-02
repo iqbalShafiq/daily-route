@@ -1,4 +1,4 @@
-import { expect, test } from "@playwright/test";
+import { expect, test, type Page } from "@playwright/test";
 
 /**
  * The planner's end-to-end journey.
@@ -8,12 +8,22 @@ import { expect, test } from "@playwright/test";
  * desktop, so the layout has to work in both.
  */
 
+/**
+ * The two place fields.
+ *
+ * `getByLabel("To")` also matches the long aria-label of a notice button
+ * ("... to Bundaran Senayan"), so target the combobox role exactly.
+ */
+function field(page: Page, name: "From" | "To") {
+  return page.getByRole("combobox", { name, exact: true });
+}
+
 test.describe("route planner", () => {
   test("plans a journey and shows the itinerary", async ({ page }) => {
     await page.goto("/");
 
-    const origin = page.getByLabel("Dari");
-    const destination = page.getByLabel("Ke");
+    const origin = field(page, "From");
+    const destination = field(page, "To");
 
     await expect(origin).toBeVisible();
     await expect(destination).toBeVisible();
@@ -22,10 +32,10 @@ test.describe("route planner", () => {
     await destination.fill("Kelapa Gading");
 
     await page.keyboard.press("Escape");
-    await page.getByRole("button", { name: "Tampilkan rute" }).click();
+    await page.getByRole("button", { name: "Show route" }).click();
 
     // The itinerary arrives with a duration and at least one leg.
-    await expect(page.getByText("Tarif")).toBeVisible({ timeout: 30_000 });
+    await expect(page.getByText("Fare")).toBeVisible({ timeout: 30_000 });
     await expect(page.getByText(/→ Kelapa Gading$/).first()).toBeVisible();
 
     // The route is drawn on the map.
@@ -35,30 +45,30 @@ test.describe("route planner", () => {
   test("shows the distance, the fare and what a transfer means", async ({ page }) => {
     await page.goto("/");
 
-    await page.getByLabel("Dari").fill("Bundaran HI");
-    await page.getByLabel("Ke").fill("Kelapa Gading");
+    await field(page, "From").fill("Bundaran HI");
+    await field(page, "To").fill("Kelapa Gading");
     await page.keyboard.press("Escape");
-    await page.getByRole("button", { name: "Tampilkan rute" }).click();
+    await page.getByRole("button", { name: "Show route" }).click();
 
-    await expect(page.getByText("Tarif")).toBeVisible({ timeout: 30_000 });
+    await expect(page.getByText("Fare")).toBeVisible({ timeout: 30_000 });
 
     // The journey is stated first, and the rest follows it: how far it
     // is and how many changes of vehicle it takes.
-    await expect(page.getByText(/^\d+ jam \d+ mnt$|^\d+ mnt$/).first()).toBeVisible();
-    await expect(page.getByText(/^[\d,]+ km · \d+ kali pindah$/).first()).toBeVisible();
+    await expect(page.getByText(/^\d+ hr \d+ min$|^\d+ min$/).first()).toBeVisible();
+    await expect(page.getByText(/^[\d.,]+ km · \d+ changes?(?: · walk [\d.,]+ (?:m|km))?$/).first()).toBeVisible();
 
     // The fare is an amount in rupiah.
     await expect(page.getByText(/^Rp[\d.]+$/).first()).toBeVisible();
 
     // A change of vehicle names the line the rider takes next, and a walk
     // says what it is for.
-    await expect(page.getByText(/Pindah ke |Ganti dari /).first()).toBeVisible();
+    await expect(page.getByText(/Change to |Change from /).first()).toBeVisible();
   });
 
   test("offers station suggestions while typing", async ({ page }) => {
     await page.goto("/");
 
-    await page.getByLabel("Dari").fill("Kelapa Gading");
+    await field(page, "From").fill("Kelapa Gading");
 
     const option = page.getByRole("option").first();
     await expect(option).toBeVisible({ timeout: 15_000 });
@@ -70,7 +80,7 @@ test.describe("route planner", () => {
 
     // The role, not the label: the list of suggestions carries the name of
     // the field in its own label as well.
-    const origin = page.getByRole("combobox", { name: "Dari" });
+    const origin = page.getByRole("combobox", { name: "From" });
     await origin.fill("manggarai");
 
     const options = page.getByRole("option");
@@ -90,7 +100,7 @@ test.describe("route planner", () => {
   test("marks the matched part of a suggestion", async ({ page }) => {
     await page.goto("/");
 
-    await page.getByLabel("Dari").fill("manggarai");
+    await field(page, "From").fill("manggarai");
 
     const option = page.getByRole("option").first();
     await expect(option).toBeVisible({ timeout: 15_000 });
@@ -104,28 +114,51 @@ test.describe("route planner", () => {
 
     await page.goto("/");
 
-    await page.getByLabel("Dari").fill("Bundaran HI");
-    await page.getByLabel("Ke").fill("Kelapa Gading");
+    await field(page, "From").fill("Bundaran HI");
+    await field(page, "To").fill("Kelapa Gading");
     await page.keyboard.press("Escape");
-    await page.getByRole("button", { name: "Tampilkan rute" }).click();
+    await page.getByRole("button", { name: "Show route" }).click();
 
-    await expect(page.getByText("Tarif")).toBeVisible({ timeout: 30_000 });
+    await expect(page.getByText("Fare")).toBeVisible({ timeout: 30_000 });
 
-    // The legend lists the vehicles the journey uses, so the colours of
-    // the map are explained.
-    const legend = page.locator("text=Pindah kendaraan");
-    await expect(legend).toBeVisible();
+    // Turning an operator off removes its lines from the map.
+    const hideBus = page.getByRole("button", { name: "Hide Transjakarta" });
+    await expect(hideBus).toBeVisible();
+    const before = await page.evaluate(() => {
+      const map = (window as unknown as {
+        __dailyRouteMap?: { queryRenderedFeatures: (options: { layers: string[] }) => unknown[] };
+      }).__dailyRouteMap;
+      return map?.queryRenderedFeatures({ layers: ["network-primary-body"] }).length ?? 0;
+    });
+    expect(before).toBeGreaterThan(0);
+    await hideBus.click();
+    await expect(page.getByRole("button", { name: "Show Transjakarta" })).toBeVisible();
+    await expect.poll(async () =>
+      page.evaluate(() => {
+        const map = (window as unknown as {
+          __dailyRouteMap?: { queryRenderedFeatures: (options: { layers: string[] }) => unknown[] };
+        }).__dailyRouteMap;
+        return map?.queryRenderedFeatures({ layers: ["network-primary-body"] }).length ?? -1;
+      }),
+    ).toBeLessThan(before);
+
+    // This journey shows one operator mark per mode, without line labels
+    // or a "Change of vehicle" row.
+    const journey = page.getByTestId("this-journey");
+    await expect(journey).toBeVisible();
+    await expect(journey.getByText("Change of vehicle")).toHaveCount(0);
+    expect(await journey.locator("img").count()).toBeGreaterThan(0);
   });
 
   test("swaps the origin and the destination", async ({ page }) => {
     await page.goto("/");
 
-    await page.getByLabel("Dari").fill("Senen");
-    await page.getByLabel("Ke").fill("Cawang");
-    await page.getByRole("button", { name: "Tukar asal dan tujuan" }).click();
+    await field(page, "From").fill("Senen");
+    await field(page, "To").fill("Cawang");
+    await page.getByRole("button", { name: "Swap origin and destination" }).click();
 
-    await expect(page.getByLabel("Dari")).toHaveValue("Cawang");
-    await expect(page.getByLabel("Ke")).toHaveValue("Senen");
+    await expect(field(page, "From")).toHaveValue("Cawang");
+    await expect(field(page, "To")).toHaveValue("Senen");
   });
 
   test("tells what a stop is when the reader points at its name", async ({ page }, testInfo) => {
@@ -133,19 +166,30 @@ test.describe("route planner", () => {
 
     await page.goto("/");
 
-    await page.getByLabel("Dari").fill("Lebak Bulus");
-    await page.getByLabel("Ke").fill("Kalidores");
-    await page.getByRole("button", { name: "Tampilkan rute" }).click();
-    await expect(page.getByText("Tarif")).toBeVisible();
+    // Pin the departure to midday so this interaction test does not depend
+    // on the hour the suite happens to run at.
+    await page.getByRole("button", { name: "Leave at" }).click();
+    // Select 12 PM regardless of whether the suite runs in the AM or PM.
+    const switchToPm = page.getByRole("button", { name: "Switch to PM" });
+    if (await switchToPm.isVisible().catch(() => false)) await switchToPm.click();
+    await page.getByRole("button", { name: "Hour 12" }).click();
+    await page.getByRole("button", { name: "Minute 00" }).click();
+    await page.getByRole("button", { name: "Done" }).click();
 
-    // Open the list of stops of every ride.
-    const summaries = page.locator("details summary");
-    for (let index = 0; index < (await summaries.count()); index += 1) {
-      await summaries.nth(index).click();
-      await page.waitForTimeout(120);
-    }
+    await field(page, "From").fill("Lebak Bulus");
+    await field(page, "To").fill("Kalideres");
+    await page.getByRole("button", { name: "Show route" }).click();
+    await expect(page.getByText("Fare")).toBeVisible();
 
-    const name = page.getByRole("button", { name: /^Detail / }).first();
+    // The ride details are open by default; make sure a previous
+    // interaction did not collapse one before pointing at a stop.
+    await page.locator("details").evaluateAll((nodes) => {
+      for (const node of nodes) {
+        if (node instanceof HTMLDetailsElement) node.open = true;
+      }
+    });
+
+    const name = page.getByRole("button", { name: /^Details for / }).first();
     // The name stands on one line, however long it is.
     const box = await name.boundingBox();
     expect(box?.height ?? 0).toBeLessThan(30);
@@ -154,17 +198,17 @@ test.describe("route planner", () => {
 
     const card = page.getByRole("dialog");
     await expect(card).toBeVisible();
-    await expect(card).toContainText("Halte");
+    await expect(card).toContainText(/Stop|Station/);
   });
 
   test("opens the assistant over the map and closes it again", async ({ page }) => {
     await page.goto("/");
 
-    await page.getByRole("button", { name: "Tanya asisten" }).click();
-    await expect(page.getByRole("heading", { name: "Tanya asisten rute" })).toBeVisible();
+    await page.getByRole("button", { name: "Ask the assistant" }).click();
+    await expect(page.getByRole("heading", { name: "Route assistant" })).toBeVisible();
 
-    await page.getByRole("button", { name: "Tutup asisten" }).click();
-    await expect(page.getByRole("heading", { name: "Tanya asisten rute" })).toHaveCount(0);
+    await page.getByRole("button", { name: "Close assistant" }).click();
+    await expect(page.getByRole("heading", { name: "Route assistant" })).toHaveCount(0);
   });
 
   test("gives the search the whole width of a phone", async ({ page }, testInfo) => {
@@ -173,20 +217,20 @@ test.describe("route planner", () => {
     await page.goto("/");
 
     // The search surface is the width of the window, edge to edge.
-    const surface = page.getByRole("button", { name: "Tukar asal dan tujuan" }).locator("..");
+    const surface = page.getByRole("search", { name: "Route search" });
     const surfaceBox = await surface.boundingBox();
     const width = page.viewportSize()?.width ?? 0;
     expect(surfaceBox?.width ?? 0).toBeGreaterThan(width - 1);
 
     // The button that runs the search is the last thing in the form.
-    const send = await page.getByRole("button", { name: "Tampilkan rute" }).boundingBox();
+    const send = await page.getByRole("button", { name: "Show route" }).boundingBox();
     const rightEdge = (surfaceBox?.x ?? 0) + (surfaceBox?.width ?? 0);
     expect(rightEdge - ((send?.x ?? 0) + (send?.width ?? 0))).toBeLessThanOrEqual(20);
 
     // And it only works when there is a destination.
-    await expect(page.getByRole("button", { name: "Tampilkan rute" })).toBeDisabled();
-    await page.getByLabel("Ke").fill("Cawang");
-    await expect(page.getByRole("button", { name: "Tampilkan rute" })).toBeEnabled();
+    await expect(page.getByRole("button", { name: "Show route" })).toBeDisabled();
+    await field(page, "To").fill("Cawang");
+    await expect(page.getByRole("button", { name: "Show route" })).toBeEnabled();
   });
 
   test("keeps the layout usable on a small screen", async ({ page }, testInfo) => {
@@ -194,8 +238,8 @@ test.describe("route planner", () => {
 
     await page.goto("/");
 
-    await expect(page.getByLabel("Dari")).toBeVisible();
-    await expect(page.getByRole("button", { name: "Tampilkan rute" })).toBeVisible();
+    await expect(field(page, "From")).toBeVisible();
+    await expect(page.getByRole("button", { name: "Show route" })).toBeVisible();
 
     // Nothing may overflow the viewport horizontally.
     const overflow = await page.evaluate(
@@ -215,19 +259,19 @@ test.describe("walking from the reader's place", () => {
     await page.goto("/");
 
     // A journey needs a destination before the start can be weighed.
-    await page.getByLabel("Ke").fill("Kelapa Gading");
+    await field(page, "To").fill("Kelapa Gading");
     await page.keyboard.press("Escape");
 
-    await page.getByRole("button", { name: "Gunakan posisi saya" }).click();
+    await page.getByRole("button", { name: "Use my location" }).click();
 
     // The stop to start from, the distance, and the ways of starting.
-    await expect(page.getByText("Mulai dari")).toBeVisible({ timeout: 30_000 });
+    await expect(page.getByText("Start from")).toBeVisible({ timeout: 30_000 });
     await expect(
-      page.getByRole("list", { name: "Pilihan mulai" }).getByRole("button", { name: /^Tercepat/ }),
+      page.getByRole("list", { name: "Ways to start" }).getByRole("button", { name: /^Fastest/ }),
     ).toBeVisible();
-    await expect(page.getByText(/Berjalan .* ke /).first()).toBeVisible({ timeout: 30_000 });
+    await expect(page.getByText(/Walk .* to /).first()).toBeVisible({ timeout: 30_000 });
 
     // The journey starts from that stop.
-    await expect(page.getByLabel("Dari")).toHaveValue(/.+/);
+    await expect(field(page, "From")).toHaveValue(/.+/);
   });
 });

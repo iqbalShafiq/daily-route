@@ -25,7 +25,7 @@ export default defineConfig({
     baseURL: WEB_URL,
     trace: "on-first-retry",
     screenshot: "only-on-failure",
-    locale: "id-ID",
+    locale: "en-GB",
     timezoneId: "Asia/Jakarta",
   },
   projects: [

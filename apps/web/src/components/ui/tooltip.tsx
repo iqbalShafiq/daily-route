@@ -1,5 +1,5 @@
 import { Tooltip as BaseTooltip } from "@base-ui/react/tooltip";
-import type { ReactElement } from "react";
+import type { ReactElement, ReactNode } from "react";
 
 import { cn } from "../../lib/cn.js";
 
@@ -15,21 +15,31 @@ export function Tooltip({
   children,
   side = "bottom",
   className,
+  variant = "label",
 }: {
-  label: string;
+  label: ReactNode;
   children: ReactElement;
   side?: "top" | "bottom" | "left" | "right";
   className?: string;
+  /** A plain tooltip is a dark label; a panel is a surface with its own layout. */
+  variant?: "label" | "panel";
 }) {
   return (
     <BaseTooltip.Provider delay={250}>
       <BaseTooltip.Root>
         <BaseTooltip.Trigger render={children} />
         <BaseTooltip.Portal>
-          <BaseTooltip.Positioner side={side} sideOffset={6}>
+          <BaseTooltip.Positioner
+            side={side}
+            sideOffset={6}
+            className={variant === "panel" ? "z-[70]" : "z-[60]"}
+          >
             <BaseTooltip.Popup
+              role="tooltip"
               className={cn(
-                "z-50 max-w-64 rounded-lg bg-ink px-3 py-2 text-[12px] leading-[1.3] text-bg shadow-pop",
+                variant === "panel"
+                  ? "z-[70] w-[320px] max-w-[calc(100vw-24px)] rounded-[10px] border border-line bg-surface p-3 text-[12px] leading-[1.45] text-ink shadow-pop"
+                  : "z-[60] max-w-64 rounded-lg bg-ink px-3 py-2 text-[12px] leading-[1.3] text-bg shadow-pop",
                 className,
               )}
             >

@@ -36,6 +36,23 @@ async function request<T>(path: string, init?: RequestInit): Promise<T> {
 
 export type MatchedRange = { start: number; end: number };
 
+/** A suggestion in the place field: a stop, or a place that is not one. */
+export type PlaceSuggestion = {
+  kind: "station" | "place";
+  id: string;
+  name: string;
+  systemId: string | null;
+  systemName: string | null;
+  code: string | null;
+  latitude: number;
+  longitude: number;
+  isInterchange: boolean;
+  lineCount?: number;
+  street?: string | null;
+  detail?: string;
+  matchedRanges?: MatchedRange[];
+};
+
 export type StationSummary = {
   id: string;
   name: string;
@@ -83,6 +100,62 @@ export type LegStop = {
   name: string;
   latitude: number;
   longitude: number;
+  /** The vehicle passes this stop, but does not serve it. */
+  skipped?: boolean;
+  /** The notice that says the stop is skipped. */
+  skippedNotice?: string;
+};
+
+export type NoticeDiversionVia = {
+  stationId: string;
+  name: string;
+  served: boolean;
+};
+
+export type DiversionDescription = {
+  from: string | null;
+  to: string | null;
+  via: string[];
+  follows: string[];
+};
+
+export type NoticeDiversion = {
+  lineId: string;
+  direction: "forward" | "backward";
+  fromStationId: string;
+  toStationId: string;
+  via: NoticeDiversionVia[];
+  viaLineCodes: string[];
+  skippedStationIds: string[];
+  skippedNames: string[];
+  approximate: boolean;
+  sourceUrl: string | null;
+  quote: string | null;
+};
+
+export type LegDetour = {
+  via: NoticeDiversionVia[];
+  viaLineCodes: string[];
+  skipped: string[];
+  approximate: boolean;
+};
+
+export type LegVariant = {
+  id: string;
+  headsign: string;
+  direction: "forward" | "backward";
+  patternType: string;
+  serviceLabel: string;
+  serviceDays: string[];
+  situational: boolean;
+  serviceNote: string | null;
+  holidayService: boolean;
+  toll: boolean;
+  isDefault: boolean;
+  activeNow: boolean;
+  stops: string[];
+  skipped: string[];
+  extra: string[];
 };
 
 export type ItineraryLeg = {
@@ -92,6 +165,8 @@ export type ItineraryLeg = {
   lineName: string | null;
   lineCode: string | null;
   serviceClass: string | null;
+  /** An announced temporary service, not a permanent line. */
+  temporary?: boolean;
   fromStationId: string | null;
   toStationId: string | null;
   fromName: string;
@@ -109,9 +184,49 @@ export type ItineraryLeg = {
   changedFrom: string | null;
   /** Where the rider changes vehicle. */
   changedAt: string | null;
+  /** The side of the road and the direction of travel, for a ride. */
+  direction?: "forward" | "backward" | null;
+  directionLabel?: string | null;
+  fromPlatform?: { name: string; latitude: number; longitude: number; code: string | null } | null;
+  toPlatform?: { name: string; latitude: number; longitude: number; code: string | null } | null;
+  /** The scheduled service window for this ride. */
+  serviceLabel?: string | null;
+  headwayMinMinutes?: number | null;
+  headwayMaxMinutes?: number | null;
+  outsideService?: boolean;
+  serviceDetail?: string | null;
   /** The path of this leg, along the road the vehicle travels. */
   geometry: { latitude: number; longitude: number }[];
+  /** The borrowed path, when this ride is a diversion. */
+  detour?: LegDetour | null;
+  /** The scheduled trip pattern this ride uses. */
+  patternId?: string | null;
+  patternLabel?: string | null;
+  patternType?: string | null;
+  patternService?: string | null;
+  /** All patterns of this line in this direction, for the switcher. */
+  variants?: LegVariant[];
 };
+
+export type NoticeSource = {
+  type: "x" | "news" | "link";
+  text: string | null;
+  authorHandle: string | null;
+  authorName: string | null;
+  publishedAt: string | null;
+  url: string;
+  title: string | null;
+};
+
+export type NoticeEvidence = {
+  id: string;
+  title: string;
+  sources: NoticeSource[];
+};
+
+export async function getNoticeEvidence(id: string): Promise<NoticeEvidence> {
+  return request<NoticeEvidence>(`/routes/disruptions/${encodeURIComponent(id)}/sources`);
+}
 
 export type FareBreakdownItem = {
   label: string;
@@ -152,13 +267,31 @@ export type Itinerary = {
   geometry: { latitude: number; longitude: number }[];
 };
 
+export type ValidityWindow = {
+  startsAt: string;
+  endsAt: string | null;
+  timezone: string;
+  scope: {
+    systemIds: string[];
+    lineIds: string[];
+    stationIds: string[];
+  };
+  label: string;
+  quote: string;
+  evidenceUrl: string;
+  confidence: number;
+};
+
 export type DisruptionSummary = {
   id: string;
   title: string;
   body: string;
   severity: string;
   kind: string;
+  /** The case Jev chose. Absent until a choice is stored. */
+  mark?: string | null;
   status: string;
+  systemId: string | null;
   source: string;
   sourceType: string;
   url: string | null;
@@ -167,7 +300,66 @@ export type DisruptionSummary = {
   affectedStationIds: string[];
   affectedLineIds: string[];
   publishedAt: string;
+  observedAt: string;
+  /** The instant the announcement says the effect starts, when it knows. */
+  startsAt?: string | null;
+  /** The instant the announcement says the effect ends. */
+  endsAt: string | null;
+  /** A stable slug for the event, shared by updates. */
+  eventKey: string | null;
+  /** The last time an announcement confirmed the notice. */
+  lastSeenAt: string | null;
+  /** The next time we will look for a fresher update. */
+  reviewAt?: string | null;
+  /** scheduled | verified | unverified | reviewing | none */
+  reviewState?: string | null;
+  /** The last time a reviewer checked the notice. */
+  lastVerifiedAt?: string | null;
+  /** The verified impact windows, when a verifier has run. */
+  validityWindows: ValidityWindow[];
+  /** Whether a window covers the current instant. */
+  activeNow: boolean;
   impact: "direct" | "station" | "line";
+  /** True when the record is a labelled scenario, not an operator announcement. */
+  demonstration: boolean;
+  /** True when the planner should stop using the stop or the line. */
+  blocksService: boolean;
+  /** The announcement says the service diverts via a toll road. */
+  viaToll: boolean;
+  /** The route names the announcement described. */
+  diversionDescription?: DiversionDescription | null;
+  /** The temporary patterns that keep the corridor running. */
+  diversions?: NoticeDiversion[];
+  /** What the notice is about: a stop, a corridor/line, or the operator. */
+  scope: "stop" | "line" | "network";
+  /** Every stop the notice names, in the order the API grounded them. */
+  stations: {
+    id: string;
+    name: string;
+    systemId: string;
+    latitude: number;
+    longitude: number;
+  }[];
+  /** Every corridor or rail line the notice names. */
+  lines: {
+    id: string;
+    code: string;
+    name: string;
+    systemId: string;
+  }[];
+  /** The codes as printed, including a code the snapshot does not carry. */
+  lineCodes: string[];
+  /** The streets the announcement named, when it named one. */
+  roads: { name: string; latitude: number; longitude: number; osmId: number }[];
+  /**
+   * The first stop, kept for the map's single point.
+   *
+   * A notice about a corridor has no such point; the row uses `scope` and
+   * the map uses `stations` or `lines`.
+   */
+  latitude: number | null;
+  longitude: number | null;
+  stationName: string | null;
 };
 
 export type PlanResult = {
@@ -175,9 +367,51 @@ export type PlanResult = {
   destination: StationSummary & { text: string };
   itineraries: Itinerary[];
   alternatives: Itinerary[];
+  /** Notices that touch the fastest journey. */
   disruptions: DisruptionSummary[];
+  /**
+   * Labelled scenarios that do not touch the fastest journey.
+   *
+   * They stay visible so the rider can see that the incident was checked
+   * and that this journey does not pass it.
+   */
+  watch: DisruptionSummary[];
+  /** The fastest journey uses a stop or a line that is out of service. */
+  routeBlocked: boolean;
   /** When the answer was computed, as an ISO timestamp. */
   computedAt: string;
+  /** The departure instant the planner used. */
+  quotedAt?: string;
+  /** The rider chose a departure time instead of "now". */
+  scheduled?: boolean;
+  /** The planner preferred fewer night walks. */
+  nightSafe?: boolean;
+};
+
+export type DepartureLine = {
+  lineId: string;
+  code: string;
+  name: string;
+  mode: string;
+  serviceClass: string;
+  color: string | null;
+  direction: "forward" | "backward";
+  headsign: string | null;
+  origin: string | null;
+  platform: string | null;
+  serviceLabel: string;
+  detail: string | null;
+  headwayMinMinutes: number | null;
+  headwayMaxMinutes: number | null;
+  waitMinutes: number | null;
+  reliable: boolean;
+  night: boolean;
+};
+
+export type DepartureBoard = {
+  station: { id: string; name: string; latitude: number; longitude: number };
+  at: string;
+  lines: DepartureLine[];
 };
 
 export type StationDetail = {
@@ -265,10 +499,32 @@ export const api = {
       `/walk?latitude=${coordinates.latitude}&longitude=${coordinates.longitude}`,
     ),
 
+  networkOverview: () =>
+    request<{
+      lines: { id: string; systemId: string; tier: "primary" | "local"; coordinates: number[] }[];
+      places: { id: string; systemId: string; name: string; longitude: number; latitude: number }[];
+      platforms: {
+        id: string;
+        systemId: string;
+        name: string;
+        code: string | null;
+        lineCode: string;
+        direction: "forward" | "backward";
+        longitude: number;
+        latitude: number;
+      }[];
+    }>("/network/overview"),
+
   systems: () => request<SystemSummary[]>("/systems"),
 
   lines: (systemId?: string) =>
     request<LineSummary[]>(`/lines${systemId ? `?systemId=${encodeURIComponent(systemId)}` : ""}`),
+
+  places: (query: string, signal?: AbortSignal) =>
+    request<PlaceSuggestion[]>(
+      `/places?q=${encodeURIComponent(query)}&limit=6`,
+      signal ? { signal } : undefined,
+    ),
 
   stations: (
     params: { q?: string; limit?: number; systemId?: string; minScore?: number },
@@ -292,10 +548,41 @@ export const api = {
       signal ? { signal } : undefined,
     ),
 
-  plan: (origin: string, destination: string) =>
-    request<PlanResult>(
-      `/routes/plan?origin=${encodeURIComponent(origin)}&destination=${encodeURIComponent(destination)}`,
-    ),
+  departures: (id: string, at?: string, signal?: AbortSignal) => {
+    const search = new URLSearchParams();
+    if (at) search.set("at", at);
+    return request<DepartureBoard>(
+      `/stations/${encodeURIComponent(id)}/departures${search.size ? `?${search}` : ""}`,
+      signal ? { signal } : undefined,
+    );
+  },
+
+  plan: (input: {
+    origin: string;
+    destination: string;
+    originLatitude?: number;
+    originLongitude?: number;
+    destinationLatitude?: number;
+    destinationLongitude?: number;
+    at?: string;
+    nightSafe?: boolean;
+  }) => {
+    const search = new URLSearchParams({
+      origin: input.origin,
+      destination: input.destination,
+    });
+    if (input.at) search.set("at", input.at);
+    if (input.nightSafe) search.set("nightSafe", "true");
+    if (input.originLatitude !== undefined && input.originLongitude !== undefined) {
+      search.set("originLatitude", String(input.originLatitude));
+      search.set("originLongitude", String(input.originLongitude));
+    }
+    if (input.destinationLatitude !== undefined && input.destinationLongitude !== undefined) {
+      search.set("destinationLatitude", String(input.destinationLatitude));
+      search.set("destinationLongitude", String(input.destinationLongitude));
+    }
+    return request<PlanResult>(`/routes/plan?${search.toString()}`);
+  },
 
   disruptions: () => request<DisruptionSummary[]>("/routes/disruptions"),
 

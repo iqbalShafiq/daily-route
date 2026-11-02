@@ -6,8 +6,9 @@ import { cn } from "../../lib/cn.js";
  * The button.
  *
  * One component covers every action in the app: the variants encode
- * hierarchy (primary, secondary, ghost, danger) and the sizes encode
- * density. Nothing in the codebase styles a raw `<button>` by hand.
+ * hierarchy and the sizes encode density. The primary button has a hard
+ * lower edge, so pressing it feels like a key on a ticket machine rather
+ * than a coloured rectangle.
  */
 
 export type ButtonVariant = "primary" | "secondary" | "ghost" | "danger" | "subtle";
@@ -15,25 +16,29 @@ export type ButtonSize = "sm" | "md" | "lg" | "icon";
 
 const VARIANTS: Record<ButtonVariant, string> = {
   primary:
-    "bg-accent text-accent-ink hover:bg-accent-hover shadow-[0_1px_2px_rgb(0_0_0/0.08)] active:translate-y-px",
+    "border border-accent-hover bg-accent text-accent-ink shadow-[0_2px_0_0_var(--accent-hover)] " +
+    "hover:-translate-y-px hover:bg-accent-hover hover:shadow-[0_3px_0_0_var(--accent-hover)] " +
+    "active:translate-y-[2px] active:shadow-none",
   secondary:
-    "bg-surface text-ink border border-line hover:border-line-strong hover:bg-surface-2 active:translate-y-px",
-  ghost: "text-ink-2 hover:bg-surface-2 hover:text-ink",
-  subtle: "bg-surface-2 text-ink hover:bg-surface-3",
-  danger: "bg-danger text-white hover:brightness-110 active:translate-y-px",
+    "border border-line-strong bg-surface text-ink hover:border-ink hover:bg-surface-2 active:translate-y-px",
+  ghost: "text-ink-2 hover:bg-surface-2 hover:text-ink active:translate-y-px",
+  subtle: "bg-surface-2 text-ink hover:bg-surface-3 active:translate-y-px",
+  danger:
+    "border border-danger/60 bg-danger text-white hover:brightness-105 active:translate-y-px",
 };
 
 const SIZES: Record<ButtonSize, string> = {
-  sm: "h-8 px-3 text-[13px] gap-2 rounded-lg",
-  md: "h-10 px-4 text-[13px] gap-2 rounded-xl",
-  lg: "h-12 px-5 text-[15px] gap-2 rounded-xl",
+  sm: "h-8 px-3 text-[12px] gap-2 rounded-md",
+  md: "h-10 px-4 text-[13px] gap-2 rounded-lg",
+  lg: "h-12 px-5 text-[15px] gap-2 rounded-lg",
   icon: "size-9 rounded-lg",
 };
 
 const BASE =
-  "inline-flex shrink-0 items-center justify-center font-medium tracking-[-0.01em] " +
+  "inline-flex shrink-0 items-center justify-center font-semibold tracking-[-0.01em] " +
   "transition-[background-color,border-color,color,transform,box-shadow] duration-150 " +
-  "cursor-pointer disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-45";
+  "cursor-pointer disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-40 " +
+  "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/40 focus-visible:ring-offset-2 focus-visible:ring-offset-bg";
 
 export type ButtonProps = Omit<ButtonHTMLAttributes<HTMLButtonElement>, "children"> & {
   variant?: ButtonVariant;

@@ -1,8 +1,9 @@
 /**
  * Formatting helpers shared by the transit views.
  *
- * The wording follows what riders in Jakarta actually say: "halte", "stasiun",
- * "jika" for "if", and a clock time without a date.
+ * The interface is English. A bus still stops at a stop and a train at a
+ * station. Rupiah keeps the ticket's grouping: "Rp3.500". The clock is
+ * Jakarta time.
  */
 
 export type TransitMode = "bus" | "minibus" | "tram" | "metro" | "rail";
@@ -44,7 +45,6 @@ export const MODE_WIDTH: Record<string, number> = {
   rail: 6.5,
 };
 
-/** The label for a service class, which is finer than the mode. */
 /**
  * The label for a service class, which is finer than the mode.
  *
@@ -53,17 +53,17 @@ export const MODE_WIDTH: Record<string, number> = {
  */
 export const SERVICE_CLASS_LABEL: Record<ServiceClass, string> = {
   brt: "BRT",
-  "non-brt": "Angkutan Pengumpan",
+  "non-brt": "Feeder",
   mikrotrans: "Mikrotrans",
   minitrans: "MiniTrans",
   "rapid-transit": "MRT",
   lrt: "LRT",
   "commuter-rail": "KRL",
   royaltrans: "Royaltrans",
-  wisata: "Bus Wisata",
-  "rumah-susun": "Bus Rumah Susun",
+  wisata: "Sightseeing bus",
+  "rumah-susun": "Housing bus",
   transjabodetabek: "Transjabodetabek",
-  amari: "Bus Malam (Amari)",
+  amari: "Night bus (Amari)",
 };
 
 /**
@@ -99,23 +99,20 @@ export const SERVICE_CLASS_COLOR: Record<ServiceClass, string> = {
 /**
  * The word for the place a vehicle stops at.
  *
- * A bus stops at a halte, a train at a stasiun. The operators write it
- * that way themselves: Transjakarta says "Halte BRT Senen", LRT Jakarta
- * says "Stasiun Velodrome". The law says the same: a halte is where a
- * motor vehicle lets passengers get off.
+ * A bus stops at a stop. A train stops at a station.
  */
-export function stopNoun(mode: string | null | undefined): "halte" | "stasiun" {
-  return mode === "metro" || mode === "tram" || mode === "rail" ? "stasiun" : "halte";
+export function stopNoun(mode: string | null | undefined): "stop" | "station" {
+  return mode === "metro" || mode === "tram" || mode === "rail" ? "station" : "stop";
 }
 
 /**
- * The time of a moment, as a rider would read it: "21 Okt 2026, 10.14".
+ * The time of a moment, in Jakarta: "21 Oct 2026, 10:14".
  */
 export function formatTimestamp(iso: string | undefined): string {
   if (!iso) return "-";
   const date = new Date(iso);
   if (Number.isNaN(date.getTime())) return "-";
-  return new Intl.DateTimeFormat("id-ID", {
+  return new Intl.DateTimeFormat("en-GB", {
     timeZone: "Asia/Jakarta",
     day: "numeric",
     month: "short",
@@ -123,90 +120,89 @@ export function formatTimestamp(iso: string | undefined): string {
     hour: "2-digit",
     minute: "2-digit",
     hour12: false,
-  })
-    .format(date)
-    .replace(" pukul ", "");
+  }).format(date);
 }
 
-/** `95` becomes "1 jam 35 mnt"; `8` becomes "8 mnt". */
+/** `95` becomes "1 hr 35 min"; `8` becomes "8 min". */
 export function formatDuration(minutes: number): string {
   const total = Math.max(0, Math.round(minutes));
-  if (total < 60) return `${total} mnt`;
+  if (total < 60) return `${total} min`;
   const hours = Math.floor(total / 60);
   const rest = total % 60;
-  return rest === 0 ? `${hours} jam` : `${hours} jam ${rest} mnt`;
+  return rest === 0 ? `${hours} hr` : `${hours} hr ${rest} min`;
 }
 
-/** `8` becomes "8 menit". */
+/** `8` becomes "8 min". */
 export function formatMinutesLong(minutes: number): string {
   const total = Math.max(0, Math.round(minutes));
-  return total === 1 ? "1 menit" : `${total} menit`;
+  return total === 1 ? "1 min" : `${total} min`;
 }
 
 /** A distance in kilometres, without a trailing zero. */
 export function formatDistance(kilometers: number): string {
   if (kilometers < 1) return `${Math.round(kilometers * 1000)} m`;
   const value = Math.round(kilometers * 10) / 10;
-  // Indonesian notation: the decimal separator is a comma.
-  return `${value.toLocaleString("id-ID")} km`;
+  return `${value.toLocaleString("en-GB")} km`;
 }
 
-/** An ISO timestamp as a local clock time. */
+/** An ISO timestamp as a Jakarta clock time. */
 export function formatTime(iso: string): string {
   const date = new Date(iso);
   if (Number.isNaN(date.getTime())) return iso;
-  return new Intl.DateTimeFormat("id-ID", {
+  return new Intl.DateTimeFormat("en-GB", {
     hour: "2-digit",
     minute: "2-digit",
+    hour12: false,
     timeZone: "Asia/Jakarta",
   }).format(date);
 }
 
-/** An ISO timestamp as a short local date and time. */
+/** An ISO timestamp as a short Jakarta date and time. */
 export function formatDateTime(iso: string): string {
   const date = new Date(iso);
   if (Number.isNaN(date.getTime())) return iso;
-  return new Intl.DateTimeFormat("id-ID", {
+  return new Intl.DateTimeFormat("en-GB", {
     day: "numeric",
     month: "short",
     hour: "2-digit",
     minute: "2-digit",
+    hour12: false,
     timeZone: "Asia/Jakarta",
   }).format(date);
 }
 
-/** "3 minutes ago", "2 hours ago", "just now". */
+/** "3 min ago", "2 hr ago", "just now". */
 export function formatRelative(iso: string): string {
   const date = new Date(iso);
   if (Number.isNaN(date.getTime())) return iso;
   const seconds = Math.round((Date.now() - date.getTime()) / 1000);
-  if (seconds < 60) return "baru saja";
+  if (seconds < 60) return "just now";
   const minutes = Math.round(seconds / 60);
-  if (minutes < 60) return `${minutes} menit lalu`;
+  if (minutes < 60) return minutes === 1 ? "1 min ago" : `${minutes} min ago`;
   const hours = Math.round(minutes / 60);
-  if (hours < 24) return `${hours} jam lalu`;
+  if (hours < 24) return hours === 1 ? "1 hr ago" : `${hours} hr ago`;
   const days = Math.round(hours / 24);
-  return `${days} hari lalu`;
+  return days === 1 ? "1 day ago" : `${days} days ago`;
 }
 
 /** The label of a disruption severity. */
 export const SEVERITY_LABEL: Record<string, string> = {
-  info: "Informasi",
-  warning: "Waspada",
-  severe: "Serius",
-  critical: "Kritis",
+  info: "Info",
+  warning: "Watch",
+  severe: "Serious",
+  critical: "Critical",
 };
 
 /** The label of a disruption kind. */
 export const DISRUPTION_KIND_LABEL: Record<string, string> = {
-  diversion: "Pengalihan rute",
-  closure: "Penutupan",
-  delay: "Keterlambatan",
-  "service-change": "Perubahan layanan",
-  maintenance: "Pemeliharaan",
-  strike: "Mogok",
-  weather: "Cuaca",
-  unknown: "Pemberitahuan",
+  diversion: "Diversion",
+  closure: "Closure",
+  delay: "Delay",
+  "service-change": "Service change",
+  maintenance: "Maintenance",
+  strike: "Strike",
+  weather: "Weather",
+  unknown: "Notice",
 };
 
 /** Format an amount of rupiah the way a ticket does. */

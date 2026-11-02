@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { MapPin, Network, Users } from "lucide-react";
+import { Clock3, MapPin, Network, Users } from "lucide-react";
 import { createPortal } from "react-dom";
 
 import { api } from "../../lib/api.js";
@@ -30,6 +30,13 @@ export function StopPopover({
     staleTime: 300_000,
     retry: false,
   });
+  const departures = useQuery({
+    queryKey: ["departures", stationId],
+    queryFn: ({ signal }) => api.departures(stationId ?? "", undefined, signal),
+    enabled: stationId !== null,
+    staleTime: 60_000,
+    retry: false,
+  });
 
   if (!stationId || !anchor) return null;
 
@@ -42,12 +49,13 @@ export function StopPopover({
   const width = 288;
   const beside = window.innerWidth - anchor.right > width + 24;
   const left = beside ? anchor.right + 12 : Math.max(12, Math.min(anchor.left, window.innerWidth - width - 12));
-  const top = beside ? anchor.top : anchor.bottom + 8;
+  const topCandidate = beside ? anchor.top : anchor.bottom + 8;
+  const top = Math.max(12, Math.min(topCandidate, window.innerHeight - 380));
 
   return createPortal(
     <div
       role="dialog"
-      aria-label={`Detail ${name}`}
+      aria-label={`Details for ${name}`}
       style={{ left: `${left}px`, top: `${top}px`, width: `${width}px` }}
       className="fade-in fixed z-50 rounded-[10px] border border-line bg-surface p-3 shadow-pop"
     >
@@ -62,7 +70,7 @@ export function StopPopover({
               <MapPin aria-hidden className="size-3.5 shrink-0" />
             )}
             <span className="truncate">
-              {place.stationType === "stasiun" ? "Stasiun" : "Halte"}
+              {place.stationType === "stasiun" ? "Station" : "Stop"}
               {place.area ? ` · ${place.area}` : ""}
             </span>
           </p>
@@ -87,19 +95,48 @@ export function StopPopover({
             </p>
           ) : null}
 
+          {departures.data && departures.data.lines.length > 0 ? (
+            <div className="mt-3 border-t border-line pt-2">
+              <p className="flex items-center gap-2 text-[12px] font-medium text-ink-3">
+                <Clock3 aria-hidden className="size-3" />
+                Scheduled departures
+              </p>
+              <ul className="mt-2 space-y-2">
+                {departures.data.lines.slice(0, 6).map((row) => (
+                  <li key={`${row.lineId}-${row.direction}`} className="flex items-baseline gap-2">
+                    <span className="w-10 shrink-0 rounded-[3px] bg-surface-2 px-1 py-px text-center font-mono text-[12px] text-ink-2">
+                      {row.code}
+                    </span>
+                    <span className="min-w-0 flex-1 truncate text-[12px] text-ink-2">
+                      {row.headsign ?? row.name}
+                    </span>
+                    <span className="shrink-0 text-[12px] tabular-nums text-ink-3">
+                      {row.headwayMinMinutes === null
+                        ? "unknown"
+                        : `~${Math.round(row.headwayMinMinutes)} min`}
+                    </span>
+                  </li>
+                ))}
+              </ul>
+              <p className="mt-1 text-[12px] leading-[1.45] text-ink-3">
+                Schedule-based, not live arrivals.
+              </p>
+            </div>
+          ) : null}
+
           {interchange.length > 0 ? (
             <p className="mt-2 flex items-start gap-2 text-[12px] leading-[1.45] text-ink-2">
               <Users aria-hidden className="mt-px size-3.5 shrink-0 text-ink-3" />
               <span className="min-w-0">
-                Berpindah dengan {interchange.map((other) => other.name).join(", ")}
+                Connects with {interchange.map((other) => other.name).join(", ")}
               </span>
             </p>
           ) : null}
         </>
       ) : detail.isError ? (
-        <p className="mt-2 text-[12px] text-ink-3">Detail tempat tidak dapat dimuat.</p>
+        <p className="mt-2 text-[12px] text-ink-3">Place details could not be loaded.</p>
       ) : (
-        <p className="mt-2 text-[12px] text-ink-3">Memuat detail…</p>
+        <p className="mt-2 text-[12px] text-ink-3">Loading details…</p>
       )}
     </div>,
     document.body,

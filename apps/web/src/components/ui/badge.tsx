@@ -31,7 +31,7 @@ export function Badge({
   return (
     <span
       className={cn(
-        "inline-flex items-center gap-1 rounded-md px-2 py-0.5 text-[12px] font-medium tracking-[0.01em]",
+        "inline-flex items-center gap-1 rounded-[4px] px-2 py-0.5 font-mono text-[12px] font-medium uppercase leading-[1.2] tracking-[0.04em]",
         TONES[tone],
         className,
       )}
@@ -55,7 +55,7 @@ export function DotBadge({
   return (
     <span
       className={cn(
-        "inline-flex items-center gap-2 rounded-md bg-surface-2 px-2 py-0.5 text-[12px] font-medium text-ink-2",
+        "inline-flex items-center gap-2 rounded-[4px] bg-surface-2 px-2 py-0.5 font-mono text-[12px] font-medium uppercase leading-[1.2] tracking-[0.04em] text-ink-2",
         className,
       )}
     >

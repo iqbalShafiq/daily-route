@@ -30,8 +30,7 @@ export function WalkPanel({
   if (plan.needsDestination) {
     return (
       <p className="px-4 pb-3 text-[12px] text-ink-3">
-        Tulis tujuan dulu, lalu tekan ikon lokasi untuk mencari rute terbaik dari
-        tempat Anda berada.
+        Type a destination first, then press the location icon to plan from where you are.
       </p>
     );
   }
@@ -42,10 +41,10 @@ export function WalkPanel({
     <div className={cn("px-4 pb-3", className)}>
       <p className="flex items-center gap-2 text-[12px] uppercase tracking-[0.08em] text-ink-3">
         <Footprints aria-hidden className="size-3.5" />
-        Mulai dari
+        Start from
       </p>
 
-      <ul className="mt-2 space-y-1" aria-label="Pilihan mulai">
+      <ul className="mt-2 space-y-1" aria-label="Ways to start">
         {plan.profiles.map((profile) => {
           const chosen = profile.id === "fastest";
           return (
@@ -70,7 +69,7 @@ export function WalkPanel({
                   {profile.stationName}
                 </span>
                 <span className="shrink-0 tabular-nums text-[12px] text-ink-2">
-                  {profile.totalMinutes ?? "-"} mnt
+                  {profile.totalMinutes ?? "-"} min
                 </span>
                 <span className="shrink-0 tabular-nums text-[12px] text-ink-3">
                   {profile.transferCount ?? 0}×
@@ -84,8 +83,8 @@ export function WalkPanel({
       {walk ? (
         <div className="mt-2 border-t border-line pt-2">
           <p className="text-[12px] text-ink-2">
-            Berjalan {formatDistance(walk.distanceKm)} ke {plan.stationName},{" "}
-            {walk.durationMinutes} mnt
+            Walk {formatDistance(walk.distanceKm)} to {plan.stationName},{" "}
+            {walk.durationMinutes} min
           </p>
           <ol className="mt-1 space-y-0.5">
             {walk.steps
@@ -101,6 +100,16 @@ export function WalkPanel({
                 </li>
               ))}
           </ol>
+        </div>
+      ) : plan.accessWalkKm !== null && plan.stationName ? (
+        <div className="mt-2 border-t border-line pt-2">
+          <p className="text-[12px] text-ink-2">
+            Walk {formatDistance(plan.accessWalkKm)} to {plan.stationName}
+          </p>
+          <p className="mt-0.5 text-[12px] leading-[1.45] text-ink-3">
+            The turn-by-turn path is not available right now. The distance is
+            measured along the walking network.
+          </p>
         </div>
       ) : null}
     </div>

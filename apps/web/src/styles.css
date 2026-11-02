@@ -5,12 +5,13 @@
 @import "@fontsource-variable/jetbrains-mono";
 
 /* ---------------------------------------------------------------------------
-   Theme tokens.
+   Daily Route — the design tokens.
 
-   The palette is defined once as raw custom properties and exposed to
-   Tailwind through `@theme inline`, so a utility such as `bg-surface` emits
-   `var(--surface)` and follows the theme automatically. That keeps the
-   dark theme a token swap rather than a second set of utility classes.
+   The interface is a printed transit board for Jakarta: warm paper, ink,
+   one jade signal, and operator colour used only as data. The palette is
+   defined once as custom properties and exposed to Tailwind through
+   `@theme inline`, so a utility such as `bg-surface` emits `var(--surface)`
+   and follows the theme automatically.
 --------------------------------------------------------------------------- */
 
 @custom-variant dark (&:where([data-theme="dark"], [data-theme="dark"] *));
@@ -18,27 +19,27 @@
 :root {
   color-scheme: light;
 
-  --bg: #fbfaf8;
-  --surface: #ffffff;
-  --surface-2: #f4f2ee;
-  --surface-3: #ebe8e1;
-  --ink: #17150f;
-  --ink-2: #4a4740;
-  --ink-3: #6f6b61;
-  --line: #e5e1d8;
-  --line-strong: #cfcabe;
+  --bg: #f2ede2;
+  --surface: #fbf8f0;
+  --surface-2: #ebe4d6;
+  --surface-3: #ded4c2;
+  --ink: #14140f;
+  --ink-2: #49453a;
+  --ink-3: #6f695c;
+  --line: #d8cfbd;
+  --line-strong: #b6ab96;
 
   --accent: #0b6b4f;
-  --accent-hover: #095a42;
-  --accent-ink: #ffffff;
-  --accent-soft: #e6f1ec;
+  --accent-hover: #07513c;
+  --accent-ink: #f8f3e7;
+  --accent-soft: #d9e9df;
 
-  --warn: #a85b00;
-  --warn-soft: #fbf0e2;
-  --danger: #a4262c;
-  --danger-soft: #fbeaea;
-  --info: #1d4ed8;
-  --info-soft: #e8eefd;
+  --warn: #965900;
+  --warn-soft: #f4e4cd;
+  --danger: #a22b2b;
+  --danger-soft: #f4dad7;
+  --info: #2348b8;
+  --info-soft: #e1e7f8;
 
   /*
    * The colours of the modes.
@@ -49,82 +50,138 @@
    * are hard to tell apart, even with colour blindness, and so that no
    * mode shares a colour with the interface itself.
    */
-  --mode-bus: #1d4ed8;
-  --mode-metro: #b91c1c;
-  --mode-tram: #b45309;
-  --mode-lrt-jabodebek: #0e7490;
-  --mode-rail: #334155;
+  --mode-bus: #1f4fbf;
+  --mode-metro: #b3262e;
+  --mode-tram: #a45a0a;
+  --mode-lrt-jabodebek: #0e6f6a;
+  --mode-rail: #343f52;
 
   /*
-   * A card has a border, not a shadow. A shadow is for what floats: the
-   * popover, the sheet, the map controls.
+   * Paper is not flat. A printed map has a tooth, and a soft tint keeps
+   * the large surfaces from looking like a default white card.
    */
-  --shadow-pop: 0 2px 6px rgb(23 21 15 / 0.08), 0 18px 48px -18px rgb(23 21 15 / 0.3);
+  --paper-glow: rgb(255 252 244 / 0.9);
+  --paper-shade: rgb(20 20 15 / 0.035);
+
   /* A shadow is the colour of the ink, never of black. */
-  --shadow-raised: 0 1px 2px rgb(23 21 15 / 0.12);
+  --shadow-raised: 0 1px 2px rgb(20 20 15 / 0.1);
+  --shadow-pop: 0 2px 6px rgb(20 20 15 / 0.08), 0 24px 60px -26px rgb(20 20 15 / 0.5);
 
-  --radius-card: 14px;
+  --radius-card: 12px;
 
   /*
-   * The height of the search bar on a phone: two lines of 48 px.
-   *
-   * It is written down once, because the things that float below the
-   * bar on a phone have to know where the bar ends.
+   * The height of the search board on a phone: the brand strip and the
+   * two place rows. The controls below it start where the board ends.
    */
-  --bar-h: 96px;
+  --bar-h: 132px;
+
+  /* The bottom app bar on a phone. */
+  --bottom-bar-h: 64px;
 
   /*
    * The room the map leaves around the journey.
    *
    * On a wide screen the answer stands in a column on the left, so the
-   * journey is framed to the right of it. On a phone the search bar is
-   * above the map and the answer is below it, and the journey has to
-   * fit between the two.
+   * journey is framed to the right of it. On a phone the search board is
+   * above the map and the result is below it, and the journey has to fit
+   * between the two.
    */
-  --map-pad-top: 56px;
-  --map-pad-bottom: 56px;
+  --map-pad-top: 48px;
+  --map-pad-bottom: 48px;
   --map-pad-left: 440px;
-  --map-pad-right: 56px;
+  --map-pad-right: 48px;
 
   /* The line that separates a route from the roads under it. */
-  --map-halo: rgb(23 21 15 / 0.14);
+  --map-halo: rgb(20 20 15 / 0.16);
+
+  /*
+   * The paper map.
+   *
+   * The basemap is recoloured from these tokens rather than from a second
+   * style file, so the map follows the theme with the rest of the window.
+   */
+  --map-bg: #efe7d8;
+  --map-park: #e2e7d5;
+  --map-water: #c7d8d4;
+  --map-wood: #dfe6d5;
+  --map-residential: #ece5d7;
+  --map-building: #e5dccb;
+  --map-building-line: #d7ccb9;
+  --map-road: #fbf7ee;
+  --map-road-casing: #d8cebc;
+  --map-road-minor: #f7f1e5;
+  --map-road-subtle: #e6ddcc;
+  --map-motorway: #f3e3c4;
+  --map-motorway-casing: #d8c8a8;
+  --map-rail: #c9bfaa;
+  --map-boundary: #b9af9b;
+  --map-label: #23231b;
+  --map-label-halo: #f7f2e7;
+  --map-water-label: #4f6d75;
+  --map-road-label: #6f695c;
+
+  --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+  --ease-in-out: cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 [data-theme="dark"] {
   color-scheme: dark;
 
-  --bg: #111310;
-  --surface: #1a1c18;
-  --surface-2: #22251f;
-  --surface-3: #2b2f27;
-  --ink: #f2efe7;
-  --ink-2: #c6c2b6;
-  --ink-3: #8e8a7e;
-  --line: #2e322a;
-  --line-strong: #414639;
+  --bg: #0d100d;
+  --surface: #151914;
+  --surface-2: #1d231c;
+  --surface-3: #273026;
+  --ink: #f4efe2;
+  --ink-2: #c9c1b0;
+  --ink-3: #918977;
+  --line: #293127;
+  --line-strong: #3d483a;
 
-  --accent: #4ade9e;
-  --accent-hover: #6ee7b2;
+  --accent: #64e6ad;
+  --accent-hover: #8af0c2;
   --accent-ink: #06251a;
-  --accent-soft: #14301f;
+  --accent-soft: #143326;
 
-  --warn: #f0b45e;
-  --warn-soft: #2f2413;
-  --danger: #f28b82;
-  --danger-soft: #331a19;
-  --info: #93b4fd;
-  --info-soft: #16203a;
+  --warn: #f1b76a;
+  --warn-soft: #322510;
+  --danger: #f28f85;
+  --danger-soft: #351a18;
+  --info: #9db8ff;
+  --info-soft: #17223f;
 
-  --mode-bus: #38bdf8;
-  --mode-metro: #f43f5e;
-  --mode-tram: #f59e0b;
-  --mode-lrt-jabodebek: #2dd4bf;
-  --mode-rail: #a78bfa;
+  --mode-bus: #5aa2ff;
+  --mode-metro: #ff6b6b;
+  --mode-tram: #f3a63a;
+  --mode-lrt-jabodebek: #4fd7c9;
+  --mode-rail: #a9a2f5;
 
-  --shadow-pop: 0 2px 6px rgb(0 0 0 / 0.45), 0 18px 48px -18px rgb(0 0 0 / 0.8);
-  --shadow-raised: 0 1px 2px rgb(0 0 0 / 0.45);
+  --paper-glow: rgb(255 255 255 / 0.035);
+  --paper-shade: rgb(0 0 0 / 0.22);
 
-  --map-halo: rgb(255 255 255 / 0.12);
+  --shadow-raised: 0 1px 2px rgb(0 0 0 / 0.5);
+  --shadow-pop: 0 2px 8px rgb(0 0 0 / 0.45), 0 28px 70px -28px rgb(0 0 0 / 0.9);
+
+  --map-halo: rgb(0 0 0 / 0.45);
+
+  --map-bg: #0e110e;
+  --map-park: #141c14;
+  --map-water: #10201f;
+  --map-wood: #162016;
+  --map-residential: #131711;
+  --map-building: #1a1f18;
+  --map-building-line: #242b22;
+  --map-road: #1c221b;
+  --map-road-casing: #262d24;
+  --map-road-minor: #1a211a;
+  --map-road-subtle: #20271f;
+  --map-motorway: #2b2b21;
+  --map-motorway-casing: #3a3526;
+  --map-rail: #394235;
+  --map-boundary: #3d483a;
+  --map-label: #ece5d5;
+  --map-label-halo: #0e110e;
+  --map-water-label: #7fa3a7;
+  --map-road-label: #918977;
 }
 
 @theme inline {
@@ -186,7 +243,7 @@
   h1,
   h2,
   h3 {
-    letter-spacing: -0.022em;
+    letter-spacing: -0.03em;
     text-wrap: balance;
   }
 
@@ -204,10 +261,78 @@
     background: var(--accent);
     color: var(--accent-ink);
   }
+
+  ::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    background: var(--line-strong);
+    border: 3px solid transparent;
+    border-radius: 999px;
+    background-clip: padding-box;
+  }
 }
 
 @layer components {
-  /* A quiet, consistent scrollbar that does not fight the layout. */
+  /*
+   * The panel.
+   *
+   * A panel is a sheet of paper on the map, not a glass card. It has a
+   * hairline, a slightly warm fill, and a top rule that gives it the
+   * weight of a printed board.
+   */
+  .panel {
+    background-color: var(--surface);
+    background-image: linear-gradient(180deg, var(--paper-glow), transparent 140px);
+    border: 1px solid var(--line);
+    border-top-color: var(--line-strong);
+    box-shadow: var(--shadow-pop);
+  }
+
+  .panel--flat {
+    box-shadow: none;
+  }
+
+  /* The lower edge of a ticket, torn along a perforation. */
+  .perforation {
+    border-top: 1px dashed var(--line-strong);
+  }
+
+  /* A small label in the language of a station sign. */
+  .eyebrow {
+    font-family: var(--font-mono);
+    font-size: 12px;
+    line-height: 1.2;
+    font-weight: 500;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--ink-3);
+  }
+
+  /* A route rule: two points and the line between them. */
+  .route-rule {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .route-rule::before,
+  .route-rule::after {
+    content: "";
+    height: 1px;
+    flex: 1;
+    background: var(--line);
+  }
+
+  /*
+   * The scrollbar of a panel.
+   *
+   * A thin thumb in the strong line colour. The platform bar is hidden
+   * where a drawn thumb replaces it, because the platform bar fades
+   * and does not match the card.
+   */
   .scroll-quiet {
     scrollbar-width: thin;
     scrollbar-color: var(--line-strong) transparent;
@@ -227,6 +352,16 @@
     background: transparent;
   }
 
+  .quiet-scroll {
+    scrollbar-width: none;
+  }
+
+  .quiet-scroll::-webkit-scrollbar {
+    display: none;
+    width: 0;
+    height: 0;
+  }
+
   /*
    * The answer arrives.
    *
@@ -235,16 +370,25 @@
    * something came in rather than that something changed.
    */
   .rise-in {
-    animation: rise-in 260ms cubic-bezier(0.22, 1, 0.36, 1) both;
+    animation: rise-in 320ms var(--ease-out) both;
   }
 
   .fade-in {
-    animation: fade-in 160ms ease-out both;
+    animation: fade-in 180ms ease-out both;
   }
 
   /* The list of suggestions opens from the field it belongs to. */
   .list-in {
-    animation: list-in 180ms cubic-bezier(0.22, 1, 0.36, 1) both;
+    animation: list-in 200ms var(--ease-out) both;
+  }
+
+  /* A sheet rises from the bottom edge, with a little weight. */
+  .sheet-in {
+    animation: sheet-in 320ms var(--ease-out) both;
+  }
+
+  .sheet-out {
+    animation: sheet-out 200ms var(--ease-in-out) both;
   }
 
   /*
@@ -275,6 +419,41 @@
   .marquee--overflow:focus-within .marquee__track {
     animation: marquee var(--marquee-duration, 0s) linear infinite;
   }
+
+  /* A row that can be chosen: it lifts, then settles under the finger. */
+  .press {
+    transition:
+      transform 150ms var(--ease-out),
+      background-color 150ms var(--ease-out),
+      border-color 150ms var(--ease-out),
+      color 150ms var(--ease-out);
+  }
+
+  .press:active {
+    transform: translateY(1px) scale(0.995);
+  }
+
+  /* A hairline that draws from the left when a row is chosen. */
+  .sweep {
+    position: relative;
+  }
+
+  .sweep::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    bottom: 0;
+    height: 2px;
+    width: 100%;
+    background: var(--accent);
+    transform: scaleX(0);
+    transform-origin: left;
+    transition: transform 260ms var(--ease-out);
+  }
+
+  .sweep[data-active="true"]::after {
+    transform: scaleX(1);
+  }
 }
 
 @keyframes marquee {
@@ -289,7 +468,7 @@
 @keyframes rise-in {
   from {
     opacity: 0;
-    transform: translate3d(0, 10px, 0);
+    transform: translate3d(0, 12px, 0);
   }
   to {
     opacity: 1;
@@ -309,7 +488,7 @@
 @keyframes list-in {
   from {
     opacity: 0;
-    transform: translate3d(0, -4px, 0);
+    transform: translate3d(0, -6px, 0);
   }
   to {
     opacity: 1;
@@ -317,13 +496,134 @@
   }
 }
 
+@keyframes sheet-in {
+  from {
+    opacity: 0;
+    transform: translate3d(0, 24px, 0) scale(0.995);
+  }
+  to {
+    opacity: 1;
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+}
+
+@keyframes sheet-out {
+  from {
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
+  }
+  to {
+    opacity: 0;
+    transform: translate3d(0, 24px, 0);
+  }
+}
+
+@keyframes brand-draw {
+  from {
+    stroke-dashoffset: 1;
+  }
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+.brand-mark__line {
+  stroke-dasharray: 1;
+  stroke-dashoffset: 1;
+  animation: brand-draw 900ms var(--ease-out) 120ms forwards;
+}
+
+.brand-mark__dot {
+  transform-origin: center;
+  animation: dot-pop 420ms var(--ease-out) 780ms both;
+}
+
+@keyframes dot-pop {
+  0% {
+    transform: scale(0.2);
+    opacity: 0;
+  }
+  65% {
+    transform: scale(1.25);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+.swap-flash {
+  animation: swap-flash 280ms var(--ease-out);
+}
+
+.number-roll {
+  animation: number-roll 320ms var(--ease-out) both;
+}
+
+.route-loader {
+  position: absolute;
+  inset: 0;
+  background-image: linear-gradient(
+    90deg,
+    transparent 0%,
+    var(--accent) 38%,
+    var(--accent) 55%,
+    transparent 72%
+  );
+  background-size: 46% 100%;
+  background-repeat: no-repeat;
+  animation: route-loader 1.4s linear infinite;
+}
+
+@keyframes route-loader {
+  0% {
+    background-position: -46% 0;
+  }
+  100% {
+    background-position: 146% 0;
+  }
+}
+
+@keyframes swap-flash {
+  0% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  35% {
+    opacity: 0.2;
+    transform: translateY(-4px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes number-roll {
+  from {
+    opacity: 0.4;
+    transform: translateY(40%);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
 /* The popover of a point on the map. */
+/* The map popover must clear the dock, not sit under its card. The map
+   itself creates no stacking context, so the popup participates at root. */
+.maplibregl-popup {
+  z-index: 35;
+}
+
 .maplibregl-popup-content {
   background: var(--surface);
   color: var(--ink);
-  border: 1px solid var(--line);
-  border-radius: 10px;
-  padding: 7px 10px;
+  border: 1px solid var(--line-strong);
+  border-radius: 8px;
+  padding: 8px 10px;
   box-shadow: var(--shadow-pop);
   font-family: inherit;
 }
@@ -353,29 +653,18 @@
 
 .map-popup-detail {
   margin-top: 2px;
-  font-size: 11px;
-  line-height: 1.3;
+  font-size: 12px;
+  line-height: 1.35;
   color: var(--ink-3);
-}
-
-/* The MapLibre default controls are replaced by the app's own affordances. */
-.maplibregl-ctrl-attrib {
-  font-size: 10px;
-  background-color: color-mix(in srgb, var(--surface) 88%, transparent) !important;
-  color: var(--ink-3) !important;
-  border-radius: 6px 0 0 0;
-}
-
-.maplibregl-ctrl-attrib a {
-  color: var(--ink-2) !important;
 }
 
 @media (max-width: 1023px) {
   :root {
-    --map-pad-top: 120px;
-    --map-pad-bottom: 320px;
-    --map-pad-left: 24px;
-    --map-pad-right: 24px;
+    --bar-h: calc(210px + env(safe-area-inset-top));
+    --map-pad-top: calc(218px + env(safe-area-inset-top));
+    --map-pad-bottom: 360px;
+    --map-pad-left: 20px;
+    --map-pad-right: 20px;
   }
 }
 
@@ -387,5 +676,43 @@
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
     scroll-behavior: auto !important;
+  }
+}
+
+/* The assistant sheet arrives from above and leaves the same way. */
+.chat-sheet-in {
+  animation: chat-sheet-in 260ms var(--ease-out) both;
+}
+
+.chat-sheet-out {
+  animation: chat-sheet-out 200ms var(--ease-in-out) both;
+}
+
+@keyframes chat-sheet-in {
+  from {
+    opacity: 0;
+    transform: translateY(-14px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes chat-sheet-out {
+  from {
+    opacity: 1;
+    transform: none;
+  }
+  to {
+    opacity: 0;
+    transform: translateY(-14px);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .chat-sheet-in,
+  .chat-sheet-out {
+    animation: none;
   }
 }

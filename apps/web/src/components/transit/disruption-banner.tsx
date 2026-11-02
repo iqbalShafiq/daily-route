@@ -1,4 +1,6 @@
-import { CircleCheck, ExternalLink, TriangleAlert } from "lucide-react";
+import { CircleCheck, ExternalLink } from "lucide-react";
+
+import { IncidentIcon } from "./incident-icon.js";
 
 import { cn } from "../../lib/cn.js";
 import {
@@ -38,8 +40,17 @@ export function DisruptionBanner({
   return (
     <div className={cn("rounded-xl border px-3 py-3", toneClasses, className)}>
       <div className="flex items-start gap-3">
-        <TriangleAlert aria-hidden className="mt-0.5 size-4 shrink-0" />
+        <IncidentIcon
+          mark={disruption.mark}
+          kind={disruption.kind}
+          className="mt-0.5 size-4 shrink-0"
+        />
         <div className="min-w-0 flex-1">
+          {disruption.demonstration ? (
+            <p className="text-[12px] font-medium uppercase tracking-[0.04em] opacity-80">
+              Sample watch
+            </p>
+          ) : null}
           <p className="text-[13px] font-semibold leading-[1.3]">{disruption.title}</p>
           {disruption.body ? (
             <p className="mt-0.5 text-[12px] leading-[1.5] opacity-90">{disruption.body}</p>
@@ -57,7 +68,7 @@ export function DisruptionBanner({
                 rel="noreferrer"
                 className="inline-flex items-center gap-1 underline underline-offset-2"
               >
-                Sumber
+                Source
                 <ExternalLink aria-hidden className="size-3" />
               </a>
             ) : null}
@@ -78,7 +89,7 @@ export function ClearRouteNotice({ className }: { className?: string }) {
       )}
     >
       <CircleCheck aria-hidden className="size-4 shrink-0" />
-      <span>Tidak ada pengalihan atau penutupan yang memengaruhi rute ini.</span>
+      <span>No diversion or closure affects this route.</span>
     </div>
   );
 }

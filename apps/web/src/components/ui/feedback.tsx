@@ -1,13 +1,19 @@
-import { Loader2 } from "lucide-react";
 import type { ReactNode } from "react";
 
 import { cn } from "../../lib/cn.js";
 
-/** The loading indicator. It always carries a label, never only a spinner. */
+/**
+ * The loading indicator.
+ *
+ * A line with a carriage travelling along it, in the language of the map.
+ * It always carries a label, never only a spinner.
+ */
 export function Spinner({ label, className }: { label?: string; className?: string }) {
   return (
     <span className={cn("inline-flex items-center gap-2 text-[13px] text-ink-3", className)}>
-      <Loader2 aria-hidden className="size-4 animate-spin" />
+      <span aria-hidden className="relative block h-px w-7 overflow-hidden bg-line-strong">
+        <span className="route-loader" />
+      </span>
       {label ? <span>{label}</span> : null}
     </span>
   );
@@ -40,7 +46,7 @@ export function EmptyState({
       )}
     >
       {icon ? (
-        <span className="flex size-11 items-center justify-center rounded-full bg-surface-2 text-ink-3">
+        <span className="flex size-11 items-center justify-center rounded-lg border border-dashed border-line-strong bg-surface-2 text-ink-3">
           {icon}
         </span>
       ) : null}
@@ -57,5 +63,5 @@ export function EmptyState({
 
 /** A skeleton block used while a panel loads. */
 export function Skeleton({ className }: { className?: string }) {
-  return <div className={cn("animate-pulse rounded-lg bg-surface-2", className)} />;
+  return <div className={cn("rounded-[4px] bg-surface-2", className)} />;
 }

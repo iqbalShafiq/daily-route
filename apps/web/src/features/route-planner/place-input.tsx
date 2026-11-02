@@ -1,23 +1,25 @@
 import { useQuery } from "@tanstack/react-query";
-import { AlertCircle, Loader2, MapPin, Search, X } from "lucide-react";
+import { AlertCircle, MapPin, Star, X } from "lucide-react";
 import { useEffect, useId, useMemo, useRef, useState } from "react";
 
-import { api, type MatchedRange, type StationSummary } from "../../lib/api.js";
+import { api, type MatchedRange, type PlaceSuggestion } from "../../lib/api.js";
 import { cn } from "../../lib/cn.js";
 import { Input } from "../../components/ui/input.js";
+import { Spinner } from "../../components/ui/feedback.js";
+
+import type { ChosenPlace } from "./place-memory.js";
 
 /**
  * The place field.
  *
  * It accepts free text — a station name, a district, a landmark — and
- * offers the stations that match. The suggestions come from the semantic
- * resolver on the server, so a misspelled name still finds its station.
+ * offers the stations and the places that match. The suggestions come
+ * from the server. A landmark is not rewritten into the nearest halte:
+ * the reader keeps the name they chose, and the walk is part of the route.
  *
- * The list follows the combobox pattern of the ARIA practices: the input
- * keeps the focus, the active option is pointed at with
- * `aria-activedescendant`, and the keyboard moves through the list
- * without ever leaving the field. The rules it follows are written down
- * in `research/ux-search.md`.
+ * When the field is empty the list is the places this browser has saved
+ * and the places it has used. The focus stays in the input, and the
+ * active option is pointed at with `aria-activedescendant`.
  */
 
 /** How long to wait after the last keystroke before asking the server. */
@@ -29,34 +31,45 @@ const MINIMUM_QUERY_LENGTH = 2;
 /** How many suggestions are offered. */
 const MAXIMUM_RESULTS = 6;
 
-/**
- * The list of suggestions.
- *
- * The best match stands first and the part of the name that matched is
- * marked. Nothing else is said about the match: a rider reads a name,
- * not a score, and a badge that says "less sure" is a guess about how
- * the reader feels.
- */
-
 /** How many options the page keys move at once. */
 const PAGE_SIZE = 5;
+
+export type MemorySuggestion = {
+  id: string;
+  name: string;
+  detail: string;
+  place: ChosenPlace;
+};
+
+type Row = {
+  key: string;
+  name: string;
+  detail: string;
+  ranges: MatchedRange[];
+  interchange: boolean;
+  place: ChosenPlace;
+};
 
 export function PlaceInput({
   label,
   value,
   onValueChange,
-  onSelect,
+  onSelectPlace,
   placeholder,
   icon,
   invalid,
   autoFocus,
   trailingAction,
   variant,
+  memory = [],
+  canSave = false,
+  saved = false,
+  onToggleSaved,
 }: {
   label: string;
   value: string;
   onValueChange: (value: string) => void;
-  onSelect?: ((station: StationSummary) => void) | undefined;
+  onSelectPlace?: ((place: ChosenPlace) => void) | undefined;
   placeholder?: string | undefined;
   icon?: React.ReactNode | undefined;
   invalid?: boolean | undefined;
@@ -65,6 +78,12 @@ export function PlaceInput({
   trailingAction?: React.ReactNode | undefined;
   /** `row` makes the field one line of a larger surface. */
   variant?: "field" | "row" | undefined;
+  /** Saved and recent places, shown when the field is empty. */
+  memory?: MemorySuggestion[] | undefined;
+  /** Whether the current text is a place that can be saved. */
+  canSave?: boolean | undefined;
+  saved?: boolean | undefined;
+  onToggleSaved?: (() => void) | undefined;
 }) {
   const [open, setOpen] = useState(false);
   // -1 means the list is open but nothing is selected yet.
@@ -77,20 +96,27 @@ export function PlaceInput({
 
   const query = value.trim();
   const debouncedQuery = useDebouncedValue(query, DEBOUNCE_MS);
+  const searching = debouncedQuery.length >= MINIMUM_QUERY_LENGTH;
 
   // The request waits for the typing to pause, and the previous results
   // stay on screen while the new ones are fetched, so the list never
   // flickers and never reorders under the pointer. A request that is
   // still running when the query changes is cancelled.
   const suggestions = useQuery({
-    queryKey: ["stations", debouncedQuery],
-    queryFn: ({ signal }) => api.stations({ q: debouncedQuery, limit: MAXIMUM_RESULTS }, signal),
-    enabled: debouncedQuery.length >= MINIMUM_QUERY_LENGTH,
+    queryKey: ["places", debouncedQuery],
+    queryFn: ({ signal }) => api.places(debouncedQuery, signal),
+    enabled: searching,
     staleTime: 60_000,
     placeholderData: (previous) => previous,
   });
 
-  const results = useMemo(() => suggestions.data ?? [], [suggestions.data]);
+  const searched = useMemo(
+    () => (suggestions.data ?? []).slice(0, MAXIMUM_RESULTS).map(rowOfSuggestion),
+    [suggestions.data],
+  );
+  const remembered = useMemo(() => memory.map(rowOfMemory), [memory]);
+  const showingMemory = query.length < MINIMUM_QUERY_LENGTH;
+  const rows = showingMemory ? remembered : searched;
 
   // The list closes when the pointer goes somewhere else.
   useEffect(() => {
@@ -109,49 +135,49 @@ export function PlaceInput({
     if (option instanceof HTMLElement) {
       option.scrollIntoView({ block: "nearest" });
     }
-  }, [highlight, open, results]);
+  }, [highlight, open, rows]);
 
-  const showList = open && query.length >= MINIMUM_QUERY_LENGTH;
-  const showEmpty = showList && !suggestions.isPending && results.length === 0;
-  const showError = showList && suggestions.isError;
-  const loading = suggestions.isPending && suggestions.fetchStatus === "fetching";
+  const showList = open && (searching || (showingMemory && rows.length > 0));
+  const showEmpty = showList && searching && !suggestions.isPending && rows.length === 0;
+  const showError = showList && searching && suggestions.isError;
+  const loading = searching && suggestions.isPending && suggestions.fetchStatus === "fetching";
 
   const handleKeyDown = (event: React.KeyboardEvent<HTMLInputElement>): void => {
     if (event.key === "ArrowDown" || event.key === "ArrowUp") {
-      if (results.length === 0) return;
+      if (rows.length === 0) return;
       event.preventDefault();
       setOpen(true);
       setHighlight((index) => {
         const next = event.key === "ArrowDown" ? index + 1 : index - 1;
         // Up from the first option returns to the input itself.
         if (next < 0) return -1;
-        return next % results.length;
+        return next % rows.length;
       });
       return;
     }
 
     if (event.key === "PageDown" || event.key === "PageUp") {
-      if (results.length === 0) return;
+      if (rows.length === 0) return;
       event.preventDefault();
       setOpen(true);
       setHighlight((index) => {
         const next = event.key === "PageDown" ? index + PAGE_SIZE : index - PAGE_SIZE;
         if (next < 0) return -1;
-        return Math.min(next, results.length - 1);
+        return Math.min(next, rows.length - 1);
       });
       return;
     }
 
     if (event.key === "Home" || event.key === "End") {
-      if (!showList || results.length === 0) return;
+      if (!showList || rows.length === 0) return;
       event.preventDefault();
-      setHighlight(event.key === "Home" ? 0 : results.length - 1);
+      setHighlight(event.key === "Home" ? 0 : rows.length - 1);
       return;
     }
 
     if (event.key === "Enter") {
       if (!showList || highlight < 0) return;
-      const suggestion = results[highlight];
+      const suggestion = rows[highlight];
       if (!suggestion) return;
       event.preventDefault();
       choose(suggestion);
@@ -174,9 +200,9 @@ export function PlaceInput({
     }
   };
 
-  const choose = (station: StationSummary): void => {
-    onValueChange(station.name);
-    onSelect?.(station);
+  const choose = (row: Row): void => {
+    onValueChange(row.name);
+    onSelectPlace?.(row.place);
     setOpen(false);
     // The focus stays in the field, with the caret at the end of the name.
     inputRef.current?.focus();
@@ -191,11 +217,24 @@ export function PlaceInput({
    */
   const trailing = useMemo(
     () => {
+      const saveButton = canSave ? (
+        <button
+          type="button"
+          aria-label={saved ? "Remove from saved" : "Save place"}
+          title={saved ? "Remove from saved" : "Save place"}
+          aria-pressed={saved}
+          onClick={onToggleSaved}
+          className="flex size-6 cursor-pointer items-center justify-center rounded-md text-ink-3 transition-colors hover:bg-surface-2 hover:text-ink"
+        >
+          <Star aria-hidden className={cn("size-3.5", saved && "fill-current text-ink")} />
+        </button>
+      ) : null;
+
       const clearButton =
         value.length > 0 ? (
           <button
             type="button"
-            aria-label="Bersihkan"
+            aria-label="Clear"
             onClick={() => {
               onValueChange("");
               setOpen(false);
@@ -206,19 +245,27 @@ export function PlaceInput({
           </button>
         ) : null;
 
+      const tools =
+        saveButton || clearButton ? (
+          <span className="flex items-center gap-1">
+            {saveButton}
+            {clearButton}
+          </span>
+        ) : null;
+
       if (trailingAction) {
         return (
           <span className="flex items-center gap-1">
-            {clearButton}
+            {tools}
             {trailingAction}
           </span>
         );
       }
-      if (clearButton) return clearButton;
-      if (loading) return <Loader2 aria-hidden className="size-3.5 animate-spin text-ink-3" />;
+      if (tools) return tools;
+      if (loading) return <Spinner />;
       return null;
     },
-    [value, onValueChange, loading, trailingAction],
+    [value, onValueChange, loading, trailingAction, canSave, saved, onToggleSaved],
   );
 
   return (
@@ -231,7 +278,7 @@ export function PlaceInput({
         label={label}
         value={value}
         placeholder={placeholder}
-        icon={icon ?? <Search aria-hidden className="size-4" />}
+        icon={icon}
         trailing={trailing}
         invalid={invalid}
         autoFocus={autoFocus}
@@ -259,45 +306,53 @@ export function PlaceInput({
           id={listId}
           ref={listRef}
           role="listbox"
-          aria-label={`Saran tempat untuk ${label}`}
+          aria-label={`Places matching ${label}`}
           className={cn(
             // On a phone the list becomes a sheet at the bottom of the
             // screen: the keyboard covers half of it, and a dropdown
             // under the field would be covered with it.
-            "list-in absolute inset-x-0 top-full z-30 mt-2 max-h-72 overflow-y-auto overscroll-contain",
-            "rounded-xl border border-line bg-surface shadow-pop",
+            "list-in absolute inset-x-0 top-full z-50 mt-2 max-h-72 overflow-y-auto overscroll-contain",
+            "rounded-lg border border-line-strong bg-surface shadow-pop",
             "max-md:fixed max-md:inset-x-0 max-md:top-auto max-md:bottom-0 max-md:mt-0",
-            "max-md:max-h-[60dvh] max-md:rounded-b-none max-md:rounded-t-2xl max-md:border-x-0 max-md:border-b-0",
+            "max-md:max-h-[62dvh] max-md:rounded-b-none max-md:rounded-t-[16px] max-md:border-x-0 max-md:border-b-0 max-md:pb-[calc(12px+env(safe-area-inset-bottom))]",
           )}
         >
-          {loading && results.length === 0 ? (
-            <li className="flex items-center gap-2 px-3 py-3 text-[13px] text-ink-3">
-              <Loader2 aria-hidden className="size-3.5 animate-spin" />
-              Mencari tempat…
+          <li role="presentation" className="sticky top-0 z-10 bg-surface px-3 pb-1 pt-2 md:hidden">
+            <span aria-hidden className="mx-auto block h-1 w-10 rounded-full bg-line-strong/70" />
+          </li>
+
+          {loading && rows.length === 0 ? (
+            <li className="flex items-center justify-center px-3 py-5">
+              <Spinner label="Searching places…" />
             </li>
           ) : null}
 
           {showError ? (
-            <li className="flex items-center gap-2 px-3 py-3 text-[13px] text-ink-3">
-              <AlertCircle aria-hidden className="size-3.5 shrink-0" />
-              Saran gagal dimuat. Periksa koneksi lalu coba lagi.
+            <li className="flex items-center gap-2 px-3 py-4 text-[13px] leading-[1.5] text-ink-2">
+              <AlertCircle aria-hidden className="size-4 shrink-0 text-danger" />
+              Place suggestions could not be loaded. Check the connection and try again.
             </li>
           ) : null}
 
           {showEmpty ? (
-            <li className="px-3 py-3 text-[13px] text-ink-3">
-              Tidak ada tempat yang cocok dengan “{query}”.
+            <li className="px-3 py-5 text-[13px] leading-[1.5] text-ink-2">
+              No places match “{query}”.
             </li>
           ) : null}
 
-          {results.map((suggestion, index) => {
+          {rows.map((suggestion, index) => {
             return (
               <li
-                key={suggestion.id}
+                key={suggestion.key}
                 id={optionId(index)}
                 role="option"
                 aria-selected={index === highlight}
-                className={cn(index === highlight ? "bg-surface-2" : "bg-surface")}
+                className={cn(
+                  "border-l-2 transition-colors",
+                  index === highlight
+                    ? "border-l-accent bg-surface-2"
+                    : "border-l-transparent bg-surface",
+                )}
               >
                 <button
                   type="button"
@@ -307,32 +362,22 @@ export function PlaceInput({
                   onClick={() => choose(suggestion)}
                   className="flex w-full cursor-pointer items-center gap-3 px-3 py-3 text-left transition-colors"
                 >
-                  <MapPin aria-hidden className="size-3.5 shrink-0 text-ink-3" />
-                  <span className="min-w-0 flex-1">
-                    <span className="block truncate text-[15px] text-ink">
-                      <Highlighted
-                        text={suggestion.name}
-                        ranges={suggestion.matchedRanges ?? []}
-                      />
-                    </span>
-                    {/*
-                     * One line, and it is cut at the end. The road
-                     * the place stands on is the last thing said
-                     * about it, so it is the first thing to go.
-                     */}
-                    <span className="flex items-center gap-2 overflow-hidden whitespace-nowrap text-[12px] text-ink-3">
-                      <span className="shrink-0">{suggestion.systemName ?? suggestion.systemId}</span>
-                      {suggestion.lineCount ? (
-                        <span className="shrink-0">· {suggestion.lineCount} garis</span>
-                      ) : null}
-                      {suggestion.street ? (
-                        <span className="truncate">· {suggestion.street}</span>
-                      ) : null}
-                    </span>
+                  <span className="flex size-6 shrink-0 items-center justify-center rounded-[4px] border border-line bg-surface-2 text-ink-3">
+                    <MapPin aria-hidden className="size-3" />
                   </span>
-                  {suggestion.isInterchange ? (
-                    <span className="shrink-0 rounded bg-surface-3 px-2 py-0.5 text-[12px] text-ink-3">
-                      Transit
+                  <span className="min-w-0 flex-1">
+                    <span className="block truncate text-[15px] font-medium text-ink">
+                      <Highlighted text={suggestion.name} ranges={suggestion.ranges} />
+                    </span>
+                    {suggestion.detail ? (
+                      <span className="mt-0.5 block truncate font-mono text-[12px] uppercase leading-[1.2] tracking-[0.04em] text-ink-3">
+                        {suggestion.detail}
+                      </span>
+                    ) : null}
+                  </span>
+                  {suggestion.interchange ? (
+                    <span className="shrink-0 rounded-[4px] border border-line-strong px-2 py-0.5 font-mono text-[12px] uppercase leading-[1.2] tracking-[0.04em] text-ink-3">
+                      Interchange
                     </span>
                   ) : null}
                 </button>
@@ -344,11 +389,54 @@ export function PlaceInput({
 
       {/* The number of results, for a reader that does not see the list. */}
       <span className="sr-only" role="status" aria-live="polite">
-        {showList && results.length > 0 ? `${results.length} saran tersedia` : ""}
-        {showEmpty ? `Tidak ada saran untuk “${query}”` : ""}
+        {showList && rows.length > 0 ? `${rows.length} suggestions available` : ""}
+        {showEmpty ? `No places match “${query}”` : ""}
       </span>
     </div>
   );
+}
+
+function rowOfSuggestion(suggestion: PlaceSuggestion): Row {
+  const detail =
+    suggestion.kind === "place"
+      ? ["Place", suggestion.street].filter((part) => part && part.length > 0).join(" · ")
+      : [
+          suggestion.systemName,
+          suggestion.lineCount
+            ? `${suggestion.lineCount} ${suggestion.lineCount === 1 ? "line" : "lines"}`
+            : null,
+          suggestion.street,
+        ]
+          .filter((part) => part && part.length > 0)
+          .join(" · ");
+
+  return {
+    key: suggestion.id,
+    name: suggestion.name,
+    detail,
+    ranges: suggestion.matchedRanges ?? [],
+    interchange: suggestion.kind === "station" && suggestion.isInterchange,
+    place: {
+      kind: suggestion.kind,
+      id: suggestion.id,
+      name: suggestion.name,
+      latitude: suggestion.latitude,
+      longitude: suggestion.longitude,
+      systemId: suggestion.systemId,
+      systemName: suggestion.systemName,
+    },
+  };
+}
+
+function rowOfMemory(suggestion: MemorySuggestion): Row {
+  return {
+    key: suggestion.id,
+    name: suggestion.name,
+    detail: suggestion.detail,
+    ranges: [],
+    interchange: false,
+    place: suggestion.place,
+  };
 }
 
 /**

@@ -70,7 +70,15 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
   const value = useMemo<ThemeContextValue>(
     () => ({
       theme,
-      toggle: () => setTheme((current) => (current === "dark" ? "light" : "dark")),
+      toggle: () =>
+        setTheme((current) => {
+          const next: Theme = current === "dark" ? "light" : "dark";
+          // Apply the attribute before React repaints, so a child that
+          // reads the tokens in the same commit (the map) sees the new
+          // theme rather than the old one.
+          applyTheme(next);
+          return next;
+        }),
     }),
     [theme],
   );
