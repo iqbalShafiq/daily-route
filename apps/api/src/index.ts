@@ -1,4 +1,4 @@
-import { createRouteAgent } from "@daily-route/agent";
+import { createRouteAgent, flushTracing } from "@daily-route/agent";
 import { createDb } from "@daily-route/db";
 import { parseEnv } from "@daily-route/env";
 import { createEmbeddingProvider, PlaceResolver } from "@daily-route/semantic";
@@ -48,7 +48,9 @@ async function main(): Promise<void> {
   const shutdown = async (signal: string): Promise<void> => {
     console.log(`· ${signal} diterima, menutup server`);
     server.close(() => {
-      void db.$client.end({ timeout: 5 }).then(() => process.exit(0));
+      void flushTracing()
+        .then(() => db.$client.end({ timeout: 5 }))
+        .then(() => process.exit(0));
     });
   };
 

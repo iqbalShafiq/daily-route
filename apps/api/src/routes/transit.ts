@@ -2,6 +2,12 @@ import { Router } from "express";
 import { z } from "zod";
 
 import { listLines, listSystems } from "@daily-route/db";
+import {
+  networkOverview,
+  networkPlatforms,
+  networkPlaces,
+  serviceAt,
+} from "@daily-route/transit";
 
 import type { ApiDeps } from "../deps.js";
 
@@ -33,6 +39,15 @@ const stationQuerySchema = z.object({
 
 export function createTransitRouter(deps: ApiDeps): Router {
   const router = Router();
+
+  router.get("/network/overview", async (_request, response) => {
+    const { network } = await deps.cache.get();
+    response.json({
+      lines: networkOverview(network),
+      places: networkPlaces(network),
+      platforms: networkPlatforms(network),
+    });
+  });
 
   router.get("/systems", async (_request, response) => {
     const systems = await listSystems(deps.db);
@@ -77,7 +92,7 @@ export function createTransitRouter(deps: ApiDeps): Router {
   router.get("/stations", async (request, response) => {
     const parsed = stationQuerySchema.safeParse(request.query);
     if (!parsed.success) {
-      response.status(400).json({ error: "Permintaan tidak valid", detail: parsed.error.issues });
+      response.status(400).json({ error: "Invalid request", detail: parsed.error.issues });
       return;
     }
 
@@ -131,11 +146,86 @@ export function createTransitRouter(deps: ApiDeps): Router {
     );
   });
 
+  /**
+   * The scheduled departure board for one stop.
+   *
+   * It is a service-window answer, not a live vehicle: a line that is
+   * outside its published hours is hidden, and each row says how often the
+   * service is scheduled. The UI labels it as a schedule.
+   */
+  router.get("/stations/:id/departures", async (request, response) => {
+    const atRaw = typeof request.query["at"] === "string" ? request.query["at"] : null;
+    const at = atRaw ? new Date(atRaw) : new Date();
+    if (Number.isNaN(at.getTime())) {
+      response.status(400).json({ error: "Invalid at timestamp" });
+      return;
+    }
+    const { network } = await deps.cache.get();
+    const station = network.stations.find((candidate) => candidate.id === request.params["id"]);
+    if (!station) {
+      response.status(404).json({ error: "Station not found" });
+      return;
+    }
+
+    const rows = [];
+    const seen = new Set<string>();
+    for (const stop of network.lineStops.filter((entry) => entry.stationId === station.id)) {
+      const line = network.lines.find((candidate) => candidate.id === stop.lineId);
+      if (!line) continue;
+      const key = `${line.id}:${stop.direction}`;
+      if (seen.has(key)) continue;
+      seen.add(key);
+      const state = serviceAt(line, stop.direction, at);
+      if (state && state.reliable && !state.active) continue;
+      const direction = network.lineStops
+        .filter((entry) => entry.lineId === line.id && entry.direction === stop.direction)
+        .sort((a, b) => a.position - b.position);
+      const first = direction[0]?.stationId;
+      const last = direction[direction.length - 1]?.stationId;
+      const nameOf = (stationId: string | undefined) =>
+        network.stations.find((candidate) => candidate.id === stationId)?.name ?? null;
+      rows.push({
+        lineId: line.id,
+        code: line.code,
+        name: line.name,
+        mode: line.mode,
+        serviceClass: line.serviceClass,
+        color: line.color,
+        direction: stop.direction,
+        headsign: nameOf(last),
+        origin: nameOf(first),
+        platform: stop.platform?.name ?? null,
+        serviceLabel: state?.label ?? "Schedule not confirmed",
+        detail: state?.detail ?? null,
+        headwayMinMinutes: state?.headwayMinMinutes ?? null,
+        headwayMaxMinutes: state?.headwayMaxMinutes ?? null,
+        waitMinutes: state?.waitMinutes ?? null,
+        reliable: state?.reliable ?? false,
+        night: state?.night ?? false,
+      });
+    }
+    rows.sort((a, b) => {
+      const waitA = a.waitMinutes ?? 999;
+      const waitB = b.waitMinutes ?? 999;
+      return waitA - waitB || a.code.localeCompare(b.code);
+    });
+    response.json({
+      station: {
+        id: station.id,
+        name: station.name,
+        latitude: station.latitude,
+        longitude: station.longitude,
+      },
+      at: at.toISOString(),
+      lines: rows,
+    });
+  });
+
   router.get("/stations/:id", async (request, response) => {
     const { network } = await deps.cache.get();
     const station = network.stations.find((candidate) => candidate.id === request.params["id"]);
     if (!station) {
-      response.status(404).json({ error: "Stasiun tidak ditemukan" });
+      response.status(404).json({ error: "Station not found" });
       return;
     }
 

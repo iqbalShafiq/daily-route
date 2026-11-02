@@ -2,6 +2,7 @@ import { createDb } from "@daily-route/db";
 import { parseEnv } from "@daily-route/env";
 import { createEmbeddingProvider, PlaceResolver } from "@daily-route/semantic";
 import { NetworkCache } from "@daily-route/agent";
+import { DEMO_DISRUPTION_ID } from "@daily-route/transit";
 import request from "supertest";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 
@@ -125,6 +126,20 @@ describe("GET /api/stations", () => {
   });
 });
 
+describe("GET /api/stations/:id/departures", () => {
+  it("returns scheduled lines and their service window", async () => {
+    const response = await request(app).get(
+      "/api/stations/transjakarta:grogol-reformasi/departures?at=2026-10-27T09%3A00%3A00%2B07%3A00",
+    );
+    expect(response.status).toBe(200);
+    expect(response.body.station.name).toBe("Grogol Reformasi");
+    const nine = response.body.lines.find((line: { code: string }) => line.code === "9");
+    expect(nine).toBeDefined();
+    expect(nine.serviceLabel).toContain("Frequent");
+    expect(nine.headwayMinMinutes).toBeGreaterThan(0);
+  });
+});
+
 describe("GET /api/routes/plan", () => {
   it("plans a journey across two modes", async () => {
     const response = await request(app).get(
@@ -147,10 +162,121 @@ describe("GET /api/routes/plan", () => {
 
   it("returns an alternative when the direct route exists", async () => {
     const response = await request(app).get(
-      "/api/routes/plan?origin=Lebak%20Bulus&destination=Senen",
+      "/api/routes/plan?origin=Lebak%20Bulus&destination=Senen&at=2026-10-29T12%3A00%3A00%2B07%3A00",
     );
     expect(response.status).toBe(200);
     expect(response.body.itineraries.length).toBeGreaterThan(0);
+  });
+
+  it("does not offer a one-way scheduled route after its last departure", async () => {
+    const codesAt = async (at: string): Promise<string[]> => {
+      const response = await request(app).get(
+        `/api/routes/plan?origin=Simpang%20Kuningan&destination=Grogol%20Reformasi&limit=5&at=${encodeURIComponent(at)}`,
+      );
+      expect(response.status).toBe(200);
+      return response.body.itineraries.flatMap(
+        (itinerary: { legs: { kind: string; lineCode: string | null }[] }) =>
+          itinerary.legs.filter((leg) => leg.kind === "ride").map((leg) => leg.lineCode),
+      );
+    };
+
+    expect(await codesAt("2026-10-27T05:30:00+07:00")).toContain("7R");
+    expect(await codesAt("2026-10-27T15:18:00+07:00")).not.toContain("7R");
+  });
+
+  it("returns the scheduled patterns of a corridor", async () => {
+    const response = await request(app).get(
+      "/api/routes/plan?origin=Lebak%20Bulus&destination=Pasar%20Baru&limit=3&at=2026-10-25T12%3A00%3A00%2B07%3A00",
+    );
+    expect(response.status).toBe(200);
+    const legs = response.body.itineraries.flatMap(
+      (itinerary: { legs: { lineCode: string | null; variants: unknown[] }[] }) => itinerary.legs,
+    );
+    const leg = legs.find((candidate: { lineCode: string | null }) => candidate.lineCode === "8");
+    expect(leg).toBeDefined();
+    expect(leg.variants).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ headsign: "Pasar Baru via Cideng", serviceLabel: "Sunday" }),
+      ]),
+    );
+    const cideng = leg.variants.find(
+      (variant: { headsign: string }) => variant.headsign === "Pasar Baru via Cideng",
+    );
+    expect(cideng.extra).toEqual(expect.arrayContaining(["Grogol", "Roxy"]));
+    expect(cideng.skipped).toEqual(expect.arrayContaining(["Tomang Raya"]));
+    expect(cideng.situational).toBe(true);
+  });
+
+  it("uses the scheduled headway at the requested departure time", async () => {
+    const response = await request(app).get(
+      "/api/routes/plan?origin=Grogol%20Reformasi&destination=Simpang%20Kuningan&at=2026-10-27T09%3A00%3A00%2B07%3A00",
+    );
+    expect(response.status).toBe(200);
+    expect(response.body.quotedAt).toBe("2026-10-27T02:00:00.000Z");
+    const leg = response.body.itineraries[0].legs.find(
+      (candidate: { kind: string }) => candidate.kind === "ride",
+    );
+    expect(leg.serviceLabel?.toLowerCase()).toContain("frequent");
+    expect(leg.headwayMinMinutes).toBeGreaterThan(0);
+  });
+
+  it("offers 8A only on its Sunday service", async () => {
+    const response = await request(app).get(
+      "/api/routes/plan?origin=Jelambar&destination=Juanda&limit=5&at=2026-10-25T12%3A00%3A00%2B07%3A00",
+    );
+    expect(response.status).toBe(200);
+    const legs = response.body.itineraries.flatMap(
+      (itinerary: { legs: { lineCode: string | null; patternLabel: string | null }[] }) =>
+        itinerary.legs,
+    );
+    const leg = legs.find(
+      (candidate: { lineCode: string | null; patternLabel: string | null }) =>
+        candidate.lineCode === "8A" && candidate.patternLabel === "Juanda",
+    );
+    expect(leg).toBeDefined();
+  });
+
+  it("uses the 4 branch that serves the requested side of the route", async () => {
+    const response = await request(app).get(
+      "/api/routes/plan?origin=Pulo%20Gadung&destination=Galunggung&limit=3&at=2026-10-26T12%3A00%3A00%2B07%3A00",
+    );
+    expect(response.status).toBe(200);
+    const legs = response.body.itineraries.flatMap(
+      (itinerary: { legs: { lineCode: string | null; patternLabel: string | null }[] }) =>
+        itinerary.legs,
+    );
+    expect(legs.some((candidate: { lineCode: string | null }) => candidate.lineCode === "4")).toBe(true);
+  });
+
+  it("offers 13E only on its weekend service", async () => {
+    const sunday = await request(app).get(
+      "/api/routes/plan?origin=Puri%20Beta&destination=Flyover%20Kuningan&limit=3&at=2026-10-25T12%3A00%3A00%2B07%3A00",
+    );
+    expect(sunday.status).toBe(200);
+    const sundayLegs = sunday.body.itineraries.flatMap(
+      (itinerary: { legs: { lineCode: string | null }[] }) => itinerary.legs,
+    );
+    expect(sundayLegs.some((candidate: { lineCode: string | null }) => candidate.lineCode === "13E")).toBe(true);
+
+    const monday = await request(app).get(
+      "/api/routes/plan?origin=Puri%20Beta&destination=Flyover%20Kuningan&limit=3&at=2026-10-26T12%3A00%3A00%2B07%3A00",
+    );
+    const mondayLegs = monday.body.itineraries.flatMap(
+      (itinerary: { legs: { lineCode: string | null }[] }) => itinerary.legs,
+    );
+    expect(mondayLegs.some((candidate: { lineCode: string | null }) => candidate.lineCode === "13E")).toBe(false);
+  });
+
+  it("uses the weekend 13E on a national holiday instead of L13E", async () => {
+    const response = await request(app).get(
+      "/api/routes/plan?origin=Puri%20Beta&destination=Flyover%20Kuningan&limit=3&at=2026-08-17T12%3A00%3A00%2B07%3A00",
+    );
+    expect(response.status).toBe(200);
+    const legs = response.body.itineraries.flatMap(
+      (itinerary: { legs: { lineCode: string | null }[] }) => itinerary.legs,
+    );
+    expect(legs.some((candidate: { lineCode: string | null }) => candidate.lineCode === "13E")).toBe(true);
+    expect(legs.some((candidate: { lineCode: string | null }) => candidate.lineCode === "L13E")).toBe(false);
   });
 
   it("rejects a missing destination", async () => {
@@ -171,6 +297,23 @@ describe("GET /api/routes/disruptions", () => {
     const response = await request(app).get("/api/routes/disruptions");
     expect(response.status).toBe(200);
     expect(Array.isArray(response.body)).toBe(true);
+    expect(
+      response.body.some((row: { id?: string }) => row.id === DEMO_DISRUPTION_ID),
+    ).toBe(false);
+  });
+
+  it("plans Grogol to Simpang Kuningan without the labelled Denpasar scenario", async () => {
+    const response = await request(app).get(
+      "/api/routes/plan?origin=Grogol%20Reformasi&destination=Simpang%20Kuningan",
+    );
+    expect(response.status).toBe(200);
+    expect(response.body.itineraries.length).toBeGreaterThan(0);
+    expect(
+      response.body.disruptions.some((row: { id?: string }) => row.id === DEMO_DISRUPTION_ID),
+    ).toBe(false);
+    expect(
+      (response.body.watch ?? []).some((row: { id?: string }) => row.id === DEMO_DISRUPTION_ID),
+    ).toBe(false);
   });
 });
 

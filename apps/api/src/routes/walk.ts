@@ -77,9 +77,9 @@ const ORIGIN_PROFILES: Record<string, OriginWeights> = {
 };
 
 const PROFILE_LABELS: Record<string, string> = {
-  fastest: "Tercepat",
-  "fewer-transfers": "Paling sedikit transit",
-  "less-walking": "Paling sedikit jalan kaki",
+  fastest: "Fastest",
+  "fewer-transfers": "Fewest changes",
+  "less-walking": "Least walking",
 };
 
 type OriginCandidate = {
@@ -318,7 +318,7 @@ export function createWalkRouter(deps: ApiDeps): Router {
     const latitude = Number(request.query["latitude"]);
     const longitude = Number(request.query["longitude"]);
     if (!Number.isFinite(latitude) || !Number.isFinite(longitude)) {
-      response.status(400).json({ error: "Koordinat tidak lengkap" });
+      response.status(400).json({ error: "The coordinates are incomplete" });
       return;
     }
 
@@ -327,7 +327,7 @@ export function createWalkRouter(deps: ApiDeps): Router {
       limit: 6,
     });
     if (nearby.length === 0) {
-      response.status(404).json({ error: "Tidak ada halte dalam radius 1,5 km" });
+      response.status(404).json({ error: "No stop within 1.5 km" });
       return;
     }
 
@@ -349,7 +349,7 @@ export function createWalkRouter(deps: ApiDeps): Router {
 
     const first = ranked[0]?.candidate;
     if (!first) {
-      response.status(404).json({ error: "Tidak ada halte dalam radius 1,5 km" });
+      response.status(404).json({ error: "No stop within 1.5 km" });
       return;
     }
     let stop = first;
@@ -400,7 +400,7 @@ export function createWalkRouter(deps: ApiDeps): Router {
 
     if (!walk) {
       response.status(503).json({
-        error: "Rute jalan kaki belum bisa dihitung",
+        error: "The walk could not be calculated",
         station: {
           id: stop.id,
           name: stop.name,
@@ -441,7 +441,7 @@ export function createWalkRouter(deps: ApiDeps): Router {
       : "";
 
     if (!Number.isFinite(latitude) || !Number.isFinite(longitude)) {
-      response.status(400).json({ error: "Koordinat tidak lengkap" });
+      response.status(400).json({ error: "The coordinates are incomplete" });
       return;
     }
 
@@ -466,7 +466,7 @@ export function createWalkRouter(deps: ApiDeps): Router {
       limit: 60,
     });
     if (nearby.length === 0) {
-      response.status(404).json({ error: "Tidak ada halte dalam radius 1,5 km" });
+      response.status(404).json({ error: "No stop within 1.5 km" });
       return;
     }
 
@@ -477,7 +477,7 @@ export function createWalkRouter(deps: ApiDeps): Router {
      */
     const nearest = nearby[0];
     if (!nearest) {
-      response.status(404).json({ error: "Tidak ada halte dalam radius 1,5 km" });
+      response.status(404).json({ error: "No stop within 1.5 km" });
       return;
     }
     if (!destinationStation) {
@@ -524,7 +524,7 @@ export function createWalkRouter(deps: ApiDeps): Router {
     }
 
     if (evaluated.length === 0) {
-      response.status(404).json({ error: "Tidak ada perjalanan dari halte di sekitar situ" });
+      response.status(404).json({ error: "No journey starts from a stop near there" });
       return;
     }
 
@@ -556,7 +556,7 @@ export function createWalkRouter(deps: ApiDeps): Router {
     const fastest = profiles.find((profile) => profile.id === "fastest");
     const winner = evaluated.find((candidate) => candidate.stationId === fastest?.stationId);
     if (!winner) {
-      response.status(404).json({ error: "Tidak ada perjalanan dari halte di sekitar situ" });
+      response.status(404).json({ error: "No journey starts from a stop near there" });
       return;
     }
 

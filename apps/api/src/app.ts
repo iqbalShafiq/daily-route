@@ -2,6 +2,8 @@ import express, { type Express } from "express";
 
 import type { ApiDeps } from "./deps.js";
 import { createAgentRouter } from "./routes/agent.js";
+import { createMonitorRouter } from "./routes/monitor.js";
+import { createPlacesRouter } from "./routes/places.js";
 import { createRoutesRouter } from "./routes/routes.js";
 import { createWalkRouter } from "./routes/walk.js";
 import { createTransitRouter } from "./routes/transit.js";
@@ -35,23 +37,30 @@ export function createApp(deps: ApiDeps): Express {
       status: "ok",
       agent: deps.agent !== null,
       model: deps.env.AGENT_MODEL,
+      tracing: Boolean(
+        deps.env.LANGFUSE_PUBLIC_KEY &&
+          deps.env.LANGFUSE_SECRET_KEY &&
+          (deps.env.LANGFUSE_BASE_URL ?? deps.env.LANGFUSE_HOST),
+      ),
       lastProviderError: deps.lastProviderError,
     });
   });
 
   app.use("/api", createTransitRouter(deps));
+  app.use("/api/places", createPlacesRouter(deps));
   app.use("/api/routes", createRoutesRouter(deps));
   app.use("/api/walk", createWalkRouter(deps));
   app.use("/api/agent", createAgentRouter(deps));
+  app.use("/api/monitor", createMonitorRouter(deps));
 
   app.use((_request, response) => {
-    response.status(404).json({ error: "Endpoint tidak ditemukan" });
+    response.status(404).json({ error: "Endpoint not found" });
   });
 
   app.use((error: unknown, _request: express.Request, response: express.Response, _next: express.NextFunction) => {
     const message = error instanceof Error ? error.message : String(error);
     console.error("api error:", message);
-    response.status(500).json({ error: "Kesalahan internal", detail: message });
+    response.status(500).json({ error: "Internal error", detail: message });
   });
 
   return app;
