@@ -11,12 +11,15 @@
     "lint": "eslint src",
     "test": "vitest run --passWithNoTests",
     "ingest": "tsx src/cli/ingest.ts",
-    "embed": "tsx src/cli/embed.ts"
+    "embed": "tsx src/cli/embed.ts",
+    "gtfs": "tsx src/cli/gtfs.ts",
+    "enrich": "tsx src/cli/enrich.ts"
   },
   "dependencies": {
     "@daily-route/db": "workspace:*",
     "@daily-route/semantic": "workspace:*",
     "@daily-route/transit": "workspace:*",
+    "@opentelemetry/api": "^1.9.1",
     "drizzle-orm": "^0.45.4",
     "postgres": "^3.4.9",
     "zod": "^4.6.5"

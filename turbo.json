@@ -35,6 +35,7 @@
         "AGENT_BASE_URL",
         "AGENT_API_KEY",
         "AGENT_MODEL",
+        "JEV_MODEL",
         "EMBEDDINGS_BASE_URL",
         "EMBEDDINGS_API_KEY",
         "EMBEDDINGS_MODEL",
@@ -43,7 +44,11 @@
         "X_BEARER_TOKEN",
         "X_API_BASE_URL",
         "X_POLL_INTERVAL_MS",
-        "WORKER_CRON_ENABLED"
+        "WORKER_CRON_ENABLED",
+        "LANGFUSE_PUBLIC_KEY",
+        "LANGFUSE_SECRET_KEY",
+        "LANGFUSE_BASE_URL",
+        "LANGFUSE_HOST"
       ]
     }
   }

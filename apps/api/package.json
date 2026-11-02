@@ -18,6 +18,7 @@
     "@daily-route/db": "workspace:*",
     "@daily-route/semantic": "workspace:*",
     "@daily-route/transit": "workspace:*",
+    "@opentelemetry/api": "^1.9.1",
     "drizzle-orm": "^0.45.4",
     "express": "^5.3.0",
     "zod": "^4.6.5"
