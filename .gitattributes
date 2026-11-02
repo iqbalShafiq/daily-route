@@ -1,0 +1,22 @@
+# Normalise line endings. The repository is developed on macOS and Linux and
+# may be checked out on Windows; every text file is stored with LF.
+* text=auto eol=lf
+
+# Lockfiles are text and should diff normally.
+pnpm-lock.yaml text eol=lf
+
+# Binary assets. Git would detect most of these on its own; being explicit
+# keeps diffs and merge behaviour predictable.
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.webp binary
+*.avif binary
+*.ico binary
+*.woff binary
+*.woff2 binary
+*.ttf binary
+*.otf binary
+*.pdf binary
+*.zip binary

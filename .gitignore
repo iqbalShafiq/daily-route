@@ -10,15 +10,25 @@ build/
 .env
 .env.*
 !.env.example
+.envrc
+.direnv/
+*.local
 
 # Tooling caches
 .vite/
 .turbo/
 .cache/
 .eslintcache
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
 
-# Playwright browsers (installed locally, not committed)
+# Playwright browsers and reports (installed locally, not committed)
 .playwright/
+playwright/.cache/
+blob-report/
 
 # pnpm store when it is placed inside the repository
 .pnpm-store/
@@ -37,11 +47,23 @@ coverage/
 # Logs
 logs/
 *.log
+*.pid
 
 # OS / editor
 .DS_Store
 Thumbs.db
+desktop.ini
 .idea/
 .vscode/*
 !.vscode/extensions.json
 *.swp
+*.swo
+
+# The extracted operator feed; the zip is fetched on demand.
+data/gtfs/
+
+# Derived administrative boundaries fetched by data:enrich.
+data/admin/
+
+# Cached reverse-geocoding answers for data:enrich.
+data/enrichment/
