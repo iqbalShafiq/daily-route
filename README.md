@@ -296,9 +296,13 @@ tool whose credentials are missing is not added.
   `includeDomains`, `excludeDomains`, `maxResults`). Identical searches are
   coalesced, a successful answer is cached for ten minutes, and only two calls
   run at once.
-- `Watch` is a local memory in `use-watch.ts`. It keeps a journey across a
-  reload and labels it on the result; it is not a push notification and does not
-  claim one.
+- `Watch` is a local memory in `use-watch.ts` until the rider signs in.
+  It keeps a journey across a reload and labels it on the result; it is not a
+  push notification and does not claim one.
+- An account is optional. Saved places, recent journeys and watches move to
+  Postgres when the rider signs in, and the session is an `HttpOnly` cookie.
+  The theme stays on the device. There is no email verification and no
+  password reset.
 
 The model never produces a station id, a coordinate, a duration or a fare. The
 model may name a place; the resolver decides which station that name refers to;

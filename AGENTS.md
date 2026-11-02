@@ -267,9 +267,32 @@ coverage and the known gaps are in `research/data-completeness.md`.
   running: the assistant must not suggest a line outside `plan_journey`
   without reading that block. 7R is the regression case: 05:00–06:00 only,
   Cibubur to Pluit.
-- `Watch` is a local memory in `use-watch.ts`. It keeps a journey across a
-  reload and labels it on the result; it is not a push notification and does
-  not claim one.
+- `Watch` is a local memory in `use-watch.ts` until the rider signs in.
+  It keeps a journey across a reload and labels it on the result; it is
+  not a push notification and does not claim one.
+
+## The account
+
+An account is optional. The planner, the map and the assistant work without
+one. Signing in is how saved places, recent places, recent journeys and
+watches follow the rider to another browser.
+
+- Postgres holds `users`, `sessions` and `rider_memory_items`. The session
+  cookie is `HttpOnly`; the table stores the SHA-256 of the token, never the
+  token. A station id in a memory payload is not a foreign key: `db:seed`
+  truncates the network with `CASCADE`, and a key would delete the rider's
+  rows with it. The write looks the station up and overwrites the name and
+  the coordinate from the graph.
+- The browser keeps the theme in `localStorage` and the chat session id in
+  `sessionStorage`. Those are device preferences and a pointer, not the
+  account. While the rider is signed out, the four memory keys stay in
+  `localStorage` as they did before. The first successful sign-in uploads
+  them and then deletes the keys. Sign-out does not copy the account back
+  onto the device.
+- There is no mailer, so there is no email verification and no password
+  reset. A missing address and a wrong password are the same answer. A
+  mutation that carries the cookie is refused unless `Origin` is
+  `WEB_ORIGIN`.
 
 ## Line patterns
 

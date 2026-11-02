@@ -123,11 +123,19 @@ map. The map owns the window, and the controls float on it.
   button that swaps the two places sits immediately to its left. The
   hairline between the two place rows starts after the marker column, so it
   never crosses the vertical route line.
-- The controls of the window, the theme and the assistant, are a small
-  stack in the top right corner on a wide screen. On a phone the assistant
-  is a place in the bottom app bar and only the theme floats on the map.
+- The controls of the window, the theme, the account and the assistant,
+  are a small stack in the top right corner on a wide screen. On a phone
+  the assistant is a place in the bottom app bar. The theme and the account
+  float on the map. The bottom bar stays four places.
   The map draws no zoom buttons. Scroll, a pinch, and the keyboard still
   zoom.
+- The account is a paper panel, the same `.panel` as the assistant, opened
+  from a `UserRound` control. On a wide screen it is 320 px wide under the
+  window controls. On a phone it is a sheet above the bottom bar. It does
+  not add a fifth place to that bar, and it does not sit in the brand plate.
+  Opening it closes the assistant. The signed-out line says the device keeps
+  places until the rider signs in. Delete account is a second step in the
+  same panel, not a browser confirm and not a card inside a card.
 - The phone has a bottom app bar with four places: **Plan**, **Lines**,
   **Alerts** and **Ask**. It is a navigation region, not a row of tabs in a
   card. The active place has a paper plate behind its label and a jade rule
