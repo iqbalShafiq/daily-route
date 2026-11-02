@@ -13,12 +13,18 @@ import { createEmbeddingProvider, PlaceResolver } from "@daily-route/semantic";
  * almost no characters.
  *
  * Run with `pnpm data:embed`. Without a remote embedding provider the
- * deterministic local encoder is used, so the step never needs a key.
+ * command stops: a hash of the letters is not written in place of a vector.
  */
 async function main(): Promise<void> {
   const env = parseEnv();
   const db = createDb(env.DATABASE_URL);
   const provider = createEmbeddingProvider(env);
+  if (provider.model === "unconfigured") {
+    console.error("· EMBEDDINGS_BASE_URL dan EMBEDDINGS_MODEL kosong, embedding tidak dihitung");
+    await db.$client.end({ timeout: 5 });
+    process.exitCode = 1;
+    return;
+  }
 
   console.log(`· encoder: ${provider.model} (${provider.dimensions} dimensi)`);
 

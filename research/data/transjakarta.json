@@ -10465,6 +10465,7 @@
         {
           "code": "7R",
           "name": "CIBUBUR - PLUIT",
+          "oneWay": true,
           "operator": "Bayu Holong Persada (MBT)",
           "lengthKm": null,
           "status": "operating",
@@ -23890,6 +23891,7 @@
         {
           "code": "7R",
           "name": "CIBUBUR - PLUIT",
+          "oneWay": true,
           "operator": "PT Transportasi Jakarta + contracted operators",
           "lengthKm": null,
           "status": "operating",

@@ -1,16 +1,17 @@
 import type { Env } from "@daily-route/env";
 
-import { LocalHashEncoder, OpenAiCompatibleEncoder, type EmbeddingProvider } from "./encoder.js";
+import { OpenAiCompatibleEncoder, UnavailableEmbeddingProvider, type EmbeddingProvider } from "./encoder.js";
 
 export * from "./encoder.js";
 export * from "./resolve.js";
+export * from "./roads.js";
 
 /**
  * Pick the embedding provider for the current environment.
  *
- * A remote provider is used whenever one is configured; otherwise the local
- * deterministic encoder keeps place resolution working offline, in CI and in
- * the integration tests.
+ * A remote provider is used whenever one is configured. Without one, lookup
+ * stays on the lexical and exact channels. A hash of the letters is not
+ * substituted for a semantic vector.
  */
 export function createEmbeddingProvider(env: Env): EmbeddingProvider {
   if (env.EMBEDDINGS_BASE_URL && env.EMBEDDINGS_MODEL) {
@@ -21,5 +22,5 @@ export function createEmbeddingProvider(env: Env): EmbeddingProvider {
       dimensions: env.EMBEDDINGS_DIMENSIONS,
     });
   }
-  return new LocalHashEncoder(env.EMBEDDINGS_DIMENSIONS);
+  return new UnavailableEmbeddingProvider(env.EMBEDDINGS_DIMENSIONS);
 }

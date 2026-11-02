@@ -1,0 +1,104 @@
+{
+  "updatedAt": "2026-10-25",
+  "note": "Toll roads are not the same as a closed stop. A service can use a toll segment and skip the stops on the old road; a stop can be passed without being served. Only the entries marked confirmed are stated as a fact; the rest are reported by riders or route listings and are shown with that caveat.",
+  "roads": [
+    {
+      "id": "jagorawi",
+      "name": "Tol Jagorawi",
+      "aliases": ["Jagorawi", "Jakarta–Bogor–Ciawi"],
+      "cities": ["Jakarta", "Depok", "Bogor"],
+      "gates": ["Cawang", "TMII", "Cibubur", "Cimanggis"],
+      "sources": ["https://megapolitan.kompas.com/read/2023/01/20/01150081/rute-royaltrans-6p-cibubur-kuningan"]
+    },
+    {
+      "id": "dalam-kota",
+      "name": "Tol Lingkar Dalam Jakarta",
+      "aliases": ["Tol Dalam Kota", "Cawang–Tomang–Pluit"],
+      "cities": ["Jakarta"],
+      "gates": ["Cawang", "Tomang", "Pluit", "Semanggi"],
+      "sources": ["https://id.wikipedia.org/wiki/Koridor_9_Transjakarta"]
+    },
+    {
+      "id": "jorr",
+      "name": "Jakarta Outer Ring Road",
+      "aliases": ["JORR", "Tol JORR"],
+      "cities": ["Jakarta", "Depok", "Tangerang", "Bekasi"],
+      "gates": ["Cawang", "Pancoran", "Lebak Bulus", "Cilandak", "Kebon Jeruk"],
+      "sources": ["https://id.wikipedia.org/wiki/Daftar_rute_Transjakarta"]
+    },
+    {
+      "id": "cikampek",
+      "name": "Tol Jakarta–Cikampek",
+      "aliases": ["Tol Cikampek", "Jakarta–Cikampek"],
+      "cities": ["Jakarta", "Bekasi", "Karawang"],
+      "gates": ["Halim", "Cibitung", "Tambun", "Bekasi Barat"],
+      "sources": ["https://id.wikipedia.org/wiki/Daftar_rute_Transjakarta"]
+    },
+    {
+      "id": "merak",
+      "name": "Tol Jakarta–Merak",
+      "aliases": ["Tol Merak", "Jakarta–Tangerang–Merak"],
+      "cities": ["Jakarta", "Tangerang", "Serang"],
+      "gates": ["Kebon Jeruk", "Karang Tengah", "Poris Plawad", "Cikupa"],
+      "sources": ["https://id.wikipedia.org/wiki/Daftar_rute_Transjakarta"]
+    },
+    {
+      "id": "bandara",
+      "name": "Tol Prof. Dr. Sedyatmo",
+      "aliases": ["Tol Bandara", "Tol Sedyatmo", "Bandara Soekarno–Hatta"],
+      "cities": ["Jakarta", "Tangerang"],
+      "gates": ["Pluit", "Kapuk", "Cengkareng", "Bandara Soekarno–Hatta"],
+      "sources": ["https://www.youtube.com/watch?v=ccQ2pg_aEjs"]
+    },
+    {
+      "id": "desari",
+      "name": "Tol Desari",
+      "aliases": ["Desari", "Depok–Antasari"],
+      "cities": ["Jakarta", "Depok"],
+      "gates": ["Antasari", "Cilandak", "Sawangan", "Cinere"],
+      "sources": ["https://id.wikipedia.org/wiki/Daftar_rute_Transjakarta"]
+    },
+    {
+      "id": "wiyoto",
+      "name": "Tol Ir. Wiyoto Wiyono",
+      "aliases": ["Tol Wiyoto Wiyono", "Tanjung Priok"],
+      "cities": ["Jakarta"],
+      "gates": ["Tanjung Priok", "Cawang", "Ancol"],
+      "sources": ["https://id.wikipedia.org/wiki/Daftar_rute_Transjakarta"]
+    }
+  ],
+  "services": [
+    { "lineCode": "6P", "mode": "regular", "roads": ["jagorawi", "dalam-kota"], "confidence": "confirmed", "note": "Royaltrans Cibubur–Kuningan enters from Jagorawi and continues on the inner ring road.", "sources": ["https://megapolitan.kompas.com/read/2023/01/20/01150081/rute-royaltrans-6p-cibubur-kuningan"] },
+    { "lineCode": "6H", "mode": "regular", "roads": ["jorr"], "confidence": "confirmed", "note": "Senen–Lebak Bulus via Tol JORR.", "sources": ["https://id.wikipedia.org/wiki/Daftar_rute_Transjakarta"] },
+    { "lineCode": "D41", "mode": "regular", "roads": ["desari"], "confidence": "confirmed", "note": "The official name says VIA TOL Desari.", "sources": ["https://id.wikipedia.org/wiki/Daftar_rute_Transjakarta"] },
+    { "lineCode": "SH1", "mode": "regular", "roads": ["bandara"], "confidence": "confirmed", "note": "Airport service to the Soekarno–Hatta offices.", "sources": ["https://www.youtube.com/watch?v=ccQ2pg_aEjs"] },
+    { "lineCode": "SH2", "mode": "regular", "roads": ["bandara"], "confidence": "confirmed", "note": "Blok M–Bandara Soekarno–Hatta uses the airport toll road.", "sources": ["https://www.youtube.com/watch?v=ccQ2pg_aEjs"] },
+    { "lineCode": "7R", "mode": "regular", "roads": ["jagorawi", "wiyoto"], "confidence": "reported", "note": "Cibubur–Pluit; listed as a Jagorawi–Wiyoto route.", "sources": ["https://www.instagram.com/p/C0_zqq7P3Po?hl=en"] },
+    { "lineCode": "7T", "mode": "regular", "roads": ["jagorawi", "wiyoto"], "confidence": "reported", "note": "Cibubur–Tanjung Priok; listed as a Jagorawi–Wiyoto route.", "sources": ["https://www.instagram.com/p/C0_zqq7P3Po?hl=en"] },
+    { "lineCode": "7U", "mode": "regular", "roads": ["jagorawi", "wiyoto"], "confidence": "reported", "note": "Cibubur–Ancol; listed as a Jagorawi–Wiyoto route.", "sources": ["https://www.instagram.com/p/C0_zqq7P3Po?hl=en"] },
+    { "lineCode": "7V", "mode": "regular", "roads": ["jagorawi", "wiyoto"], "confidence": "reported", "note": "Cibubur–Kampung Rambutan; listed as a Jagorawi–Wiyoto route.", "sources": ["https://www.instagram.com/p/C0_zqq7P3Po?hl=en"] },
+    { "lineCode": "7C", "mode": "regular", "roads": ["jagorawi", "wiyoto"], "confidence": "reported", "note": "Cibubur–Cawang Cililitan; included in the Jagorawi–Wiyoto listing.", "sources": ["https://www.instagram.com/p/C0_zqq7P3Po?hl=en"] },
+    { "lineCode": "7D", "mode": "regular", "roads": ["jagorawi", "wiyoto"], "confidence": "reported", "note": "TMII–Pancoran; included in the Jagorawi–Wiyoto listing.", "sources": ["https://www.instagram.com/p/C0_zqq7P3Po?hl=en"] },
+    { "lineCode": "7F", "mode": "regular", "roads": ["jagorawi", "wiyoto"], "confidence": "reported", "note": "Kampung Rambutan–Juanda; included in the Jagorawi–Wiyoto listing.", "sources": ["https://www.instagram.com/p/C0_zqq7P3Po?hl=en"] },
+    { "lineCode": "D11", "mode": "regular", "roads": ["jagorawi", "wiyoto"], "confidence": "reported", "note": "Depok–BKN; included in the Jagorawi–Wiyoto listing.", "sources": ["https://www.instagram.com/p/C0_zqq7P3Po?hl=en"] },
+    { "lineCode": "B11", "mode": "regular", "roads": ["cikampek"], "confidence": "reported", "note": "Summarecon Bekasi–BNN; listed as a Cikampek route.", "sources": ["https://www.instagram.com/p/C0_zqq7P3Po?hl=en"] },
+    { "lineCode": "B21", "mode": "regular", "roads": ["cikampek"], "confidence": "reported", "note": "Bekasi Timur–BNN; listed as a Cikampek route.", "sources": ["https://www.instagram.com/p/C0_zqq7P3Po?hl=en"] },
+    { "lineCode": "T11", "mode": "regular", "roads": ["merak"], "confidence": "reported", "note": "Poris Plawad–Petamburan via Tol Merak.", "sources": ["https://id.wikipedia.org/wiki/Daftar_rute_Transjakarta"] },
+    { "lineCode": "T12", "mode": "regular", "roads": ["merak"], "confidence": "reported", "note": "Poris Plawad–Juanda via Tol Merak.", "sources": ["https://id.wikipedia.org/wiki/Daftar_rute_Transjakarta"] },
+    { "lineCode": "S11", "mode": "regular", "roads": ["merak"], "confidence": "reported", "note": "BSD Serpong–Jelambar; listed as a Jakarta–Merak route.", "sources": ["https://www.instagram.com/p/C0_zqq7P3Po?hl=en"] },
+    { "lineCode": "S22", "mode": "regular", "roads": ["jorr"], "confidence": "reported", "note": "Ciputat–Kampung Rambutan; listed as a JORR South route.", "sources": ["https://www.instagram.com/p/C0_zqq7P3Po?hl=en"] },
+    { "lineCode": "D31", "mode": "regular", "roads": ["jorr"], "confidence": "reported", "note": "Cinere–Kuningan; Royaltrans from the JORR corridor.", "sources": ["https://id.wikipedia.org/wiki/Daftar_rute_Transjakarta"] },
+    { "lineCode": "D32", "mode": "regular", "roads": ["jorr"], "confidence": "reported", "note": "Cinere–Bundaran Senayan; Royaltrans from the JORR corridor.", "sources": ["https://id.wikipedia.org/wiki/Daftar_rute_Transjakarta"] },
+    { "lineCode": "S31", "mode": "regular", "roads": ["jorr"], "confidence": "reported", "note": "Bintaro–Fatmawati; Royaltrans from the JORR corridor.", "sources": ["https://id.wikipedia.org/wiki/Daftar_rute_Transjakarta"] },
+    { "lineCode": "B13", "mode": "regular", "roads": ["cikampek", "jorr"], "confidence": "reported", "note": "Bekasi–Blok M; cross-city Royaltrans.", "sources": ["https://id.wikipedia.org/wiki/Daftar_rute_Transjakarta"] },
+    { "lineCode": "B14", "mode": "regular", "roads": ["cikampek", "jorr"], "confidence": "reported", "note": "Summarecon Bekasi–Kuningan; cross-city Royaltrans.", "sources": ["https://id.wikipedia.org/wiki/Daftar_rute_Transjakarta"] },
+    { "lineCode": "B25", "mode": "regular", "roads": ["cikampek", "jorr"], "confidence": "reported", "note": "Bekasi–Dukuh Atas; cross-city service.", "sources": ["https://id.wikipedia.org/wiki/Daftar_rute_Transjakarta"] },
+    { "lineCode": "B41", "mode": "regular", "roads": ["cikampek", "jorr"], "confidence": "reported", "note": "Vida Bekasi–Cawang Sentral; cross-city service.", "sources": ["https://id.wikipedia.org/wiki/Daftar_rute_Transjakarta"] },
+    { "lineCode": "B51", "mode": "regular", "roads": ["cikampek", "jorr"], "confidence": "reported", "note": "Cikarang–Cawang; cross-city service.", "sources": ["https://id.wikipedia.org/wiki/Daftar_rute_Transjakarta"] },
+    { "lineCode": "1A", "mode": "conditional", "roads": ["bandara", "dalam-kota", "wiyoto"], "confidence": "reported", "note": "Pantai Maju–Balai Kota; some trips use the airport/Pluit/Priok toll alignment, not every trip.", "sources": ["https://www.instagram.com/p/C0_zqq7P3Po?hl=en"] },
+    { "lineCode": "12F", "mode": "conditional", "roads": ["bandara", "dalam-kota", "wiyoto"], "confidence": "reported", "note": "Rusun Marunda–Rusun Waduk Pluit; listed on the Sedyatmo/Pluit/Priok alignment.", "sources": ["https://www.instagram.com/p/C0_zqq7P3Po?hl=en"] },
+    { "lineCode": "9", "mode": "conditional", "roads": ["dalam-kota"], "confidence": "reported", "note": "Normally runs alongside the inner ring road, not on it. Some diversions use the toll; do not assume every trip does.", "sources": ["https://id.wikipedia.org/wiki/Koridor_9_Transjakarta", "https://www.instagram.com/p/C0_zqq7P3Po?hl=en"] },
+    { "lineCode": "9A", "mode": "conditional", "roads": ["dalam-kota"], "confidence": "reported", "note": "PGC–Latumenten can be diverted through the inner ring road in some conditions.", "sources": ["https://www.instagram.com/p/C0_zqq7P3Po?hl=en"] },
+    { "lineCode": "7A", "mode": "conditional", "roads": ["jorr"], "confidence": "reported", "note": "Lebak Bulus–Kampung Rambutan; JORR South is used situationally.", "sources": ["https://www.instagram.com/p/C0_zqq7P3Po?hl=en"] }
+  ]
+}

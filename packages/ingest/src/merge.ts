@@ -2,6 +2,7 @@ import {
   canonicalKey,
   haversineKm,
   nearestIndexOnPolyline,
+  platformId,
   tokenize,
   type Coordinate,
   type FareRules,
@@ -61,6 +62,13 @@ export type NetworkLineStop = {
   direction: "forward" | "backward";
   position: number;
   distanceFromOriginKm: number | null;
+  platform?: {
+    id: string;
+    name: string;
+    latitude: number;
+    longitude: number;
+    code: string | null;
+  };
 };
 
 export type NetworkStationGroup = {
@@ -242,12 +250,6 @@ export function mergeNetwork(options: MergeOptions): TransitNetworkFile {
     const osmRoutes = osmGroups.get(osmKey) ?? findOsmByName(osmGroups, systemId, curated.name);
     if (osmRoutes) consumedOsmKeys.add(`${osmRoutes[0]?.systemId}::${normalizeRouteCode(osmRoutes[0]?.code ?? "").toLowerCase()}`);
 
-    // The relation that keeps the line on the road, not the first one.
-    const primary = bestOsmRoute(osmRoutes ?? []);
-    const osmStops = stopsOfRelations(primary, osmRoutes ?? []);
-    const officialCorridor = official.get(normalizeRouteCode(code).toUpperCase());
-    const serviceClass = resolveServiceClass(systemId, curated, primary, officialCorridor?.service);
-    const lineId = `${systemId}:${slugify(code) || "route"}`;
     const lineStatus = normalizeStatus(curated.status);
     // A planned line lists its future stations; an operating line must not
     // route through stations that are not open yet.
@@ -255,6 +257,35 @@ export function mergeNetwork(options: MergeOptions): TransitNetworkFile {
       lineStatus === "operating"
         ? curated.stations.filter((station) => !isPlanned(station.note ?? ""))
         : curated.stations;
+
+    // Each direction keeps the relation that travels that way. The
+    // outbound relation is the one that starts at the published origin.
+    // A curated sheet sometimes names the origin without coordinates; the
+    // station table already has them, so resolve the anchor before the
+    // direction test instead of treating a null anchor as "either end".
+    const anchorFor = (station: CuratedLine["stations"][number] | undefined) => {
+      if (!station) return undefined;
+      if (station.latitude !== null && station.longitude !== null) return station;
+      const key = normalizeLineName(station.name);
+      return [...stations.values()].find(
+        (candidate) =>
+          candidate.systemId === systemId && normalizeLineName(candidate.name) === key,
+      ) ?? station;
+    };
+    const directed = directionPaths(
+      osmRoutes ?? [],
+      anchorFor(curatedStations[0]),
+      anchorFor(curatedStations[curatedStations.length - 1]),
+    );
+    // The stop list is the relation that knows the most shelters, including
+    // the platform across the street. The road of each direction is chosen
+    // separately, above.
+    const listed = bestOsmRoute(osmRoutes ?? []);
+    const primary = directed.primary ?? listed;
+    const osmStops = stopsOfRelations(listed ?? primary, osmRoutes ?? []);
+    const officialCorridor = official.get(normalizeRouteCode(code).toUpperCase());
+    const serviceClass = resolveServiceClass(systemId, curated, primary, officialCorridor?.service);
+    const lineId = `${systemId}:${slugify(code) || "route"}`;
 
     lines.set(lineId, {
       id: lineId,
@@ -279,29 +310,16 @@ export function mergeNetwork(options: MergeOptions): TransitNetworkFile {
         from: primary?.from ?? null,
         to: primary?.to ?? null,
         via: primary?.via ?? null,
+        ...(curated.oneWay ? { oneWay: true } : {}),
       },
     });
 
-    // The path of the line. The curated report owns the order of the
-    // stops, so the path of the relation is flipped when the two
-    // disagree.
-    const forwardPolyline =
-      primary && primary.polyline.length > 1
-        ? directionMatches(primary, curatedStations[0])
-          ? primary.polyline
-          : reversePolyline(primary.polyline)
-        : [];
-
-    /*
-     * The other direction is the same road, the other way round.
-     *
-     * The second relation of the operator may trace a slightly different
-     * path, and its stop positions do not line up with the ones the
-     * report gives, which leaves the path unable to say where the stops
-     * are. Reversing the forward path keeps the two directions exact
-     * mirrors of each other, the way the stops are.
-     */
-    const backwardPolyline = reversePolyline(forwardPolyline);
+    // The outbound road, oriented so it starts where the report starts.
+    // The return keeps its own OpenStreetMap relation when the operator
+    // drives back by another street. With only one relation, the return
+    // is that same road reversed.
+    const forwardPolyline = directed.forward;
+    const backwardPolyline = curated.oneWay ? [] : directed.backward;
 
     const forward = buildStops({
       systemId,
@@ -326,11 +344,23 @@ export function mergeNetwork(options: MergeOptions): TransitNetworkFile {
         ? [...forward].sort((a, b) => (a.osmPosition ?? 0) - (b.osmPosition ?? 0))
         : forward;
 
-    // The other direction is the same line travelled backwards, so the
-    // two lists are exact mirrors of each other.
-    // The mirror is a copy: the two directions have their own distance
-    // from the start, and one list of stops cannot carry both.
-    const backward = [...ordered].reverse().map((stop) => ({ ...stop }));
+    // A sheet that runs one way has no return. Copying the stops
+    // backwards would invent a ride the operator does not run.
+    // The return list is its own copy: each direction has its own
+    // distance from the start.
+    const backward = curated.oneWay
+      ? []
+      : backwardPolyline.length > 1
+        ? [...buildStops({
+            systemId,
+            curatedStations,
+            osmStops,
+            ensureStation,
+            extraStations: options.extraStations,
+            knownStations: [...stations.values()],
+            polyline: backwardPolyline,
+          })].sort((a, b) => (a.osmPosition ?? 0) - (b.osmPosition ?? 0))
+        : [...ordered].reverse().map((stop) => ({ ...stop }));
 
     if (primary && primary.polyline.length > 1) {
       const forwardGeometry = buildLineGeometry({
@@ -339,19 +369,22 @@ export function mergeNetwork(options: MergeOptions): TransitNetworkFile {
         polyline: forwardPolyline,
         stops: ordered,
       });
-      const backwardGeometry = buildLineGeometry({
-        lineId,
-        direction: "backward",
-        polyline: backwardPolyline,
-        stops: backward,
-      });
-      applyStopDistances(forward, forwardGeometry.stopDistancesKm);
-      applyStopDistances(backward, backwardGeometry.stopDistancesKm);
-      lineGeometries.push(forwardGeometry, backwardGeometry);
+      applyStopDistances(ordered, forwardGeometry.stopDistancesKm);
+      lineGeometries.push(forwardGeometry);
+      if (!curated.oneWay) {
+        const backwardGeometry = buildLineGeometry({
+          lineId,
+          direction: "backward",
+          polyline: backwardPolyline,
+          stops: backward,
+        });
+        applyStopDistances(backward, backwardGeometry.stopDistancesKm);
+        lineGeometries.push(backwardGeometry);
+      }
     }
 
     pushStops(lineStops, lineId, ordered, "forward");
-    pushStops(lineStops, lineId, backward, "backward");
+    if (!curated.oneWay) pushStops(lineStops, lineId, backward, "backward");
   }
 
   // --- OSM lines without a curated counterpart --------------------------
@@ -397,12 +430,19 @@ export function mergeNetwork(options: MergeOptions): TransitNetworkFile {
       },
     });
 
+    const origin = primary.stops[0];
+    const destination = primary.stops[primary.stops.length - 1];
+    const directed = directionPaths(osmRoutes, origin, destination);
+    const forwardPolyline = directed.forward.length > 1 ? directed.forward : primary.polyline;
+    const backwardPolyline =
+      directed.backward.length > 1 ? directed.backward : reversePolyline(forwardPolyline);
+
     const forward = buildStops({
       systemId: primary.systemId,
       curatedStations: [],
       osmStops: stopsOfRelations(primary, osmRoutes),
       ensureStation,
-      polyline: primary.polyline,
+      polyline: forwardPolyline,
     });
 
     /*
@@ -418,21 +458,21 @@ export function mergeNetwork(options: MergeOptions): TransitNetworkFile {
       (a, b) => (a.osmPosition ?? 0) - (b.osmPosition ?? 0),
     );
 
-    // The opposite direction is the same line travelled backwards. A
-    // relation may list the stops in any order, so the mirror of the
-    // forward list is the one that is certainly right.
-    // The mirror is a copy: the two directions have their own distance
-    // from the start, and one list of stops cannot carry both.
-    const backward = [...ordered].reverse().map((stop) => ({ ...stop }));
+    // The return is sorted along its own road. The list is a copy:
+    // each direction has its own distance from the start.
+    const backward = [...buildStops({
+      systemId: primary.systemId,
+      curatedStations: [],
+      osmStops: stopsOfRelations(directed.primary ?? primary, osmRoutes),
+      ensureStation,
+      polyline: backwardPolyline,
+    })].sort((a, b) => (a.osmPosition ?? 0) - (b.osmPosition ?? 0));
 
-    if (primary.polyline.length > 1) {
-      // The other direction is the same road, the other way round.
-      const backwardPolyline = reversePolyline(primary.polyline);
-
+    if (forwardPolyline.length > 1) {
       const forwardGeometry = buildLineGeometry({
         lineId,
         direction: "forward",
-        polyline: primary.polyline,
+        polyline: forwardPolyline,
         // The offsets are read by position, and the positions come from
         // the ordered stops. The stops of the relation are not in that
         // order, so the geometry has to be built from the same list.
@@ -444,7 +484,7 @@ export function mergeNetwork(options: MergeOptions): TransitNetworkFile {
         polyline: backwardPolyline,
         stops: backward,
       });
-      applyStopDistances(forward, forwardGeometry.stopDistancesKm);
+      applyStopDistances(ordered, forwardGeometry.stopDistancesKm);
       applyStopDistances(backward, backwardGeometry.stopDistancesKm);
       lineGeometries.push(forwardGeometry, backwardGeometry);
     }
@@ -519,16 +559,64 @@ function reversePolyline(points: readonly Coordinate[]): Coordinate[] {
  * the order of the stops it belongs to.
  */
 function directionMatches(
-  route: { stops: { latitude: number; longitude: number }[] },
+  route: { polyline: { latitude: number; longitude: number }[] },
   station: { latitude: number | null; longitude: number | null } | undefined,
 ): boolean {
-  const first = route.stops[0];
-  const last = route.stops[route.stops.length - 1];
+  const first = route.polyline[0];
+  const last = route.polyline[route.polyline.length - 1];
   if (!station || !first || !last) return true;
   if (station.latitude === null || station.longitude === null) return true;
 
   const target = { latitude: station.latitude, longitude: station.longitude };
   return haversineKm(target, first) <= haversineKm(target, last) * 1.05;
+}
+
+type PathAnchor = { latitude: number | null; longitude: number | null } | undefined;
+
+/**
+ * The road of each direction.
+ *
+ * A corridor is two relations. The one that starts at the published
+ * origin is the way out. The one that starts at the other end is the
+ * way back, and it keeps the street that relation traces, which is
+ * often not the outbound street reversed. A corridor OpenStreetMap
+ * only drew once uses that same road in both directions.
+ */
+function directionPaths(
+  routes: readonly OsmRoute[],
+  origin: PathAnchor,
+  destination: PathAnchor,
+): { forward: Coordinate[]; backward: Coordinate[]; primary: OsmRoute | undefined } {
+  const viable = routes.filter((route) => route.polyline.length > 1);
+  const outbound = viable.filter((route) => directionMatches(route, origin));
+  const primary = bestOsmRoute(outbound) ?? bestOsmRoute(viable);
+  if (!primary) return { forward: [], backward: [], primary: undefined };
+
+  const forward = orientPolyline(primary.polyline, origin);
+  const inbound = viable.filter((route) => route !== primary && !directionMatches(route, origin));
+  const returnRoute = bestOsmRoute(inbound);
+  const backward = returnRoute
+    ? orientPolyline(returnRoute.polyline, destination ?? lastOf(forward))
+    : reversePolyline(forward);
+  return { forward, backward, primary };
+}
+
+/** Point the road at an anchor. A missing anchor leaves the path as it is. */
+function orientPolyline(polyline: readonly Coordinate[], anchor: PathAnchor): Coordinate[] {
+  const first = polyline[0];
+  const last = polyline[polyline.length - 1];
+  if (!first || !last || !anchor || anchor.latitude === null || anchor.longitude === null) {
+    return [...polyline];
+  }
+  const target = { latitude: anchor.latitude, longitude: anchor.longitude };
+  return haversineKm(target, first) <= haversineKm(target, last)
+    ? [...polyline]
+    : reversePolyline(polyline);
+}
+
+function lastOf(polyline: readonly Coordinate[]): PathAnchor {
+  const last = polyline[polyline.length - 1];
+  return last ? { latitude: last.latitude, longitude: last.longitude } : undefined;
 }
 
 /**
@@ -924,9 +1012,26 @@ function buildStops(input: {
       : 0;
 
 
-  for (const curatedStation of curatedStations) {
+  for (const [curatedIndex, curatedStation] of curatedStations.entries()) {
     const candidates = osmByName.get(curatedStation.name.trim().toLowerCase()) ?? [];
-    const match = candidates.find((candidate) => !usedOsm.has(candidate.nodeId));
+    /*
+     * A name can repeat in one direction (two platforms of the same halt)
+     * and the relation lists the nodes in travel order. Pick the unused
+     * node nearest the place this stop should occupy along this direction's
+     * path, not merely the next one in file order: the return must get the
+     * other platform, not the same two in the same order.
+     */
+    const expected =
+      curatedStations.length > 1 && polyline.length > 1
+        ? (curatedIndex / (curatedStations.length - 1)) * (polyline.length - 1)
+        : 0;
+    const match = candidates
+      .filter((candidate) => !usedOsm.has(candidate.nodeId))
+      .sort(
+        (left, right) =>
+          Math.abs(placeOnPath(left.latitude, left.longitude) - expected) -
+          Math.abs(placeOnPath(right.latitude, right.longitude) - expected),
+      )[0];
 
     // A station the report names but the relation does not still has a
     // place, when the operator's own list of stations knows it.
@@ -950,7 +1055,7 @@ function buildStops(input: {
       name: humanizeName(curatedStation.name),
       latitude,
       longitude,
-      code: curatedStation.code ?? match?.code ?? null,
+      code: curatedStation.code ?? match?.code ?? match?.localRef ?? null,
       stationType: "stop",
       description: curatedStation.note ?? "",
       aliases: [
@@ -975,7 +1080,7 @@ function buildStops(input: {
       name: humanizeName(curatedStation.name),
       latitude,
       longitude,
-      code: curatedStation.code ?? match?.code ?? null,
+      code: curatedStation.code ?? match?.code ?? match?.localRef ?? null,
       distanceFromOriginKm: null,
       osmPosition: placeOnPath(latitude, longitude),
     });
@@ -1053,6 +1158,13 @@ function pushStops(
       direction,
       position: index + 1,
       distanceFromOriginKm: stop.distanceFromOriginKm,
+      platform: {
+        id: platformId(stop.stationId, stop.latitude, stop.longitude),
+        name: stop.name,
+        latitude: stop.latitude,
+        longitude: stop.longitude,
+        code: stop.code,
+      },
     });
   });
 }

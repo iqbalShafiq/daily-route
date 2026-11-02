@@ -30,6 +30,25 @@ export class EmbeddingError extends Error {
  * land close together, which makes plain cosine similarity in Postgres a
  * usable lexical matcher — and it needs no key, no network and no GPU.
  */
+/**
+ * A provider that does not invent vectors.
+ *
+ * Place lookup then uses the lexical and exact channels only, and says so.
+ * A hash of the letters is not a meaning, so it is not used as a stand-in.
+ */
+export class UnavailableEmbeddingProvider implements EmbeddingProvider {
+  readonly model = "unconfigured";
+  readonly dimensions: number;
+
+  constructor(dimensions = 768) {
+    this.dimensions = dimensions;
+  }
+
+  embed(texts: readonly string[]): Promise<number[][]> {
+    return Promise.resolve(texts.map(() => []));
+  }
+}
+
 export class LocalHashEncoder implements EmbeddingProvider {
   readonly model = "local/hash-ngram-v1";
   readonly dimensions: number;
@@ -129,7 +148,13 @@ export class OpenAiCompatibleEncoder implements EmbeddingProvider {
         "Content-Type": "application/json",
         Authorization: `Bearer ${this.#apiKey}`,
       },
-      body: JSON.stringify({ model: this.model, input: [...inputs] }),
+      body: JSON.stringify({
+        model: this.model,
+        input: [...inputs],
+        // OpenAI's v3 models are Matryoshka: the stored column is 768, so the
+        // provider must truncate to 768 instead of returning its default.
+        dimensions: this.dimensions,
+      }),
       signal: AbortSignal.timeout(60_000),
     });
 

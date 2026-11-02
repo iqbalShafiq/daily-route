@@ -1,8 +1,8 @@
 import { bboxClause, overpass, type OverpassElement } from "./overpass.js";
 import { systemForRelation, type SystemId } from "./classify.js";
 import {
-  appendWay,
   closestVertexIndexOnPolyline,
+  stitchRoutePath,
   type Coordinate,
 } from "./geometry.js";
 
@@ -23,6 +23,8 @@ export type OsmStop = {
   longitude: number;
   /** The operator's own code for the stop, e.g. "NS08" or "1-3". */
   code: string | null;
+  /** The bay or platform letter, e.g. "A-B", from `local_ref`. */
+  localRef: string | null;
   /** The routes that serve this stop, from the `route_ref` tag. */
   routeRefs: string[];
   tags: Record<string, string>;
@@ -204,6 +206,7 @@ export function toOsmRoute(
       latitude: node.lat,
       longitude: node.lon,
       code: nodeTags["ref"] ?? null,
+      localRef: nodeTags["local_ref"] ?? nodeTags["platform_code"] ?? null,
       routeRefs: splitRefs(nodeTags["route_ref"]),
       tags: nodeTags,
       wikidata: nodeTags["wikidata"] ?? null,
@@ -212,36 +215,23 @@ export function toOsmRoute(
     });
   });
 
-  // The members are walked in order, because that order is the path: the
-  // ways are the road, and a stop member says where along it the vehicle
-  // stops. Walking them together yields the polyline and the offset of
-  // every stop in one pass.
-  const polyline: Coordinate[] = [];
-  const stopByNodeId = new Map(resolved.map((stop) => [stop.nodeId, stop]));
-
-  /*
-   * The road every stretch of the path belongs to.
-   *
-   * The path is stitched from the ways of the relation, and every way is
-   * a road with a name. Remembering which way covers which part of the
-   * path is what tells the reader the address of a stop.
-   */
-  const wayAtIndex: (number | null)[] = [];
-
-  for (const member of relation.members ?? []) {
-    if (member.type === "way" && member.geometry && member.geometry.length > 0) {
-      const before = polyline.length;
-      appendWay(
-        polyline,
-        member.geometry.map((point) => ({ latitude: point.lat, longitude: point.lon })),
-      );
-      for (let index = before; index < polyline.length; index += 1) wayAtIndex[index] = member.ref;
-      continue;
-    }
-    if (member.type === "node" && member.role === "stop") {
-      if (!stopByNodeId.has(member.ref)) continue;
-    }
-  }
+  // The ways are the road. Their order in the relation is the order the
+  // vehicle travels, except when a short way at the terminus is listed
+  // before the rest: that break is several kilometres long and is not a
+  // road. The stitch keeps the chain that is actually the route.
+  const stitched = stitchRoutePath(
+    (relation.members ?? [])
+      .filter((member) => member.type === "way" && member.geometry && member.geometry.length > 0)
+      .map((member) => ({
+        id: member.ref,
+        geometry: (member.geometry ?? []).map((point) => ({
+          latitude: point.lat,
+          longitude: point.lon,
+        })),
+      })),
+  );
+  const polyline = stitched.points;
+  const wayAtIndex = stitched.wayIds;
 
   /*
    * Every stop is given the name of the road the path runs on there.

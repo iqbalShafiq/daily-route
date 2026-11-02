@@ -5,6 +5,7 @@ import {
   index,
   integer,
   jsonb,
+  numeric,
   pgTable,
   primaryKey,
   real,
@@ -246,19 +247,146 @@ export const disruptions = pgTable(
     body: text("body").notNull().default(""),
     url: text("url"),
     confidence: real("confidence").notNull().default(1),
+    /**
+     * A stable slug for the event this notice describes.
+     *
+     * Two announcements about the same event share this key, so the newer
+     * one refreshes the row instead of adding a duplicate. Null on notices
+     * that predate the field or that the classifier could not group.
+     */
+    eventKey: text("event_key"),
+    /** The instant the announcement itself says the effect ends. */
+    startsAt: timestamp("starts_at", { withTimezone: true }),
+    endsAt: timestamp("ends_at", { withTimezone: true }),
+    /**
+     * When the evidence should be checked again. It is chosen by the
+     * classifier's duration assessment, not by a kind-to-hours table.
+     * Null means no review is scheduled (an explicit end or legacy row).
+     */
+    reviewAt: timestamp("review_at", { withTimezone: true }),
+    /** The last time a review agent looked at this notice. */
+    lastVerifiedAt: timestamp("last_verified_at", { withTimezone: true }),
+    /** scheduled | due | verified | unverified */
+    reviewState: text("review_state").notNull().default("none"),
+    /** The model's horizon, reason, confidence and chosen cadence. */
+    durationAssessment: jsonb("duration_assessment").notNull().default(sql`'{}'::jsonb`),
+    /**
+     * The verified impact windows.
+     *
+     * A running event can close one road in the morning and another route on
+     * the next day; `ends_at` alone would make the notice look active for the
+     * whole event.
+     */
+    validityWindows: jsonb("validity_windows").notNull().default(sql`'[]'::jsonb`),
     publishedAt: timestamp("published_at", { withTimezone: true }).notNull(),
     observedAt: timestamp("observed_at", { withTimezone: true }).notNull().defaultNow(),
+    /** The last time a fresh announcement confirmed or refreshed this row. */
+    lastSeenAt: timestamp("last_seen_at", { withTimezone: true }).notNull().defaultNow(),
+    /** The last time the resolver looked for a closing announcement. */
+    lastCheckedAt: timestamp("last_checked_at", { withTimezone: true }),
     resolvedAt: timestamp("resolved_at", { withTimezone: true }),
+    /** How the row left the active board: operator, expiry, superseded. */
+    resolvedReason: text("resolved_reason"),
     affectedStationIds: jsonb("affected_station_ids").notNull().default(sql`'[]'::jsonb`),
     affectedLineIds: jsonb("affected_line_ids").notNull().default(sql`'[]'::jsonb`),
+    /**
+     * What the notice is about: a stop, a corridor/line, or the operator.
+     *
+     * The board no longer splits notices into "on the map" and "without a
+     * stop"; a notice about a corridor is drawn as that corridor.
+     */
+    scope: text("scope"),
+    /**
+     * The line codes as the announcement printed them.
+     *
+     * Kept next to the grounded ids because a code the network does not
+     * have ("4H" before it enters the snapshot) is still what the rider
+     * reads, and the board should say the corridor's name rather than
+     * pretend the notice is about nothing.
+     */
+    lineCodes: jsonb("line_codes").notNull().default(sql`'[]'::jsonb`),
+    /** The roads the announcement named, grounded against OpenStreetMap. */
+    roads: jsonb("roads").notNull().default(sql`'[]'::jsonb`),
     metadata: jsonb("metadata").notNull().default(sql`'{}'::jsonb`),
   },
   (table) => [
     index("disruptions_status_idx").on(table.status),
+    index("disruptions_event_idx").on(table.eventKey),
     index("disruptions_line_idx").on(table.lineId),
     index("disruptions_station_idx").on(table.stationId),
     index("disruptions_published_idx").on(table.publishedAt),
+    index("disruptions_last_seen_idx").on(table.lastSeenAt),
+    index("disruptions_review_idx").on(table.reviewAt),
     uniqueIndex("disruptions_source_external_unique").on(table.source, table.externalId),
+  ],
+);
+
+export const linePatterns = pgTable(
+  "line_patterns",
+  {
+    id: text("id").primaryKey(),
+    lineId: text("line_id")
+      .notNull()
+      .references(() => lines.id, { onDelete: "cascade" }),
+    code: text("code").notNull(),
+    headsign: text("headsign").notNull(),
+    direction: text("direction").notNull(),
+    patternType: text("pattern_type").notNull().default("branch"),
+    stopIds: jsonb("stop_ids").notNull().default(sql`'[]'::jsonb`),
+    geometry: jsonb("geometry").notNull().default(sql`'[]'::jsonb`),
+    stopOffsets: jsonb("stop_offsets").notNull().default(sql`'[]'::jsonb`),
+    serviceDays: jsonb("service_days").notNull().default(sql`'[]'::jsonb`),
+    serviceLabel: text("service_label").notNull().default("Daily"),
+    toll: boolean("toll").notNull().default(false),
+    isDefault: boolean("is_default").notNull().default(false),
+    source: text("source").notNull().default("gtfs"),
+    sourceUrl: text("source_url"),
+    metadata: jsonb("metadata").notNull().default(sql`'{}'::jsonb`),
+  },
+  (table) => [
+    index("line_patterns_line_idx").on(table.lineId, table.direction),
+    index("line_patterns_default_idx").on(table.lineId, table.direction, table.isDefault),
+  ],
+);
+
+export const temporaryServices = pgTable(
+  "temporary_services",
+  {
+    /** Stable id, normally derived from the event key by the writer. */
+    id: text("id").primaryKey(),
+    /** One row per announced event; a follow-up updates it. */
+    eventKey: text("event_key").notNull().unique(),
+    code: text("code").notNull(),
+    name: text("name").notNull(),
+    systemId: text("system_id")
+      .notNull()
+      .references(() => systems.id, { onDelete: "cascade" }),
+    operator: text("operator").notNull(),
+    mode: text("mode").notNull(),
+    serviceClass: text("service_class").notNull(),
+    color: text("color"),
+    /**
+     * Ordered directions, each with grounded station ids and its own
+     * daily windows. A loop is one forward direction that returns to its
+     * origin; a two-way shuttle has two entries.
+     */
+    directions: jsonb("directions").notNull().default(sql`'[]'::jsonb`),
+    startsAt: timestamp("starts_at", { withTimezone: true }).notNull(),
+    endsAt: timestamp("ends_at", { withTimezone: true }),
+    /** When the announcement should be read again; not an operational end. */
+    reviewAt: timestamp("review_at", { withTimezone: true }),
+    status: text("status").notNull().default("active"),
+    /** The original Post, quote and images that justify this overlay. */
+    source: jsonb("source").notNull().default(sql`'{}'::jsonb`),
+    confidence: real("confidence").notNull().default(0),
+    metadata: jsonb("metadata").notNull().default(sql`'{}'::jsonb`),
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+    updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
+  },
+  (table) => [
+    index("temporary_services_status_idx").on(table.status),
+    index("temporary_services_start_idx").on(table.startsAt),
+    index("temporary_services_system_idx").on(table.systemId),
   ],
 );
 
@@ -274,6 +402,18 @@ export const socialPosts = pgTable(
     url: text("url").notNull(),
     publishedAt: timestamp("published_at", { withTimezone: true }).notNull(),
     ingestedAt: timestamp("ingested_at", { withTimezone: true }).notNull().defaultNow(),
+    /**
+     * Where the item stands in the classification queue.
+     *
+     * `processing` is a lease: `nextAttemptAt` is pushed into the future
+     * while the model reads it, so a worker that dies mid-call leaves the
+     * item claimable again instead of stuck forever.
+     */
+    classificationStatus: text("classification_status").notNull().default("pending"),
+    classificationAttempts: integer("classification_attempts").notNull().default(0),
+    classificationError: text("classification_error"),
+    classifiedAt: timestamp("classified_at", { withTimezone: true }),
+    nextAttemptAt: timestamp("next_attempt_at", { withTimezone: true }).notNull().defaultNow(),
     /** The disruption this post was distilled into, when it produced one. */
     disruptionId: uuid("disruption_id").references(() => disruptions.id, { onDelete: "set null" }),
     metadata: jsonb("metadata").notNull().default(sql`'{}'::jsonb`),
@@ -282,27 +422,7 @@ export const socialPosts = pgTable(
     uniqueIndex("social_posts_platform_external_unique").on(table.platform, table.externalId),
     index("social_posts_author_idx").on(table.authorHandle),
     index("social_posts_published_idx").on(table.publishedAt),
-  ],
-);
-
-export const newsItems = pgTable(
-  "news_items",
-  {
-    id: uuid("id").primaryKey().defaultRandom(),
-    title: text("title").notNull(),
-    url: text("url").notNull(),
-    content: text("content").notNull().default(""),
-    source: text("source"),
-    query: text("query"),
-    score: real("score"),
-    publishedAt: timestamp("published_at", { withTimezone: true }).notNull(),
-    ingestedAt: timestamp("ingested_at", { withTimezone: true }).notNull().defaultNow(),
-    disruptionId: uuid("disruption_id").references(() => disruptions.id, { onDelete: "set null" }),
-    metadata: jsonb("metadata").notNull().default(sql`'{}'::jsonb`),
-  },
-  (table) => [
-    uniqueIndex("news_items_url_unique").on(table.url),
-    index("news_items_published_idx").on(table.publishedAt),
+    index("social_posts_queue_idx").on(table.classificationStatus, table.nextAttemptAt, table.publishedAt),
   ],
 );
 
@@ -386,3 +506,40 @@ export const stationGroupMembersRelations = relations(stationGroupMembers, ({ on
 export const stationEmbeddingsRelations = relations(stationEmbeddings, ({ one }) => ({
   station: one(stations, { fields: [stationEmbeddings.stationId], references: [stations.id] }),
 }));
+
+/**
+ * What the application asked a paid provider to do.
+ *
+ * X and OpenRouter bill per call or per token, and the first question after a
+ * surprising bill is always "which call". The row keeps the operation, the
+ * provider that answered, the tokens or Posts, the estimated cost and enough
+ * metadata to reconstruct it. The dashboard is a later concern.
+ */
+export const usageEvents = pgTable(
+  "usage_events",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    /** "x" for the X API, "ai" for an OpenRouter completion. */
+    kind: text("kind").notNull(),
+    provider: text("provider").notNull(),
+    /** chat, classifier, grounder, verifier, research, monitor, catch-up… */
+    operation: text("operation").notNull(),
+    model: text("model"),
+    providerName: text("provider_name"),
+    endpoint: text("endpoint"),
+    status: text("status"),
+    requests: integer("requests").notNull().default(1),
+    posts: integer("posts").notNull().default(0),
+    promptTokens: integer("prompt_tokens").notNull().default(0),
+    completionTokens: integer("completion_tokens").notNull().default(0),
+    costUsd: numeric("cost_usd", { precision: 12, scale: 6 }).notNull().default("0"),
+    latencyMs: integer("latency_ms"),
+    traceId: text("trace_id"),
+    metadata: jsonb("metadata").notNull().default(sql`'{}'::jsonb`),
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  },
+  (table) => [
+    index("usage_events_created_idx").on(table.createdAt),
+    index("usage_events_kind_idx").on(table.kind, table.createdAt),
+  ],
+);

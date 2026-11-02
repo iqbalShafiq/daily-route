@@ -34,6 +34,12 @@ export type CuratedLine = {
   description: string;
   stations: CuratedStation[];
   sources: string[];
+  /**
+   * The official sheet runs one way.
+   *
+   * The return is not a service, so the merger must not mirror the stops.
+   */
+  oneWay?: boolean;
 };
 
 export type CuratedDocument = {
@@ -57,6 +63,8 @@ type RawCorridor = {
   service?: unknown;
   /** The official route map the corridor was read from. */
   officialMapUrl?: unknown;
+  /** True when the published sheet runs in one direction only. */
+  oneWay?: unknown;
 };
 
 type RawSystem = {
@@ -160,6 +168,7 @@ export async function loadCurated(path: string): Promise<CuratedDocument> {
         description: firstString(rawLine.serviceHours) ?? "",
         stations,
         sources: [firstString(rawLine.officialMapUrl) ?? "transjakarta.co.id/rute"],
+        ...(rawLine.oneWay === true ? { oneWay: true } : {}),
         ...(firstString(rawLine.serviceHours)
           ? { serviceHours: firstString(rawLine.serviceHours) }
           : {}),
@@ -211,6 +220,7 @@ export async function loadCurated(path: string): Promise<CuratedDocument> {
         description: firstString(rawLine.description) ?? "",
         stations,
         sources: toStringArray(rawLine.sources),
+        ...(rawLine.oneWay === true ? { oneWay: true } : {}),
       });
     }
   }
@@ -275,6 +285,7 @@ export function dedupeLines(lines: readonly CuratedLine[]): CuratedLine[] {
       operator: [...operators].join(", ") || null,
       sources,
       stations: [...stations],
+      ...(existing.oneWay || line.oneWay ? { oneWay: true } : {}),
     });
   }
 

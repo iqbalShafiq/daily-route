@@ -96,7 +96,8 @@ export class PlaceResolver {
     const vectorWeight = options.vectorWeight ?? 0.55;
 
     const [embedding] = await this.#provider.embed([query]);
-    const vectorLiteral = embedding ? toVectorLiteral(embedding) : null;
+    const vectorLiteral =
+      embedding && embedding.length > 0 ? toVectorLiteral(embedding) : null;
 
     const systemFilter = options.systemId
       ? sql`${stations.systemId} = ${options.systemId}`
@@ -197,8 +198,11 @@ export class PlaceResolver {
       );
       const vector = clamp01(Number(vectorRow?.vector ?? 0));
       const exact = exactMatch(query, row.name, aliases) ? 1 : 0;
+      // Without a vector hit, the lexical and exact signals carry the score.
+      // Leaving the default vector weight in place would halve a real match.
+      const weight = vectorRow ? vectorWeight : 0;
 
-      const score = clamp01(vectorWeight * vector + (1 - vectorWeight) * lexical + 0.25 * exact);
+      const score = clamp01(weight * vector + (1 - weight) * lexical + 0.25 * exact);
 
       candidates.push({
         stationId: row.id,

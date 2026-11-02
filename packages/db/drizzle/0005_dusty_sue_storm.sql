@@ -1,0 +1,1 @@
+ALTER TABLE "disruptions" ADD COLUMN "validity_windows" jsonb DEFAULT '[]'::jsonb NOT NULL;

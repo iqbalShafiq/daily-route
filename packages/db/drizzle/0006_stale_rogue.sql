@@ -1,0 +1,1 @@
+ALTER TABLE "disruptions" ADD COLUMN "starts_at" timestamp with time zone;

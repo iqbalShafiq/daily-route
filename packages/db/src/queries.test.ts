@@ -9,14 +9,15 @@ import {
   loadInterchangeSiblings,
   loadNetwork,
   searchStationsLexical,
+  updateNotice,
 } from "./queries.js";
 
 /**
  * The database layer, against the real database.
  *
  * These tests are the integrity check of the seeded network: every stop
- * belongs to a line that exists, every line has stops in both directions,
- * and the search functions find what they promise.
+ * belongs to a line that exists, every line has the directions the
+ * operator publishes, and the search functions find what they promise.
  */
 
 const databaseUrl = process.env["DATABASE_URL"];
@@ -56,7 +57,7 @@ describe("loadNetwork", () => {
     }
   });
 
-  it("gives every operating line stops in both directions", async () => {
+  it("gives every operating line the directions it publishes", async () => {
     const network = await loadNetwork(db);
     const directions = new Map<string, Set<string>>();
 
@@ -71,8 +72,15 @@ describe("loadNetwork", () => {
       const stops = network.lineStops.filter((stop) => stop.lineId === line.id);
       if (stops.length === 0) continue;
       const set = directions.get(line.id);
-      expect(set?.has("forward")).toBe(true);
-      expect(set?.has("backward")).toBe(true);
+      // A line may publish only one direction. The return is not mirrored
+      // into a service the operator does not run.
+      expect(set !== undefined && set.size > 0).toBe(true);
+      if (line.id === "transjakarta:7r") {
+        expect(set?.has("forward")).toBe(true);
+        expect(set?.has("backward")).toBe(false);
+        continue;
+      }
+      expect(Boolean(set?.has("forward") || set?.has("backward"))).toBe(true);
     }
   });
 
@@ -171,5 +179,32 @@ describe("listActiveDisruptions", () => {
     for (const row of rows) {
       expect(row.status).toBe("active");
     }
+  });
+});
+
+describe("updateNotice", () => {
+  it("keeps a computed lastSeenAt instead of resetting it to now", async () => {
+    await db.execute(`DELETE FROM disruptions WHERE source = 'test:lastseen'`);
+    const inserted = await db.execute<{ id: string }>(
+      `INSERT INTO disruptions
+        (source, source_type, external_id, severity, status, kind, title, body, confidence, published_at, observed_at, last_seen_at)
+       VALUES
+        ('test:lastseen', 'official', 'test-lastseen-1', 'warning', 'active', 'diversion',
+         'Lifecycle fixture', 'A fixture for the last-seen lifecycle.', 1,
+         now() - interval '4 days', now() - interval '4 days', now() - interval '4 days')
+       RETURNING id`,
+    );
+    const id = inserted[0]?.id;
+    expect(id).toBeTruthy();
+    const old = new Date(Date.now() - 4 * 24 * 3_600_000);
+    await updateNotice(db, String(id), {
+      title: "Lifecycle fixture, refreshed",
+      lastSeenAt: old,
+    });
+    const rows = await db.execute<{ last_seen_at: Date }>(
+      `SELECT last_seen_at FROM disruptions WHERE id = '${id}'`,
+    );
+    expect(Math.abs(new Date(String(rows[0]?.last_seen_at)).getTime() - old.getTime())).toBeLessThan(1_000);
+    await db.execute(`DELETE FROM disruptions WHERE source = 'test:lastseen'`);
   });
 });

@@ -14,7 +14,7 @@
         "currency": "IDR",
         "label": "Pagi hari (tap-in 05.00-07.00)"
       },
-      "transferRule": "Flat fare charged per boarding (tap-in), not per journey: changing vehicle means a new tap-in and a new full fare. A transfer between two buses of the operator is capped at Rp5,000 within 3 hours on a JakLingko co-branded card (PT Transjakarta, 8 February 2026). The Integrasi Multimodal scheme (max Rp10,000 within 3 hours) covers Transjakarta BRT + MRT Jakarta + LRT Jakarta and applies only when the journey uses at least two DIFFERENT modes, so a BRT to BRT change never falls under it. Mikrotrans and non-BRT buses break the multimodal scheme and require a separate ticket. The early-morning band is decided by the tap-in time, not the tap-out time. There is no time limit on a journey without a tap-out: the fare stays at the normal amount and the earlier journey is charged when the rider taps in next. A physical card needs a balance of at least Rp5,000. KLG holders travel free.",
+      "transferRule": "Flat fare charged once per entry to the paid halte. Changing BRT corridor inside the same halte, without passing the exit gate, is still one fare. Leaving the halte and boarding again is a new fare, capped at Rp5,000 within 3 hours on a JakLingko co-branded card (PT Transjakarta, 8 February 2026). The Integrasi Multimodal scheme (max Rp10,000 within 3 hours) covers Transjakarta BRT + MRT Jakarta + LRT Jakarta and applies only when the journey uses at least two DIFFERENT modes. Mikrotrans and non-BRT buses break the multimodal scheme and require a separate ticket, because their reader is on the vehicle. The early-morning band is decided by the tap-in time, not the tap-out time. There is no time limit on a journey without a tap-out: the fare stays at the normal amount and the earlier journey is charged when the rider taps in next. A physical card needs a balance of at least Rp5,000. KLG holders travel free.",
       "microtransFare": {
         "amount": 0,
         "currency": "IDR",
@@ -27,7 +27,8 @@
         "https://transjakarta.co.id/layanan/brt",
         "https://jaklingkoindonesia.co.id/faq-tarif-integrasi"
       ],
-      "earlyMorningHours": "05:00-07:00"
+      "earlyMorningHours": "05:00-07:00",
+      "access": "Tap in di halte pertama dan tap out di halte tujuan. Ganti koridor di dalam halte yang sama tidak menambah tarif. Keluar halte lalu naik lagi dihitung naik baru. Tarif mengikuti jam tap in. Saldo kartu minimal Rp5.000. Tidak tap out memblokir kartu, dan tarif perjalanan ini ditarik pada tap in berikutnya."
     },
     "transjakarta-non-brt": {
       "label": "Transjakarta non-BRT (Angkutan Pengumpan: Metrotrans, Minitrans)",
@@ -56,7 +57,8 @@
         "https://transjakarta.co.id/layanan/royaltrans",
         "https://news.detik.com/berita/d-6891014/transjakarta-tarif-bus-royaltrans-tetap-rp-20-000"
       ],
-      "earlyMorningHours": "05:00-07:00"
+      "earlyMorningHours": "05:00-07:00",
+      "access": "Tap in dan tap out di mesin di dalam bus. Setiap kali naik bus ditagih sendiri, termasuk ganti dari koridor BRT. Tarif mengikuti jam tap in. Saldo kartu minimal Rp5.000. Tidak tap out memblokir kartu."
     },
     "mrt-jakarta": {
       "label": "MRT Jakarta",
@@ -98,7 +100,8 @@
         "https://megapolitan.kompas.com/read/2019/03/27/09421241/tarif-mrt-rp-3000-rp-14000-berlaku-1-april-2019",
         "https://jaklingkoindonesia.co.id/faq-tarif-integrasi"
       ],
-      "chargeBy": "station"
+      "chargeBy": "station",
+      "access": "Tap in di stasiun masuk dan tap out di stasiun keluar. Ganti peron di dalam stasiun yang sama tetap satu tarif. Tarif naik Rp1.000 untuk setiap stasiun setelah stasiun pertama, sampai Rp14.000. Kartu Multi Trip harus berisi minimal Rp14.000."
     },
     "lrt-jakarta": {
       "label": "LRT Jakarta (Jakpro)",
@@ -120,7 +123,8 @@
         "https://www.lrtjakarta.co.id/faq",
         "https://id.wikipedia.org/w/index.php?title=LRT_Jakarta&action=raw",
         "https://jaklingkoindonesia.co.id/faq-tarif-integrasi"
-      ]
+      ],
+      "access": "Tap in di stasiun masuk dan tap out di stasiun keluar. Ganti kereta di dalam area berbayar tetap satu tarif Rp5.000. Berada di area berbayar lebih dari 2 jam tanpa tap out dikenai Rp5.000. Saldo kartu minimal Rp5.000 menurut FAQ operator."
     },
     "lrt-jabodebek": {
       "label": "LRT Jabodebek",
@@ -166,7 +170,8 @@
       "baseKm": 1,
       "stepKm": 1,
       "peakHours": "06:00-09:00,16:00-20:00",
-      "peakHoursNote": "Jam sibuk 06:00-08:59 dan 16:00-19:59, Senin sampai Jumat, di luar hari libur nasional. Sabtu, Minggu dan hari libur nasional memakai tarif maksimal yang lebih rendah."
+      "peakHoursNote": "Jam sibuk 06:00-08:59 dan 16:00-19:59, Senin sampai Jumat, di luar hari libur nasional. Sabtu, Minggu dan hari libur nasional memakai tarif maksimal yang lebih rendah.",
+      "access": "Tap in di stasiun masuk dan tap out di stasiun keluar. Ganti jalur di dalam stasiun yang sama tetap satu tarif menurut jarak dari masuk sampai keluar. Tarif di luar skema JakLingko, jadi pindah moda ditagih terpisah. Saldo kartu minimal Rp10.000."
     },
     "krl-jabodetabek": {
       "label": "KRL Jabodetabek (KAI Commuter)",
@@ -188,9 +193,9 @@
         "note": "Covers the first 25 km"
       },
       "perKm": {
-        "amount": 100,
+        "amount": 1000,
         "currency": "IDR",
-        "note": "Equivalent to Rp1,000 for every further 10 km"
+        "note": "Rp1.000 untuk setiap 10 km setelah 25 km pertama. Satu blok yang sudah dimulai dihitung penuh."
       },
       "min": {
         "amount": 3000,
@@ -206,12 +211,14 @@
       ],
       "baseKm": 25,
       "stepKm": 10,
-      "maxNote": "KAI Commuter tidakmunitionkan plafon tarif; tarifnya sebuah rumus, bukan batas atas."
+      "maxNote": "KAI Commuter tidak mengumumkan plafon tarif. Tarifnya sebuah rumus, bukan batas atas.",
+      "access": "Tap in di stasiun masuk dan tap out di stasiun keluar. Ganti jalur di dalam stasiun yang sama tetap satu tiket. Tarif KRL tidak masuk skema JakLingko, jadi pindah moda ditagih terpisah. Saldo Kartu Multi Trip minimal Rp5.000."
     },
     "transjakarta-mikrotrans": {
       "label": "Transjakarta Mikrotrans (JakLingko)",
       "structure": "free",
       "note": "Mikrotrans JakLingko gratis bagi penumpang pada 21 Oktober 2026; penumpang tetap harus tap-in dan tap-out, dan operator dibayar per jarak tempuh. Usulan tarif Rp2.000 mulai 1 Januari 2027 belum berlaku.",
+      "access": "Gratis bagi penumpang. Tap in dan tap out di dalam bus tetap wajib.",
       "verified": true,
       "sources": [
         "https://www.antaranews.com/berita/375342/mikrotrans-jaklingko-gratis-biaya-uje-",
@@ -276,6 +283,7 @@
         "label": "Tarif"
       },
       "note": "Royaltrans dilayani terpisah dari bus Transjakarta dan tidak termasuk dalam skema tarif integrasi mana pun.",
+      "access": "Royaltrans di luar setiap skema integrasi. Bayar dengan kartu elektronik atau QRIS Tap di dalam bus.",
       "verified": true,
       "sources": [
         "https://transjakarta.co.id/layanan/royaltrans",

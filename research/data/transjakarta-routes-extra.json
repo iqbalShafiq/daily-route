@@ -1222,7 +1222,10 @@
         {
           "name": "Simpang Sentul",
           "code": null,
-          "transfers": []
+          "latitude": -6.531293,
+          "longitude": 106.85176,
+          "transfers": [],
+          "note": "Koordinat dari feed GTFS Transjakarta, halte B08177P Simpang Sentul. Sebelumnya nama ini di-geocode tanpa konteks koridor dan jatuh di Walantaka, Serang."
         },
         {
           "name": "Sentul",
@@ -1244,7 +1247,16 @@
           "name": "Botani Square",
           "code": null,
           "transfers": [],
-          "terminal": true
+          "terminal": false
+        },
+        {
+          "name": "Baranangsiang",
+          "code": null,
+          "latitude": -6.6040724,
+          "longitude": 106.8059975,
+          "transfers": [],
+          "terminal": true,
+          "note": "Terminal Bogor setelah Botani Square. Koordinat dari OSM node 473365748 (Terminal Baranangsiang). Pengumuman operator 24 Oktober 2026 menempatkan halte ini di rute P11: https://x.com/PT_Transjakarta/status/2113889938181910580"
         }
       ],
       "reverseStops": [
@@ -1352,7 +1364,16 @@
           "name": "Botani Square",
           "code": null,
           "transfers": [],
-          "terminal": true
+          "terminal": false
+        },
+        {
+          "name": "Baranangsiang",
+          "code": null,
+          "latitude": -6.6040724,
+          "longitude": 106.8059975,
+          "transfers": [],
+          "terminal": true,
+          "note": "Terminal Bogor setelah Botani Square. Koordinat dari OSM node 473365748 (Terminal Baranangsiang). Pengumuman operator 24 Oktober 2026 menempatkan halte ini di rute P11: https://x.com/PT_Transjakarta/status/2113889938181910580"
         }
       ]
     },

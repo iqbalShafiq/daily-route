@@ -8,6 +8,7 @@ import postgres from "postgres";
 import {
   fareRules,
   lineGeometry,
+  linePatterns,
   lineStops,
   lines,
   stationGroupMembers,
@@ -26,6 +27,7 @@ import {
 
 const ROOT = resolve(import.meta.dirname, "../../../..");
 const SNAPSHOT = resolve(ROOT, "data/transit-network.json");
+const PATTERNS = resolve(ROOT, "data/line-patterns.json");
 
 type Snapshot = {
   systems: {
@@ -98,15 +100,33 @@ async function main(): Promise<void> {
   }
 
   const snapshot = JSON.parse(await readFile(SNAPSHOT, "utf8")) as Snapshot;
+  const patterns = JSON.parse(await readFile(PATTERNS, "utf8")) as {
+    id: string;
+    lineId: string;
+    code: string;
+    headsign: string;
+    direction: "forward" | "backward";
+    patternType: string;
+    stopIds: string[];
+    geometry: number[];
+    stopOffsets: number[];
+    serviceDays: string[];
+    serviceLabel: string;
+    toll: boolean;
+    isDefault: boolean;
+    source: string;
+    sourceUrl: string | null;
+    metadata: Record<string, unknown>;
+  }[];
   const client = postgres(databaseUrl, { max: 4 });
   const db = drizzle(client);
 
   console.log("· truncating");
   await db.execute(
     `TRUNCATE TABLE
-       social_posts, news_items, disruptions, agent_messages, agent_sessions,
+       social_posts, disruptions, agent_messages, agent_sessions,
        route_plans, station_embeddings, station_group_members, station_groups,
-       line_geometry, line_stops, stations, lines, systems, fare_rules
+       line_patterns, line_geometry, line_stops, stations, lines, systems, fare_rules
      RESTART IDENTITY CASCADE`,
   );
 
@@ -143,6 +163,9 @@ async function main(): Promise<void> {
     })),
   );
 
+  console.log(`· inserting ${patterns.length} line patterns`);
+  if (patterns.length > 0) await db.insert(linePatterns).values(patterns);
+
   // How many lines serve each station decides which of two stations of
   // the same name a rider meant, so it is counted before they are written.
   const linesPerStation = new Map<string, Set<string>>();
@@ -153,30 +176,33 @@ async function main(): Promise<void> {
   }
 
   console.log(`· inserting ${snapshot.stations.length} stations`);
-  await db.insert(stations).values(
-    snapshot.stations.map((station) => ({
-      id: station.id,
-      systemId: station.systemId,
+  const stationRows = snapshot.stations.map((station) => ({
+    id: station.id,
+    systemId: station.systemId,
+    name: station.name,
+    code: station.code,
+    latitude: station.latitude,
+    longitude: station.longitude,
+    stationType: station.stationType,
+    isInterchange: station.isInterchange,
+    lineCount: linesPerStation.get(station.id)?.size ?? 0,
+    description: station.description,
+    area: station.area,
+    aliases: station.aliases,
+    searchText: buildSearchDocument({
       name: station.name,
       code: station.code,
-      latitude: station.latitude,
-      longitude: station.longitude,
-      stationType: station.stationType,
-      isInterchange: station.isInterchange,
-      lineCount: linesPerStation.get(station.id)?.size ?? 0,
-      description: station.description,
-      area: station.area,
       aliases: station.aliases,
-      searchText: buildSearchDocument({
-        name: station.name,
-        code: station.code,
-        aliases: station.aliases,
-        area: station.area,
-        description: station.description,
-      }),
-      metadata: station.metadata,
-    })),
-  );
+      area: station.area,
+      description: station.description,
+    }),
+    metadata: station.metadata,
+  }));
+  // Postgres has a hard 65535-parameter limit. A growing network crosses
+  // it in one insert, so stations are written in bounded chunks too.
+  for (let index = 0; index < stationRows.length; index += 1000) {
+    await db.insert(stations).values(stationRows.slice(index, index + 1000));
+  }
 
   console.log(`· inserting ${snapshot.lineStops.length} line stops`);
   const chunk = 5000;

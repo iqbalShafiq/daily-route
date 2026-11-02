@@ -181,8 +181,20 @@ function integrationOf(entry: Record<string, unknown>): IntegrationRule | null {
 /** Shape the research document into the rules the engine applies. */
 export function loadFareRules(document: FaresDocument): FareRules {
   const modes: Record<string, FareRule> = {};
+  const access: Record<string, string> = {};
+  const withheld: Record<string, string> = {};
 
   for (const [key, mode] of Object.entries(document.modes)) {
+    const rider = text(mode["access"]);
+    if (rider) access[key] = rider;
+
+    // A tariff the operator has not confirmed is not a price. The note
+    // says what is known, and the journey leaves that part out of the total.
+    if (mode["verified"] === false) {
+      withheld[key] = text(mode["note"]) ?? "Tarifnya belum terverifikasi oleh operator.";
+      continue;
+    }
+
     const rule = ruleOf(mode);
     if (rule) modes[key] = rule;
   }
@@ -198,5 +210,5 @@ export function loadFareRules(document: FaresDocument): FareRules {
     .filter((rule): rule is IntegrationRule => rule !== null)
     .filter((rule) => rule.covers.length > 0);
 
-  return { modes, integrations, holidays: document.holidays ?? [] };
+  return { modes, integrations, holidays: document.holidays ?? [], access, withheld };
 }
