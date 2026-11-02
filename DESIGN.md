@@ -133,9 +133,11 @@ map. The map owns the window, and the controls float on it.
   from a `UserRound` control. On a wide screen it is 320 px wide under the
   window controls. On a phone it is a sheet above the bottom bar. It does
   not add a fifth place to that bar, and it does not sit in the brand plate.
-  Opening it closes the assistant. The signed-out line says the device keeps
-  places until the rider signs in. Delete account is a second step in the
-  same panel, not a browser confirm and not a card inside a card.
+  Opening it closes the assistant. The assistant and account controls keep
+  their icon when open; the button fills with ink instead of swapping the
+  mark. The signed-out line says the device keeps places until the rider
+  signs in. Delete account is a second step in the same panel, not a browser
+  confirm and not a card inside a card.
 - The phone has a bottom app bar with four places: **Plan**, **Lines**,
   **Alerts** and **Ask**. It is a navigation region, not a row of tabs in a
   card. The active place has a paper plate behind its label and a jade rule
@@ -334,7 +336,9 @@ edge. Every variant has a hover, an active state and a disabled state at
 ### Input
 
 The label sits above the field in the monospaced station-label voice, the
-clear button on the right. The field is 44 px tall and the radius is 8 px.
+clear button on the right. Every field has a placeholder: the label names
+the field, and the placeholder says what to type. The field is 44 px tall
+and the radius is 8 px.
 The focus state is the accent border plus a 15 % accent ring. In the search
 board the two fields are rows with no box: a vertical route line and a
 marker join them, and the hairline between the rows starts after the marker

@@ -164,6 +164,7 @@ export function AccountPanel({
         label="Email"
         type="email"
         autoComplete="email"
+        placeholder="name@email.com"
         value={email}
         onChange={(event) => setEmail(event.target.value)}
       />
@@ -171,6 +172,7 @@ export function AccountPanel({
         label="Password"
         type={shown ? "text" : "password"}
         autoComplete={mode === "signin" ? "current-password" : "new-password"}
+        placeholder={mode === "create" ? "At least 10 characters" : "Your password"}
         value={password}
         onChange={(event) => setPassword(event.target.value)}
         trailing={<PasswordToggle shown={shown} onToggle={() => setShown((current) => !current)} />}
@@ -180,6 +182,7 @@ export function AccountPanel({
           label="Confirm password"
           type={shown ? "text" : "password"}
           autoComplete="new-password"
+          placeholder="Repeat the password"
           value={confirm}
           onChange={(event) => setConfirm(event.target.value)}
           invalid={mismatch}
@@ -301,6 +304,7 @@ export function AccountPanel({
                   label="Current password"
                   type="password"
                   autoComplete="current-password"
+                  placeholder="Password you use now"
                   value={currentPassword}
                   onChange={(event) => setCurrentPassword(event.target.value)}
                 />
@@ -308,6 +312,7 @@ export function AccountPanel({
                   label="New password"
                   type={shown ? "text" : "password"}
                   autoComplete="new-password"
+                  placeholder="At least 10 characters"
                   value={newPassword}
                   onChange={(event) => setNewPassword(event.target.value)}
                   trailing={
@@ -355,6 +360,7 @@ export function AccountPanel({
                   label="Password"
                   type="password"
                   autoComplete="current-password"
+                  placeholder="Password for this account"
                   value={deletePassword}
                   onChange={(event) => setDeletePassword(event.target.value)}
                 />

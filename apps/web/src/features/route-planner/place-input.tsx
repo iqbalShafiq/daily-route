@@ -70,7 +70,7 @@ export function PlaceInput({
   value: string;
   onValueChange: (value: string) => void;
   onSelectPlace?: ((place: ChosenPlace) => void) | undefined;
-  placeholder?: string | undefined;
+  placeholder: string;
   icon?: React.ReactNode | undefined;
   invalid?: boolean | undefined;
   autoFocus?: boolean | undefined;
