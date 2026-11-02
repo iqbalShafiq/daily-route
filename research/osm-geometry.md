@@ -80,7 +80,13 @@ Rujukan yang dipakai untuk memutuskan hal ini:
 - **PTNA** memeriksa celah itinerary pada relasi PTv2
   ([ptna.openstreetmap.de](https://ptna.openstreetmap.de)).
 
-Jalan untuk menutup celah: mengambil jalan yang menghubungkan dari OSM,
-atau meminta perute jalan (Valhalla atau OSRM) untuk mengisi celah itu
-dengan jalan yang sebenarnya. Keduanya belum dikerjakan; hari ini celah
-itu masih tergambar sebagai ruas lurus.
+Jalan untuk menutup celah di bawah satu kilometer: mengambil jalan yang
+menghubungkan dari OSM, atau meminta perute jalan (Valhalla atau OSRM).
+Itu belum dikerjakan, jadi celah pendek masih tergambar sebagai ruas lurus.
+
+Celah yang lebih panjang dari satu kilometer bukan celah jalan. Pada
+banyak koridor, relasi OSM menaruh satu ruas pendek di terminus (Blok M,
+Tanjung Priok) sebelum sisa rute. Menyambungkannya menarik garis lurus
+17–28 km. Jahitan sekarang memutus rantai pada celah itu dan menyimpan
+rantai yang panjangnya adalah rutenya. Ruas terminus yang memang berdiri
+di ujung rute tetap disambung ke ujung itu.

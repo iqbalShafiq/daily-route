@@ -1,0 +1,230 @@
+{
+  "version": "2026-10-24.1",
+  "description": "Cases for the notice pipeline. Each expectation is judged by a model, not by string matching.",
+  "cases": [
+    {
+      "id": "stop-halte-baranangsiang",
+      "input": {
+        "text": "@shinggiibanggi_ @shinggiibanggi_ Hai Kak. Kami informasikan untuk Halte Baranangsiang tidak tersedia di rute P11 ya kak. Berikut informasi peta rute P11. Yuk unduh aplikasi TJ:Transjakarta. Terima kasih ^DW https://t.co/vKq45w5Zvz",
+        "publishedAt": "2026-10-24T07:06:50Z",
+        "source": "x:PT_Transjakarta",
+        "url": "https://x.com/PT_Transjakarta/status/2113889938181910580",
+        "systemHint": "transjakarta"
+      },
+      "expected": {
+        "scope": "stop",
+        "places": [
+          "Baranangsiang"
+        ],
+        "note": "Pengumuman menutup Halte Baranangsiang pada rute P11. Halte itu baru masuk snapshot setelah data diperbarui. Halte Baranangsiang wajib muncul; halte lain di koridor P11 boleh ikut sebagai konteks."
+      }
+    },
+    {
+      "id": "stop-aeon-sentul-collision",
+      "input": {
+        "text": "#INFOTRANSJAKARTA | Rute P11: Bogor - Blok M mengalami pengalihan rute dikarenakan adanya kepadatan lalu lintas di sekitar Exit Tol Sentul. Sementara operasional dilakukan sebagian bus beroperasi normal, sebagian bus tidak melayani bus stop Aeon dan Mall Belanova Sentul. Pantau informasi terkini layanan Transjakarta melalui X: pt_transjakarta, instagram: infotije, pt_transjakarta ataupun aplikasi TJ:Transjakarta. Mari kita #JagaJakarta #RuteP11",
+        "publishedAt": "2026-10-24T09:59:43Z",
+        "source": "x:PT_Transjakarta",
+        "url": "https://x.com/PT_Transjakarta/status/2113933448469704726",
+        "systemHint": "transjakarta"
+      },
+      "expected": {
+        "scope": "stop",
+        "places": [
+          "Mall Bellanova Sentul"
+        ],
+        "note": "Pengumuman menyebut bus stop Aeon dan Mall Bellanova Sentul. Di jaringan ini hanya ada AEON Mall di Jakarta Timur (jauh dari koridor P11) dan Mall Bellanova Sentul (di koridor). Memakai AEON Mall Jakarta Timur adalah kesalahan; yang benar Mall Bellanova Sentul, dan boleh ditambah halte lain di P11."
+      }
+    },
+    {
+      "id": "road-jak10-pintu-air",
+      "input": {
+        "text": "#INFOTRANSJAKARTA | Layanan Mikrotrans JAK 10: Tanah Abang - Kota mengalami pengalihan rute dikarenakan adanya penutupan jalan disekitar Jl. Pintu Air Raya. Sementara tidak melayani Bus stop Pintu air 5 Pasar Baru untuk kedua arah. Pantau informasi terkini layanan Transjakarta melalui X pt_transjakarta, instagram: infotije, pt_transjakarta ataupun aplikasi TJ:Transjakarta. Mari kita #JagaJakarta #RuteJAK10",
+        "publishedAt": "2026-10-24T01:53:07Z",
+        "source": "x:PT_Transjakarta",
+        "url": "https://x.com/PT_Transjakarta/status/2113810989879837178",
+        "systemHint": "transjakarta"
+      },
+      "expected": {
+        "scope": "line",
+        "places": [
+          "JAK.10"
+        ],
+        "note": "Halte 'Pintu Air 5 Pasar Baru' tidak ada di jaringan, jadi koridor JAK.10 adalah jawaban yang benar. Menyebut Jl. Pintu Air Raya bagus tetapi tidak wajib; jangan mengarang halte."
+      }
+    },
+    {
+      "id": "road-jak05-nawawi-unknown",
+      "input": {
+        "text": "#INFOTRANSJAKARTA | Layanan Mikrotrans JAK 05: Semper - Rorotan mengalami pengalihan rute dikarenakan adanya penutupan jalan di sekitar Jl. Syekh Nawawi Al Bantani. Sementara tidak melayani Bus stop Pemadam Kebakaran Cilincing s/d Kebon Baru untuk kedua arah. Pantau informasi",
+        "publishedAt": "2026-10-23T02:16:58Z",
+        "source": "x:PT_Transjakarta",
+        "url": "https://x.com/PT_Transjakarta/status/2113454606189781189",
+        "systemHint": "transjakarta"
+      },
+      "expected": {
+        "scope": "line",
+        "places": [],
+        "note": "Pengumuman menyebut Jl. Syekh Nawawi Al Bantani dan dua halte yang tidak ada di jaringan. Bila haltenya tidak ditemukan, jawaban yang benar adalah koridor JAK.05 tanpa halte. Mengarang halte seperti 'Jln. Pemadam Kebakaran Cacing' adalah kegagalan."
+      }
+    },
+    {
+      "id": "line-4h-not-operating",
+      "input": {
+        "text": "@Horor_Holic23 @Horor_Holic23 Hai kak. Rute 4H saat ini tidak beroperasi melayani pelanggan ya. Pantau informasi terkini layanan Transjakarta melalui X pt_transjakarta, instagram: infotije, pt_transjakarta. Terima kasih. ^NY",
+        "publishedAt": "2026-10-23T02:54:09Z",
+        "source": "x:PT_Transjakarta",
+        "url": "https://x.com/PT_Transjakarta/status/2113463963724001469",
+        "systemHint": "transjakarta"
+      },
+      "expected": {
+        "scope": "line",
+        "places": [],
+        "note": "Rute 4H tidak beroperasi. Kode 4H tidak ada di snapshot, tetapi pengumuman tetap tentang satu koridor, bukan seluruh jaringan. Tidak boleh ada halte karangan."
+      }
+    },
+    {
+      "id": "network-jakarta-running-festival",
+      "input": {
+        "text": "Hai Kak. Mohon maaf untuk sementara belum bisa karena adanya kegiatan Jakarta Running Festival yang berdampak pada modifikasi layanan. Terima kasih atas pengertiannya, Kak. Pantau informasi terkini layanan Transjakarta melalui X pt_transjakarta, instagram: infotije, pt_transjakarta ataupun aplikasi TJ: Transjakarta.^JN",
+        "publishedAt": "2026-10-23T23:54:43Z",
+        "source": "x:PT_Transjakarta",
+        "url": "https://x.com/PT_Transjakarta/status/2113781192499900918",
+        "systemHint": "transjakarta"
+      },
+      "expected": {
+        "scope": "network",
+        "places": [],
+        "note": "Layanan Transjakarta berhenti sementara karena Jakarta Running Festival; pengumuman tidak menyebut koridor atau halte tertentu."
+      }
+    },
+    {
+      "id": "stop-6d-multiple",
+      "input": {
+        "text": "Hai Kak. Pada 25 Oktober 2026 akan dilakukan modifikasi layanan Transjakarta terkait rekayasa lalu lintas untuk Jakarta Running Festival 2026. Layanan Rute 6D: Stasiun Tebet - Bundaran Senayan sementara tidak melayani bus stop Plaza Sentral hingga Bundaran Senayan 1 untuk arah Bundaran Senayan dan tidak melayani Bundaran Senayan 1 hingga Jln. Karet Pasar Baru timur 5 untuk arah Stasiun Tebet, serta menjadi melayani bus stop Jln. Pasar Karet Baru Barat IV hingga London School. Pantau informasi terkini layanan Transjakarta melalui X pt_transjakarta, instagram: infotije, pt_transjakarta ataupun aplikasi TJ:Transjakarta.  Tks ^RN",
+        "publishedAt": "2026-10-24T10:07:19Z",
+        "source": "x:PT_Transjakarta",
+        "url": "https://x.com/PT_Transjakarta/status/2113935361625956659",
+        "systemHint": "transjakarta"
+      },
+      "expected": {
+        "scope": "stop",
+        "places": [
+          "Plaza Sentral",
+          "Bundaran Senayan 1",
+          "London School"
+        ],
+        "note": "Modifikasi 6D menyebut beberapa halte: Plaza Sentral, Bundaran Senayan 1, Jln. Karet Pasar Baru Timur/Barat, London School. Beberapa halte harus muncul. Halte dengan nomor jalan yang berbeda dari pengumuman tidak boleh dipakai sebagai pengganti."
+      }
+    },
+    {
+      "id": "line-9d-start-time",
+      "input": {
+        "text": "@h0miiieeee @h0miiieeee Halo kak. Benar, untuk di tanggal 25 Oktober 2026 layanan Rute 9D mulai beroperasi pada pukul 10:00 WIB ya. Pantau informasi terkini layanan Transjakarta melalui X pt_transjakarta, instagram: infotije, pt_transjakarta ataupun aplikasi TJ: Transjakarta.^JN",
+        "publishedAt": "2026-10-24T03:19:06Z",
+        "source": "x:PT_Transjakarta",
+        "url": "https://x.com/PT_Transjakarta/status/2113832627610509733",
+        "systemHint": "transjakarta"
+      },
+      "expected": {
+        "scope": "line",
+        "places": [],
+        "note": "9D mulai beroperasi pukul 10.00 pada 25 Oktober 2026: perubahan layanan pada satu koridor. Halte boleh kosong."
+      }
+    },
+    {
+      "id": "road-6n-dharmawangsa",
+      "input": {
+        "text": "#INFOTRANSJAKARTA | Rute 6N: Ragunan - Blok M Via Kemang mengalami pengalihan rute dikarenakan adanya penutupan jalan di sekitar jalan Dharmawangsa VIII. Sementara arah Blok M tidak melayani bus stop Simpang Dharmawangsa VIII s/d Simpang Dharmawangsa Raya. Pantau informasi terkini layanan Transjakarta melalui X pt_transjakarta, instagram: infotije, pt_transjakarta ataupun aplikasi TJ:Transjakarta. Mari kita #JagaJakarta #Rute6N",
+        "publishedAt": "2026-10-23T11:28:22Z",
+        "source": "x:PT_Transjakarta",
+        "url": "https://x.com/PT_Transjakarta/status/2113593370132033641",
+        "systemHint": "transjakarta"
+      },
+      "expected": {
+        "scope": "stop",
+        "places": [
+          "Dharmawangsa"
+        ],
+        "note": "Penutupan jalan di Jalan Dharmawangsa VIII membuat 6N dialihkan. Halte 6N di sekitar jalan itu (misalnya Simpang Dharmawangsa VIII) adalah jawaban yang benar."
+      }
+    },
+    {
+      "id": "stop-jak38-masjid",
+      "input": {
+        "text": "#INFOTRANSJAKARTA | Layanan Mikrotrans JAK 38: Bulak Ringin - Kampung Rambutan mengalami pengalihan rute dikarenakan adanya perbaikan saluran air di sekitar jalan Masjid At-Taufiq. Sementara tidak melayani bus stop Jln. Acin Gaton s/d Sbr. Jln.Mangga KDW. Pantau informasi terkini layanan Transjakarta melalui X pt_transjakarta, instagram: infotije, pt_transjakarta ataupun aplikasi TJ:Transjakarta. Mari kita #JagaJakarta #RuteJAK38",
+        "publishedAt": "2026-10-24T08:55:03Z",
+        "source": "x:PT_Transjakarta",
+        "url": "https://x.com/PT_Transjakarta/status/2113917174750523827",
+        "systemHint": "transjakarta"
+      },
+      "expected": {
+        "scope": "stop",
+        "places": [
+          "Acin Gaton"
+        ],
+        "note": "JAK 38 dialihkan karena perbaikan saluran air di Jalan Masjid. Halte JAK 38 di sekitar jalan itu (Jln. Acin Gaton dan sekitarnya) adalah jawaban yang benar."
+      }
+    },
+    {
+      "id": "krl-bogor-cancelled",
+      "input": {
+        "text": "Tujuh Perjalanan KRL Lintas Bogor Dibatalkan, Penumpang Diminta Atur Ulang Jadwal - Media Nusantara https://t.co/CI4Kt3uR5W",
+        "publishedAt": "2026-10-19T06:13:53.000Z",
+        "source": "x:ASBINews",
+        "url": "https://x.com/ASBINews/status/2112064675508810020",
+        "systemHint": null
+      },
+      "expected": {
+        "scope": "line",
+        "places": [],
+        "note": "Tujuh perjalanan KRL lintas Bogor dibatalkan. Ini gangguan pada satu lin KRL (Commuter Line Bogor), bukan seluruh jaringan KRL dan bukan satu halte. Stasiun Bogor/Bojonggede boleh disebut, tetapi yang penting lininya."
+      }
+    },
+    {
+      "id": "krl-sudirman-blackout",
+      "input": {
+        "text": "Stasiun Sudirman, Jakarta Pusat, mendadak gelap gulita akibat pemadaman listrik pada Kamis (22/10/2026) malam. Peron yang dipadati penumpang terlihat minim penerangan, sementara petugas mengimbau masyarakat untuk berhati-hati saat berjalan.\n\nKAI Commuter mengonfirmasi pemadaman berasal dari jaringan PLN dan berlangsung selama 30 menit, mulai pukul 18.59 hingga 19.29 WIB. Meski sempat mengalami blackout, layanan KRL tetap berjalan normal tanpa gangguan.\n\n#Okezone #StasiunSudirman #Blackout #KRL",
+        "publishedAt": "2026-10-23T10:00:03.000Z",
+        "source": "x:okezonenews",
+        "url": "https://x.com/okezonenews/status/2113571141952716828",
+        "systemHint": null
+      },
+      "expected": {
+        "scope": "not-a-notice",
+        "places": [],
+        "note": "Stasiun Sudirman gelap akibat pemadaman listrik, tetapi KRL tetap berjalan normal. Gangguan fasilitas tanpa penghentian perjalanan bukan gangguan layanan."
+      }
+    },
+    {
+      "id": "negative-mrt-night-hours",
+      "input": {
+        "text": "MRT Jakarta Beroperasi Mulai Pukul 03.00 WIB pada 24-25 Oktober 2026, Ini Alasannya\n\n\"Kalau kemudian, misalnya ada yang sesak napas atau apa pun, silakan datang ke rumah sakit RSUD yang dimiliki oleh pemerintah DKI Jakarta,\" ujar dia.\n\nPramono juga meminta pengertian masyarakat jika terjadi pengalihan arus lalu lintas.\n\nBaca juga: Daftar Rute Transjakarta yang Berubah Saat JRF 2026 pada 24-25 Oktober\n\nIa berharap Jakarta Running Festival dapat berlangsung tertib meskipun digelar bersamaan dengan agenda konser musik pada akhir pekan ini. [...] Selain itu, Pemerintah Provinsi (Pemprov) DKI Jakarta juga memberikan layanan transportasi gratis bagi peserta JRF pada 24 dan 25 Oktober 2026.\n\nLayanan tersebut mencakup Transjakarta, MRT, LRT Jakarta, dan Mikrotrans.\n\nPeserta dapat memanfaatkan layanan tersebut dengan menunjukkan race bib atau nomor dada dan mengenakan jersey resmi yang dikeluarkan panitia.\n\nBaca juga: Pramono Mengaku Tak Bisa Tidur, Berharap Hujan Turun Jelang JRF dan Konser Kanye West [...] Selain itu, rumah sakit umum daerah (RSUD) milik Pemprov DKI Jakarta turut disiagakan untuk mengantisipasi peserta yang mengalami gangguan kesehatan selama perlombaan.\n\nBaca juga: Sejumlah Jalan Jakarta Ditutup Saat JRF pada 24-25 Oktober, Ini Daftarnya\n\nPramono mengatakan, terdapat 31 RSUD, 44 puskesmas, dan 292 puskesmas pembantu yang dapat dimanfaatkan untuk mendukung pelayanan kesehatan selama kegiatan berlangsung.",
+        "publishedAt": "Fri, 23 Oct 2026 10:23:49 GMT",
+        "source": "x:megapolitan.kompas.com",
+        "url": "https://megapolitan.kompas.com/read/2026/10/23/17234911/mrt-jakarta-beroperasi-mulai-pukul-0300-wib-pada-24-25-oktober-2026-ini",
+        "systemHint": "transjakarta"
+      },
+      "expected": {
+        "scope": "not-a-notice",
+        "places": [],
+        "note": "MRT beroperasi mulai pukul 03.00 pada 24-25 Oktober adalah jadwal layanan, bukan gangguan."
+      }
+    },
+    {
+      "id": "negative-demo-normal",
+      "input": {
+        "text": "Transjakarta, MRT, dan LRT tetap beroperasi normal saat ...\n\nDemo Jakarta Hari Ini, Transjakarta hingga MRT Beroperasi Normal: Transjakarta, MRT, dan LRT tetap beroperasi normal saat demo Jakarta 20 Oktober 2026.",
+        "publishedAt": "2026-10-24T11:44:47.051Z",
+        "source": "x:facebook.com",
+        "url": "https://www.facebook.com/beritasatuofficial/posts/demo-jakarta-hari-ini-transjakarta-hingga-mrt-beroperasi-normal-transjakarta-mrt/1552615483567311",
+        "systemHint": "transjakarta"
+      },
+      "expected": {
+        "scope": "not-a-notice",
+        "places": [],
+        "note": "Transjakarta, MRT dan LRT beroperasi normal saat demo: tidak ada gangguan yang perlu dicatat."
+      }
+    }
+  ]
+}

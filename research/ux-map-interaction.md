@@ -210,6 +210,14 @@ Tiga aturan yang tidak bisa ditawar:
 3. **Selalu isi `padding`.** Tanpa padding, halte bisa tertutup header di
    atas atau bottom sheet di bawah. Di desktop cukup `{ top: 80, bottom: 40 }`;
    di mobile, bagian bawah dikurangi oleh sheet: `{ top: 80, bottom: 120 }`.
+4. **`fitBounds` hanya saat perjalanan yang diikuti berubah**, termasuk
+   saat satu bagian perjalanan dipilih di daftar. `idle` dan `styledata`
+   menyala lagi setelah pembaca selesai zoom, dan juga saat cat lapisan
+   berubah. Memasang `fitBounds` atau menggambar ulang garis di sana
+   membuat rute berkedip. Zoom dan geser milik pembaca sampai pilihan
+   berganti.
+   (*Kebijakan tim*, sama dengan peta navigasi yang tidak merebut kamera
+   setelah gestur.)
 
 ### 3. Target sentuh di peta: **44 × 44 CSS px**
 

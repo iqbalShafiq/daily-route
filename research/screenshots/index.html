@@ -1,0 +1,136 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Daily Route · simulation screenshots</title>
+<style>
+  :root { color-scheme: light; --ink:#1d252c; --muted:#5b6770; --line:#d9e0e4; --paper:#f4f6f7; --accent:#0f6b5c; }
+  * { box-sizing: border-box; }
+  body { margin:0; background:var(--paper); color:var(--ink); font:15px/1.55 "Helvetica Neue", Arial, sans-serif; }
+  main { max-width:1180px; margin:0 auto; padding:40px 24px 80px; }
+  h1 { font-size:34px; line-height:1.15; margin:0 0 8px; letter-spacing:-.02em; }
+  h2 { font-size:20px; margin:44px 0 14px; }
+  p { margin:0 0 12px; }
+  .lede { color:var(--muted); max-width:780px; }
+  figure { margin:0 0 34px; background:#fff; border:1px solid var(--line); border-radius:12px; overflow:hidden; }
+  figure img { display:block; width:100%; height:auto; }
+  figcaption { padding:12px 16px 14px; color:var(--muted); font-size:13px; }
+  figcaption strong { color:var(--ink); }
+  table { width:100%; border-collapse:collapse; background:#fff; border:1px solid var(--line); font-size:13px; }
+  th, td { text-align:left; padding:9px 12px; border-bottom:1px solid var(--line); white-space:nowrap; }
+  th { background:#eef2f2; font-weight:600; }
+  .grid { display:grid; grid-template-columns:repeat(2, minmax(0,1fr)); gap:18px; }
+  .note { border-left:3px solid var(--accent); padding:10px 14px; background:#eaf3f0; margin:18px 0; }
+  code { font-family:ui-monospace, SFMono-Regular, Menlo, monospace; font-size:12px; }
+  @media (max-width:760px) { .grid { grid-template-columns:1fr; } }
+</style>
+</head>
+<body>
+<main>
+  <h1>Daily Route · simulation screenshots</h1>
+  <p class="lede">25 October 2026. The Jakarta Running Festival closure, a one-direction closure, a future window, and a chat after the event. The closure fixtures were inserted only for the screenshot and deleted afterwards; the clean board is back to 23 notices.</p>
+
+  <div class="note"><strong>Fixture rule.</strong> Screenshots 03–05 use a temporary notice whose source is <code>sim:full</code> or <code>sim:directional</code>. The rows were deleted after the run; the final board has no <code>sim:</code> row.</div>
+
+  <h2>0. The clean board</h2>
+  <figure><img src="01-home-notices.png" alt="Home with 23 active notices"><figcaption><strong>23 open notices, none about the Jakarta Running Festival.</strong> The map draws the operating network; the board is the single chronological list.</figcaption></figure>
+
+  <h2>1. Grogol Reformasi → Simpang Kuningan, open</h2>
+  <figure><img src="02-route-open.png" alt="Open route from Grogol Reformasi to Simpang Kuningan"><figcaption><strong>41 min, Rp3.500, no change.</strong> Corridor 9 towards Pinang Ranti. This is the normal state after the event.</figcaption></figure>
+
+  <h2>2. A full stop closure</h2>
+  <figure><img src="03-route-blocked.png" alt="Full closure at Simpang Kuningan"><figcaption><strong>Simpang Kuningan closed in both directions.</strong> The planner alights at Tegal Parang, one stop after Simpang, and walks 310 m: 48 minutes, no change. The notice appears on the board with its end time.</figcaption></figure>
+
+  <h2>3. A closure in one direction only</h2>
+  <div class="grid">
+    <figure><img src="04-directional-blocked.png" alt="Directional closure, 9 blocked, 9A alternative"><figcaption><strong>Grogol → Simpang (backward).</strong> Corridor 9 is removed by the platform-scoped notice; 9A is the viable alternative at 42 min.</figcaption></figure>
+    <figure><img src="05-directional-open.png" alt="Opposite direction remains open"><figcaption><strong>Simpang → Grogol (forward).</strong> The other side of the road is not affected: 7R runs in 41 min. The notice is still visible, but it does not block this direction.</figcaption></figure>
+  </div>
+
+  <h2>4. A future window</h2>
+  <figure><img src="06-future-not-on-board.png" alt="Future notice is not on the board"><figcaption><strong>The notice starts tomorrow.</strong> The board stays at 23 open notices; the future row is stored but not shown. The map is the clean operating network.</figcaption></figure>
+
+  <h2>5. Chat after the event</h2>
+  <figure><img src="07-chat-after.png" alt="Chat answer: route is open"><figcaption><strong>“Sudah terbuka.”</strong> The assistant plans the 41-minute corridor 9 journey and says there is no active disruption. The answer uses <code>list_notice_history</code>.</figcaption></figure>
+  <figure><img src="08-chat-history.png" alt="Chat history explanation"><figcaption><strong>Why the notice disappeared.</strong> The archive says the JRF diversion ended at 09:15 WIB and the S61/51ST windows ended at 10:00 WIB; the resolution reasons are <code>announcement-end</code> or follow-up.</figcaption></figure>
+
+  <h2>6. Usage ledger</h2>
+  <p>The paid calls are stored in <code>usage_events</code>. X is estimated at $0.005 per Post read; the AI cost is the one OpenRouter reported.</p>
+  <table>
+    <thead><tr><th>Kind</th><th>Operation</th><th>Model / endpoint</th><th>Provider</th><th>Posts</th><th>Cost USD</th><th>Latency</th><th>Status</th></tr></thead>
+    <tbody>
+      <tr><td>ai</td><td>chat</td><td>deepseek-v4.1-flash</td><td>Sail Research</td><td>0</td><td>0.000560</td><td>19.8 s</td><td>ok</td></tr>
+      <tr><td>ai</td><td>chat</td><td>deepseek-v4.1-flash</td><td>Sail Research</td><td>0</td><td>0.000078</td><td>3.9 s</td><td>ok</td></tr>
+      <tr><td>ai</td><td>classifier</td><td>deepseek-v4.1-flash</td><td>Sail Research</td><td>0</td><td>0.000787</td><td>47.8 s</td><td>ok</td></tr>
+      <tr><td>x</td><td>monitor</td><td>stream</td><td>X</td><td>1</td><td>0.005000</td><td>—</td><td>ok</td></tr>
+      <tr><td>x</td><td>monitor</td><td>recent search</td><td>X</td><td>1</td><td>0.005000</td><td>—</td><td>ok</td></tr>
+    </tbody>
+  </table>
+  <p style="margin-top:14px;color:var(--muted);font-size:13px">Totals at capture: 9 AI calls, $0.003495; 21 X calls, $0.090000. Worker stream: connected, 0 reconnects, last Post 08:48 UTC (15:48 WIB).</p>
+
+  <h2>7. A skipped stop in the journey list</h2>
+  <figure><img src="11-skipped-stop.png" alt="Expanded stop list with a skipped stop"><figcaption><strong>Simpang Kuningan is passed, not served.</strong> The ride details are open by default; the skipped stop has a red dot, a red strikethrough and is labelled skipped. Hovering it gives the notice title. The journey continues to Pancoran; the stop is not presented as a place to board or alight.</figcaption></figure>
+
+  <h2>8. A corridor borrows another corridor</h2>
+  <figure><img src="17-diversion-route.png" alt="Koridor 9 diverted from Simpang Kuningan to Tanjung Duren"><figcaption><strong>Simpang Kuningan → Tanjung Duren.</strong> The fewest-changes journey is a single Koridor 9 ride: from Simpang Kuningan it follows the 6A alignment to Bundaran HI ASTRA, then Tomang Raya, then Tanjung Duren. The shape combines the OSM shapes of 6A and 8 with routed connector roads; it is marked approximate because the operator published no shape. The fare stays one Koridor 9 fare.</figcaption></figure>
+  <figure><img src="18-diversion-notice.png" alt="Expanded notice with diverted route and alignment points"><figcaption><strong>The notice carries the evidence.</strong> The expanded row shows the operator's source text, the followed corridors, which via points are served and which are alignment only, and the seven ordinary stops that are not served.</figcaption></figure>
+  <figure><img src="19-diversion-reverse.png" alt="Reverse Koridor 9 diversion from Tanjung Duren to Simpang Kuningan"><figcaption><strong>The reverse direction.</strong> Tanjung Duren → Simpang Kuningan is also a single Koridor 9 ride (53 min); its borrowed shape is composed in the opposite direction. The 2025 operator notice only wrote the Pluit direction, so this reverse path is explicitly approximate.</figcaption></figure>
+
+  <h2>8b. One corridor, two alignments</h2>
+  <figure><img src="20-line-patterns.png" alt="Koridor 8 pattern list for via Tomang and via Cideng"><figcaption><strong>Koridor 8 via Tomang and via Cideng, in the route panel.</strong> The list gives the headsign, service day, skipped stops and added stops. Cideng is Sunday only; on a Monday the row says "not today". The selected pattern is marked "this journey" and the map uses its shape.</figcaption></figure>
+  <figure><img src="21-corridor9-patterns.png" alt="Koridor 9 all-stop and toll pattern list"><figcaption><strong>Koridor 9 all-stop and toll patterns.</strong> The chosen one-seat journey is via Tol Petamburan (18 stops). The other patterns show Gerbang Pemuda/Petamburan or the Kemanggisan–Jembatan Tiga stretch as skipped, so the rider can see why the bus does not call there.</figcaption></figure>
+  <figure><img src="22-corridor7-patterns.png" alt="Koridor 7 all-stop and toll pattern list"><figcaption><strong>Koridor 7 toll and all-stop patterns.</strong> The selected pattern is via Tol HEK; the list names Cawang Cililitan, Cililitan and Kramat Jati as skipped. The ordinary pattern remains visible as the all-stop choice.</figcaption></figure>
+
+  <h2>8c. Left-hand alignment at Grogol</h2>
+  <figure><img src="24-grogol-9-9a.png" alt="Corridor 9 and 9A aligned on the left side at Grogol"><figcaption><strong>9 and 9A after the direction fix.</strong> The return geometry now comes from the Grogol→Cililitan OSM relation instead of the outbound path reversed; the bus layers also carry a left-hand-traffic offset. The route line stays on the left side of the road, while rail and walking keep their own alignment.</figcaption></figure>
+
+  <h2>9. Why a notice is still on the board</h2>
+  <figure><img src="16-notice-reasons.png" alt="Notice rows with a short reason they are still active"><figcaption><strong>A reason on every live row.</strong> "No reopening yet · 06:41 WIB" says the event is still in force and when it was last confirmed. A notice with an announced end says "Ends 22:00 WIB" instead. The board is down to six active notices after the eight-hour fallback.</figcaption></figure>
+
+  <h2>10. Notice board: Today first, newest first</h2>
+  <figure><img src="15-notices-newest-first.png" alt="Notice board with Today group first and newest rows"><figcaption><strong>Today above the overnight carry-over.</strong> Within each group the newest announcement is first (06:41 before 05:16). The service-day grouping keeps a 25 October event visible while it is still in force.</figcaption></figure>
+
+  <h2>11. Notice board grouped by service day</h2>
+  <figure><img src="14-notices-grouped.png" alt="Notice board with Overnight carried over group and dates"><figcaption><strong>Overnight · carried over.</strong> The board does not wipe itself at midnight. A notice from the previous evening stays under the carried group while it is still in force; each row has the date and time, and the header says the current WIB date.</figcaption></figure>
+
+  <h2>12. The source behind a notice</h2>
+  <figure><img src="12-notice-expanded.png" alt="Notice detail expanded inline with the original X post"><figcaption><strong>The stored original Post, expanded in place.</strong> Clicking a notice opens an inline panel under the row, with a short height/opacity transition and a rotating chevron. The panel shows the Post text, author, time and a link to X; a news notice shows its excerpt and article link.</figcaption></figure>
+
+  <h2>13. Route stops wear the official mark</h2>
+  <figure><img src="13-route-map-logos.png" alt="Route stops drawn with Transjakarta marks"><figcaption><strong>No more red dots on the route.</strong> Every stop of corridor 9 carries the Transjakarta mark; the origin has a ring, and the route panel is open. The normal network view is unchanged.</figcaption></figure>
+
+  <h2>14. This journey, one mark per mode</h2>
+  <figure><img src="10-this-journey.png" alt="This journey shows one Transjakarta mark"><figcaption><strong>Three Transjakarta lines, one mark.</strong> The 9 → 6B → 7E journey no longer prints a line list or "Change of vehicle"; the dock shows a single inline operator wordmark.</figcaption></figure>
+
+  <h2>15. Worker evidence</h2>
+  <figure><img src="09-evidence.png" alt="Worker retry, X connection guard and usage ledger evidence"><figcaption><strong>Worker-level cases.</strong> The needs_review test, the second-worker port guard, the usage ledger rows, and the clean board after the fixtures were deleted.</figcaption></figure>
+
+  <h2>17. Scheduled time, frequency and night</h2>
+  <figure><img src="28-time-aware-setup.png" alt="Time-aware planner with Leave at 09:00 and a Frequent service chip"><figcaption><strong>Leave at 09:00.</strong> The planner uses the GTFS service window and headway instead of a fixed five-minute wait. The ride carries a <em>Frequent · 6–7 min</em> chip and the published daily window; "Watch" keeps this journey in the browser.</figcaption></figure>
+  <figure><img src="29-night-safe.png" alt="Night-safe planner at 23:00 with service windows"><figcaption><strong>Night-safe after dark.</strong> The time selects 23:00 and turns on the walking penalty. The planner orders the journeys that still run at that hour by the night cost; it does not invent a service that has stopped.</figcaption></figure>
+
+  <h2>18. Stop departure board</h2>
+  <figure><img src="30-stop-departures.png" alt="Stop popover with scheduled departures and headways"><figcaption><strong>Scheduled departures at Grogol Reformasi.</strong> Each line, headsign and scheduled headway comes from the service windows. The card says "Schedule-based, not live arrivals" so a rider cannot mistake it for a vehicle feed.</figcaption></figure>
+
+  <h2>19. Chat with semantic cards</h2>
+  <figure><img src="35-chat-route-card.png" alt="Chat route card with service window and Open this journey"><figcaption><strong>A route card, not a paragraph.</strong> The card comes from the <code>plan_journey</code> tool result; the action opens the same deterministic journey in the planner. The model's prose cannot create the line, fare or duration.</figcaption></figure>
+  <figure><img src="36-chat-stop-card.png" alt="Chat stop card with line chips and endpoint actions"><figcaption><strong>A stop card with actions.</strong> Lines are deduped, and the buttons show the stop or set it as either endpoint. The result came from <code>get_station</code>; the earlier resolver card is merged into it.</figcaption></figure>
+  <figure><img src="32-chat-notice-cards.png" alt="Chat notice cards with source actions"><figcaption><strong>Notice cards.</strong> A notice result becomes a card with its scope, kind and source action. The prose list above is a fallback text answer; the data below is the semantic part.</figcaption></figure>
+  <figure><img src="33-chat-action-opened-route.png" alt="The planner opened from the chat route card"><figcaption><strong>The card action is an action.</strong> "Open this journey" leaves the chat and plans the same route, with the time controls, chips and watch state intact.</figcaption></figure>
+  <figure><img src="34-watch-trip.png" alt="A journey marked Watching"><figcaption><strong>Watch this trip.</strong> The journey is remembered locally and labelled <em>Watching</em>; the button is a state, not a claim of a push notification.</figcaption></figure>
+  <figure><img src="37-mobile-chat-route.png" alt="Mobile chat with a route card"><figcaption><strong>The phone view.</strong> The same semantic card stays readable at 390 px; the answer scrolls to its beginning, so the route card is not pushed below the stop cards.</figcaption></figure>
+
+  <h2>20. Route detail polish</h2>
+  <figure><img src="38-route-new.png" alt="The route leg with a pattern-aware corridor chip and a coloured frequency chip"><figcaption><strong>The leg, simplified.</strong> The corridor code is the pattern-aware chip ("9" or "9 via Tol"), and the frequency is a coloured wait chip next to the service class. The old "2 patterns" disclosure is gone.</figcaption></figure>
+  <figure><img src="41-time-picker.png" alt="Leave at opens a small hour and minute popover in the search surface"><figcaption><strong>Leave at, in the same surface.</strong> The two departure tabs share the pointer treatment; Now has a clock and Leave at a calendar. The old native time input is replaced by a 12-hour analog face: tap an hour, then a minute, or drag the hands; AM/PM and Done sit in the same popover.</figcaption></figure>
+  <figure><img src="44-tab-popover.png" alt="Hovering the Night-safe tab explains that it prefers fewer night walks"><figcaption><strong>The departure tabs explain themselves on hover.</strong> Now, Leave at and Night-safe each carry a small popover. The loose "after dark" label outside the card is gone.</figcaption></figure>
+  <figure><img src="42-time-hover.png" alt="Hovering the analog clock previews the hand without changing the time"><figcaption><strong>The hand follows the pointer.</strong> Hovering the clock previews the active hand at that angle; the chosen time stays unchanged until the rider taps or drags. Leaving the face puts the hand back on the chosen value. This is a hover-only preview, not a hidden edit.</figcaption></figure>
+  <figure><img src="40-pattern-popover.png" alt="Hovering the corridor chip opens the pattern list with the selected pattern highlighted"><figcaption><strong>Pattern detail on demand.</strong> Hovering the corridor chip lists the variants and marks the selected one. The chip and the popover come from the same leg variants; the selected pattern is never inferred from the model.</figcaption></figure>
+  <figure><img src="39-lines-collapsed.png" alt="The whole right dock collapsed to its Lines header"><figcaption><strong>The dock folds to its header.</strong> The old 5/5 count is replaced by an arrow; This journey and the notices board fold with it, and the panel contracts instead of leaving empty space. The arrow points up when the dock is closed and down when it is open.</figcaption></figure>
+
+  <h2>16. What the screenshots do not show</h2>
+  <p>The <code>needs_review</code> retry and the X <code>TooManyConnections</code> fix are worker-level, not UI-level. Their evidence is the worker test, the port-guard log, and the stream health above. Screenshot 06 is the absence of a future notice, which is intentionally quiet.</p>
+</main>
+</body>
+</html>

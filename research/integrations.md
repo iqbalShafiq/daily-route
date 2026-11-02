@@ -130,7 +130,7 @@ Source: <https://docs.x.com/x-api/posts/search/introduction.md> and <https://doc
 **Multi-handle OR filter (the pattern this app needs):**
 
 ```
-(from:PT_Transjakarta OR from:mrtjakarta OR from:lrtjkt OR from:lrtjabodebek OR from:KAI121) -is:retweet -is:reply
+(from:PT_Transjakarta OR from:mrtjakarta OR from:lrtjkt OR from:lrtjabodebek OR from:CommuterLine) -is:retweet -is:reply
 ```
 
 > ⚠️ **UNVERIFIED:** I did not confirm from the docs whether the X search parser accepts a parenthesised OR of five `from:` operators, nor whether there is a per-query operator-count cap. Historically X's parser has been finicky about long OR groups. **Verify with a live call before shipping.** Safe fallback: one request per handle (5 requests per poll — still well inside 450/15min), or a single `from:` per request with `since_id`.
@@ -222,7 +222,12 @@ Verified two ways: (1) each operator's own website footer link, and (2) the `api
 | **MRT Jakarta** (North–South + East–West) | **`@mrtjakarta`** | `78847590` | 109,647 | 38,640 | ✅ `verified: true`, type `individual` | "Akun Informasi Resmi MRT Jakarta" | ⚠️ **UNVERIFIED from official site** — `mrtjakarta.co.id` was **unreachable** (HTTP 000) from this environment, so the handle is confirmed only via the account bio ("Akun Informasi Resmi") + verified badge |
 | **LRT Jakarta** (Kelapa Gading–Jatinegara) | **`@lrtjkt`** | `846894897139363841` | 24,459 | 4,764 | ❌ `verified: false` | "LRT Jakarta" + CARLA contact | ✅ linked from `https://www.lrtjakarta.co.id/` → `https://twitter.com/lrtjkt` |
 | **LRT Jabodebek** (Bekasi–Depok–Tangerang) | **`@lrtjabodebek`** | `1453976897981849602` | 10,339 | 1,974 | ❌ `verified: false` | "Akun Resmi LRT Jabodebek, Transportasi Cerdas Mobilitas Tanpa Batas" | ⚠️ **UNVERIFIED from official site** — `lrtjabodebek.co.id` / `jakarta.lrtjabodebek.co.id` were **unreachable** (HTTP 000); handle confirmed via the account's self-description |
-| **PT Kereta Api Indonesia (KAI)** | **`@KAI121`** | `516165629` | **1,283,358** | 1,481,336 | ✅ `verified: true`, type `organization` | "Official X, Layanan Pelanggan PT Kereta Api Indonesia" | ✅ linked from `https://www.kai.id/` → `https://twitter.com/KAI121` |
+| **KAI Commuter** (KRL Jabodetabek / Commuter Line) | **`@CommuterLine`** | — | — | — | ✅ official bio | "Official Account of KAI Commuter. Contact: 121" | ✅ linked from `commuterline.id` and the official Instagram bio → `https://x.com/CommuterLine` |
+
+> **Runtime correction (29 October 2026):** the worker now uses
+> **`@mrtjakarta`** for MRT Jakarta and **`@CommuterLine`** for KAI Commuter
+> (KRL Jabodetabek). `@MRTjakartaID` and `@KAI121` are not used. LRT Jakarta
+> remains `@lrtjkt`; LRT Jabodebek remains `@lrtjabodebek`.
 
 **Handle-pitfalls I verified — do not use these:**
 
@@ -234,7 +239,7 @@ Verified two ways: (1) each operator's own website footer link, and (2) the `api
 | `@Jabodebek` | An unrelated property agent account (1 follower). |
 | `@railway` | Unrelated (a cloud platform). |
 
-**KAI Commuter:** the commuter service is operated by KAI; there is **no separate verified official @-handle for KAI Commuter** that I could verify. `@KAI121` is the official KAI account and posts commuter service updates (Cikarang Loop, scores, etc.). **UNVERIFIED:** whether KAI Commuter has a separate account under another name.
+**KAI Commuter:** the commuter service is operated by **KAI Commuter**, and its official account is **`@CommuterLine`** (bio: "Official Account of KAI Commuter"; linked from `commuterline.id` and the official Instagram). `@KAI121` is the corporate/intercity PT KAI account, not the commuter operator, and is not used for KRL Jabodetabek. `@KAICommuter` remains a parody handle and must not be ingested.
 
 **Other useful Jakarta operator accounts** (not requested, but commonly the ones that actually post disruptions): `@DishubKemenhub`, `@BPJT`, `@jakarta_tdk`, `@Polres Jakarta` — **UNVERIFIED**, I did not check them.
 
@@ -283,7 +288,7 @@ Multi-handle OR variant (one request instead of five) — **verify the parser ac
 ```bash
 curl -sS --get "https://api.x.com/2/tweets/search/recent" \
   -H "Authorization: Bearer ${X_APP_BEARER_TOKEN}" \
-  --data-urlencode "query=(from:PT_Transjakarta OR from:mrtjakarta OR from:lrtjkt OR from:lrtjabodebek OR from:KAI121) -is:retweet -is:reply lang:id" \
+  --data-urlencode "query=(from:PT_Transjakarta OR from:mrtjakarta OR from:lrtjkt OR from:lrtjabodebek OR from:CommuterLine) -is:retweet -is:reply lang:id" \
   --data-urlencode "max_results=100" \
   --data-urlencode "sort_order=recency" \
   --data-urlencode "tweet.fields=created_at,public_metrics,entities" \
@@ -295,7 +300,7 @@ curl -sS --get "https://api.x.com/2/tweets/search/recent" \
 Resolve handles → IDs once, at boot:
 
 ```bash
-for h in PT_Transjakarta mrtjakarta lrtjkt lrtjabodebek KAI121; do
+for h in PT_Transjakarta mrtjakarta lrtjkt lrtjabodebek CommuterLine; do
   curl -sS "https://api.x.com/2/users/by/username/${h}?user.fields=verified,public_metrics,description" \
     -H "Authorization: Bearer ${X_APP_BEARER_TOKEN}"
   echo
@@ -322,7 +327,7 @@ curl -X POST "https://api.x.com/2/tweets/search/stream/rules" \
       {"value": "from:mrtjakarta -is:retweet", "tag": "mrt"},
       {"value": "from:lrtjkt -is:retweet", "tag": "lrtjkt"},
       {"value": "from:lrtjabodebek -is:retweet", "tag": "lrtjb"},
-      {"value": "from:KAI121 -is:retweet", "tag": "kai"}
+      {"value": "from:CommuterLine -is:retweet", "tag": "krl"}
     ]
   }'
 
@@ -1184,7 +1189,7 @@ export default function TransitMap({ routes, stops, onStopClick }) {
 │  X API v2 (pay-per-use credits, app-only Bearer)             │
 │    └─ poll /2/tweets/search/recent every 5 min, per handle    │
 │       handles: PT_Transjakarta, mrtjakarta, lrtjkt,          │
-│                lrtjabodebek, KAI121                           │
+│                lrtjabodebek, CommuterLine                     │
 │    └─ cost ≈ $6–12/mo (posts read, 24h dedup)                 │
 │                                                               │
 │  Tavily (1,000 free credits/mo)                               │
@@ -1264,9 +1269,9 @@ export default function TransitMap({ routes, stops, onStopClick }) {
 | 18 | Mapbox Maps free-tier map-load allowance | ⚠️ **UNVERIFIED** | The Maps tab of mapbox.com/pricing is JS-rendered; only the Navigation section is server-side HTML. |
 | 19 | MapTiler per-plan tile quotas | ⚠️ **UNVERIFIED** | Same reason — counters are JS-rendered. |
 | 20 | `@stadiamaps/*` npm packages | ❌ **Do not exist** | 6 name variants checked, all 404 on the npm registry. |
-| 21 | Official KAI Commuter handle | ⚠️ **None found** | `@KAICommuter` is a **parody**. `@KAI121` is the official KAI account. |
+| 21 | Official KAI Commuter handle | ✅ **`@CommuterLine`** | Official bio; linked from `commuterline.id`. `@KAICommuter` is a parody. `@KAI121` is PT KAI corporate, not the commuter operator. |
 | 22 | `@mrtjakarta` / `@lrtjabodebek` as *site-linked* handles | ⚠️ **Partially verified** | Both accounts exist, are correct by bio, and `@mrtjakarta` carries a blue check; but both operator sites were unreachable from this environment, so I could not read the official footer link. |
-| 23 | A separate verified KAI Commuter X account | ⚠️ **UNVERIFIED** | Possibly under a name I did not try. |
+| 23 | A separate verified KAI Commuter X account | ✅ **`@CommuterLine`** | Use it for KRL Jabodetabek. |
 
 **Recommended next verification steps (all cheap):**
 1. Open `https://www.kai.id/` in a browser → DevTools → Network → XHR → read the real `api.kai.id` paths (also try `https://www.kai.id/gtfs` and the `/Informasi/` section).

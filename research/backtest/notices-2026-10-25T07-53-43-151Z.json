@@ -1,0 +1,70 @@
+{
+  "generatedAt": "2026-10-25T07:53:43.150Z",
+  "at": "2026-10-25T01:54:00.000Z",
+  "model": "deepseek/deepseek-v4.1-flash-1017",
+  "jev": "typesafe/jev-1.14",
+  "written": false,
+  "counts": {
+    "stop": 2,
+    "line": 0,
+    "network": 0,
+    "skipped": 0,
+    "failed": 0
+  },
+  "rows": [
+    {
+      "externalId": "2114162388899692856",
+      "url": "https://x.com/PT_Transjakarta/status/2114162388899692856",
+      "publishedAt": "2026-10-25T01:09:27.000Z",
+      "source": "x:PT_Transjakarta",
+      "systemHint": "transjakarta",
+      "noticeId": "43232afc-6287-4077-9766-0b5bdc1e6dff",
+      "title": "Corridor 1 service modified and diverted on 25 October",
+      "scope": "stop",
+      "stations": [
+        "Kota Bambu",
+        "Kemanggisan",
+        "Pancoran Arah Barat",
+        "Tegal Mampang",
+        "Rawa Barat",
+        "Pasar Santa",
+        "Monumen Nasional",
+        "Asean"
+      ],
+      "lines": [
+        "1",
+        "13",
+        "9"
+      ],
+      "roads": [],
+      "unresolved": [
+        "Pancoran arah Barat",
+        "ASEAN"
+      ],
+      "ms": 51776,
+      "error": null
+    },
+    {
+      "externalId": "2114143962185531586",
+      "url": "https://x.com/PT_Transjakarta/status/2114143962185531586",
+      "publishedAt": "2026-10-24T23:56:14.000Z",
+      "source": "x:PT_Transjakarta",
+      "systemHint": "transjakarta",
+      "noticeId": null,
+      "title": "Transjakarta Corridor 9 diverted due to Jakarta Running Festival 2026",
+      "scope": "stop",
+      "stations": [
+        "Simpang Kuningan",
+        "Petamburan",
+        "Pancoran Tugu"
+      ],
+      "lines": [
+        "9"
+      ],
+      "roads": [],
+      "unresolved": [],
+      "ms": 31553,
+      "error": null
+    }
+  ]
+}

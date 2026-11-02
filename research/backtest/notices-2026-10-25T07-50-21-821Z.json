@@ -1,0 +1,69 @@
+{
+  "generatedAt": "2026-10-25T07:50:21.819Z",
+  "at": "2026-10-25T01:54:00.000Z",
+  "model": "deepseek/deepseek-v4.1-flash-1017",
+  "jev": "typesafe/jev-1.14",
+  "written": false,
+  "counts": {
+    "stop": 0,
+    "line": 0,
+    "network": 0,
+    "skipped": 3,
+    "failed": 0
+  },
+  "rows": [
+    {
+      "externalId": "2114197780931776913",
+      "url": "https://x.com/PT_Transjakarta/status/2114197780931776913",
+      "publishedAt": "2026-10-25T03:30:05.000Z",
+      "source": "x:PT_Transjakarta",
+      "systemHint": "transjakarta",
+      "noticeId": null,
+      "title": "Transjakarta services affected by Jakarta Running Festival 2026 return to normal",
+      "scope": "not-a-notice",
+      "stations": [],
+      "lines": [],
+      "roads": [],
+      "unresolved": [],
+      "ms": 7560,
+      "error": null
+    },
+    {
+      "externalId": "2114191181970329695",
+      "url": "https://x.com/PT_Transjakarta/status/2114191181970329695",
+      "publishedAt": "2026-10-25T03:03:52.000Z",
+      "source": "x:PT_Transjakarta",
+      "systemHint": "transjakarta",
+      "noticeId": null,
+      "title": "Transjakarta services affected by Jakarta Running Festival 2026 return to normal",
+      "scope": "not-a-notice",
+      "stations": [],
+      "lines": [],
+      "roads": [],
+      "unresolved": [],
+      "ms": 5775,
+      "error": null
+    },
+    {
+      "externalId": "2114188548714979680",
+      "url": "https://x.com/PT_Transjakarta/status/2114188548714979680",
+      "publishedAt": "2026-10-25T02:53:24.000Z",
+      "source": "x:PT_Transjakarta",
+      "systemHint": "transjakarta",
+      "noticeId": null,
+      "title": "Transjakarta Corridor 9 Pinang Ranti - Pluit returns to normal after Jakarta Running Festival 2026",
+      "scope": "not-a-notice",
+      "stations": [
+        "Pinang Ranti",
+        "Pluit"
+      ],
+      "lines": [
+        "9"
+      ],
+      "roads": [],
+      "unresolved": [],
+      "ms": 15425,
+      "error": null
+    }
+  ]
+}

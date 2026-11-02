@@ -241,11 +241,11 @@
   },
 
   "copy": {
-    "lang": "id-ID",
+    "lang": "en",
     "principles": [
       "Tidak ada copy pemasaran, tidak ada tanda seru, tidak ada emoji, tidak ada em-dash.",
-      "Bahasa Indonesia resmi: angka ribuan memakai titik, desimal memakai koma, jam memakai titik, rupiah tanpa spasi.",
-      "Istilah mengikuti operator: halte untuk bus, stasiun untuk MRT, LRT Jakarta, LRT Jabodebek, dan KRL.",
+      "The rider interface is English. Rupiah stays Rp5.000. The clock is 10:14 WIB. Place names stay as published.",
+      "A bus stops at a stop. A train stops at a station.",
       "Label mengikuti kapitalisasi kalimat. Uppercase hanya untuk eyebrow dan kode jalur.",
       "Setiap keadaan kosong menyebut apa yang terjadi dan apa yang bisa dilakukan berikutnya."
     ],

@@ -1,0 +1,541 @@
+{
+  "runId": "eval-2026-10-24T12-48-08-509Z",
+  "generatedAt": "2026-10-24T12:53:04.402Z",
+  "model": "deepseek/deepseek-v4.1-flash",
+  "jev": "typesafe/jev-1.14",
+  "totals": {
+    "total": 14,
+    "passed": 14,
+    "failed": 0,
+    "invalid": 0
+  },
+  "usage": {
+    "target": {
+      "inputTokens": 0,
+      "outputTokens": 0,
+      "totalTokens": 0,
+      "cachedInputTokens": 0,
+      "cacheCreationInputTokens": 0
+    },
+    "evaluation": {
+      "inputTokens": 0,
+      "outputTokens": 0,
+      "totalTokens": 0,
+      "cachedInputTokens": 0,
+      "cacheCreationInputTokens": 0
+    },
+    "total": {
+      "inputTokens": 0,
+      "outputTokens": 0,
+      "totalTokens": 0,
+      "cachedInputTokens": 0,
+      "cacheCreationInputTokens": 0
+    }
+  },
+  "cases": [
+    {
+      "id": "stop-halte-baranangsiang",
+      "outcome": "pass",
+      "expected": {
+        "scope": "stop",
+        "places": [
+          "Baranangsiang"
+        ],
+        "note": "Pengumuman menutup Halte Baranangsiang pada rute P11. Halte itu baru masuk snapshot setelah data diperbarui. Halte Baranangsiang wajib muncul; halte lain di koridor P11 boleh ikut sebagai konteks."
+      },
+      "output": {
+        "scope": "stop",
+        "isDisruption": true,
+        "title": "Halte Baranangsiang not available on route P11",
+        "stations": [
+          "Baranangsiang"
+        ],
+        "lines": [
+          "P11"
+        ],
+        "roads": [],
+        "note": "Halte Baranangsiang is not served on route P11. No start or end time is stated in the announcement."
+      },
+      "metric": [
+        {
+          "name": "grounding",
+          "outcome": "pass",
+          "score": {
+            "scopeCorrect": true,
+            "placesCorrect": true,
+            "inventedPlaces": [],
+            "verdict": "pass",
+            "reason": "Scope sudah benar sebagai stop/halte tertentu, dan tempat yang disebut sistem sesuai, yaitu Halte Baranangsiang pada rute P11."
+          },
+          "comment": "Scope sudah benar sebagai stop/halte tertentu, dan tempat yang disebut sistem sesuai, yaitu Halte Baranangsiang pada rute P11."
+        }
+      ]
+    },
+    {
+      "id": "stop-aeon-sentul-collision",
+      "outcome": "pass",
+      "expected": {
+        "scope": "stop",
+        "places": [
+          "Mall Bellanova Sentul"
+        ],
+        "note": "Pengumuman menyebut bus stop Aeon dan Mall Bellanova Sentul. Di jaringan ini hanya ada AEON Mall di Jakarta Timur (jauh dari koridor P11) dan Mall Bellanova Sentul (di koridor). Memakai AEON Mall Jakarta Timur adalah kesalahan; yang benar Mall Bellanova Sentul, dan boleh ditambah halte lain di P11."
+      },
+      "output": {
+        "scope": "stop",
+        "isDisruption": true,
+        "title": "P11 Bogor–Blok M diverted due to congestion near Exit Tol Sentul",
+        "stations": [
+          "Mall Bellanova Sentul"
+        ],
+        "lines": [
+          "P11"
+        ],
+        "roads": [],
+        "note": "The P11 Bogor–Blok M route is diverted because of traffic congestion around Exit Tol Sentul. Some buses are operating normally, while some are not serving the Aeon and Mall Belanova Sentul stops."
+      },
+      "metric": [
+        {
+          "name": "grounding",
+          "outcome": "pass",
+          "score": {
+            "scopeCorrect": true,
+            "placesCorrect": true,
+            "inventedPlaces": [],
+            "verdict": "pass",
+            "reason": "Sistem memilih scope stop dan menyebut Mall Bellanova Sentul, sesuai pengumuman dan jawaban yang diharapkan."
+          },
+          "comment": "Sistem memilih scope stop dan menyebut Mall Bellanova Sentul, sesuai pengumuman dan jawaban yang diharapkan."
+        }
+      ]
+    },
+    {
+      "id": "road-jak10-pintu-air",
+      "outcome": "pass",
+      "expected": {
+        "scope": "line",
+        "places": [
+          "JAK.10"
+        ],
+        "note": "Halte 'Pintu Air 5 Pasar Baru' tidak ada di jaringan, jadi koridor JAK.10 adalah jawaban yang benar. Menyebut Jl. Pintu Air Raya bagus tetapi tidak wajib; jangan mengarang halte."
+      },
+      "output": {
+        "scope": "line",
+        "isDisruption": true,
+        "title": "Mikrotrans JAK 10 diverted due to road closure near Jl. Pintu Air Raya",
+        "stations": [],
+        "lines": [
+          "JAK.10"
+        ],
+        "roads": [],
+        "note": "Mikrotrans JAK 10 (Tanah Abang–Kota) is rerouted because of a road closure around Jl. Pintu Air Raya and will temporarily not serve Bus stop Pintu air 5 Pasar Baru in both directions."
+      },
+      "metric": [
+        {
+          "name": "grounding",
+          "outcome": "pass",
+          "score": {
+            "scopeCorrect": true,
+            "placesCorrect": true,
+            "inventedPlaces": [],
+            "verdict": "pass",
+            "reason": "Scope line sudah tepat dan tempat yang disebut, JAK.10, sesuai dengan layanan yang mengalami pengalihan rute dalam pengumuman."
+          },
+          "comment": "Scope line sudah tepat dan tempat yang disebut, JAK.10, sesuai dengan layanan yang mengalami pengalihan rute dalam pengumuman."
+        }
+      ]
+    },
+    {
+      "id": "road-jak05-nawawi-unknown",
+      "outcome": "pass",
+      "expected": {
+        "scope": "line",
+        "places": [],
+        "note": "Pengumuman menyebut Jl. Syekh Nawawi Al Bantani dan dua halte yang tidak ada di jaringan. Bila haltenya tidak ditemukan, jawaban yang benar adalah koridor JAK.05 tanpa halte. Mengarang halte seperti 'Jln. Pemadam Kebakaran Cacing' adalah kegagalan."
+      },
+      "output": {
+        "scope": "line",
+        "isDisruption": true,
+        "title": "Mikrotrans JAK 05 diverted due to road closure at Jl. Syekh Nawawi Al Bantani",
+        "stations": [],
+        "lines": [
+          "JAK.05"
+        ],
+        "roads": [],
+        "note": "Mikrotrans JAK 05 (Semper - Rorotan) is diverted because of a road closure around Jl. Syekh Nawawi Al Bantani. Stops Pemadam Kebakaran Cilincing through Kebon Baru are not served in both directions."
+      },
+      "metric": [
+        {
+          "name": "grounding",
+          "outcome": "pass",
+          "score": {
+            "scopeCorrect": true,
+            "placesCorrect": true,
+            "inventedPlaces": [],
+            "verdict": "pass",
+            "reason": "Scope sudah tepat sebagai line, dan sistem menyebut koridor JAK.05 sesuai pengumuman. Tidak ada halte yang dikarang, sehingga sesuai dengan jawaban yang diharapkan."
+          },
+          "comment": "Scope sudah tepat sebagai line, dan sistem menyebut koridor JAK.05 sesuai pengumuman. Tidak ada halte yang dikarang, sehingga sesuai dengan jawaban yang diharapkan."
+        }
+      ]
+    },
+    {
+      "id": "line-4h-not-operating",
+      "outcome": "pass",
+      "expected": {
+        "scope": "line",
+        "places": [],
+        "note": "Rute 4H tidak beroperasi. Kode 4H tidak ada di snapshot, tetapi pengumuman tetap tentang satu koridor, bukan seluruh jaringan. Tidak boleh ada halte karangan."
+      },
+      "output": {
+        "scope": "line",
+        "isDisruption": true,
+        "title": "Transjakarta route 4H not operating",
+        "stations": [],
+        "lines": [
+          "4H"
+        ],
+        "roads": [],
+        "note": "Transjakarta route 4H is currently not operating to serve passengers. Monitor official Transjakarta channels for further updates."
+      },
+      "metric": [
+        {
+          "name": "grounding",
+          "outcome": "pass",
+          "score": {
+            "scopeCorrect": true,
+            "placesCorrect": true,
+            "inventedPlaces": [],
+            "verdict": "pass",
+            "reason": "Scope line sesuai dengan jawaban yang diharapkan. Sistem menyebut koridor 4H, sesuai dengan rute yang diumumkan tidak beroperasi. Tidak ada halte atau tempat yang dikarang."
+          },
+          "comment": "Scope line sesuai dengan jawaban yang diharapkan. Sistem menyebut koridor 4H, sesuai dengan rute yang diumumkan tidak beroperasi. Tidak ada halte atau tempat yang dikarang."
+        }
+      ]
+    },
+    {
+      "id": "network-jakarta-running-festival",
+      "outcome": "pass",
+      "expected": {
+        "scope": "network",
+        "places": [],
+        "note": "Layanan Transjakarta berhenti sementara karena Jakarta Running Festival; pengumuman tidak menyebut koridor atau halte tertentu."
+      },
+      "output": {
+        "scope": "network",
+        "isDisruption": true,
+        "title": "Transjakarta service modification due to Jakarta Running Festival",
+        "stations": [],
+        "lines": [],
+        "roads": [],
+        "note": "Transjakarta says services are temporarily affected by the Jakarta Running Festival, resulting in service modifications. No specific routes, stops, or roads are mentioned."
+      },
+      "metric": [
+        {
+          "name": "grounding",
+          "outcome": "pass",
+          "score": {
+            "scopeCorrect": true,
+            "placesCorrect": true,
+            "inventedPlaces": [],
+            "verdict": "pass",
+            "reason": "Scope sistem sama-sama network dan tidak menyebut koridor/halte tertentu, sehingga sesuai dengan pengumuman yang hanya membahas gangguan layanan Transjakarta secara umum."
+          },
+          "comment": "Scope sistem sama-sama network dan tidak menyebut koridor/halte tertentu, sehingga sesuai dengan pengumuman yang hanya membahas gangguan layanan Transjakarta secara umum."
+        }
+      ]
+    },
+    {
+      "id": "stop-6d-multiple",
+      "outcome": "pass",
+      "expected": {
+        "scope": "stop",
+        "places": [
+          "Plaza Sentral",
+          "Bundaran Senayan 1",
+          "London School"
+        ],
+        "note": "Modifikasi 6D menyebut beberapa halte: Plaza Sentral, Bundaran Senayan 1, Jln. Karet Pasar Baru Timur/Barat, London School. Beberapa halte harus muncul. Halte dengan nomor jalan yang berbeda dari pengumuman tidak boleh dipakai sebagai pengganti."
+      },
+      "output": {
+        "scope": "stop",
+        "isDisruption": true,
+        "title": "Transjakarta Route 6D modified for Jakarta Running Festival 2026",
+        "stations": [
+          "Stasiun Tebet",
+          "Plaza Sentral",
+          "Bundaran Senayan 1",
+          "Jalan Karet Pasar Baru Timur 5",
+          "Jln. Karet Pasar Baru Barat IV",
+          "London School"
+        ],
+        "lines": [
+          "6D"
+        ],
+        "roads": [],
+        "note": "On 25 October 2026, Transjakarta Route 6D: Stasiun Tebet - Bundaran Senayan will temporarily skip several bus stops and serve alternative stops due to traffic engineering for Jakarta Running Festival 2026."
+      },
+      "metric": [
+        {
+          "name": "grounding",
+          "outcome": "pass",
+          "score": {
+            "scopeCorrect": true,
+            "placesCorrect": true,
+            "inventedPlaces": [],
+            "verdict": "pass",
+            "reason": "Scope sudah benar sebagai stop. Halte yang disebut sistem didukung pengumuman, termasuk Plaza Sentral, Bundaran Senayan 1, dan London School, serta halte lain pada rute 6D yang disebut."
+          },
+          "comment": "Scope sudah benar sebagai stop. Halte yang disebut sistem didukung pengumuman, termasuk Plaza Sentral, Bundaran Senayan 1, dan London School, serta halte lain pada rute 6D yang disebut."
+        }
+      ]
+    },
+    {
+      "id": "line-9d-start-time",
+      "outcome": "pass",
+      "expected": {
+        "scope": "line",
+        "places": [],
+        "note": "9D mulai beroperasi pukul 10.00 pada 25 Oktober 2026: perubahan layanan pada satu koridor. Halte boleh kosong."
+      },
+      "output": {
+        "scope": "line",
+        "isDisruption": true,
+        "title": "Transjakarta Route 9D late start on 25 October 2026",
+        "stations": [],
+        "lines": [
+          "9D"
+        ],
+        "roads": [],
+        "note": "Transjakarta Route 9D will begin operating at 10:00 WIB on 25 October 2026, reducing service compared with its usual morning start."
+      },
+      "metric": [
+        {
+          "name": "grounding",
+          "outcome": "pass",
+          "score": {
+            "scopeCorrect": true,
+            "placesCorrect": true,
+            "inventedPlaces": [],
+            "verdict": "pass",
+            "reason": "Scope sesuai, yaitu line, dan koridor 9D yang disebut sistem memang rute yang dimaksud dalam pengumuman. Tidak ada tempat yang dikarang."
+          },
+          "comment": "Scope sesuai, yaitu line, dan koridor 9D yang disebut sistem memang rute yang dimaksud dalam pengumuman. Tidak ada tempat yang dikarang."
+        }
+      ]
+    },
+    {
+      "id": "road-6n-dharmawangsa",
+      "outcome": "pass",
+      "expected": {
+        "scope": "stop",
+        "places": [
+          "Dharmawangsa"
+        ],
+        "note": "Penutupan jalan di Jalan Dharmawangsa VIII membuat 6N dialihkan. Halte 6N di sekitar jalan itu (misalnya Simpang Dharmawangsa VIII) adalah jawaban yang benar."
+      },
+      "output": {
+        "scope": "stop",
+        "isDisruption": true,
+        "title": "Transjakarta Route 6N diversion due to road closure at Jalan Dharmawangsa VIII",
+        "stations": [
+          "Simpang Dharmawangsa VIII"
+        ],
+        "lines": [
+          "6N"
+        ],
+        "roads": [
+          "Jalan Dharmawangsa VIII"
+        ],
+        "note": "Route 6N (Ragunan–Blok M via Kemang) is diverted because of a road closure around Jalan Dharmawangsa VIII. Toward Blok M, buses do not serve stops Simpang Dharmawangsa VIII through Simpang Dharmawangsa Raya."
+      },
+      "metric": [
+        {
+          "name": "grounding",
+          "outcome": "pass",
+          "score": {
+            "scopeCorrect": true,
+            "placesCorrect": true,
+            "inventedPlaces": [],
+            "verdict": "pass",
+            "reason": "Scope stop sesuai karena pengumuman menyebut halte tertentu yang tidak dilayani. Halte Simpang Dharmawangsa VIII dan Jalan Dharmawangsa VIII juga didukung oleh pengumuman, tanpa tempat karangan."
+          },
+          "comment": "Scope stop sesuai karena pengumuman menyebut halte tertentu yang tidak dilayani. Halte Simpang Dharmawangsa VIII dan Jalan Dharmawangsa VIII juga didukung oleh pengumuman, tanpa tempat karangan."
+        }
+      ]
+    },
+    {
+      "id": "stop-jak38-masjid",
+      "outcome": "pass",
+      "expected": {
+        "scope": "stop",
+        "places": [
+          "Acin Gaton"
+        ],
+        "note": "JAK 38 dialihkan karena perbaikan saluran air di Jalan Masjid. Halte JAK 38 di sekitar jalan itu (Jln. Acin Gaton dan sekitarnya) adalah jawaban yang benar."
+      },
+      "output": {
+        "scope": "stop",
+        "isDisruption": true,
+        "title": "Mikrotrans JAK 38 route diversion due to water channel repairs",
+        "stations": [
+          "Jln. Acin Gaton",
+          "Sbr. Jln. Mangga KDW",
+          "Sbr. Anggur KDW"
+        ],
+        "lines": [
+          "JAK.38"
+        ],
+        "roads": [
+          "Jalan Masjid At Taufiq"
+        ],
+        "note": "Mikrotrans JAK 38: Bulak Ringin - Kampung Rambutan is diverted because of water channel repairs near jalan Masjid At-Taufiq, and temporarily does not serve bus stops Jln. Acin Gaton to Sbr. Jln.Mangga KDW."
+      },
+      "metric": [
+        {
+          "name": "grounding",
+          "outcome": "pass",
+          "score": {
+            "scopeCorrect": true,
+            "placesCorrect": true,
+            "inventedPlaces": [],
+            "verdict": "pass",
+            "reason": "Scope sudah sesuai, yaitu stop. Halte yang disebut sistem (Jln. Acin Gaton dan Sbr. Jln. Mangga KDW) sesuai pengumuman, dan halte tambahan masih dalam koridor JAK 38 sehingga tidak dianggap mengarang."
+          },
+          "comment": "Scope sudah sesuai, yaitu stop. Halte yang disebut sistem (Jln. Acin Gaton dan Sbr. Jln. Mangga KDW) sesuai pengumuman, dan halte tambahan masih dalam koridor JAK 38 sehingga tidak dianggap mengarang."
+        }
+      ]
+    },
+    {
+      "id": "krl-bogor-cancelled",
+      "outcome": "pass",
+      "expected": {
+        "scope": "line",
+        "places": [],
+        "note": "Tujuh perjalanan KRL lintas Bogor dibatalkan. Ini gangguan pada satu lin KRL (Commuter Line Bogor), bukan seluruh jaringan KRL dan bukan satu halte. Stasiun Bogor/Bojonggede boleh disebut, tetapi yang penting lininya."
+      },
+      "output": {
+        "scope": "line",
+        "isDisruption": true,
+        "title": "Seven KRL Lintas Bogor trips cancelled",
+        "stations": [],
+        "lines": [
+          "B",
+          "Bogor"
+        ],
+        "roads": [],
+        "note": "Seven KRL Lintas Bogor trips have been cancelled, and passengers are advised to reschedule their journeys."
+      },
+      "metric": [
+        {
+          "name": "grounding",
+          "outcome": "pass",
+          "score": {
+            "scopeCorrect": true,
+            "placesCorrect": true,
+            "inventedPlaces": [],
+            "verdict": "pass",
+            "reason": "Scope line sesuai karena gangguan pada lintas Bogor, dan koridor Bogor yang disebut sistem tepat merujuk ke lintas tersebut."
+          },
+          "comment": "Scope line sesuai karena gangguan pada lintas Bogor, dan koridor Bogor yang disebut sistem tepat merujuk ke lintas tersebut."
+        }
+      ]
+    },
+    {
+      "id": "krl-sudirman-blackout",
+      "outcome": "pass",
+      "expected": {
+        "scope": "not-a-notice",
+        "places": [],
+        "note": "Stasiun Sudirman gelap akibat pemadaman listrik, tetapi KRL tetap berjalan normal. Gangguan fasilitas tanpa penghentian perjalanan bukan gangguan layanan."
+      },
+      "output": {
+        "scope": "not-a-notice",
+        "isDisruption": false,
+        "title": "Sudirman Station blackout did not disrupt KRL services",
+        "stations": [],
+        "lines": [],
+        "roads": [],
+        "note": "Stasiun Sudirman experienced a PLN power outage on 22 October 2026, but KAI Commuter confirmed KRL services continued normally."
+      },
+      "metric": [
+        {
+          "name": "grounding",
+          "outcome": "pass",
+          "score": {
+            "scopeCorrect": true,
+            "placesCorrect": true,
+            "inventedPlaces": [],
+            "verdict": "pass",
+            "reason": "Scope sistem sama dengan jawaban yang diharapkan, yaitu not-a-notice. Pemadaman listrik di Stasiun Sudirman tidak menghentikan layanan KRL, sehingga bukan gangguan layanan transportasi. Tidak ada halte, koridor, atau jalan yang perlu disebut."
+          },
+          "comment": "Scope sistem sama dengan jawaban yang diharapkan, yaitu not-a-notice. Pemadaman listrik di Stasiun Sudirman tidak menghentikan layanan KRL, sehingga bukan gangguan layanan transportasi. Tidak ada halte, koridor, atau jalan yang perlu disebut."
+        }
+      ]
+    },
+    {
+      "id": "negative-mrt-night-hours",
+      "outcome": "pass",
+      "expected": {
+        "scope": "not-a-notice",
+        "places": [],
+        "note": "MRT beroperasi mulai pukul 03.00 pada 24-25 Oktober adalah jadwal layanan, bukan gangguan."
+      },
+      "output": {
+        "scope": "not-a-notice",
+        "isDisruption": false,
+        "title": "MRT Jakarta to operate from 03:00 WIB on 24-25 October 2026 for JRF",
+        "stations": [],
+        "lines": [],
+        "roads": [],
+        "note": "MRT Jakarta will start operating at 03:00 WIB on 24-25 October 2026 for Jakarta Running Festival. Free transport is also available for participants on Transjakarta, MRT, LRT Jakarta, and Mikrotrans with a race bib and official jersey."
+      },
+      "metric": [
+        {
+          "name": "grounding",
+          "outcome": "pass",
+          "score": {
+            "scopeCorrect": true,
+            "placesCorrect": true,
+            "inventedPlaces": [],
+            "verdict": "pass",
+            "reason": "Scope sistem sama dengan jawaban yang diharapkan, yaitu bukan gangguan. Tidak ada tempat yang disebut sehingga tidak ada tempat salah atau dikarang."
+          },
+          "comment": "Scope sistem sama dengan jawaban yang diharapkan, yaitu bukan gangguan. Tidak ada tempat yang disebut sehingga tidak ada tempat salah atau dikarang."
+        }
+      ]
+    },
+    {
+      "id": "negative-demo-normal",
+      "outcome": "pass",
+      "expected": {
+        "scope": "not-a-notice",
+        "places": [],
+        "note": "Transjakarta, MRT dan LRT beroperasi normal saat demo: tidak ada gangguan yang perlu dicatat."
+      },
+      "output": {
+        "scope": "not-a-notice",
+        "isDisruption": false,
+        "title": "",
+        "stations": [],
+        "lines": [],
+        "roads": [],
+        "note": ""
+      },
+      "metric": [
+        {
+          "name": "grounding",
+          "outcome": "pass",
+          "score": {
+            "scopeCorrect": true,
+            "placesCorrect": true,
+            "inventedPlaces": [],
+            "verdict": "pass",
+            "reason": "Pengumuman menyatakan layanan beroperasi normal dan tidak ada gangguan. Sistem juga menilai bukan gangguan tanpa menyebut tempat yang salah atau mengarang."
+          },
+          "comment": "Pengumuman menyatakan layanan beroperasi normal dan tidak ada gangguan. Sistem juga menilai bukan gangguan tanpa menyebut tempat yang salah atau mengarang."
+        }
+      ]
+    }
+  ]
+}

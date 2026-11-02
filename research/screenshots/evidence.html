@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><title>Simulation evidence</title>
+<style>
+body{margin:0;background:#f4f6f7;color:#1d252c;font:15px/1.5 "Helvetica Neue",Arial,sans-serif}
+main{max-width:1100px;margin:0 auto;padding:36px 26px 60px}h1{font-size:30px;margin:0 0 6px;letter-spacing:-.02em}h2{font-size:18px;margin:30px 0 10px}p{color:#5b6770;margin:0 0 10px}
+table{width:100%;border-collapse:collapse;background:#fff;border:1px solid #d9e0e4;font-size:13px}th,td{text-align:left;padding:8px 11px;border-bottom:1px solid #d9e0e4;white-space:nowrap}th{background:#eef2f2}
+code{font-family:ui-monospace,Menlo,monospace;font-size:12px}.ok{color:#0f6b5c;font-weight:600}.bad{color:#9b2c2c;font-weight:600}
+.box{background:#fff;border:1px solid #d9e0e4;border-radius:10px;padding:14px 16px;margin:0 0 14px;font-size:13px}
+</style></head><body><main>
+<h1>Simulation evidence</h1>
+<p>25 October 2026. UI screenshots are in index.html; this page records the worker and database facts that do not have a screen.</p>
+
+<h2>1. Retry / needs_review</h2>
+<div class="box"><span class="ok">PASS</span> <code>apps/worker/src/monitor.test.ts</code> · “marks a post needs_review after the last failed attempt” · post set to 7 attempts, classifier throws, tick marks it <code>needs_review</code> instead of dropping it. Worker suite: 7 passed.</div>
+
+<h2>2. X connection guard</h2>
+<div class="box">
+Start a second worker while the first owns port 4012:<br>
+<code>· worker berjalan di http://localhost:4012</code><br>
+<code>· port 4012 sudah dipakai worker lain; proses ini berhenti tanpa membuka stream</code><br>
+<span class="ok">The second process exits before touching X.</span> Current stream: <code>connected: true</code>, <code>reconnects: 0</code>, <code>lastError: null</code>.
+</div>
+
+<h2>3. Usage ledger</h2>
+<table><thead><tr><th>Kind</th><th>Operation</th><th>Model / endpoint</th><th>Provider</th><th>Posts</th><th>Cost USD</th><th>Latency</th><th>Status</th></tr></thead><tbody>
+<tr><td>ai</td><td>chat</td><td>deepseek-v4.1-flash-1017</td><td>Sail Research</td><td>0</td><td>0.000560</td><td>19,848 ms</td><td>ok</td></tr>
+<tr><td>ai</td><td>chat</td><td>deepseek-v4.1-flash-1017</td><td>Sail Research</td><td>0</td><td>0.000078</td><td>3,883 ms</td><td>ok</td></tr>
+<tr><td>ai</td><td>classifier</td><td>deepseek-v4.1-flash-1017</td><td>Sail Research</td><td>0</td><td>0.000787</td><td>47,797 ms</td><td>ok</td></tr>
+<tr><td>ai</td><td>classifier</td><td>deepseek-v4.1-flash-1017</td><td>Sail Research</td><td>0</td><td>0.000552</td><td>32,567 ms</td><td>ok</td></tr>
+<tr><td>ai</td><td>screen</td><td>typesafe/jev-1.14</td><td>TypeSafe</td><td>0</td><td>0.000000</td><td>1,091 ms</td><td>ok</td></tr>
+<tr><td>x</td><td>monitor</td><td>filtered stream</td><td>X</td><td>1</td><td>0.005000</td><td>—</td><td>ok</td></tr>
+<tr><td>x</td><td>monitor</td><td>recent search</td><td>X</td><td>1</td><td>0.005000</td><td>—</td><td>ok</td></tr>
+</tbody></table>
+<p style="margin-top:10px">Totals at capture: 17 AI calls, $0.006658 (OpenRouter $0.006658, TypeSafe screen calls $0.000000); 35 X calls, $0.105000. X cost is the estimated $0.005 per Post read; AI cost is what the provider reported.</p>
+
+<h2>4. Board after cleanup</h2>
+<div class="box"><code>active notices: 23</code> · <code>sim: rows: 0</code> · <code>Jakarta Running Festival rows: 0</code><br>The test fixtures were deleted; the board is the real afternoon state.</div>
+</main></body></html>
