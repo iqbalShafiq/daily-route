@@ -1,7 +1,17 @@
+export * from "./access.js";
+export * from "./directions.js";
+export * from "./demo-watch.js";
 export * from "./disruption.js";
+export * from "./temporary-service.js";
+export * from "./diversion.js";
 export * from "./fare.js";
 export * from "./geometry.js";
 export * from "./geo.js";
 export * from "./graph.js";
 export * from "./normalize.js";
+export * from "./service.js";
+export * from "./overview.js";
+export * from "./platforms.js";
 export * from "./types.js";
+
+export * from "./chat.js";

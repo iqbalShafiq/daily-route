@@ -11,6 +11,8 @@
  * by the operator is marked as such and left out of the total.
  */
 
+import type { Itinerary, ServiceClass } from "./types.js";
+
 /** A fare that does not depend on the distance. */
 export type FlatFare = {
   kind: "flat";
@@ -74,6 +76,19 @@ export type FareRules = {
   /** The combined tickets that cover more than one operator. */
   integrations: IntegrationRule[];
   /**
+   * What a rider has to do to pay, per operator.
+   *
+   * The sentence is the operator's own rule — where to tap, the balance
+   * the gate asks for — and it is shown with the price.
+   */
+  access?: Record<string, string>;
+  /**
+   * A tariff the research recorded but the operator has not confirmed.
+   *
+   * The amount is not added to the journey. The sentence says why.
+   */
+  withheld?: Record<string, string>;
+  /**
    * The public holidays, as ISO dates.
    *
    * The LRT Jabodebek charges the cheaper fare on a public holiday even
@@ -126,6 +141,15 @@ export type IntegrationRule =
       requiresCard: string;
     };
 
+/**
+ * Where the operator takes the fare.
+ *
+ * A gate charges when the rider enters the paid area and again only when
+ * they have left it. A vehicle charges every time they board, because the
+ * reader is on the bus.
+ */
+export type Billing = "gate" | "vehicle";
+
 /** One leg of a journey, as the fare engine sees it. */
 export type FareLeg = {
   kind: "walk" | "ride";
@@ -133,8 +157,19 @@ export type FareLeg = {
   operator: string | null;
   /** The distance of the leg, in kilometres. */
   distanceKm: number;
-  /** The number of stations the vehicle passes. */
+  /** The number of stations the vehicle passes, including the ends. */
   stopCount: number;
+  /** The station the leg starts at, when the planner knows it. */
+  fromStationId?: string | null;
+  /** The station the leg ends at, when the planner knows it. */
+  toStationId?: string | null;
+  /**
+   * How this ride is charged.
+   *
+   * Absent means the caller does not know, and each ride is then charged
+   * on its own. That keeps a quote without a station graph well defined.
+   */
+  billing?: Billing;
 };
 
 export type FareBreakdownItem = {
@@ -174,6 +209,18 @@ const RUPIAH = "Rp";
 /** Format an amount the way a ticket does. */
 export function formatRupiah(amount: number): string {
   return `${RUPIAH}${Math.round(amount).toLocaleString("id-ID")}`;
+}
+
+/** A distance the way a rider reads it: "9,3 km", "40 km". */
+function formatFareDistance(distanceKm: number): string {
+  const rounded = Math.round(distanceKm * 10) / 10;
+  const text = Number.isInteger(rounded) ? String(rounded) : rounded.toFixed(1);
+  return `${text} km`;
+}
+
+/** A published clock window, with the Indonesian dot: "05.00-07.00". */
+function formatClockWindow(window: string): string {
+  return window.replaceAll(":", ".");
 }
 
 /**
@@ -288,7 +335,7 @@ function fareOfLeg(
       if (earlyMorning && rule.earlyMorningAmount !== undefined) {
         return {
           amount: rule.earlyMorningAmount,
-          detail: `pagi hari (${rule.earlyMorningHours ?? ""})`,
+          detail: `Early morning (${formatClockWindow(rule.earlyMorningHours ?? "")})`,
         };
       }
       return { amount: rule.amount };
@@ -298,7 +345,7 @@ function fareOfLeg(
       // The first station is the base, every further one costs more.
       const stations = Math.max(1, leg.stopCount - 1);
       const amount = Math.min(rule.max, rule.base + stations * rule.perStation);
-      return { amount, detail: `${leg.stopCount} stasiun dilalui` };
+      return { amount, detail: `${leg.stopCount} ${leg.stopCount === 1 ? "stop" : "stops"} on this ride` };
     }
 
     case "perKm": {
@@ -317,19 +364,133 @@ function fareOfLeg(
 
       return {
         amount,
-        detail: `${distance.toFixed(1)} km`,
+        detail: formatFareDistance(distance),
       };
     }
   }
 }
 
+const GATE_CLASSES = new Set<ServiceClass>([
+  "brt",
+  "rapid-transit",
+  "lrt",
+  "commuter-rail",
+]);
+
+/**
+ * Whether a service charges at a gate or on the vehicle.
+ *
+ * BRT, MRT, LRT and KRL charge at the entrance of the paid area. Changing
+ * platform or corridor inside that area is still the same ticket. A bus
+ * with the reader at the door charges every boarding.
+ */
+export function billingFor(serviceClass: ServiceClass | null): Billing {
+  if (serviceClass && GATE_CLASSES.has(serviceClass)) return "gate";
+  return "vehicle";
+}
+
+/**
+ * The rides of one itinerary, in the shape the fare engine reads.
+ *
+ * Station ids and the billing kind travel with the ride, so a change of
+ * vehicle inside one halte is not priced as a second ticket.
+ */
+export function fareLegsOf(itinerary: Itinerary): FareLeg[] {
+  return itinerary.legs.map((leg) => ({
+    kind: leg.kind,
+    operator:
+      leg.kind === "ride" && leg.lineId
+        ? fareOperatorFor({
+            systemId: leg.lineId.split(":")[0] ?? "",
+            serviceClass: leg.serviceClass,
+            lineCode: leg.lineCode,
+          })
+        : null,
+    distanceKm: leg.distanceKm,
+    stopCount: leg.stops.length,
+    fromStationId: leg.fromStationId,
+    toStationId: leg.toStationId,
+    ...(leg.kind === "ride" ? { billing: billingFor(leg.serviceClass) } : {}),
+  }));
+}
+
+type FareSession = {
+  operator: string;
+  distanceKm: number;
+  stopCount: number;
+  rides: number;
+  tail: FareLeg;
+};
+
+/**
+ * One charge.
+ *
+ * Gate rides of the same operator that meet at the same station are one
+ * stay in the paid area: the rider never passed an exit gate. A walk, a
+ * different station, or a reader on the vehicle starts a new charge. When
+ * the station is unknown the rides stay separate, which is the cautious
+ * reading.
+ */
+function fareSessions(legs: readonly FareLeg[]): FareSession[] {
+  const sessions: FareSession[] = [];
+  let current: FareSession | null = null;
+  let leftTheArea = false;
+
+  for (const leg of legs) {
+    if (leg.kind !== "ride" || !leg.operator) {
+      if (leg.kind === "walk" && current) leftTheArea = true;
+      continue;
+    }
+
+    if (current && !leftTheArea && samePaidArea(current.tail, leg)) {
+      current.distanceKm += leg.distanceKm;
+      current.stopCount += Math.max(0, leg.stopCount - 1);
+      current.rides += 1;
+      current.tail = leg;
+    } else {
+      current = {
+        operator: leg.operator,
+        distanceKm: leg.distanceKm,
+        stopCount: Math.max(1, leg.stopCount),
+        rides: 1,
+        tail: leg,
+      };
+      sessions.push(current);
+    }
+    leftTheArea = false;
+  }
+
+  return sessions;
+}
+
+/** Two gate rides that meet inside one station, without leaving it. */
+function samePaidArea(previous: FareLeg, next: FareLeg): boolean {
+  if (previous.billing !== "gate" || next.billing !== "gate") return false;
+  if (!previous.operator || previous.operator !== next.operator) return false;
+  if (!previous.toStationId || !next.fromStationId) return false;
+  return previous.toStationId === next.fromStationId;
+}
+
+function sessionLeg(session: FareSession): FareLeg {
+  return {
+    kind: "ride",
+    operator: session.operator,
+    distanceKm: session.distanceKm,
+    stopCount: session.stopCount,
+  };
+}
+
+/** Where a same-area change happens, in the operator's own word. */
+function paidAreaWord(operator: string): string {
+  return operator.startsWith("transjakarta") ? "stop" : "station";
+}
+
 /**
  * The price of a journey.
  *
- * The combined ticket is offered when it covers every vehicle of the
- * journey and costs less than paying for each one separately. Walking
- * between the vehicles is free, and the ticket stays valid for the whole
- * window the operator allows.
+ * A combined ticket is offered when it covers every charge and costs less
+ * than paying each charge on its own. Walking is free. A change of vehicle
+ * inside one paid area is one charge, not one charge per vehicle.
  */
 export function quoteFare(input: {
   legs: readonly FareLeg[];
@@ -339,50 +500,56 @@ export function quoteFare(input: {
   /** The labels of the operators, for the breakdown. */
   labels?: Record<string, string>;
 }): FareQuote {
-  const rides = input.legs.filter((leg) => leg.kind === "ride" && leg.operator);
+  const sessions = fareSessions(input.legs);
   const breakdown: FareBreakdownItem[] = [];
   const notes: string[] = [];
   const unverified: string[] = [];
 
   let separateTotal = 0;
 
-  for (const leg of rides) {
-    const operator = leg.operator;
-    if (!operator) continue;
+  for (const session of sessions) {
+    const operator = session.operator;
     const rule = input.rules.modes[operator];
     if (!rule) {
       unverified.push(operator);
+      const withheld = input.rules.withheld?.[operator];
+      if (withheld) notes.push(withheld);
       continue;
     }
 
-    const fare = fareOfLeg(rule, leg, input.at, input.rules.holidays);
+    const fare = fareOfLeg(rule, sessionLeg(session), input.at, input.rules.holidays);
     separateTotal += fare.amount;
     const label = input.labels?.[operator] ?? operator;
+    const stayed =
+      session.rides > 1
+        ? `Includes a change inside the same ${paidAreaWord(operator)}`
+        : undefined;
+    // The measure and the transfer are two facts. A comma makes them
+    // read as one clause, so each one keeps its own sentence.
+    const detail = [fare.detail, stayed].filter((part) => part && part.length > 0).join(". ");
     breakdown.push({
       label,
       amountIdr: fare.amount,
-      ...(fare.detail ? { detail: fare.detail } : {}),
+      ...(detail ? { detail } : {}),
     });
   }
 
   // The combined ticket, when every vehicle of the journey is covered.
   let integration: FareQuote["integration"] = null;
   const alternatives: FareAlternative[] = [];
-  const totalDistance = rides.reduce((total, leg) => total + leg.distanceKm, 0);
+  const totalDistance = sessions.reduce((total, session) => total + session.distanceKm, 0);
 
   for (const candidate of input.rules.integrations) {
     if (candidate.kind === "multiModal") {
-      const covered = rides.every(
-        (leg) => leg.operator && candidate.covers.includes(leg.operator),
-      );
-      if (!covered) continue;
+      const covered = sessions.every((session) => candidate.covers.includes(session.operator));
+      if (!covered || sessions.length === 0) continue;
       /*
        * The scheme exists to combine modes, not to make one mode cheaper.
-       * Two buses of the same operator are two fares, not one journey
-       * across two modes, so the scheme is only offered when the journey
-       * really does use more than one operator.
+       * Two charges of the same operator are that operator's own ticket,
+       * so the scheme is only offered when the journey really does use
+       * more than one operator.
        */
-      const operators = new Set(rides.map((leg) => leg.operator));
+      const operators = new Set(sessions.map((session) => session.operator));
       if (operators.size < 2) continue;
 
       const amount = Math.min(
@@ -403,18 +570,18 @@ export function quoteFare(input: {
 
     /*
      * The continuation ticket caps what one operator charges when the
-     * rider changes vehicles inside the window. It needs more than one
-     * vehicle, every vehicle of the journey has to be one the ticket
-     * covers, and the price only exists for a rider who holds the card
-     * the operator names. Without that card every vehicle is charged on
-     * its own, so that price is offered as well.
+     * rider pays for a second boarding inside the window. Staying inside
+     * one halte is not a second boarding. Every charge has to be one the
+     * ticket covers, and the price only exists for a rider who holds the
+     * card the operator names. Without that card every boarding is charged
+     * on its own, so that price is offered as well.
      */
-    const coveredRides = rides.filter(
-      (leg) => leg.operator && candidate.covers.includes(leg.operator),
+    const coveredSessions = sessions.filter((session) =>
+      candidate.covers.includes(session.operator),
     );
-    if (coveredRides.length < 2) continue;
-    const everyRideCovered = rides.every(
-      (leg) => leg.operator && candidate.covers.includes(leg.operator),
+    if (coveredSessions.length < 2) continue;
+    const everyRideCovered = sessions.every((session) =>
+      candidate.covers.includes(session.operator),
     );
     if (!everyRideCovered) continue;
 
@@ -429,18 +596,34 @@ export function quoteFare(input: {
     };
     notes.push(candidate.note);
     alternatives.push({
-      label: `Tanpa ${candidate.requiresCard}`,
+      label: `Without ${candidate.requiresCard}`,
       amountIdr: Math.round(separateTotal),
-      note: "Setiap kendaraan ditagih dengan tarifnya sendiri.",
+      note: "Each boarding is charged on its own.",
     });
     break;
   }
 
   const total = integration ? integration.amountIdr : separateTotal;
 
-  if (!integration && separateTotal > 0) {
+  if (!integration && separateTotal > 0 && sessions.length > 1) {
     notes.push(
-      "Setiap kendaraan ditagih sendiri; tiket integrasi tidak berlaku untuk kombinasi ini.",
+      "Each boarding is charged on its own. An integrated ticket does not cover this combination.",
+    );
+  }
+
+  const seen = new Set<string>();
+  for (const session of sessions) {
+    const operator = session.operator;
+    if (seen.has(operator)) continue;
+    seen.add(operator);
+    const access = input.rules.access?.[operator];
+    if (access) notes.push(access);
+  }
+
+  const explained = unverified.every((operator) => input.rules.withheld?.[operator]);
+  if (unverified.length > 0 && !explained) {
+    notes.push(
+      "Part of this journey has no verified fare, so that part is not included in the total.",
     );
   }
 
@@ -451,7 +634,7 @@ export function quoteFare(input: {
           {
             label: integration.label,
             amountIdr: integration.amountIdr,
-            detail: `${totalDistance.toFixed(1)} km`,
+            detail: formatFareDistance(totalDistance),
           },
         ]
       : breakdown,
@@ -522,9 +705,13 @@ export function fareOperatorFor(leg: {
 export const FARE_OPERATOR_LABELS: Record<string, string> = {
   "transjakarta-royaltrans-s14": "Royaltrans Lebak Bulus - Summarecon Serpong",
   "transjakarta-transbandara": "Transbandara Blok M - Bandara Soekarno-Hatta",
-  "transjakarta-brt": "Transjakarta BRT (Jakpro)",
+  "transjakarta-brt": "Transjakarta BRT",
   "transjakarta-non-brt": "Transjakarta Metrotrans / Minitrans",
   "transjakarta-feeder": "Transjakarta Mikrotrans",
+  "transjakarta-mikrotrans": "Transjakarta Mikrotrans",
+  "transjakarta-wisata": "Bus Wisata Transjakarta",
+  "transjakarta-rumah-susun": "Bus rusun Transjakarta",
+  "transjakarta-transjabodetabek": "Transjabodetabek",
   "transjakarta-royaltrans": "Transjakarta Royaltrans",
   "mrt-jakarta": "MRT Jakarta",
   "lrt-jakarta": "LRT Jakarta",

@@ -224,6 +224,177 @@ describe("quoteFare", () => {
     expect(quote.alternatives[0]?.label).toContain("JakLingko");
   });
 
+  it("charges one Transjakarta fare when the rider changes corridor inside the halte", () => {
+    const legs = [
+      {
+        kind: "ride" as const,
+        operator: "transjakarta-brt",
+        billing: "gate" as const,
+        fromStationId: "transjakarta:grogol-reformasi",
+        toStationId: "transjakarta:tanjung-duren",
+        distanceKm: 1.2,
+        stopCount: 2,
+      },
+      {
+        kind: "ride" as const,
+        operator: "transjakarta-brt",
+        billing: "gate" as const,
+        fromStationId: "transjakarta:tanjung-duren",
+        toStationId: "transjakarta:simpang-kuningan",
+        distanceKm: 8.4,
+        stopCount: 9,
+      },
+    ];
+
+    const quote = quoteFare({ at: at(10), rules, legs });
+    const early = quoteFare({ at: at(6), rules, legs });
+
+    expect(quote.totalIdr).toBe(3500);
+    expect(quote.integration).toBeNull();
+    expect(quote.alternatives).toHaveLength(0);
+    expect(quote.breakdown).toHaveLength(1);
+    expect(quote.breakdown[0]?.detail).toContain("stop");
+    expect(quote.notes.some((note) => note.includes("Each boarding is charged on its own"))).toBe(false);
+    expect(early.totalIdr).toBe(2000);
+  });
+
+  it("charges again when the rider leaves the halte and boards another bus", () => {
+    const quote = quoteFare({
+      at: at(10),
+      rules,
+      legs: [
+        {
+          kind: "ride",
+          operator: "transjakarta-brt",
+          billing: "gate",
+          fromStationId: "transjakarta:grogol-reformasi",
+          toStationId: "transjakarta:tanjung-duren",
+          distanceKm: 1.2,
+          stopCount: 2,
+        },
+        { kind: "walk", operator: null, distanceKm: 0.2, stopCount: 2 },
+        {
+          kind: "ride",
+          operator: "transjakarta-brt",
+          billing: "gate",
+          fromStationId: "transjakarta:tanjung-duren-luar",
+          toStationId: "transjakarta:simpang-kuningan",
+          distanceKm: 8,
+          stopCount: 8,
+        },
+      ],
+    });
+
+    expect(quote.integration?.id).toBe("okotrip");
+    expect(quote.totalIdr).toBe(5000);
+    expect(quote.alternatives[0]?.amountIdr).toBe(7000);
+  });
+
+  it("charges a tap on the bus even when the stop has the same name", () => {
+    const withFeeder = {
+      ...rules,
+      modes: {
+        ...rules.modes,
+        "transjakarta-non-brt": {
+          kind: "flat" as const,
+          amount: 3500,
+          earlyMorningAmount: 2000,
+          earlyMorningHours: "05:00-07:00",
+        },
+      },
+    };
+    const quote = quoteFare({
+      at: at(10),
+      rules: withFeeder,
+      legs: [
+        {
+          kind: "ride" as const,
+          operator: "transjakarta-brt",
+          billing: "gate" as const,
+          fromStationId: "transjakarta:grogol-reformasi",
+          toStationId: "transjakarta:tanjung-duren",
+          distanceKm: 1.2,
+          stopCount: 2,
+        },
+        {
+          kind: "ride" as const,
+          operator: "transjakarta-non-brt",
+          billing: "vehicle" as const,
+          fromStationId: "transjakarta:tanjung-duren",
+          toStationId: "transjakarta:simpang-kuningan",
+          distanceKm: 8,
+          stopCount: 10,
+        },
+      ],
+    });
+
+    expect(quote.totalIdr).toBe(5000);
+    expect(quote.alternatives[0]?.amountIdr).toBe(7000);
+  });
+
+  it("charges one distance fare when the rider changes KRL line inside the station", () => {
+    const quote = quoteFare({
+      at: at(10),
+      rules,
+      legs: [
+        {
+          kind: "ride",
+          operator: "krl-jabodetabek",
+          billing: "gate",
+          fromStationId: "krl-jabodetabek:bogor",
+          toStationId: "krl-jabodetabek:manggarai",
+          distanceKm: 30,
+          stopCount: 12,
+        },
+        {
+          kind: "ride",
+          operator: "krl-jabodetabek",
+          billing: "gate",
+          fromStationId: "krl-jabodetabek:manggarai",
+          toStationId: "krl-jabodetabek:tanah-abang",
+          distanceKm: 10,
+          stopCount: 4,
+        },
+      ],
+    });
+
+    // Forty kilometres is one ticket: Rp3.000 and two further blocks.
+    expect(quote.totalIdr).toBe(5000);
+    expect(quote.breakdown).toHaveLength(1);
+    expect(quote.breakdown[0]?.detail).toBe("40 km. Includes a change inside the same station");
+  });
+
+  it("charges the MRT once for a platform change inside the station", () => {
+    const quote = quoteFare({
+      at: at(10),
+      rules,
+      legs: [
+        {
+          kind: "ride",
+          operator: "mrt-jakarta",
+          billing: "gate",
+          fromStationId: "mrt-jakarta:lebak-bulus",
+          toStationId: "mrt-jakarta:dukuh-atas",
+          distanceKm: 8,
+          stopCount: 5,
+        },
+        {
+          kind: "ride",
+          operator: "mrt-jakarta",
+          billing: "gate",
+          fromStationId: "mrt-jakarta:dukuh-atas",
+          toStationId: "mrt-jakarta:bundaran-hi",
+          distanceKm: 2,
+          stopCount: 4,
+        },
+      ],
+    });
+
+    // Eight stations in one paid area: the base plus seven further stations.
+    expect(quote.totalIdr).toBe(10_000);
+    expect(quote.breakdown).toHaveLength(1);
+  });
+
   it("keeps the Transjakarta cap out of a journey with another operator", () => {
     const quote = quoteFare({
       at: at(10),

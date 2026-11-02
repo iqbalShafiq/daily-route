@@ -87,6 +87,110 @@ export function sliceGeometry(
 }
 
 /**
+ * How far a stop may stand from the stored path and still be on it.
+ *
+ * A platform sits beside the rail, not on the centre of the track. Half a
+ * kilometre is enough for that, and not enough to accept a vertex on a
+ * different part of the line.
+ */
+const STOP_SNAP_KM = 0.5;
+
+/**
+ * The part of a line between two stops, found on the path itself.
+ *
+ * The stored stop offsets are a single increasing index. On a loop whose
+ * first stop is matched at the wrong end, that index pins every later
+ * stop to the same place, and the leg drawn on the map is a short chord
+ * that never reaches the station the rider gets off at. Snapping the two
+ * stops to the path and keeping the short stretch between them draws the
+ * rail the vehicle actually travels.
+ */
+export function sliceGeometryNearStops(
+  geometry: LineGeometry,
+  from: Coordinate,
+  to: Coordinate,
+): Coordinate[] | null {
+  const points = fromFlatCoordinates(geometry.coordinates);
+  if (points.length < 2) return null;
+
+  const fromIndex = vertexWithin(points, from, STOP_SNAP_KM);
+  const toIndex = vertexWithin(points, to, STOP_SNAP_KM);
+  if (fromIndex === null || toIndex === null || fromIndex === toIndex) return null;
+
+  const straightKm = haversineKm(from, to);
+  const limitKm = Math.max(straightKm * 2.5, straightKm + 4);
+  const candidates = [sliceBetween(points, fromIndex, toIndex)];
+  if (haversineKm(points[0] ?? from, points[points.length - 1] ?? to) <= STOP_SNAP_KM) {
+    candidates.push(wrapBetween(points, fromIndex, toIndex));
+  }
+
+  let best: Coordinate[] | null = null;
+  let bestMiss = Number.POSITIVE_INFINITY;
+  for (const candidate of candidates) {
+    if (candidate.length < 2) continue;
+    const lengthKm = polylineLengthKm(candidate);
+    if (lengthKm > limitKm) continue;
+    if (longestHopKm(candidate) > 2.5) continue;
+    const miss = haversineKm(candidate[0] ?? from, from) + haversineKm(candidate[candidate.length - 1] ?? to, to);
+    if (miss > STOP_SNAP_KM * 2) continue;
+    if (miss < bestMiss) {
+      best = candidate;
+      bestMiss = miss;
+    }
+  }
+  if (!best) return null;
+
+  const anchored = [...best];
+  const start = anchored[0];
+  const end = anchored[anchored.length - 1];
+  if (start && haversineKm(start, from) > 0.02) anchored.unshift(from);
+  if (end && haversineKm(end, to) > 0.02) anchored.push(to);
+  return anchored;
+}
+
+/** The closest vertex, when it is close enough to be the same place. */
+function vertexWithin(
+  points: readonly Coordinate[],
+  target: Coordinate,
+  maxKm: number,
+): number | null {
+  const index = closestVertexIndexOnPolyline(points, target);
+  const point = points[index];
+  if (!point || haversineKm(point, target) > maxKm) return null;
+  return index;
+}
+
+/** The stretch of a path from one vertex to another, in that direction. */
+function sliceBetween(points: readonly Coordinate[], fromIndex: number, toIndex: number): Coordinate[] {
+  if (fromIndex <= toIndex) return points.slice(fromIndex, toIndex + 1);
+  return points.slice(toIndex, fromIndex + 1).reverse();
+}
+
+/**
+ * The stretch that crosses the join of a loop.
+ *
+ * The path of a loop is stored with its two ends at the same station, so
+ * a ride that passes that station continues from the end back to the start.
+ */
+function wrapBetween(points: readonly Coordinate[], fromIndex: number, toIndex: number): Coordinate[] {
+  if (fromIndex <= toIndex) return [];
+  return [...points.slice(fromIndex), ...points.slice(0, toIndex + 1)];
+}
+
+/** The longest single step of a path. A long step is a line across the city. */
+function longestHopKm(points: readonly Coordinate[]): number {
+  let longest = 0;
+  for (let index = 0; index < points.length - 1; index += 1) {
+    const start = points[index];
+    const end = points[index + 1];
+    if (!start || !end) continue;
+    const hop = haversineKm(start, end);
+    if (hop > longest) longest = hop;
+  }
+  return longest;
+}
+
+/**
  * The perpendicular distance from a point to a segment, in kilometres.
  */
 export function distanceToSegmentKm(
