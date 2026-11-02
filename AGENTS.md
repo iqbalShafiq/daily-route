@@ -94,7 +94,7 @@ TypeScript with no framework and no database — keep it that way.
   is a place the rider can walk through, not a paid area.
 - **No fallback that invents data.** When a provider is missing, the feature
   reports the missing cause and the rest of the application keeps working.
-  A deterministic stand-in is acceptable only when it is *labelled* as such.
+  A deterministic stand-in is acceptable only when it is _labelled_ as such.
   Place lookup uses a remote embedding model when one is configured.
   Without one, the lexical and exact channels answer, and no hash vector
   is written in their place. Live disruptions come from the monitor.
@@ -389,7 +389,7 @@ express. A pattern is stored separately from the line:
   monitor resolves them against the stop order, the heading of the next stop
   from the station the notice names (which works on a loop), and the bearing
   of each direction, and writes `platforms` — one `(line, direction, platform
-  id)` entry per affected line. A platform-scoped notice is not matched to a
+id)` entry per affected line. A platform-scoped notice is not matched to a
   journey that does not ride one of those entries, so one side of a road and
   one line at a shared station keep working. A terminus is matched against
   the station's aliases, not only its exact name.
@@ -531,11 +531,12 @@ express. A pattern is stored separately from the line:
 - Every tool is read-only and returns a plain object the model can read.
   A tool that cannot answer returns a reason, not a guess.
 - The catalog is English and semantic. The assistant and the notice reader
-  share the lookups: `find_line`, `list_line_stops`, `find_street` and
-  `stops_on_street`. The assistant also has `resolve_place`, `plan_journey`,
-  `get_station`, `list_active_disruptions`, `find_toll_routes` and
-  `search_news` (Tavily, on demand), plus `list_notice_history` (active and
-  closed notices). The planner reads stored notices; Tavily is the only live
+  share `find_line`, `list_line_stops` and `find_street`. The assistant uses
+  `stops_on_street`; the notice reader uses `find_stop` and
+  `list_street_stops` when a name needs grounding. The assistant also has
+  `resolve_place`, `plan_journey`, `get_station`, `list_active_disruptions`,
+  `find_toll_routes` and `search_news` (Tavily, on demand), plus
+  `list_notice_history` (active and closed notices). The planner reads stored notices; Tavily is the only live
   search the chat model can call. The history tool is what lets the assistant
   answer "is it open again" and "why did the notice go".
 - The news tool takes structured filters, not only a query. `search_news`
@@ -701,7 +702,7 @@ Read `DESIGN.md` before touching the interface. The short version:
   a panel with the variants and the selected one highlighted. The old
   expandable "N patterns" disclosure is gone.
 - The scheduled wait is a colour-coded chip next to the service class
-  (for example "BRT  6-7 min"); the band word is not repeated in the row.
+  (for example "BRT 6-7 min"); the band word is not repeated in the row.
   The panel on hover explains the window, and colour is never the only
   carrier: the chip carries an accessible frequency label.
 - The right dock collapses from an arrow in its header. The sections fold

@@ -279,10 +279,12 @@ is read-only and returns a plain object the model can read; a tool that cannot
 answer returns a reason, not a guess. The catalog is built per request, and a
 tool whose credentials are missing is not added.
 
-- The assistant and the notice reader share `find_line`, `list_line_stops`,
-  `find_street` and `stops_on_street`. The assistant also has `resolve_place`,
-  `plan_journey`, `get_station`, `list_active_disruptions`,
-  `find_toll_routes`, `list_notice_history` and `search_news`.
+- The assistant and the notice reader share `find_line`, `list_line_stops`
+  and `find_street`. The assistant uses `stops_on_street`; the notice reader
+  uses `find_stop` and `list_street_stops` when a name needs grounding. The
+  assistant also has `resolve_place`, `plan_journey`, `get_station`,
+  `list_active_disruptions`, `find_toll_routes`, `list_notice_history` and
+  `search_news`.
 - Chat cards are semantic values from tool results, not prose parsed with a
   regex. The SSE stream carries `card` next to `delta`, `tool`, `actions` and
   `done`. The browser dedupes a stop card from `resolve_place` when the richer
