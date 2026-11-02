@@ -1,4 +1,4 @@
-import { ArrowRight, MessageSquare, Moon, Sun, UserRound, X } from "lucide-react";
+import { ArrowRight, MessageSquare, Moon, Sun, UserRound } from "lucide-react";
 import { useEffect, useMemo, useRef, useState } from "react";
 
 import {
@@ -96,6 +96,22 @@ function departureAt(time: string): string | undefined {
 }
 
 /**
+ * A window control on the map.
+ *
+ * An open panel fills the button with ink. The icon stays the same mark,
+ * so the rider can still see which control they opened.
+ */
+function mapControlClass(active: boolean, compact = false): string {
+  return cn(
+    "pointer-events-auto rounded-lg backdrop-blur",
+    compact ? "size-9 shadow-raised" : "size-10 shadow-pop",
+    active
+      ? "border-ink bg-ink text-bg hover:border-ink hover:bg-ink hover:text-bg"
+      : "border-line-strong bg-surface/95",
+  );
+}
+
+/**
  * The planner page.
  *
  * On a phone the map sits above the controls and the two views — planner
@@ -164,6 +180,10 @@ export function PlannerPage() {
 
   /** The account sheet and the assistant never share the corner. */
   const openAccount = (): void => {
+    if (accountOpen) {
+      setAccountOpen(false);
+      return;
+    }
     setAccountOpen(true);
     setMobileTab("plan");
     if (view === "chat") closeChat();
@@ -718,25 +738,23 @@ export function PlannerPage() {
           <Button
             variant="secondary"
             size="icon"
-            aria-label={view === "chat" ? "Hide assistant" : "Ask the assistant"}
+            aria-label="Ask the assistant"
+            aria-pressed={view === "chat"}
             onClick={() => (view === "chat" ? closeChat() : openChat())}
-            className="pointer-events-auto size-10 rounded-lg border-line-strong bg-surface/95 shadow-pop backdrop-blur"
+            className={mapControlClass(view === "chat")}
           >
-            {view === "chat" ? (
-              <X aria-hidden className="size-4" />
-            ) : (
-              <MessageSquare aria-hidden className="size-4" />
-            )}
+            <MessageSquare aria-hidden className="size-4" />
           </Button>
         </Tooltip>
 
-        <Tooltip label="Account">
+        <Tooltip label={accountOpen ? "Close account" : "Account"}>
           <Button
             variant="secondary"
             size="icon"
             aria-label="Account"
+            aria-pressed={accountOpen}
             onClick={openAccount}
-            className="pointer-events-auto size-10 rounded-lg border-line-strong bg-surface/95 shadow-pop backdrop-blur"
+            className={mapControlClass(accountOpen)}
           >
             <UserRound aria-hidden className="size-4" />
           </Button>
@@ -761,14 +779,15 @@ export function PlannerPage() {
 
       {/* The theme switch and the account stay on the map on a phone; the
           bottom bar owns the assistant. */}
-      <div className={cn("pointer-events-none absolute right-3 top-[calc(var(--bar-h)+8px)] z-30 flex items-center gap-2 lg:hidden", (view === "chat" || accountOpen) && "max-lg:hidden")}>
-        <Tooltip label="Account">
+      <div className={cn("pointer-events-none absolute right-3 top-[calc(var(--bar-h)+8px)] z-30 flex items-center gap-2 lg:hidden", view === "chat" && "max-lg:hidden")}>
+        <Tooltip label={accountOpen ? "Close account" : "Account"}>
           <Button
             variant="secondary"
             size="icon"
             onClick={openAccount}
             aria-label="Account"
-            className="pointer-events-auto size-9 rounded-lg border-line-strong bg-surface/95 shadow-raised"
+            aria-pressed={accountOpen}
+            className={mapControlClass(accountOpen, true)}
           >
             <UserRound aria-hidden className="size-4" />
           </Button>
