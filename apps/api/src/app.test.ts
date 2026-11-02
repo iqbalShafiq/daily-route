@@ -7,6 +7,7 @@ import request from "supertest";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 
 import { createApp } from "./app.js";
+import { createAttemptLimiter } from "./attempts.js";
 import type { ApiDeps } from "./deps.js";
 
 /**
@@ -31,6 +32,7 @@ const deps: ApiDeps = {
   resolver,
   agent: null,
   lastProviderError: null,
+  attempts: createAttemptLimiter(100, 15 * 60_000),
 };
 
 const app = createApp(deps);

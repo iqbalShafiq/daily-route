@@ -1,6 +1,7 @@
 import express, { type Express } from "express";
 
 import type { ApiDeps } from "./deps.js";
+import { createAccountRouter } from "./routes/account.js";
 import { createAgentRouter } from "./routes/agent.js";
 import { createMonitorRouter } from "./routes/monitor.js";
 import { createPlacesRouter } from "./routes/places.js";
@@ -22,9 +23,13 @@ export function createApp(deps: ApiDeps): Express {
   app.use(express.json({ limit: "256kb" }));
 
   app.use((_request, response, next) => {
+    // The browser sends the session cookie, so the allowed origin is exact
+    // and credentials are enabled; a wildcard origin cannot carry a cookie.
     response.setHeader("Access-Control-Allow-Origin", deps.env.WEB_ORIGIN);
+    response.setHeader("Access-Control-Allow-Credentials", "true");
     response.setHeader("Access-Control-Allow-Headers", "Content-Type");
-    response.setHeader("Access-Control-Allow-Methods", "GET,POST,OPTIONS");
+    response.setHeader("Access-Control-Allow-Methods", "GET,POST,PUT,DELETE,OPTIONS");
+    response.setHeader("Vary", "Origin");
     next();
   });
 
@@ -47,6 +52,7 @@ export function createApp(deps: ApiDeps): Express {
   });
 
   app.use("/api", createTransitRouter(deps));
+  app.use("/api/account", createAccountRouter(deps));
   app.use("/api/places", createPlacesRouter(deps));
   app.use("/api/routes", createRoutesRouter(deps));
   app.use("/api/walk", createWalkRouter(deps));

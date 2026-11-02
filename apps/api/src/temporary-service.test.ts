@@ -8,6 +8,7 @@ import type { TemporaryService } from "@daily-route/transit";
 import { createEmbeddingProvider, PlaceResolver } from "@daily-route/semantic";
 
 import { createApp } from "./app.js";
+import { createAttemptLimiter } from "./attempts.js";
 import type { ApiDeps } from "./deps.js";
 
 /**
@@ -20,7 +21,15 @@ const env = parseEnv();
 const db = createDb(env.DATABASE_URL);
 const resolver = new PlaceResolver(db, createEmbeddingProvider(env));
 const cache = new NetworkCache({ db, resolver });
-const app = createApp({ db, env, cache, resolver, agent: null, lastProviderError: null } satisfies ApiDeps);
+const app = createApp({
+  db,
+  env,
+  cache,
+  resolver,
+  agent: null,
+  lastProviderError: null,
+  attempts: createAttemptLimiter(100, 15 * 60_000),
+} satisfies ApiDeps);
 
 const service: TemporaryService = {
   id: "temporary-tst9-2027-10-31",

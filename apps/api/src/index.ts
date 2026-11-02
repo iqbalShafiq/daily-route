@@ -4,6 +4,7 @@ import { parseEnv } from "@daily-route/env";
 import { createEmbeddingProvider, PlaceResolver } from "@daily-route/semantic";
 
 import { createApp } from "./app.js";
+import { createAttemptLimiter } from "./attempts.js";
 import type { ApiDeps } from "./deps.js";
 
 /**
@@ -32,6 +33,7 @@ async function main(): Promise<void> {
     resolver,
     agent,
     lastProviderError: null,
+    attempts: createAttemptLimiter(10, 15 * 60_000),
   };
 
   const app = createApp(deps);

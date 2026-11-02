@@ -4,6 +4,8 @@ import type { Env } from "@daily-route/env";
 import type { NetworkCache } from "@daily-route/agent";
 import type { PlaceResolver } from "@daily-route/semantic";
 
+import type { AttemptLimiter } from "./attempts.js";
+
 /**
  * The API's dependencies.
  *
@@ -19,4 +21,6 @@ export type ApiDeps = {
   agent: Agent | null;
   /** The id of the most recent provider error, for the health endpoint. */
   lastProviderError: { at: string; message: string } | null;
+  /** The failed-attempt limiter behind the account endpoints. */
+  attempts: AttemptLimiter;
 };
