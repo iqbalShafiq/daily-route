@@ -176,9 +176,12 @@ describe("sign-up", () => {
   });
 
   it("rejects a short password and a malformed address", async () => {
-    const short = await signUp(request(app), uniqueEmail(), "too short");
+    const short = await signUp(request(app), uniqueEmail(), "short");
     expect(short.status).toBe(400);
-    expect(short.body.error).toBe("Use at least 10 characters.");
+    expect(short.body.error).toBe("Use at least 8 characters.");
+
+    const eight = await signUp(request(app), uniqueEmail(), "Test@123");
+    expect(eight.status).toBe(201);
 
     const malformed = await request(app)
       .post("/api/account")

@@ -413,7 +413,7 @@ export function AccountPanel({
         label="Password"
         type={shown ? "text" : "password"}
         autoComplete={mode === "signin" ? "current-password" : "new-password"}
-        placeholder={mode === "create" ? "At least 10 characters" : "Your password"}
+        placeholder={mode === "create" ? "At least 8 characters" : "Your password"}
         value={password}
         onChange={(event) => setPassword(event.target.value)}
         trailing={<PasswordToggle shown={shown} onToggle={() => setShown((current) => !current)} />}
@@ -561,7 +561,7 @@ export function AccountPanel({
                   label="New password"
                   type={shown ? "text" : "password"}
                   autoComplete="new-password"
-                  placeholder="At least 10 characters"
+                  placeholder="At least 8 characters"
                   value={newPassword}
                   onChange={(event) => setNewPassword(event.target.value)}
                   trailing={

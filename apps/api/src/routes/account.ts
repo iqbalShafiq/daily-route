@@ -62,7 +62,7 @@ import {
 
 const emailSchema = z.string().trim().toLowerCase().pipe(z.email());
 
-const passwordSchema = z.string().min(10).max(200);
+const passwordSchema = z.string().min(8).max(200);
 
 const credentialsSchema = z.object({
   email: emailSchema,
@@ -105,7 +105,7 @@ function credentialError(error: z.ZodError): string {
   const emailIssue = error.issues.some(
     (issue) => issue.path.length === 0 || issue.path[0] === "email",
   );
-  return emailIssue ? "Enter a valid email." : "Use at least 10 characters.";
+  return emailIssue ? "Enter a valid email." : "Use at least 8 characters.";
 }
 
 /** The address the limiter groups by. A missing socket still needs a key. */
@@ -268,7 +268,7 @@ export function createAccountRouter(deps: ApiDeps): Router {
     if (!parsed.success) {
       const passwordIssue = parsed.error.issues.some((issue) => issue.path[0] === "password");
       response.status(passwordIssue ? 400 : 401).json({
-        error: passwordIssue ? "Use at least 10 characters." : CURRENT_PASSWORD_WRONG,
+        error: passwordIssue ? "Use at least 8 characters." : CURRENT_PASSWORD_WRONG,
       });
       return;
     }
