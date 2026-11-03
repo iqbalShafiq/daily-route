@@ -567,9 +567,10 @@ are written down in `research/ux-search.md`; the short version:
 - The order of the list is the only thing that says which match is the
   better one. A rider reads a name, not a score, so no badge says how
   sure the list is about it.
-- When a suggestion comes from Google Places, the list ends with a
-  quiet "Powered by Google" line, in the monospaced label voice. The
-  line is not an option and cannot be chosen.
+- A suggestion that comes from the local Overture extract closes the list
+  with "Places © Overture Maps"; one that comes from Google Places closes
+  it with "Powered by Google". The line is in the monospaced label voice,
+  sticks to the bottom of the list, and is not an option.
 - On a phone the list is a sheet at the bottom of the screen, because the
   keyboard covers half of it.
 

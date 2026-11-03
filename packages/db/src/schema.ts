@@ -699,6 +699,35 @@ export const riderObservations = pgTable(
 );
 
 /**
+ * Places from the open map that are not stops.
+ *
+ * Overture Maps publishes its places theme as open data, monthly. The
+ * Jabodetabek extract lives in Postgres so a name search is a local query,
+ * not a request to a geocoder with a rate limit. A row is not a stop: the
+ * planner never rides from it, but the place field can start or end there.
+ */
+export const mapPlaces = pgTable(
+  "map_places",
+  {
+    id: text("id").primaryKey(),
+    name: text("name").notNull(),
+    category: text("category"),
+    address: text("address"),
+    locality: text("locality"),
+    confidence: real("confidence"),
+    latitude: doublePrecision("latitude").notNull(),
+    longitude: doublePrecision("longitude").notNull(),
+    /** The Overture release the row was extracted from. */
+    release: text("release").notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  },
+  (table) => [
+    index("map_places_name_idx").on(table.name),
+    index("map_places_coordinates_idx").on(table.latitude, table.longitude),
+  ],
+);
+
+/**
  * A short-lived cache of public tool output.
  *
  * It deliberately has no user column: the entries are answers about the

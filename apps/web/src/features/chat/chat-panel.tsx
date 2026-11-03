@@ -108,6 +108,7 @@ export function ChatPanel({
             ? (place.systemName ?? "Stop")
             : (place.detail ?? "Place"),
         insert: place.name,
+        overture: place.source === "overture",
         google: place.source === "google",
       }));
     return [
@@ -116,6 +117,7 @@ export function ChatPanel({
         title: place.detail && place.detail !== "Saved" && place.detail !== "Recent" ? place.detail : place.name,
         detail: place.name,
         insert: place.name,
+        overture: false,
         google: false,
       })),
       ...searched,
@@ -370,8 +372,13 @@ export function ChatPanel({
                   No places match “{mentionNeedle}”.
                 </li>
               ) : null}
+              {mentionRows.some((row) => row.overture) ? (
+                <li className="sticky bottom-0 z-10 border-t border-line/70 bg-surface px-3 py-2 font-mono text-[12px] uppercase leading-[1.2] tracking-[0.04em] text-ink-3">
+                  Places © Overture Maps
+                </li>
+              ) : null}
               {mentionRows.some((row) => row.google) ? (
-                <li className="border-t border-line/70 px-3 py-2 font-mono text-[12px] uppercase leading-[1.2] tracking-[0.04em] text-ink-3">
+                <li className="sticky bottom-0 z-10 border-t border-line/70 bg-surface px-3 py-2 font-mono text-[12px] uppercase leading-[1.2] tracking-[0.04em] text-ink-3">
                   Powered by Google
                 </li>
               ) : null}

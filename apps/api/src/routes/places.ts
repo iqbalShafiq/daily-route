@@ -1,5 +1,6 @@
 import { Router } from "express";
 import { z } from "zod";
+import { searchMapPlaces } from "@daily-route/db";
 
 import { searchPlaces } from "../geocode.js";
 import type { ApiDeps } from "../deps.js";
@@ -15,7 +16,7 @@ import type { ApiDeps } from "../deps.js";
 
 const querySchema = z.object({
   q: z.string().trim().min(2).max(120),
-  limit: z.coerce.number().int().min(1).max(8).default(6),
+  limit: z.coerce.number().int().min(1).max(8).default(8),
 });
 
 const MINIMUM_SUGGESTION_SCORE = 0.32;
@@ -31,10 +32,19 @@ export function createPlacesRouter(deps: ApiDeps): Router {
     }
 
     const { q, limit } = parsed.data;
-    const [resolved, places] = await Promise.all([
+    const [resolved, local] = await Promise.all([
       deps.resolver.resolve(q, { limit: 6 }),
-      searchPlaces(q, { googleKey: deps.env.GOOGLE_MAPS_API_KEY }),
+      searchMapPlaces(deps.db, q, { limit: 8 }),
     ]);
+    /*
+     * The Overture extract is the directory. The geocoder is only a
+     * fallback for a street, an address, or a name the extract does not
+     * hold, so a normal search costs no external request.
+     */
+    const external =
+      local.length >= 3
+        ? []
+        : await searchPlaces(q, { googleKey: deps.env.GOOGLE_MAPS_API_KEY });
 
     /*
      * A stop whose name contains what was typed is a real answer. A stop
@@ -70,17 +80,33 @@ export function createPlacesRouter(deps: ApiDeps): Router {
       .slice(0, 2)
       .map(stationOf);
 
-    const stationNames = new Set(candidates.map((station) => station.name.toLowerCase()));
-    const landmarks = places
-      .filter((place) => !stationNames.has(place.name.toLowerCase()))
-      .filter(
-        (place) =>
-          !candidates.some(
-            (station) =>
-              Math.abs(station.latitude - place.latitude) < 0.0008 &&
-              Math.abs(station.longitude - place.longitude) < 0.0008,
-          ),
-      )
+    const stationNames = new Set(candidates.map((station) => normaliseName(station.name)));
+    const localPlaces = local
+      .filter((place) => !stationNames.has(normaliseName(place.name)))
+      .filter((place) => !candidates.some((station) => near(station, place)))
+      .map((place) => ({
+        kind: "place" as const,
+        id: `overture:${place.id}`,
+        name: place.name,
+        systemId: null,
+        systemName: null,
+        code: null,
+        latitude: place.latitude,
+        longitude: place.longitude,
+        isInterchange: false,
+        lineCount: 0,
+        street: place.address ?? place.locality ?? null,
+        detail: labelOfCategory(place.category),
+        source: "overture" as const,
+        matchedRanges: [],
+      }));
+
+    const localNames = new Set(localPlaces.map((place) => normaliseName(place.name)));
+    const landmarks = external
+      .filter((place) => !stationNames.has(normaliseName(place.name)))
+      .filter((place) => !localNames.has(normaliseName(place.name)))
+      .filter((place) => !candidates.some((station) => near(station, place)))
+      .filter((place) => !local.some((entry) => near(entry, place, 0.0015)))
       .map((place) => ({
         kind: "place" as const,
         id: place.id,
@@ -117,7 +143,7 @@ export function createPlacesRouter(deps: ApiDeps): Router {
       return 3;
     };
 
-    const ordered = [...stations, ...landmarks, ...looseStations]
+    const ordered = [...stations, ...localPlaces, ...landmarks, ...looseStations]
       .map((row, index) => ({ row, index, rank: rankOf(row.name) }))
       .sort((left, right) => left.rank - right.rank || left.index - right.index)
       .slice(0, limit)
@@ -127,4 +153,28 @@ export function createPlacesRouter(deps: ApiDeps): Router {
   });
 
   return router;
+}
+
+/** A category key as the label the suggestion list shows. */
+function labelOfCategory(value: string | null): string | undefined {
+  if (!value) return undefined;
+  const label = value.replace(/_/g, " ").trim();
+  if (!label) return undefined;
+  return label.charAt(0).toUpperCase() + label.slice(1);
+}
+
+function normaliseName(value: string): string {
+  return value.trim().toLowerCase().replace(/\s+/g, " ");
+}
+
+/** Whether two points are closer than `tolerance` degrees on both axes. */
+function near(
+  left: { latitude: number; longitude: number },
+  right: { latitude: number; longitude: number },
+  tolerance = 0.0008,
+): boolean {
+  return (
+    Math.abs(left.latitude - right.latitude) < tolerance &&
+    Math.abs(left.longitude - right.longitude) < tolerance
+  );
 }

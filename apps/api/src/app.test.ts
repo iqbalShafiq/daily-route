@@ -1,5 +1,6 @@
-import { createDb } from "@daily-route/db";
+import { createDb, mapPlaces } from "@daily-route/db";
 import { parseEnv } from "@daily-route/env";
+import { eq } from "drizzle-orm";
 import { createEmbeddingProvider, PlaceResolver } from "@daily-route/semantic";
 import { NetworkCache } from "@daily-route/agent";
 import { DEMO_DISRUPTION_ID } from "@daily-route/transit";
@@ -47,6 +48,38 @@ describe("GET /api/health", () => {
     expect(response.status).toBe(200);
     expect(response.body.status).toBe("ok");
     expect(response.body.agent).toBe(false);
+  });
+});
+
+describe("GET /api/places", () => {
+  it("finds a place in the local Overture extract", async () => {
+    const id = `test-api:${Date.now()}`;
+    const name = "Test Local Overture Place";
+    await db.insert(mapPlaces).values({
+      id,
+      name,
+      category: "historic_site",
+      address: "Jl. Test",
+      locality: "Jakarta",
+      confidence: 0.9,
+      latitude: -6.1754,
+      longitude: 106.8272,
+      release: "test",
+    });
+
+    try {
+      const response = await request(app).get("/api/places").query({ q: name });
+      expect(response.status).toBe(200);
+      const rows = response.body as { id: string; name: string; source?: string; detail?: string }[];
+      const row = rows.find((entry) => entry.id === `overture:${id}`);
+      expect(row).toMatchObject({
+        name,
+        detail: "Historic site",
+        source: "overture",
+      });
+    } finally {
+      await db.delete(mapPlaces).where(eq(mapPlaces.id, id));
+    }
   });
 });
 

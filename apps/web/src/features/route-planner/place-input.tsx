@@ -30,7 +30,7 @@ const DEBOUNCE_MS = 250;
 const MINIMUM_QUERY_LENGTH = 2;
 
 /** How many suggestions are offered. */
-const MAXIMUM_RESULTS = 6;
+const MAXIMUM_RESULTS = 8;
 
 /** How many options the page keys move at once. */
 const PAGE_SIZE = 5;
@@ -49,7 +49,7 @@ type Row = {
   ranges: MatchedRange[];
   interchange: boolean;
   place: ChosenPlace;
-  source?: "google" | "openstreetmap" | undefined;
+  source?: "google" | "openstreetmap" | "overture" | undefined;
 };
 
 export function PlaceInput({
@@ -433,10 +433,19 @@ export function PlaceInput({
         );
       })}
 
+      {rows.some((row) => row.source === "overture") ? (
+        <li
+          role="presentation"
+          className="sticky bottom-0 z-10 border-t border-line/70 bg-surface px-3 py-2 font-mono text-[12px] uppercase leading-[1.2] tracking-[0.04em] text-ink-3"
+        >
+          Places © Overture Maps
+        </li>
+      ) : null}
+
       {rows.some((row) => row.source === "google") ? (
         <li
           role="presentation"
-          className="border-t border-line/70 px-3 py-2 font-mono text-[12px] uppercase leading-[1.2] tracking-[0.04em] text-ink-3"
+          className="sticky bottom-0 z-10 border-t border-line/70 bg-surface px-3 py-2 font-mono text-[12px] uppercase leading-[1.2] tracking-[0.04em] text-ink-3"
         >
           Powered by Google
         </li>

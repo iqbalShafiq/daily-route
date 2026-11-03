@@ -31,6 +31,8 @@ pnpm data:ingest            # rebuild the snapshot from OpenStreetMap + research
 pnpm data:embed             # recompute the station embeddings
 pnpm data:gtfs              # fill lines with no stops from the operator GTFS
 pnpm data:enrich            # name the kelurahan/kecamatan/kota of every stop
+pnpm data:places            # rebuild the Jabodetabek place extract from Overture
+pnpm db:places              # load the place extract into map_places
 pnpm verify:notices         # verify notice windows from X, news, and pages
 pnpm db:sync                # apply the snapshot without clearing the notices
 pnpm backtest:notices       # replay stored announcements through the pipeline
@@ -209,6 +211,21 @@ is rejected rather than drawn as a straight line. The feed is
 `https://gtfs.transjakarta.co.id/files/file_gtfs.zip` (see
 `research/agent-verification.md` for the verification design, and the GTFS
 feed for the official stop coordinates).
+
+`pnpm data:places` builds `data/places-jabodetabek.parquet`, the places that
+are not stops. It reads the latest Overture Maps Places release through the
+STAC catalog, keeps the points inside the Jabodetabek box with confidence at
+least 0.5 and an open status, drops a name that starts with punctuation, and
+reduces the same name within about 110 m to the record with the highest
+confidence. The release, count and box are written to
+`data/places-jabodetabek.json`; the licences and the Foursquare notice are in
+`data/PLACES-NOTICE.txt`. The extract is open data: CDLA Permissive 2.0, and
+Apache 2.0 for the Foursquare records. `pnpm db:places` loads it into
+`map_places` through DuckDB's Postgres extension. Both commands need the
+DuckDB CLI (`brew install duckdb`); the first run installs the S3 and Postgres
+extensions. `db:seed` does not load the places, so a fresh database needs
+`pnpm db:places` once. The place field reads `map_places` first and asks a
+geocoder only when the local list holds fewer than three answers.
 
 `pnpm data:enrich` gives every station its administrative address. It reads
 the boundary dumps in `data/admin` (MIT, geometry from BIG; fetch them with
@@ -804,16 +821,16 @@ Read `DESIGN.md` before touching the interface. The short version:
 - The place field is a combobox: the focus stays in the input, the active
   suggestion is pointed at with `aria-activedescendant`, and the matched
   part of a name is marked only when the server reported the range. A
-  place that is not a stop is geocoded on the server. With
-  `GOOGLE_MAPS_API_KEY` set, Google Places (New) answers first inside the
-  Jabodetabek rectangle and OpenStreetMap fills a thin list; without it,
-  Photon answers a name that is still being typed and Nominatim an
-  address. The same place from two indexes is one row, and the list says
-  "Powered by Google" when a Google answer is shown. Saved places and
-  recent journeys stay in the browser. The account's Places tab uses the
-  same field; its find field opens with the saved places as
-  recommendations and folds away once a suggestion has copied its place
-  into the form.
+  place that is not a stop is answered by the local Overture extract
+  first. A thin list falls back to Photon for a name that is still being
+  typed and Nominatim for an address; with `GOOGLE_MAPS_API_KEY` set,
+  Google Places (New) is the fallback instead, restricted to the
+  Jabodetabek rectangle. The same place from two indexes is one row, and
+  the list says "Places © Overture Maps" or "Powered by Google" when one
+  of them answered. Saved places and recent journeys stay in the
+  browser. The account's Places tab uses the same field; its find field
+  opens with the saved places as recommendations and folds away once a
+  suggestion has copied its place into the form.
 - A rider who is standing somewhere can ask for the walk to the stop
   that serves that place. The browser gives the position, the server
   asks the pedestrian router for the path, and the panel shows the

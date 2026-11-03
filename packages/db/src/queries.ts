@@ -17,6 +17,7 @@ import {
   linePatterns,
   lineStops,
   lines,
+  mapPlaces,
   socialPosts,
   stationGroupMembers,
   stationGroups,
@@ -358,6 +359,47 @@ export async function searchStationsLexical(
     .innerJoin(systems, eq(systems.id, stations.systemId))
     .where(where)
     .orderBy(desc(sql`similarity(${stations.searchText}, ${query})`))
+    .limit(limit);
+}
+
+/**
+ * Places that are not stops, from the Overture extract.
+ *
+ * A name that starts with the query comes first, then the trigram score,
+ * then Overture's own confidence. The GIN index on `name` makes the
+ * substring test a local lookup; no geocoder is called.
+ */
+export async function searchMapPlaces(
+  db: Database,
+  query: string,
+  options: { limit?: number } = {},
+) {
+  const limit = options.limit ?? 8;
+  const needle = query.trim();
+  if (needle.length < 2) return [];
+  const pattern = `%${needle}%`;
+  const prefix = `${needle}%`;
+
+  return db
+    .select({
+      id: mapPlaces.id,
+      name: mapPlaces.name,
+      category: mapPlaces.category,
+      address: mapPlaces.address,
+      locality: mapPlaces.locality,
+      confidence: mapPlaces.confidence,
+      latitude: mapPlaces.latitude,
+      longitude: mapPlaces.longitude,
+    })
+    .from(mapPlaces)
+    .where(sql`${mapPlaces.name} ILIKE ${pattern}`)
+    .orderBy(
+      desc(sql`(${mapPlaces.name} ILIKE ${prefix})`),
+      // Overture's confidence is the better signal among prefix matches:
+      // the mall's authoritative record beats a shorter junk duplicate.
+      sql`${mapPlaces.confidence} DESC NULLS LAST`,
+      desc(sql`similarity(${mapPlaces.name}, ${needle})`),
+    )
     .limit(limit);
 }
 

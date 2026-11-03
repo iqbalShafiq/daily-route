@@ -128,7 +128,7 @@ that need one.
 | `JEV_MODEL`                                                                             | The decision model behind Jev. Defaults to `typesafe/jev-1.14`.                                                                        |
 | `EMBEDDINGS_BASE_URL`, `EMBEDDINGS_API_KEY`, `EMBEDDINGS_MODEL`                         | Semantic place lookup. The vector column is 768 dimensions.                                                                            |
 | `TAVILY_API_KEY`                                                                        | `search_news` for the assistant, on demand. The monitor does not poll it.                                                              |
-| `GOOGLE_MAPS_API_KEY`                                                                   | Google Places API (New) for the place field. Only the typed query is sent to Google, and only when this key is set. Without it, place search uses OpenStreetMap (Photon and Nominatim). |
+| `GOOGLE_MAPS_API_KEY`                                                                   | Optional fallback for the place field. The local Overture extract answers first; only a thin list is sent to Google, and only when this key is set. Without it, that fallback is Photon/Nominatim. |
 | `X_BEARER_TOKEN`                                                                        | The operator filtered stream. Billing is per Post read, about $0.005.                                                                  |
 | `LANGFUSE_BASE_URL`, `LANGFUSE_PUBLIC_KEY`, `LANGFUSE_SECRET_KEY`                       | Traces for agent runs and evals. Leave them empty to run without telemetry.                                                            |
 | `CLASSIFY_BUDGET_MS`, `CLASSIFY_LEASE_MS`, `CLASSIFY_CONCURRENCY`, `NOTICE_SWEEP_LIMIT` | Classification queue budgets, lease time, parallelism and the notice review sweep.                                                     |
@@ -179,6 +179,8 @@ pnpm data:gtfs            # fill lines with no stops from the operator GTFS
 pnpm data:enrich          # name the kelurahan/kecamatan/kota of every stop
 pnpm db:sync              # apply the snapshot without clearing the notices
 pnpm data:embed           # recompute the station embeddings
+pnpm data:places          # rebuild the Jabodetabek place extract from Overture
+pnpm db:places            # load the place extract into map_places
 ```
 
 Run them in that order. `data:ingest` rebuilds the snapshot and drops the GTFS
@@ -189,6 +191,26 @@ flag, not a cleanup.
 
 On a fresh database, `pnpm db:seed` replaces `pnpm db:sync`. The seed loads both
 the network snapshot and the line patterns.
+
+### Places
+
+`data/places-jabodetabek.parquet` is the Overture Maps places extract for the
+Jabodetabek box: 272,964 places with a confidence of at least 0.5, deduplicated
+by name within about 110 m. It is open data (CDLA Permissive 2.0, Apache 2.0 for
+the Foursquare records); the notices are in `data/PLACES-NOTICE.txt`, and the
+release and count are in `data/places-jabodetabek.json`.
+
+```bash
+pnpm data:places          # rebuild the extract from the latest Overture release
+pnpm db:places            # load it into map_places
+```
+
+Both use the DuckDB command line (`brew install duckdb`); the first run
+downloads the S3 and Postgres extensions. `db:seed` does not load the places, so
+a fresh database needs `pnpm db:places` once. The place field reads
+`map_places` first, then falls back to Photon/Nominatim (or Google Places when
+`GOOGLE_MAPS_API_KEY` is set) only when the local list holds fewer than three
+answers.
 
 ## The planner
 

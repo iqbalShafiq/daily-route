@@ -118,7 +118,7 @@ export type PlaceSuggestion = {
   street?: string | null;
   detail?: string;
   /** The index the place came from, when it is not the network graph. */
-  source?: "google" | "openstreetmap";
+  source?: "google" | "openstreetmap" | "overture";
   matchedRanges?: MatchedRange[];
 };
 

@@ -37,6 +37,8 @@
     "infra:reset": "docker compose down -v && docker compose up -d db",
     "data:gtfs": "pnpm --filter @daily-route/ingest gtfs",
     "data:enrich": "dotenv -e .env -- pnpm --filter @daily-route/ingest enrich",
+    "data:places": "dotenv -e .env -- pnpm --filter @daily-route/ingest places:extract",
+    "db:places": "dotenv -e .env -- pnpm --filter @daily-route/ingest places:load",
     "verify:notices": "dotenv -e .env -- pnpm --filter @daily-route/agent verify:notices",
     "backtest:notices": "dotenv -e .env -- pnpm --filter @daily-route/agent backtest",
     "eval:fetch": "dotenv -e .env -- pnpm --filter @daily-route/agent eval:fetch",
