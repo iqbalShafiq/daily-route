@@ -33,7 +33,7 @@ export function createPlacesRouter(deps: ApiDeps): Router {
     const { q, limit } = parsed.data;
     const [resolved, places] = await Promise.all([
       deps.resolver.resolve(q, { limit: 6 }),
-      searchPlaces(q),
+      searchPlaces(q, { googleKey: deps.env.GOOGLE_MAPS_API_KEY }),
     ]);
 
     /*
@@ -94,6 +94,7 @@ export function createPlacesRouter(deps: ApiDeps): Router {
         lineCount: 0,
         street: place.detail,
         detail: place.kind,
+        source: place.source,
         matchedRanges: [],
       }));
 

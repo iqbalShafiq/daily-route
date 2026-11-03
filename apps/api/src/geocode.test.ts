@@ -139,6 +139,82 @@ describe("searchPlaces", () => {
     );
   });
 
+  it("takes the coordinates from Google Places when a key is set", async () => {
+    const calls: { url: string; init?: RequestInit | undefined }[] = [];
+    const fetcher: FetchLike = (input, init) => {
+      calls.push({ url: input, init });
+      if (input === "https://places.googleapis.com/v1/places:searchText") {
+        return json({
+          places: [
+            {
+              id: "grand",
+              displayName: { text: "Grand Indonesia" },
+              shortFormattedAddress: "Jl. Teluk Betung No.1, Jakarta",
+              location: { latitude: -6.1958, longitude: 106.8215 },
+              primaryTypeDisplayName: { text: "Shopping mall" },
+              types: ["shopping_mall"],
+            },
+            {
+              id: "bandung",
+              displayName: { text: "Outside Jakarta" },
+              location: { latitude: -6.9, longitude: 107.6 },
+            },
+          ],
+        });
+      }
+      return json({ features: [] });
+    };
+
+    const places = await searchPlaces("grand google test", {
+      fetch: fetcher,
+      googleKey: "secret",
+    });
+
+    const googleCall = calls.find((call) => call.url.includes("places.googleapis.com"));
+    expect(googleCall?.init?.method).toBe("POST");
+    expect(
+      (googleCall?.init?.headers as Record<string, string>)["X-Goog-Api-Key"],
+    ).toBe("secret");
+
+    const body = JSON.parse(String(googleCall?.init?.body)) as {
+      locationRestriction: { rectangle: { high: { latitude: number } } };
+    };
+    expect(body.locationRestriction.rectangle.high.latitude).toBeCloseTo(-6.05);
+
+    expect(places).toHaveLength(1);
+    expect(places[0]).toMatchObject({
+      name: "Grand Indonesia",
+      kind: "Shopping mall",
+      detail: "Jl. Teluk Betung No.1, Jakarta",
+      source: "google",
+      latitude: -6.1958,
+    });
+  });
+
+  it("falls back to OpenStreetMap when Google fails", async () => {
+    const fetcher: FetchLike = (input) => {
+      if (input.includes("places.googleapis.com")) {
+        return Promise.reject(new Error("permission denied"));
+      }
+      if (input.includes("photon.komoot.io")) {
+        return json({
+          features: [photonFeature("Monas Park", "park", -6.1767, 106.8265)],
+        });
+      }
+      return json([]);
+    };
+
+    const places = await searchPlaces("monas fallback google", {
+      fetch: fetcher,
+      googleKey: "secret",
+    });
+
+    expect(places[0]).toMatchObject({
+      name: "Monas Park",
+      source: "openstreetmap",
+    });
+  });
+
   it("does not ask the same question twice", async () => {
     let calls = 0;
     const fetcher: FetchLike = (input) => {

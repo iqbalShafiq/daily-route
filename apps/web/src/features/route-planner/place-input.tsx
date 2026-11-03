@@ -49,6 +49,7 @@ type Row = {
   ranges: MatchedRange[];
   interchange: boolean;
   place: ChosenPlace;
+  source?: "google" | "openstreetmap" | undefined;
 };
 
 export function PlaceInput({
@@ -431,6 +432,15 @@ export function PlaceInput({
           </li>
         );
       })}
+
+      {rows.some((row) => row.source === "google") ? (
+        <li
+          role="presentation"
+          className="border-t border-line/70 px-3 py-2 font-mono text-[12px] uppercase leading-[1.2] tracking-[0.04em] text-ink-3"
+        >
+          Powered by Google
+        </li>
+      ) : null}
     </ul>
   ) : null;
 
@@ -500,6 +510,7 @@ function rowOfSuggestion(suggestion: PlaceSuggestion): Row {
     detail,
     ranges: suggestion.matchedRanges ?? [],
     interchange: suggestion.kind === "station" && suggestion.isInterchange,
+    source: suggestion.source,
     place: {
       kind: suggestion.kind,
       id: suggestion.id,

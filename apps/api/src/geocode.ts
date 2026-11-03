@@ -28,8 +28,13 @@ const FAILURE_CACHE_MS = 60 * 1000;
 const MAXIMUM_PLACES = 6;
 const PHOTON_TIMEOUT_MS = 5_000;
 const NOMINATIM_TIMEOUT_MS = 4_000;
+const GOOGLE_TIMEOUT_MS = 4_000;
+
+const GOOGLE_TEXT_SEARCH = "https://places.googleapis.com/v1/places:searchText";
 
 type SourceResult = { places: GeocodedPlace[]; ok: boolean };
+
+export type PlaceSource = "google" | "openstreetmap";
 
 export type GeocodedPlace = {
   id: string;
@@ -40,6 +45,8 @@ export type GeocodedPlace = {
   kind: string;
   latitude: number;
   longitude: number;
+  /** The index that answered, so the interface can name it. */
+  source: PlaceSource;
 };
 
 export type FetchLike = (input: string, init?: RequestInit) => Promise<Response>;
@@ -48,6 +55,22 @@ export type GeocodeOptions = {
   signal?: AbortSignal;
   /** Injected so a test can answer without a network. */
   fetch?: FetchLike;
+  /**
+   * The server's Google Places key. With one, Google answers first and
+   * OpenStreetMap fills a thin list; without one, OpenStreetMap alone
+   * answers.
+   */
+  googleKey?: string | undefined;
+};
+
+type GooglePlace = {
+  id?: string;
+  displayName?: { text?: string };
+  shortFormattedAddress?: string;
+  formattedAddress?: string;
+  location?: { latitude?: number; longitude?: number };
+  primaryTypeDisplayName?: { text?: string };
+  types?: string[];
 };
 
 type PhotonFeature = {
@@ -106,6 +129,49 @@ export async function searchPlaces(
 
   const fetchImpl = options.fetch ?? fetch;
   const signal = options.signal;
+  const googleKey = options.googleKey?.trim();
+
+  /*
+   * Google Places owns the directory when a key is configured: it knows
+   * the small business that OpenStreetMap never mapped. The rectangle is
+   * the Jabodetabek box, so an answer outside it cannot arrive. A thin
+   * Google list is filled from OpenStreetMap, which is better at streets
+   * and addresses than at shops.
+   */
+  if (googleKey) {
+    const google = await readGoogle(fetchImpl, query, googleKey, signal);
+    if (google.ok && google.places.length > 0) {
+      const filler =
+        google.places.length >= MAXIMUM_PLACES
+          ? { places: [], ok: true }
+          : await readOpenStreetMap(fetchImpl, query, signal);
+      const places = dedupe([...google.places, ...filler.places]).slice(0, MAXIMUM_PLACES);
+      cache.set(key, { expiresAt: Date.now() + CACHE_MS, places });
+      return places;
+    }
+
+    const osm = await readOpenStreetMap(fetchImpl, query, signal);
+    cache.set(key, {
+      // A missing Google answer is retried in a minute, not in ten.
+      expiresAt: Date.now() + (google.ok ? CACHE_MS : FAILURE_CACHE_MS),
+      places: osm.places,
+    });
+    return osm.places;
+  }
+
+  const osm = await readOpenStreetMap(fetchImpl, query, signal);
+  cache.set(key, {
+    expiresAt: Date.now() + (osm.ok ? CACHE_MS : FAILURE_CACHE_MS),
+    places: osm.places,
+  });
+  return osm.places;
+}
+
+async function readOpenStreetMap(
+  fetchImpl: FetchLike,
+  query: string,
+  signal: AbortSignal | undefined,
+): Promise<SourceResult> {
   /*
    * "grand indonesia mall" is three words for a place whose own name is
    * two. Photon reads the first and the last, so the same search is also
@@ -124,17 +190,62 @@ export async function searchPlaces(
       ? await readNominatim(fetchImpl, query, signal)
       : { places: [], ok: true };
 
-  const places = dedupe([...photon.places, ...nominatim.places]).slice(0, MAXIMUM_PLACES);
-  /*
-   * Photon owns the answers a rider sees first. When it did not answer,
-   * the Nominatim list is a weaker stand-in: keep it for a minute so a
-   * recovered Photon is asked again, instead of hiding it for ten.
-   */
-  cache.set(key, {
-    expiresAt: Date.now() + (photon.ok ? CACHE_MS : FAILURE_CACHE_MS),
-    places,
+  return {
+    places: dedupe([...photon.places, ...nominatim.places]).slice(0, MAXIMUM_PLACES),
+    ok: photon.ok || nominatim.ok,
+  };
+}
+
+async function readGoogle(
+  fetchImpl: FetchLike,
+  query: string,
+  apiKey: string,
+  signal: AbortSignal | undefined,
+): Promise<SourceResult> {
+  const body = JSON.stringify({
+    textQuery: query.trim(),
+    languageCode: "en",
+    regionCode: "ID",
+    maxResultCount: 8,
+    locationRestriction: {
+      rectangle: {
+        low: {
+          latitude: JABODETABEK.minLatitude,
+          longitude: JABODETABEK.minLongitude,
+        },
+        high: {
+          latitude: JABODETABEK.maxLatitude,
+          longitude: JABODETABEK.maxLongitude,
+        },
+      },
+    },
   });
-  return places;
+
+  try {
+    const response = await fetchImpl(GOOGLE_TEXT_SEARCH, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "X-Goog-Api-Key": apiKey,
+        "X-Goog-FieldMask":
+          "places.id,places.displayName,places.shortFormattedAddress,places.formattedAddress,places.location,places.primaryTypeDisplayName,places.types",
+      },
+      body,
+      signal: signal ?? AbortSignal.timeout(GOOGLE_TIMEOUT_MS),
+    });
+    if (!response.ok) return { places: [], ok: false };
+    const payload = (await response.json()) as { places?: unknown };
+    if (!Array.isArray(payload.places)) return { places: [], ok: true };
+
+    return {
+      places: payload.places
+        .map((entry) => googlePlaceOf(entry))
+        .filter((place): place is GeocodedPlace => place !== null),
+      ok: true,
+    };
+  } catch {
+    return { places: [], ok: false };
+  }
 }
 
 async function readPhotonMany(
@@ -269,6 +380,30 @@ function photonPlaceOf(value: unknown): GeocodedPlace | null {
     kind: kindOf(properties.osm_value),
     latitude,
     longitude,
+    source: "openstreetmap",
+  };
+}
+
+function googlePlaceOf(value: unknown): GeocodedPlace | null {
+  if (!value || typeof value !== "object") return null;
+  const entry = value as GooglePlace;
+  const latitude = Number(entry.location?.latitude);
+  const longitude = Number(entry.location?.longitude);
+  if (!Number.isFinite(latitude) || !Number.isFinite(longitude)) return null;
+  // The request already carries the rectangle; this is the second lock.
+  if (!insideJabodetabek(latitude, longitude)) return null;
+
+  const name = cleanName(entry.displayName?.text);
+  if (!name) return null;
+
+  return {
+    id: `place:google:${entry.id ?? `${latitude.toFixed(5)},${longitude.toFixed(5)}`}`,
+    name,
+    detail: entry.shortFormattedAddress ?? entry.formattedAddress ?? null,
+    kind: entry.primaryTypeDisplayName?.text ?? kindOf(entry.types?.[0]),
+    latitude,
+    longitude,
+    source: "google",
   };
 }
 
@@ -299,6 +434,7 @@ function nominatimPlaceOf(value: unknown): GeocodedPlace | null {
     kind: kindOf(entry.type ?? entry.category),
     latitude,
     longitude,
+    source: "openstreetmap",
   };
 }
 

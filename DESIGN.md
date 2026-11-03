@@ -567,6 +567,9 @@ are written down in `research/ux-search.md`; the short version:
 - The order of the list is the only thing that says which match is the
   better one. A rider reads a name, not a score, so no badge says how
   sure the list is about it.
+- When a suggestion comes from Google Places, the list ends with a
+  quiet "Powered by Google" line, in the monospaced label voice. The
+  line is not an option and cannot be chosen.
 - On a phone the list is a sheet at the bottom of the screen, because the
   keyboard covers half of it.
 

@@ -1,4 +1,5 @@
 import express, { type Express } from "express";
+import { hasGoogleMaps } from "@daily-route/env";
 
 import type { ApiDeps } from "./deps.js";
 import { createAccountRouter } from "./routes/account.js";
@@ -47,6 +48,7 @@ export function createApp(deps: ApiDeps): Express {
           deps.env.LANGFUSE_SECRET_KEY &&
           (deps.env.LANGFUSE_BASE_URL ?? deps.env.LANGFUSE_HOST),
       ),
+      places: hasGoogleMaps(deps.env) ? "google" : "openstreetmap",
       lastProviderError: deps.lastProviderError,
     });
   });

@@ -45,6 +45,12 @@ const envSchema = z.object({
 
   TAVILY_API_KEY: optionalSecret,
 
+  /**
+   * Google Places API (New). With a key, the place field asks Google
+   * first and keeps its answer inside the Jabodetabek rectangle.
+   */
+  GOOGLE_MAPS_API_KEY: optionalSecret,
+
   X_BEARER_TOKEN: optionalSecret,
   X_API_BASE_URL: z.string().trim().url().default("https://api.x.com"),
   /** How long the classifier may work before a tick returns. */
@@ -104,4 +110,9 @@ export function hasXCredentials(env: Env): boolean {
 /** Whether news research is available. */
 export function hasTavily(env: Env): boolean {
   return env.TAVILY_API_KEY !== undefined;
+}
+
+/** Whether place search may ask Google Places. */
+export function hasGoogleMaps(env: Env): boolean {
+  return env.GOOGLE_MAPS_API_KEY !== undefined;
 }

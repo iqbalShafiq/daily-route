@@ -103,8 +103,12 @@ export function ChatPanel({
       .map((place) => ({
         key: place.id,
         title: place.name,
-        detail: place.kind === "station" ? (place.systemName ?? "Stop") : "Place",
+        detail:
+          place.kind === "station"
+            ? (place.systemName ?? "Stop")
+            : (place.detail ?? "Place"),
         insert: place.name,
+        google: place.source === "google",
       }));
     return [
       ...savedMatches.slice(0, 4).map((place) => ({
@@ -112,6 +116,7 @@ export function ChatPanel({
         title: place.detail && place.detail !== "Saved" && place.detail !== "Recent" ? place.detail : place.name,
         detail: place.name,
         insert: place.name,
+        google: false,
       })),
       ...searched,
     ].slice(0, 6);
@@ -363,6 +368,11 @@ export function ChatPanel({
               {mentionEmpty ? (
                 <li className="px-3 py-3 text-[12px] leading-[1.45] text-ink-2">
                   No places match “{mentionNeedle}”.
+                </li>
+              ) : null}
+              {mentionRows.some((row) => row.google) ? (
+                <li className="border-t border-line/70 px-3 py-2 font-mono text-[12px] uppercase leading-[1.2] tracking-[0.04em] text-ink-3">
+                  Powered by Google
                 </li>
               ) : null}
             </ul>
