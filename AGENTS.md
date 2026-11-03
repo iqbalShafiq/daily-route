@@ -718,7 +718,8 @@ Read `DESIGN.md` before touching the interface. The short version:
   handle that collapses it to a peek and expands it again. The route board
   header carries a close button that dismisses the route and returns to
   the empty board. The journey header names the two ends with "From" and
-  "To" labels and a route marker, not a horizontal rule.
+  "To" labels and a route marker, not a horizontal rule. The destination
+  name has no arrow.
 - The journey is framed in the room the rider can see. The margins
   around it are the `--map-pad-*` variables in `apps/web/src/styles.css`,
   and the map reads them when it frames a journey. The height of the

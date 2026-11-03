@@ -1,8 +1,9 @@
 import { useQuery } from "@tanstack/react-query";
-import { Eye, EyeOff, X } from "lucide-react";
+import { Eye, EyeOff, LogOut, Trash2, X } from "lucide-react";
 import { useEffect, useLayoutEffect, useRef, useState, type FormEvent } from "react";
 
 import { Button } from "../../components/ui/button.js";
+import { ConfirmDialog } from "../../components/ui/confirm-dialog.js";
 import { Spinner } from "../../components/ui/feedback.js";
 import { Input } from "../../components/ui/input.js";
 import { MarqueeText } from "../../components/ui/marquee-text.js";
@@ -344,6 +345,7 @@ export function AccountPanel({
   const [busy, setBusy] = useState(false);
   const [formError, setFormError] = useState<string | null>(null);
   const [section, setSection] = useState<"places" | "settings">("places");
+  const [confirmSignOut, setConfirmSignOut] = useState(false);
   const [confirmDelete, setConfirmDelete] = useState(false);
   const [currentPassword, setCurrentPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
@@ -463,8 +465,7 @@ export function AccountPanel({
     }
   };
 
-  const submitDelete = async (event: FormEvent<HTMLFormElement>): Promise<void> => {
-    event.preventDefault();
+  const submitDelete = async (): Promise<void> => {
     setBusy(true);
     setFormError(null);
     try {
@@ -679,7 +680,7 @@ export function AccountPanel({
                   <PasswordToggle shown={shown} onToggle={() => setShown((current) => !current)} />
                 }
               />
-              {formError && !confirmDelete ? (
+              {formError && !confirmDelete && !confirmSignOut ? (
                 <p role="alert" className="text-[13px] leading-[1.5] text-danger">
                   {formError}
                 </p>
@@ -692,71 +693,81 @@ export function AccountPanel({
               >
                 Update password
               </Button>
-              {busy && !confirmDelete ? <Spinner label="Updating password" /> : null}
+              {busy && !confirmDelete && !confirmSignOut ? <Spinner label="Updating password" /> : null}
             </form>
 
-            {confirmDelete ? (
-              <form onSubmit={submitDelete} className="flex flex-col gap-3 border-t border-line/70 pt-4">
-                <p className="text-[13px] leading-[1.5] text-ink-2">
-                  Delete this account? Places and watches stored with it are removed. This
-                  device keeps nothing of them.
-                </p>
-                <Input
-                  label="Password"
-                  type="password"
-                  autoComplete="current-password"
-                  placeholder="Password for this account"
-                  value={deletePassword}
-                  onChange={(event) => setDeletePassword(event.target.value)}
-                />
-                {formError ? (
-                  <p role="alert" className="text-[13px] leading-[1.5] text-danger">
-                    {formError}
-                  </p>
-                ) : null}
-                <Button
-                  type="submit"
-                  variant="danger"
-                  className="w-full"
-                  disabled={busy || deletePassword.length === 0}
-                >
-                  Delete account
-                </Button>
-                <Button
-                  variant="secondary"
-                  className="w-full"
-                  onClick={() => {
-                    setFormError(null);
-                    setConfirmDelete(false);
-                  }}
-                  disabled={busy}
-                >
-                  Keep account
-                </Button>
-              </form>
-            ) : (
-              <div className="border-t border-line/70">
-                <button
-                  type="button"
-                  onClick={() => void signOut()}
-                  disabled={busy}
-                  className="flex w-full cursor-pointer items-center py-3 text-left text-[15px] text-ink hover:text-ink-2 disabled:opacity-40"
-                >
-                  Sign out
-                </button>
-                <button
-                  type="button"
-                  onClick={() => {
-                    setFormError(null);
-                    setConfirmDelete(true);
-                  }}
-                  disabled={busy}
-                  className="flex w-full cursor-pointer items-center border-t border-line/70 py-3 text-left text-[15px] text-danger disabled:opacity-40"
-                >
-                  Delete account
-                </button>
-              </div>
-            )}
+            <div className="flex flex-col gap-2 border-t border-line/70 pt-4">
+              <p className="text-[13px] leading-[1.5] text-ink-2">
+                Sign out leaves this device. Deleting the account removes the places stored with it.
+              </p>
+              <Button
+                variant="secondary"
+                className="w-full justify-start"
+                onClick={() => {
+                  setFormError(null);
+                  setConfirmSignOut(true);
+                }}
+                disabled={busy}
+              >
+                <LogOut aria-hidden className="size-4" />
+                Sign out
+              </Button>
+              <Button
+                variant="secondary"
+                className="w-full justify-start text-danger hover:border-danger hover:bg-danger-soft hover:text-danger"
+                onClick={() => {
+                  setFormError(null);
+                  setDeletePassword("");
+                  setConfirmDelete(true);
+                }}
+                disabled={busy}
+              >
+                <Trash2 aria-hidden className="size-4" />
+                Delete account
+              </Button>
+            </div>
+
+            <ConfirmDialog
+              open={confirmSignOut}
+              onOpenChange={setConfirmSignOut}
+              title="Sign out"
+              description="Saved places and watches stay with this account. This device keeps nothing of them."
+              confirmLabel="Sign out"
+              cancelLabel="Stay signed in"
+              busy={busy}
+              busyLabel="Signing out"
+              error={confirmSignOut ? formError : null}
+              onConfirm={() => void signOut()}
+            />
+            <ConfirmDialog
+              open={confirmDelete}
+              onOpenChange={(next) => {
+                setConfirmDelete(next);
+                if (!next) {
+                  setDeletePassword("");
+                  setFormError(null);
+                }
+              }}
+              title="Delete account"
+              description="Places and watches stored with it are removed. This cannot be undone."
+              confirmLabel="Delete account"
+              cancelLabel="Keep account"
+              tone="danger"
+              busy={busy}
+              busyLabel="Deleting account"
+              confirmDisabled={deletePassword.length === 0}
+              error={confirmDelete ? formError : null}
+              onConfirm={() => void submitDelete()}
+            >
+              <Input
+                label="Password"
+                type="password"
+                autoComplete="current-password"
+                placeholder="Password for this account"
+                value={deletePassword}
+                onChange={(event) => setDeletePassword(event.target.value)}
+              />
+            </ConfirmDialog>
       </div>
     );
   }

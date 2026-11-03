@@ -54,7 +54,16 @@ test.describe("account", () => {
     await page.goto("/");
 
     await createAccount(page, email);
+    await page.getByRole("tab", { name: "Settings" }).click();
+    await page.getByRole("button", { name: "Delete account" }).click();
+    const deleteDialog = page.getByRole("dialog", { name: "Delete account" });
+    await expect(deleteDialog.getByLabel("Password")).toBeVisible();
+    await deleteDialog.getByRole("button", { name: "Keep account" }).click();
+    await expect(deleteDialog).toBeHidden();
+
     await page.getByRole("button", { name: "Sign out" }).click();
+    const signOutDialog = page.getByRole("dialog", { name: "Sign out" });
+    await signOutDialog.getByRole("button", { name: "Sign out" }).click();
     await expect(page.getByRole("tab", { name: "Sign in" })).toBeVisible();
 
     const panel = page.getByRole("tabpanel", { name: "Sign in" });

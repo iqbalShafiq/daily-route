@@ -429,10 +429,7 @@ function JourneyDetail({
                   {data.origin.name}
                 </p>
                 <p className="eyebrow mt-2">To</p>
-                <p className="truncate text-[15px] font-semibold text-ink">
-                  <span aria-hidden className="text-ink-3">→ </span>
-                  {data.destination.name}
-                </p>
+                <p className="truncate text-[15px] font-semibold text-ink">{data.destination.name}</p>
               </div>
             </div>
           </div>

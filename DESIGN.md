@@ -158,8 +158,9 @@ map. The map owns the window, and the controls float on it.
   never pushes the time out of the row. The dashed timeline runs
   continuously from one mode plate to the next, through walks and transfers.
 - The journey header names the two ends with **From** and **To** labels and
-  a small route marker, not a horizontal rule. The fare sits at the right
-  of that block, and the duration is the large number below it.
+  a small route marker, not a horizontal rule. The destination name has no
+  arrow; the marker already says which end is which. The fare sits at the
+  right of that block, and the duration is the large number below it.
 - A stop name that is longer than its line is not cut into three dots. It
   runs, the way a headline runs along the bottom of a news broadcast, and it
   only runs while the reader points at it.
@@ -359,6 +360,14 @@ Used to switch between the service board sections and between the departure
 modes. It is a real tab widget: the ARIA roles and the keyboard behaviour
 come from Base UI, and the wrapper only decides how it looks. The active
 surface is ink on paper, not another coloured pill.
+
+### Confirmation dialog
+
+Base UI's dialog, wrapped. It is the one place a destructive or leaving
+action is confirmed. The popup is paper, with the same top rule as a panel,
+and the map behind it is dimmed, never blurred. Cancel is a close button,
+so a touch screen reader can leave. A danger confirmation uses the danger
+button; every other confirmation uses the primary button.
 
 ### Tooltip
 
@@ -560,7 +569,7 @@ are written down in `research/ux-search.md`; the short version:
 
 ## Named places and usual journeys
 
-Named places live on the Places tab of the account sheet. A long list scrolls inside itself and can be filtered by name or address. The add form stays closed until the rider asks for it. Password, sign out and delete live on Settings, and the password fields are already open. The rider types
+Named places live on the Places tab of the account sheet. A long list scrolls inside itself and can be filtered by name or address. The add form stays closed until the rider asks for it. Password, sign out and delete live on Settings, and the password fields are already open. Sign out and delete each ask in a confirmation dialog before they run. Delete also asks for the password. The rider types
 any name and searches a stop, a street, or another place. The same search
 offers those saved names, by the name or by the address, in the route
 fields and after @ in the assistant. A notice that touches a usual journey is one strip
