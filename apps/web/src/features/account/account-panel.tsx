@@ -82,6 +82,8 @@ function PlacesSection({
   const [busy, setBusy] = useState(false);
   const [removing, setRemoving] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [adding, setAdding] = useState(false);
+  const [filter, setFilter] = useState("");
 
   const trimmedQuery = query.trim();
   const debouncedQuery = useSettledValue(trimmedQuery, 250);
@@ -119,6 +121,7 @@ function PlacesSection({
       setLabel("");
       setQuery("");
       setChosen(null);
+      setAdding(false);
     } catch (caught) {
       setError(messageOf(caught));
     } finally {
@@ -138,39 +141,63 @@ function PlacesSection({
     }
   };
 
-  return (
-    <div className="flex flex-col gap-4">
-      {places.length > 0 ? (
-        <ul className="flex flex-col gap-2">
-          {places.map((entry) => (
-            <li key={entry.label} className="flex items-center gap-3">
-              <div className="min-w-0 flex-1">
-                <MarqueeText
-                  text={entry.label}
-                  className="text-[15px] font-medium leading-[1.45] text-ink"
-                />
-                <MarqueeText
-                  text={entry.place.name}
-                  className="mt-0.5 text-[13px] leading-[1.5] text-ink-2"
-                />
-              </div>
-              <Button
-                variant="ghost"
-                size="sm"
-                className="shrink-0"
-                aria-label={`Remove ${entry.label}`}
-                disabled={removing === entry.label}
-                onClick={() => void remove(entry.label)}
-              >
-                Remove
-              </Button>
-            </li>
-          ))}
-        </ul>
-      ) : (
-        <p className="text-[13px] leading-[1.5] text-ink-2">No saved places.</p>
-      )}
+  const needle = filter.trim().toLowerCase();
+  const visible = needle
+    ? places.filter((entry) =>
+        `${entry.label} ${entry.place.name}`.toLowerCase().includes(needle),
+      )
+    : places;
+  const showForm = places.length === 0 || adding;
 
+  return (
+    <div className="flex flex-col gap-3">
+      {places.length > 0 ? (
+        <>
+          <Input
+            label="Find a place"
+            placeholder="Name or address"
+            autoComplete="off"
+            value={filter}
+            onChange={(event) => setFilter(event.target.value)}
+          />
+          {visible.length > 0 ? (
+            <ul className="scroll-quiet max-h-48 overflow-y-auto border-t border-line/70">
+              {visible.map((entry) => (
+                <li
+                  key={entry.label}
+                  className="flex items-center gap-3 border-b border-line/70 py-2"
+                >
+                  <div className="min-w-0 flex-1">
+                    <MarqueeText
+                      text={entry.label}
+                      className="text-[15px] font-medium leading-[1.2] text-ink"
+                    />
+                    <p className="mt-0.5 truncate text-[13px] leading-[1.5] text-ink-2">
+                      {entry.place.name}
+                    </p>
+                  </div>
+                  <Tooltip label={`Remove ${entry.label}`}>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="size-8 shrink-0"
+                      aria-label={`Remove ${entry.label}`}
+                      disabled={removing === entry.label}
+                      onClick={() => void remove(entry.label)}
+                    >
+                      <X aria-hidden className="size-4" />
+                    </Button>
+                  </Tooltip>
+                </li>
+              ))}
+            </ul>
+          ) : (
+            <p className="text-[13px] leading-[1.5] text-ink-2">No saved places match.</p>
+          )}
+        </>
+      ) : null}
+
+      {showForm ? (
       <form onSubmit={submit} className="flex flex-col gap-3 border-t border-line/70 pt-4">
         <Input
           label="Name"
@@ -256,7 +283,17 @@ function PlacesSection({
           Add place
         </Button>
         {busy ? <Spinner label="Saving name" /> : null}
+        {places.length > 0 ? (
+          <Button variant="secondary" className="w-full" onClick={() => setAdding(false)} disabled={busy}>
+            Cancel
+          </Button>
+        ) : null}
       </form>
+      ) : (
+        <Button variant="secondary" className="w-full" onClick={() => setAdding(true)}>
+          Add a place
+        </Button>
+      )}
 
       {error ? (
         <p role="alert" className="text-[13px] leading-[1.5] text-danger">
