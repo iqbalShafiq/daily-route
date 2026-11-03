@@ -34,9 +34,10 @@ test.describe("route planner", () => {
     await page.keyboard.press("Escape");
     await page.getByRole("button", { name: "Show route" }).click();
 
-    // The itinerary arrives with a duration and at least one leg.
+    // The itinerary arrives with a duration and at least one leg. The
+    // journey header names the destination, without an arrow.
     await expect(page.getByText("Fare")).toBeVisible({ timeout: 30_000 });
-    await expect(page.getByText(/→ Kelapa Gading$/).first()).toBeVisible();
+    await expect(page.getByText("Kelapa Gading", { exact: true }).first()).toBeVisible();
 
     // The route is drawn on the map.
     await expect(page.locator("canvas.maplibregl-canvas").first()).toBeVisible();

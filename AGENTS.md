@@ -804,8 +804,12 @@ Read `DESIGN.md` before touching the interface. The short version:
 - The place field is a combobox: the focus stays in the input, the active
   suggestion is pointed at with `aria-activedescendant`, and the matched
   part of a name is marked only when the server reported the range. A
-  place that is not a stop is geocoded on the server. Saved places and
-  recent journeys stay in the browser.
+  place that is not a stop is geocoded on the server: Photon answers a
+  name that is still being typed, Nominatim an address, and the same
+  place from both is one row. Saved places and recent journeys stay in
+  the browser. The account's Places tab uses the same field; its find
+  field opens with the saved places as recommendations and folds away
+  once a suggestion has copied its place into the form.
 - A rider who is standing somewhere can ask for the walk to the stop
   that serves that place. The browser gives the position, the server
   asks the pedestrian router for the path, and the panel shows the

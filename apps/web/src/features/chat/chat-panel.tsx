@@ -117,6 +117,28 @@ export function ChatPanel({
     ].slice(0, 6);
   }, [savedMatches, placeSearch.data]);
 
+  /*
+   * The @ list stays open while the server answers, with a loading line
+   * when it has nothing to show yet. A popover that disappears on every
+   * keystroke reads as if the place is not in the network.
+   */
+  const mentionSearching = mentionNeedle.trim().length >= 2;
+  const mentionLoading =
+    mention !== null &&
+    mentionSearching &&
+    placeSearch.isPending &&
+    placeSearch.fetchStatus === "fetching";
+  const mentionFailed = mention !== null && mentionSearching && placeSearch.isError;
+  const mentionEmpty =
+    mention !== null &&
+    mentionSearching &&
+    !placeSearch.isPending &&
+    !placeSearch.isError &&
+    mentionRows.length === 0;
+  const mentionOpen =
+    mention !== null &&
+    (mentionRows.length > 0 || mentionLoading || mentionFailed || mentionEmpty);
+
   const insertMention = (name: string): void => {
     if (!mention) return;
     const next = `${draft.slice(0, mention.start)}${name}${draft.slice(cursor)}`;
@@ -304,7 +326,7 @@ export function ChatPanel({
         </p>
       ) : (
         <form onSubmit={submit} className="relative shrink-0 border-t border-line/70 p-3">
-          {mention && mentionRows.length > 0 ? (
+          {mentionOpen ? (
             <ul
               role="listbox"
               aria-label="Place suggestions"
@@ -328,6 +350,21 @@ export function ChatPanel({
                   </button>
                 </li>
               ))}
+              {mentionLoading && mentionRows.length === 0 ? (
+                <li className="px-3 py-3">
+                  <Spinner label="Searching places…" />
+                </li>
+              ) : null}
+              {mentionFailed ? (
+                <li className="px-3 py-3 text-[12px] leading-[1.45] text-ink-2">
+                  Place suggestions could not be loaded. Check the connection and try again.
+                </li>
+              ) : null}
+              {mentionEmpty ? (
+                <li className="px-3 py-3 text-[12px] leading-[1.45] text-ink-2">
+                  No places match “{mentionNeedle}”.
+                </li>
+              ) : null}
             </ul>
           ) : null}
           <div className="flex items-center gap-2">

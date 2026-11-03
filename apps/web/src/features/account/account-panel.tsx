@@ -1,6 +1,5 @@
-import { useQuery } from "@tanstack/react-query";
 import { Eye, EyeOff, LogOut, Trash2, X } from "lucide-react";
-import { useEffect, useLayoutEffect, useRef, useState, type FormEvent } from "react";
+import { useLayoutEffect, useMemo, useRef, useState, type FormEvent } from "react";
 
 import { Button } from "../../components/ui/button.js";
 import { ConfirmDialog } from "../../components/ui/confirm-dialog.js";
@@ -9,13 +8,10 @@ import { Input } from "../../components/ui/input.js";
 import { MarqueeText } from "../../components/ui/marquee-text.js";
 import { Tab, TabPanel, Tabs } from "../../components/ui/tabs.js";
 import { Tooltip } from "../../components/ui/tooltip.js";
-import {
-  ApiError,
-  api,
-  type AccountUser,
-  type NamedPlace,
-  type PlaceSuggestion,
-} from "../../lib/api.js";
+import { ApiError, type AccountUser, type NamedPlace } from "../../lib/api.js";
+import { cn } from "../../lib/cn.js";
+import { PlaceInput, type MemorySuggestion } from "../route-planner/place-input.js";
+import type { ChosenPlace } from "../route-planner/place-memory.js";
 
 /**
  * The account sheet.
@@ -79,29 +75,64 @@ function PlacesSection({
 }) {
   const [label, setLabel] = useState("");
   const [query, setQuery] = useState("");
-  const [chosen, setChosen] = useState<PlaceSuggestion | null>(null);
+  const [chosen, setChosen] = useState<ChosenPlace | null>(null);
   const [busy, setBusy] = useState(false);
   const [removing, setRemoving] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [adding, setAdding] = useState(false);
   const [filter, setFilter] = useState("");
+  const nameRef = useRef<HTMLInputElement>(null);
 
-  const trimmedQuery = query.trim();
-  const debouncedQuery = useSettledValue(trimmedQuery, 250);
-  const searching = debouncedQuery.length >= 2;
-  const suggestions = useQuery({
-    queryKey: ["places", debouncedQuery],
-    queryFn: ({ signal }) => api.places(debouncedQuery, signal),
-    enabled: searching,
-    staleTime: 60_000,
-  });
-  const results = (suggestions.data ?? []).slice(0, 4);
+  /*
+   * The saved places are the recommendations the find field opens with.
+   * The same field is used to add a place, so a label the rider already
+   * has can be copied into the new entry without searching again.
+   */
+  const memory = useMemo<MemorySuggestion[]>(
+    () =>
+      places.map((entry) => ({
+        id: `${entry.label}:${entry.place.id}`,
+        name: entry.label,
+        detail: entry.place.name,
+        place: {
+          kind: entry.place.kind,
+          id: entry.place.id,
+          name: entry.place.name,
+          latitude: entry.place.latitude,
+          longitude: entry.place.longitude,
+          systemId: entry.place.systemId,
+          systemName: entry.place.systemName,
+        },
+      })),
+    [places],
+  );
+
   const ready = chosen !== null && label.trim().length > 0;
 
-  const choose = (suggestion: PlaceSuggestion): void => {
-    setChosen(suggestion);
-    setQuery(suggestion.name);
+  /** A suggestion from the find field becomes the place being added. */
+  const chooseFromFind = (place: ChosenPlace): void => {
+    setChosen(place);
+    setQuery(place.name);
+    setFilter(place.name);
     setError(null);
+    setAdding(true);
+    // The find field is about to fold away; the caret belongs on the
+    // name of the place that was just chosen.
+    requestAnimationFrame(() => nameRef.current?.focus());
+  };
+
+  const startAdding = (): void => {
+    setError(null);
+    setAdding(true);
+  };
+
+  const cancelAdding = (): void => {
+    setError(null);
+    setAdding(false);
+    setLabel("");
+    setQuery("");
+    setChosen(null);
+    setFilter("");
   };
 
   const submit = async (event: FormEvent<HTMLFormElement>): Promise<void> => {
@@ -116,13 +147,10 @@ function PlacesSection({
         name: chosen.name,
         latitude: chosen.latitude,
         longitude: chosen.longitude,
-        systemId: chosen.systemId,
-        systemName: chosen.systemName,
+        systemId: chosen.systemId ?? null,
+        systemName: chosen.systemName ?? null,
       });
-      setLabel("");
-      setQuery("");
-      setChosen(null);
-      setAdding(false);
+      cancelAdding();
     } catch (caught) {
       setError(messageOf(caught));
     } finally {
@@ -142,156 +170,155 @@ function PlacesSection({
     }
   };
 
-  const needle = filter.trim().toLowerCase();
+  const needle = adding ? "" : filter.trim().toLowerCase();
   const visible = needle
     ? places.filter((entry) =>
         `${entry.label} ${entry.place.name}`.toLowerCase().includes(needle),
       )
     : places;
-  const showForm = places.length === 0 || adding;
 
   return (
     <div className="flex flex-col gap-3">
-      {places.length > 0 ? (
-        <>
-          <Input
+      {/*
+       * The find field is the way into the list and into a new place. It
+       * opens with the saved places and the map's own suggestions, and it
+       * folds away when the chosen place takes over the sheet.
+       */}
+      <div
+        data-place-find=""
+        data-state={adding ? "closed" : "open"}
+        className={cn(
+          "grid transition-[grid-template-rows,opacity] duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] motion-reduce:transition-none",
+          adding ? "grid-rows-[0fr] opacity-0" : "grid-rows-[1fr] opacity-100",
+        )}
+      >
+        <div
+          className={cn("min-h-0", adding ? "overflow-hidden" : "overflow-visible")}
+          inert={adding || undefined}
+          aria-hidden={adding || undefined}
+        >
+          <PlaceInput
             label="Find a place"
-            placeholder="Name or address"
-            autoComplete="off"
             value={filter}
-            onChange={(event) => setFilter(event.target.value)}
+            onValueChange={setFilter}
+            onSelectPlace={chooseFromFind}
+            placeholder="Search a saved place, stop, or address"
+            memory={memory}
+            floating
           />
-          {visible.length > 0 ? (
-            <ul className="scroll-quiet max-h-48 overflow-y-auto border-t border-line/70">
-              {visible.map((entry) => (
-                <li
-                  key={entry.label}
-                  className="flex items-center gap-3 border-b border-line/70 py-2"
-                >
-                  <div className="min-w-0 flex-1">
-                    <MarqueeText
-                      text={entry.label}
-                      className="text-[15px] font-medium leading-[1.2] text-ink"
-                    />
-                    <p className="mt-0.5 truncate text-[13px] leading-[1.5] text-ink-2">
-                      {entry.place.name}
-                    </p>
-                  </div>
-                  <Tooltip label={`Remove ${entry.label}`}>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      className="size-8 shrink-0"
-                      aria-label={`Remove ${entry.label}`}
-                      disabled={removing === entry.label}
-                      onClick={() => void remove(entry.label)}
-                    >
-                      <X aria-hidden className="size-4" />
-                    </Button>
-                  </Tooltip>
-                </li>
-              ))}
-            </ul>
-          ) : (
-            <p className="text-[13px] leading-[1.5] text-ink-2">No saved places match.</p>
-          )}
-        </>
+        </div>
+      </div>
+
+      {places.length > 0 ? (
+        visible.length > 0 ? (
+          <ul className="scroll-quiet max-h-48 overflow-y-auto border-t border-line/70">
+            {visible.map((entry) => (
+              <li
+                key={entry.label}
+                className="flex items-center gap-3 border-b border-line/70 py-2"
+              >
+                <div className="min-w-0 flex-1">
+                  <MarqueeText
+                    text={entry.label}
+                    className="text-[15px] font-medium leading-[1.2] text-ink"
+                  />
+                  <p className="mt-0.5 truncate text-[13px] leading-[1.5] text-ink-2">
+                    {entry.place.name}
+                  </p>
+                </div>
+                <Tooltip label={`Remove ${entry.label}`}>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="size-8 shrink-0"
+                    aria-label={`Remove ${entry.label}`}
+                    disabled={removing === entry.label}
+                    onClick={() => void remove(entry.label)}
+                  >
+                    <X aria-hidden className="size-4" />
+                  </Button>
+                </Tooltip>
+              </li>
+            ))}
+          </ul>
+        ) : (
+          <p className="text-[13px] leading-[1.5] text-ink-2">No saved places match.</p>
+        )
       ) : null}
 
-      {showForm ? (
-      <form onSubmit={submit} className="flex flex-col gap-3 border-t border-line/70 pt-4">
-        <Input
-          label="Name"
-          placeholder="A name for this place"
-          autoComplete="off"
-          value={label}
-          onChange={(event) => setLabel(event.target.value)}
-        />
-
-        <Input
-          label="Place"
-          placeholder="Search a stop, street, or place"
-          autoComplete="off"
-          value={query}
-          onChange={(event) => {
-            setQuery(event.target.value);
-            // Editing the name means the chosen suggestion is no longer
-            // the place the field describes.
-            setChosen(null);
-          }}
-        />
-
-        {chosen ? (
-          <div className="flex items-center gap-2 rounded-md border border-line-strong/70 bg-surface px-3 py-2">
-            <span
-              aria-hidden
-              className="size-2 shrink-0 rounded-full border-2 border-accent bg-surface"
+      <div
+        className={cn(
+          "grid transition-[grid-template-rows,opacity] duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] motion-reduce:transition-none",
+          adding ? "grid-rows-[1fr] opacity-100" : "grid-rows-[0fr] opacity-0",
+        )}
+      >
+        <div
+          className={cn("min-h-0", adding ? "overflow-visible" : "overflow-hidden")}
+          inert={!adding || undefined}
+          aria-hidden={!adding || undefined}
+        >
+          <form
+            onSubmit={submit}
+            className={cn(
+              "flex flex-col gap-3",
+              places.length > 0 && "border-t border-line/70 pt-4",
+            )}
+          >
+            <Input
+              ref={nameRef}
+              label="Name"
+              placeholder="A name for this place"
+              autoComplete="off"
+              value={label}
+              onChange={(event) => setLabel(event.target.value)}
             />
-            <span className="min-w-0 flex-1 truncate text-[13px] font-medium text-ink">
-              {chosen.name}
-            </span>
-            <span className="shrink-0 font-mono text-[12px] uppercase leading-[1.2] tracking-[0.04em] text-ink-3">
-              Chosen
-            </span>
-          </div>
-        ) : null}
 
-        {chosen === null && trimmedQuery.length >= 2 ? (
-          <div className="flex flex-col gap-1">
-            {suggestions.isPending ? <Spinner label="Searching places" /> : null}
-            {suggestions.isError ? (
-              <p className="text-[13px] leading-[1.5] text-ink-2">
-                Place suggestions could not be loaded. Check the connection and try again.
-              </p>
-            ) : null}
-            {!suggestions.isPending && !suggestions.isError && results.length === 0 ? (
-              <p className="text-[13px] leading-[1.5] text-ink-2">
-                No places match that name.
-              </p>
-            ) : null}
-            {results.length > 0 ? (
-              <ul className="grid gap-1" aria-label="Place suggestions">
-                {results.map((suggestion) => (
-                  <li key={suggestion.id}>
-                    <button
-                      type="button"
-                      onClick={() => choose(suggestion)}
-                      className="press flex w-full cursor-pointer items-center gap-2 rounded-md border border-line-strong/70 bg-surface px-3 py-2 text-left transition-colors hover:border-ink hover:bg-surface-2"
-                    >
-                      <span
-                        aria-hidden
-                        className={
-                          suggestion.kind === "station"
-                            ? "size-2 shrink-0 rounded-full border-2 border-accent bg-surface"
-                            : "size-2 shrink-0 rounded-[4px] bg-ink"
-                        }
-                      />
-                      <span className="min-w-0 flex-1 truncate text-[13px] font-medium text-ink">
-                        {suggestion.name}
-                      </span>
-                      <span className="shrink-0 font-mono text-[12px] uppercase leading-[1.2] tracking-[0.04em] text-ink-3">
-                        {suggestion.kind === "station" ? (suggestion.systemName ?? "Stop") : "Place"}
-                      </span>
-                    </button>
-                  </li>
-                ))}
-              </ul>
-            ) : null}
-          </div>
-        ) : null}
+            <PlaceInput
+              label="Place"
+              value={query}
+              placeholder="Search a stop, street, or place"
+              memory={memory}
+              floating
+              onValueChange={(next) => {
+                setQuery(next);
+                // Editing the place means the chosen suggestion is no
+                // longer the place the field describes.
+                setChosen(null);
+              }}
+              onSelectPlace={(place) => {
+                setChosen(place);
+                setQuery(place.name);
+              }}
+            />
 
-        <Button type="submit" variant="primary" className="w-full" disabled={busy || !ready}>
-          Add place
-        </Button>
-        {busy ? <Spinner label="Saving name" /> : null}
-        {places.length > 0 ? (
-          <Button variant="secondary" className="w-full" onClick={() => setAdding(false)} disabled={busy}>
-            Cancel
-          </Button>
-        ) : null}
-      </form>
-      ) : (
-        <Button variant="secondary" className="w-full" onClick={() => setAdding(true)}>
+            {chosen ? (
+              <div className="flex items-center gap-2 rounded-md border border-line-strong/70 bg-surface px-3 py-2">
+                <span
+                  aria-hidden
+                  className="size-2 shrink-0 rounded-full border-2 border-accent bg-surface"
+                />
+                <span className="min-w-0 flex-1 truncate text-[13px] font-medium text-ink">
+                  {chosen.name}
+                </span>
+                <span className="shrink-0 font-mono text-[12px] uppercase leading-[1.2] tracking-[0.04em] text-ink-3">
+                  Chosen
+                </span>
+              </div>
+            ) : null}
+
+            <Button type="submit" variant="primary" className="w-full" disabled={busy || !ready}>
+              Add place
+            </Button>
+            {busy ? <Spinner label="Saving name" /> : null}
+            <Button variant="secondary" className="w-full" onClick={cancelAdding} disabled={busy}>
+              Cancel
+            </Button>
+          </form>
+        </div>
+      </div>
+
+      {adding ? null : (
+        <Button variant="secondary" className="w-full" onClick={startAdding}>
           Add a place
         </Button>
       )}
@@ -773,19 +800,4 @@ export function AccountPanel({
   }
 }
 
-/**
- * A value that settles after the typing pauses.
- *
- * The suggestion list asks the server once the rider stops typing, so a
- * five-letter name is one request, not five.
- */
-function useSettledValue<T>(value: T, delayMs: number): T {
-  const [settled, setSettled] = useState(value);
 
-  useEffect(() => {
-    const timer = setTimeout(() => setSettled(value), delayMs);
-    return () => clearTimeout(timer);
-  }, [value, delayMs]);
-
-  return settled;
-}

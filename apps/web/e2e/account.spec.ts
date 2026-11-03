@@ -95,6 +95,7 @@ test.describe("account", () => {
     await page.goto("/");
 
     await createAccount(page, email);
+    await page.getByRole("button", { name: "Add a place" }).click();
 
     await page.getByLabel("Name", { exact: true }).fill("Home");
     await page.getByLabel("Place", { exact: true }).fill("Bundaran HI");
@@ -102,8 +103,8 @@ test.describe("account", () => {
     // The account sheet offers its own suggestions. The empty board also
     // carries a "Bundaran HI → Kota" example on a wide screen, so the
     // search is scoped to the sheet's list rather than the whole page.
-    const results = page.getByRole("list", { name: "Place suggestions" });
-    const suggestion = results.getByRole("button", { name: /Bundaran HI/ }).first();
+    const results = page.getByRole("listbox", { name: "Places matching Place" });
+    const suggestion = results.getByRole("option", { name: /Bundaran HI/ }).first();
     await expect(suggestion).toBeVisible({ timeout: 15_000 });
     await suggestion.click();
 
@@ -121,6 +122,27 @@ test.describe("account", () => {
     await openAccount(page);
     await expect(home).toBeVisible({ timeout: 15_000 });
     await expect(home).toContainText("Bundaran HI");
+  });
+
+  test("starts a new place from the find field", async ({ page }, testInfo) => {
+    const email = newEmail(testInfo);
+    await page.goto("/");
+
+    await createAccount(page, email);
+
+    const find = page.getByRole("combobox", { name: "Find a place", exact: true });
+    await find.fill("Bundaran HI");
+
+    const results = page.getByRole("listbox", { name: "Places matching Find a place" });
+    const suggestion = results.getByRole("option", { name: /Bundaran HI/ }).first();
+    await expect(suggestion).toBeVisible({ timeout: 15_000 });
+    await suggestion.click();
+
+    // The chosen place moves into the form, and the find field folds
+    // away instead of leaving two search fields on the screen.
+    await expect(page.getByLabel("Place", { exact: true })).toHaveValue(/Bundaran HI/);
+    await expect(page.locator("[data-place-find]")).toHaveAttribute("data-state", "closed");
+    await expect(page.getByLabel("Name", { exact: true })).toBeFocused();
   });
 
   test("saves a place to the account, not to the device", async ({ page }, testInfo) => {

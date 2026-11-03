@@ -152,7 +152,10 @@ map. The map owns the window, and the controls float on it.
   and Alerts places.
 - The assistant opens over the map, in a panel on the right on a wide
   screen and as a sheet on a phone. It is a second way into the same data,
-  not a separate mode of the page.
+  not a separate mode of the page. Its @ list and the account's find field
+  offer the same places: the saved ones first, then the map, with a
+  loading line while the server answers. The list stays open while it
+  loads; it does not vanish and come back.
 - A leg of the journey reads in two lines: the name of the line stands
   alone, and the kind of vehicle and the time stand below it, so a long name
   never pushes the time out of the row. The dashed timeline runs
@@ -569,7 +572,7 @@ are written down in `research/ux-search.md`; the short version:
 
 ## Named places and usual journeys
 
-Named places live on the Places tab of the account sheet. A long list scrolls inside itself and can be filtered by name or address. The add form stays closed until the rider asks for it. Password, sign out and delete live on Settings, and the password fields are already open. Sign out and delete each ask in a confirmation dialog before they run. Delete also asks for the password. The rider types
+Named places live on the Places tab of the account sheet. The find field is the same combobox as the route search: it opens with the saved places and the map's suggestions, keeps its popover open with a loading line while it searches, and folds away when a suggestion copies its place into the add form. A long list scrolls inside itself and narrows as the rider types. The add form stays closed until the rider asks for it. Password, sign out and delete live on Settings, and the password fields are already open. Sign out and delete each ask in a confirmation dialog before they run. Delete also asks for the password. The rider types
 any name and searches a stop, a street, or another place. The same search
 offers those saved names, by the name or by the address, in the route
 fields and after @ in the assistant. A notice that touches a usual journey is one strip
