@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { Eye, EyeOff, X } from "lucide-react";
-import { useEffect, useState, type FormEvent } from "react";
+import { useEffect, useLayoutEffect, useRef, useState, type FormEvent } from "react";
 
 import { Button } from "../../components/ui/button.js";
 import { Spinner } from "../../components/ui/feedback.js";
@@ -348,6 +348,80 @@ export function AccountPanel({
   const [currentPassword, setCurrentPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [deletePassword, setDeletePassword] = useState("");
+  const shellRef = useRef<HTMLElement>(null);
+  const headerRef = useRef<HTMLElement>(null);
+  const bodyRef = useRef<HTMLDivElement>(null);
+  const contentRef = useRef<HTMLDivElement>(null);
+
+  /*
+   * A CSS transition cannot interpolate `height: auto`. Measure the
+   * content, then set an explicit height so a tab, a form or a list
+   * changes the sheet in one movement. The cap is the sheet's own
+   * max-height; past that, the body scrolls.
+   *
+   * The content box is observed rather than the scrolling body, because
+   * the body is clipped to the old height while the new one is applied.
+   */
+  useLayoutEffect(() => {
+    const shell = shellRef.current;
+    const content = contentRef.current;
+    if (!shell || !content) return;
+
+    const apply = (): void => {
+      const max = Number.parseFloat(getComputedStyle(shell).maxHeight);
+      const cap = Number.isFinite(max) ? max : Math.min(window.innerHeight * 0.72, 560);
+      const header = headerRef.current?.offsetHeight ?? 0;
+      const body = bodyRef.current;
+      const bodyStyle = body ? getComputedStyle(body) : null;
+      const pad = bodyStyle
+        ? Number.parseFloat(bodyStyle.paddingTop) + Number.parseFloat(bodyStyle.paddingBottom)
+        : 0;
+      // Measure at the full width. A scrollbar during the height transition
+      // would narrow the text and the next measurement would fight this one.
+      const previousOverflow = body?.style.overflowY ?? "";
+      if (body) body.style.overflowY = "hidden";
+      const contentHeight = content.offsetHeight;
+      if (body) body.style.overflowY = previousOverflow;
+      const border = shell.offsetHeight - shell.clientHeight;
+      const natural = header + contentHeight + pad + border;
+      const next = Math.min(cap, Math.max(header, Math.ceil(natural)));
+      const nextPx = `${next}px`;
+      const scrolling = natural > cap + 1;
+      const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+      // Reading the used height after a write cancels the transition.
+      // Hide the scrollbar while the height is moving, then restore it
+      // when the transition ends. The first write has nothing to move from.
+      if (shell.style.height === "" || reduce) {
+        shell.style.height = nextPx;
+        if (body) body.style.overflowY = scrolling ? "auto" : "hidden";
+        return;
+      }
+      if (shell.style.height !== nextPx) {
+        if (body) body.style.overflowY = "hidden";
+        shell.style.height = nextPx;
+        return;
+      }
+      if (body) body.style.overflowY = scrolling ? "auto" : "hidden";
+    };
+
+    const onEnd = (event: TransitionEvent): void => {
+      if (event.target !== shell || event.propertyName !== "height") return;
+      apply();
+    };
+
+    apply();
+    const observer = new ResizeObserver(() => apply());
+    observer.observe(content);
+    const header = headerRef.current;
+    if (header) observer.observe(header);
+    window.addEventListener("resize", apply);
+    shell.addEventListener("transitionend", onEnd);
+    return () => {
+      observer.disconnect();
+      window.removeEventListener("resize", apply);
+      shell.removeEventListener("transitionend", onEnd);
+    };
+  }, []);
 
   const mismatch = mode === "create" && confirm.length > 0 && password !== confirm;
   const missing =
@@ -475,8 +549,14 @@ export function AccountPanel({
   );
 
   return (
-    <section className="panel pointer-events-auto flex max-h-[min(72dvh,560px)] min-h-0 w-full flex-col overflow-hidden rounded-[12px] border-t-2 border-t-ink lg:max-h-[min(62dvh,560px)]">
-      <header className="flex shrink-0 items-center gap-3 border-b border-line/70 px-3 py-3">
+    <section
+      ref={shellRef}
+      className="panel pointer-events-auto flex max-h-[min(72dvh,560px)] min-h-0 w-full flex-col overflow-hidden rounded-[12px] border-t-2 border-t-ink transition-[height] duration-300 ease-[cubic-bezier(0.4,0,0.2,1)] motion-reduce:transition-none lg:max-h-[min(62dvh,560px)]"
+    >
+      <header
+        ref={headerRef}
+        className="flex shrink-0 items-center gap-3 border-b border-line/70 px-3 py-3"
+      >
         <div className="min-w-0 flex-1">
           <h2 className="text-[15px] font-semibold leading-[1.2] text-ink">Account</h2>
           {user ? (
@@ -500,7 +580,8 @@ export function AccountPanel({
         </Tooltip>
       </header>
 
-      <div className="scroll-quiet flex min-h-0 flex-col gap-4 overflow-y-auto px-4 py-4">
+      <div ref={bodyRef} className="scroll-quiet min-h-0 flex-1 overflow-y-auto px-4 py-4">
+        <div ref={contentRef} className="flex flex-col gap-4">
         {user ? (
           <div className="flex flex-col gap-4">
             {memoryError ? (
@@ -570,6 +651,7 @@ export function AccountPanel({
             <Tab value="create">Create account</Tab>
           </Tabs>
         )}
+        </div>
       </div>
     </section>
   );

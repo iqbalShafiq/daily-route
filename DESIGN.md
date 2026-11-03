@@ -584,9 +584,11 @@ Motion is used to explain a change, never to decorate.
   the reader asks for less motion.
 - The loading line travels inside its track from the left edge to the
   right; it never overflows the track.
-- The service board folds in one max-height and grid-row transition; the
+- The service board folds in one height and grid-row transition; the
   phone sheets rise from the bottom bar and the assistant sheet leaves the
-  way it came.
+  way it came. Opening the account sheet or the assistant slides the
+  service board off the map, and it returns when they close. The account
+  sheet uses that same height transition when its content changes.
 - There are no pulse dots, no travelling rings around a notice and no
   tilted stamps. A status is a static mark or an icon.
 - `prefers-reduced-motion` reduces every duration to 0.01 ms; the layout

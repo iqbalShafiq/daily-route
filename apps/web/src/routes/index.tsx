@@ -1101,6 +1101,8 @@ export function PlannerPage() {
        *
        * On a wide screen it sits in the bottom right corner. On a phone it
        * is the sheet behind the Lines and Alerts tabs of the bottom bar.
+       * The account sheet and the assistant take that corner, so the board
+       * slides off instead of vanishing. `hidden` would skip the transition.
        */}
       <NetworkDock
         legs={mapLegs}
@@ -1120,13 +1122,19 @@ export function PlannerPage() {
         tab={dockTab}
         onTabChange={setDockTab}
         onClose={() => setMobileTab("plan")}
-        hiddenFromKeyboard={!isDesktop && mobileTab !== "network" && mobileTab !== "alerts"}
+        hiddenFromKeyboard={
+          view === "chat" ||
+          accountOpen ||
+          (!isDesktop && mobileTab !== "network" && mobileTab !== "alerts")
+        }
         className={cn(
-          "pointer-events-auto fixed inset-x-2 bottom-[calc(var(--bottom-bar-h)+env(safe-area-inset-bottom)+8px)] z-40",
+          "fixed inset-x-2 bottom-[calc(var(--bottom-bar-h)+env(safe-area-inset-bottom)+8px)] z-40",
           "lg:inset-x-auto lg:bottom-4 lg:right-4 lg:z-30 lg:w-[380px]",
+          view === "chat" || accountOpen
+            ? "pointer-events-none translate-y-[calc(100%+16px)] opacity-0"
+            : "pointer-events-auto",
           (mobileTab === "plan" || mobileTab === "assistant") &&
             "max-lg:pointer-events-none max-lg:translate-y-[calc(100%+16px)] max-lg:opacity-0",
-          view === "chat" && "hidden",
         )}
       />
 

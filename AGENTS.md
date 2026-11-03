@@ -683,7 +683,10 @@ Read `DESIGN.md` before touching the interface. The short version:
   is closed, so the route and the camera stay smooth.
 - The dock is one service board with two sections, Lines and Notices. On a
   wide screen it sits in the bottom right; on a phone it is the sheet
-  behind the Lines and Alerts tabs of the bottom bar. The Lines section is
+  behind the Lines and Alerts tabs of the bottom bar. Opening the account
+  sheet or the assistant slides it off; it is not removed with `hidden`,
+  because that would skip the transition. The account sheet measures its
+  content and animates that height, capped by its maximum. The Lines section is
   a compact operator strip, the vehicles of the current journey, a network
   summary and a map key; its height follows its content. The Notices
   section is a single chronological board of notices whose verified window
