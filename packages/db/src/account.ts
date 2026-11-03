@@ -561,7 +561,13 @@ function parseMemoryPayload(kind: MemoryKind, value: unknown): MemoryPayload | n
   }
 }
 
-function memoryPlaceOf(value: unknown): MemoryPlace | null {
+/**
+ * Narrow a stored place payload.
+ *
+ * The same shape is reused by the rider's named places, so the parser is
+ * exported rather than copied: one definition of a place is enough.
+ */
+export function memoryPlaceOf(value: unknown): MemoryPlace | null {
   if (!isRecord(value)) return null;
   const kind = value["kind"];
   if (kind !== "station" && kind !== "place") return null;

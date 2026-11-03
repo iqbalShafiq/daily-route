@@ -1,12 +1,19 @@
 import { Router } from "express";
 import { z } from "zod";
 
-import { findStationsNear, listActiveDisruptions, listNoticeEvidence } from "@daily-route/db";
+import {
+  findStationsNear,
+  insertObservation,
+  labelsForPlaces,
+  listActiveDisruptions,
+  listNoticeEvidence,
+} from "@daily-route/db";
 import { PLACE_CONFIDENCE_THRESHOLD } from "@daily-route/semantic";
 import {
   bestAccess,
   blocksJourney,
   FARE_OPERATOR_LABELS,
+  jakartaDayClock,
   linesUsedBy,
   matchDisruptions,
   planRoutes,
@@ -37,6 +44,7 @@ import {
 import { storedMark } from "@daily-route/agent";
 
 import type { ApiDeps } from "../deps.js";
+import { readAccountSession } from "../account-session.js";
 import { fetchWalkingRoute } from "./walk.js";
 
 /**
@@ -233,6 +241,9 @@ export function createRoutesRouter(deps: ApiDeps): Router {
       parsed.data.destinationLatitude,
       parsed.data.destinationLongitude,
     );
+    // A signed-in rider's planned journeys become the evidence for a usual
+    // journey. A signed-out rider is planned exactly as before.
+    const session = await readAccountSession(deps, request, response);
 
     const { network, disruptions, fareRules } = await deps.cache.get();
     const quotedAt = parsed.data.at ? new Date(parsed.data.at) : new Date();
@@ -385,6 +396,18 @@ export function createRoutesRouter(deps: ApiDeps): Router {
     const presentedItineraries = await Promise.all(
       itineraries.map((itinerary) => followStreets(present(itinerary))),
     );
+
+    if (session !== null && primary) {
+      await recordPlannedJourney(deps, session.userId, {
+        originText: origin,
+        destinationText: destination,
+        originPinned: originPin !== null,
+        destinationPinned: destinationPin !== null,
+        boarded,
+        itinerary: primary,
+        at: quotedAt,
+      });
+    }
 
     response.json({
       origin: {
@@ -787,6 +810,61 @@ function dedupeItineraries(itineraries: readonly Itinerary[]): Itinerary[] {
     unique.push(itinerary);
   }
   return unique;
+}
+
+/**
+ * Record a journey the rider planned, for the usual journeys they see later.
+ *
+ * The write is the server's own bookkeeping; the rider's answer does not
+ * depend on it. A refused or failed write is therefore swallowed, because a
+ * database hiccup in a convenience must never take away the journey that was
+ * just planned.
+ */
+async function recordPlannedJourney(
+  deps: ApiDeps,
+  userId: string,
+  input: {
+    originText: string;
+    destinationText: string;
+    originPinned: boolean;
+    destinationPinned: boolean;
+    boarded: { origin: StopChoice; destination: StopChoice };
+    itinerary: Itinerary;
+    at: Date;
+  },
+): Promise<void> {
+  try {
+    const clock = jakartaDayClock(input.at);
+    const lineCodes = [
+      ...new Set(
+        input.itinerary.legs.flatMap((leg) => (leg.lineCode ? [leg.lineCode] : [])),
+      ),
+    ];
+    const labels = await labelsForPlaces(
+      deps.db,
+      userId,
+      input.boarded.origin.stationId,
+      input.boarded.destination.stationId,
+    );
+    await insertObservation(deps.db, userId, {
+      originKey: input.boarded.origin.stationId,
+      destinationKey: input.boarded.destination.stationId,
+      originLabel: labels.originLabel,
+      destinationLabel: labels.destinationLabel,
+      // A pinned place keeps the name the rider typed; a named stop keeps
+      // the network's spelling, which is what the answer shows.
+      originName: input.originPinned ? input.originText : input.boarded.origin.name,
+      destinationName: input.destinationPinned
+        ? input.destinationText
+        : input.boarded.destination.name,
+      lineCodes,
+      weekday: clock.weekday,
+      minuteOfDay: clock.minuteOfDay,
+      source: "plan",
+    });
+  } catch {
+    // The plan already answered; the habit is a convenience, not the trip.
+  }
 }
 
 function pointOfStop(stop: { latitude: number; longitude: number }): Pin {

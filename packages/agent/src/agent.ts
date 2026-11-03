@@ -10,7 +10,7 @@ import { NetworkCache, type TransitAgentContext } from "./context.js";
 import { ROUTE_AGENT_INSTRUCTIONS } from "./prompts/route-assistant.js";
 import { createCompletionModel, MEDIUM_REASONING, modelConfigFromEnv } from "./model.js";
 import { createNewsSearch } from "./news.js";
-import { cachedNewsSearch, SharedWork } from "./shared.js";
+import { cachedNewsSearch, newsCacheStore, SharedWork } from "./shared.js";
 import { createTools } from "./tools.js";
 import { langfuseObservability } from "./tracing.js";
 
@@ -47,7 +47,7 @@ export function createRouteAgent(options: CreateRouteAgentOptions): RouteAgentBu
 
   const work = new SharedWork(2);
   const rawNews = createNewsSearch(env.TAVILY_API_KEY);
-  const newsSearch = cachedNewsSearch(rawNews, work);
+  const newsSearch = cachedNewsSearch(rawNews, work, 10 * 60_000, newsCacheStore(db));
   const roads = new RoadLookup();
   const tools = createTools(
     context,

@@ -1,9 +1,11 @@
 import { Router } from "express";
 import { z } from "zod";
 
+import { readAccountSession } from "../account-session.js";
 import { actionsFromTool, parseToolResult } from "../chat-actions.js";
 import { cardsFromTool } from "../chat-cards.js";
 import type { ApiDeps } from "../deps.js";
+import { riderStore } from "../rider-context.js";
 
 /**
  * The conversational endpoint.
@@ -32,6 +34,8 @@ const chatSchema = z.object({
 
 const TOOL_STATUS: Record<string, string> = {
   resolve_place: "Looking up a place",
+  list_my_places: "Reading your saved places",
+  list_my_habits: "Reading your usual journeys",
   plan_journey: "Calculating the journey",
   get_station: "Reading the stop",
   list_active_disruptions: "Checking stored notices",
@@ -60,8 +64,15 @@ export function createAgentRouter(deps: ApiDeps): Router {
       });
       return;
     }
+    // Capture the non-null agent so the closure below keeps the narrowing.
+    const agent = deps.agent;
 
     const { message, origin, destination, sessionId, at, nightSafe } = parsed.data;
+
+    // The chat is usable signed out; an empty id through the store is what
+    // tells the rider tools to answer `signedIn: false` instead of guessing.
+    const session = await readAccountSession(deps, request, response);
+    const userId = session?.userId ?? "";
 
     const now = new Intl.DateTimeFormat("en-GB", {
       dateStyle: "medium",
@@ -99,48 +110,50 @@ export function createAgentRouter(deps: ApiDeps): Router {
     };
 
     try {
-      const stream = deps.agent.stream({
-        prompt,
-        trace: {
-          name: "chat-rute",
-          tags: ["chat"],
-          ...(sessionId ? { sessionId } : {}),
-        },
-      });
+      await riderStore.run({ userId }, async () => {
+        const stream = agent.stream({
+          prompt,
+          trace: {
+            name: "chat-rute",
+            tags: ["chat"],
+            ...(sessionId ? { sessionId } : {}),
+          },
+        });
 
-      let reasoningNoted = false;
-      for await (const event of stream.events) {
-        if (event.type === "text_delta") {
-          send("delta", { text: event.delta });
-        } else if (event.type === "reasoning_delta") {
-          if (!reasoningNoted) {
-            reasoningNoted = true;
-            send("status", { text: "Thinking" });
+        let reasoningNoted = false;
+        for await (const event of stream.events) {
+          if (event.type === "text_delta") {
+            send("delta", { text: event.delta });
+          } else if (event.type === "reasoning_delta") {
+            if (!reasoningNoted) {
+              reasoningNoted = true;
+              send("status", { text: "Thinking" });
+            }
+          } else if (event.type === "tool_call") {
+            const label = TOOL_STATUS[event.toolCall.toolName] ?? event.toolCall.toolName;
+            send("tool", { toolName: event.toolCall.toolName, phase: "start", label });
+            send("status", { text: label });
+          } else if (event.type === "tool_result") {
+            const label = TOOL_STATUS[event.toolName] ?? event.toolName;
+            send("tool", {
+              toolName: event.toolName,
+              phase: "result",
+              label: `${label} done`,
+            });
+            const parsedResult = parseToolResult(event.result);
+            const actions = actionsFromTool(event.toolName, parsedResult);
+            const cards = cardsFromTool(event.toolName, parsedResult);
+            if (cards.length > 0) send("card", { cards });
+            if (actions.length > 0) send("actions", { actions });
           }
-        } else if (event.type === "tool_call") {
-          const label = TOOL_STATUS[event.toolCall.toolName] ?? event.toolCall.toolName;
-          send("tool", { toolName: event.toolCall.toolName, phase: "start", label });
-          send("status", { text: label });
-        } else if (event.type === "tool_result") {
-          const label = TOOL_STATUS[event.toolName] ?? event.toolName;
-          send("tool", {
-            toolName: event.toolName,
-            phase: "result",
-            label: `${label} done`,
-          });
-          const parsedResult = parseToolResult(event.result);
-          const actions = actionsFromTool(event.toolName, parsedResult);
-          const cards = cardsFromTool(event.toolName, parsedResult);
-          if (cards.length > 0) send("card", { cards });
-          if (actions.length > 0) send("actions", { actions });
         }
-      }
 
-      const outcome = await stream.result;
-      send("done", {
-        text: outcome.text,
-        usage: outcome.usage,
-        finishReason: outcome.finishReason ?? null,
+        const outcome = await stream.result;
+        send("done", {
+          text: outcome.text,
+          usage: outcome.usage,
+          finishReason: outcome.finishReason ?? null,
+        });
       });
     } catch (error) {
       send("error", { message: error instanceof Error ? error.message : String(error) });

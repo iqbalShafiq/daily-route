@@ -2,20 +2,38 @@ import { Router, type Request, type Response } from "express";
 import { z } from "zod";
 
 import {
+  deleteRiderPlace,
   deleteSession,
   deleteUser,
   findSession,
   findUserByEmail,
   insertSession,
   insertUser,
+  listActiveDisruptions,
   listMemory,
+  listRecentObservations,
+  listRiderPlaces,
   MEMORY_KINDS,
-  touchSession,
   updatePassword,
   upsertMemory,
+  upsertRiderPlace,
 } from "@daily-route/db";
-import type { AccountSession, MemoryPayload, MemoryWrite } from "@daily-route/db";
+import type {
+  AccountSession,
+  MemoryPayload,
+  MemoryWrite,
+  RiderPlaceFailureReason,
+} from "@daily-route/db";
+import {
+  habitsFrom,
+  isActiveAt,
+  noticesForHabit,
+  type HabitNotice,
+  type NoticeTimeline,
+  type ValidityWindow,
+} from "@daily-route/transit";
 
+import { readAccountSession } from "../account-session.js";
 import type { ApiDeps } from "../deps.js";
 import { hashPassword, verifyPassword } from "../password.js";
 import {
@@ -26,7 +44,6 @@ import {
   secureCookie,
   sessionCookie,
   sessionMaxAgeSeconds,
-  SESSION_REFRESH_WITHIN_MS,
   SESSION_TTL_MS,
 } from "../session-cookie.js";
 
@@ -70,6 +87,11 @@ const memoryItemSchema = z.object({
 
 const memoryWriteSchema = z.object({
   items: z.array(memoryItemSchema).min(1).max(40),
+});
+
+const riderPlaceSchema = z.object({
+  label: z.string().min(1).max(64),
+  payload: z.unknown(),
 });
 
 const REFUSED = "This request was refused.";
@@ -128,36 +150,20 @@ export function createAccountRouter(deps: ApiDeps): Router {
     next();
   });
 
-  /** Resolve the cookie to a live session, refreshing it near its end. */
-  const resolveSession = async (
+  /**
+   * The signed-in user, or null after the response has been refused.
+   *
+   * The cookie lookup lives in `account-session.ts`, so the plan and chat
+   * routes answer for the same rider without their own copy of the rule.
+   */
+  const requireSession = async (
     request: Request,
     response: Response,
   ): Promise<AccountSession | null> => {
-    const token = readSessionToken(request.headers.cookie);
-    if (token === null) return null;
-
-    const session = await findSession(deps.db, hashSessionToken(token));
+    const session = await readAccountSession(deps, request, response);
     if (session === null) {
-      // The cookie names a session the database no longer honours; remove
-      // it so the browser stops sending a dead token.
-      response.setHeader("Set-Cookie", clearSessionCookie(secure));
-      return null;
+      response.status(401).json({ error: SIGN_IN_REQUIRED });
     }
-
-    const now = Date.now();
-    // The expiry slides only near its end. Writing it on every request
-    // would turn a read into a write and keep the rider's tab busy.
-    if (session.expiresAt.getTime() - now <= SESSION_REFRESH_WITHIN_MS) {
-      await touchSession(deps.db, session.id, {
-        lastSeenAt: new Date(now),
-        expiresAt: new Date(now + SESSION_TTL_MS),
-      });
-      response.setHeader(
-        "Set-Cookie",
-        sessionCookie(token, secure, sessionMaxAgeSeconds()),
-      );
-    }
-
     return session;
   };
 
@@ -171,18 +177,6 @@ export function createAccountRouter(deps: ApiDeps): Router {
       expiresAt,
     });
     response.setHeader("Set-Cookie", sessionCookie(token, secure, sessionMaxAgeSeconds()));
-  };
-
-  /** The signed-in user, or null after the response has been refused. */
-  const requireSession = async (
-    request: Request,
-    response: Response,
-  ): Promise<AccountSession | null> => {
-    const session = await resolveSession(request, response);
-    if (session === null) {
-      response.status(401).json({ error: SIGN_IN_REQUIRED });
-    }
-    return session;
   };
 
   router.post("/", async (request, response) => {
@@ -394,5 +388,159 @@ export function createAccountRouter(deps: ApiDeps): Router {
     response.json({ items: result.items });
   });
 
+  /**
+   * The places a rider named.
+   *
+   * The label is the rider's own word; the database owns the rules about
+   * length, case-insensitive replacement and the cap. The API only turns a
+   * refusal into words the rider can act on.
+   */
+  router.get("/places", async (request, response) => {
+    const session = await requireSession(request, response);
+    if (session === null) return;
+    response.json({ places: await listRiderPlaces(deps.db, session.userId) });
+  });
+
+  router.post("/places", async (request, response) => {
+    const session = await requireSession(request, response);
+    if (session === null) return;
+
+    const parsed = riderPlaceSchema.safeParse(request.body);
+    if (!parsed.success) {
+      response.status(400).json({ error: "Use a name of 1 to 32 characters." });
+      return;
+    }
+
+    const result = await upsertRiderPlace(deps.db, session.userId, {
+      label: parsed.data.label,
+      payload: parsed.data.payload,
+    });
+    if (!result.ok) {
+      response
+        .status(result.reason === "too-many" ? 409 : 400)
+        .json({ error: riderPlaceError(result.reason) });
+      return;
+    }
+    response.json({ places: result.places });
+  });
+
+  router.delete("/places/:label", async (request, response) => {
+    const session = await requireSession(request, response);
+    if (session === null) return;
+
+    const label = request.params["label"] ?? "";
+    const removed = await deleteRiderPlace(deps.db, session.userId, label);
+    response.json({ removed, places: await listRiderPlaces(deps.db, session.userId) });
+  });
+
+  /**
+   * The usual journeys, with the stored notices that touch them.
+   *
+   * This reads the notice table only. It does not call X, Tavily or a model:
+   * the worker already holds the one stream, and an alert is a stored fact
+   * about the network, not a new fetch.
+   */
+  router.get("/alerts", async (request, response) => {
+    const session = await requireSession(request, response);
+    if (session === null) return;
+
+    const now = new Date();
+    const since = new Date(now.getTime() - 28 * 24 * 60 * 60_000);
+    const [observations, rows] = await Promise.all([
+      listRecentObservations(deps.db, session.userId, since),
+      listActiveDisruptions(deps.db, { limit: 200 }),
+    ]);
+
+    const habits = habitsFrom(observations, now);
+    const notices = rows
+      .filter((row) => isActiveAt(timelineOf(row), now))
+      .map((row) => habitNoticeOf(row));
+
+    response.json({
+      alerts: habits
+        .map((habit) => ({ habit, notices: noticesForHabit(habit, notices, now) }))
+        .filter((alert) => alert.notices.length > 0),
+    });
+  });
+
   return router;
+}
+
+/** Which rule a named-place write broke, in the words the rider sees. */
+function riderPlaceError(reason: RiderPlaceFailureReason): string {
+  if (reason === "invalid-label") return "Use a name of 1 to 32 characters.";
+  if (reason === "unknown-station") return "That stop is not on the network.";
+  if (reason === "too-many") return "You can save up to 16 places.";
+  return "That place could not be saved.";
+}
+
+type NoticeRow = Awaited<ReturnType<typeof listActiveDisruptions>>[number];
+
+/** One stored notice in the shape the habit matcher reads. */
+function habitNoticeOf(row: NoticeRow): HabitNotice {
+  const lineCodes = stringList(row.lineCodes);
+  const stationIds = unique([
+    ...(row.stationId ? [row.stationId] : []),
+    ...stringList(row.affectedStationIds),
+  ]);
+  return {
+    id: row.id,
+    title: row.title,
+    lineCodes,
+    stationIds,
+    scope: noticeScopeOfRow(row, lineCodes, stationIds),
+  };
+}
+
+/**
+ * What a notice is about.
+ *
+ * The stored scope wins. A row without one is inferred from the ids it
+ * carries; a row that names nothing is `unknown`, not network-wide, because
+ * an unproven notice must not wake a rider.
+ */
+function noticeScopeOfRow(
+  row: NoticeRow,
+  lineCodes: readonly string[],
+  stationIds: readonly string[],
+): HabitNotice["scope"] {
+  if (row.scope === "stop" || row.scope === "line" || row.scope === "network") {
+    return row.scope;
+  }
+  if (stationIds.length > 0) return "stop";
+  if (lineCodes.length > 0 || row.lineId !== null || stringList(row.affectedLineIds).length > 0) {
+    return "line";
+  }
+  return "unknown";
+}
+
+/** The notice's own validity, from the row, for `isActiveAt`. */
+function timelineOf(row: NoticeRow): NoticeTimeline {
+  return {
+    startsAt: row.startsAt?.toISOString() ?? null,
+    endsAt: row.endsAt?.toISOString() ?? null,
+    validityWindows: validityWindowsOf(row.validityWindows),
+  };
+}
+
+function validityWindowsOf(value: unknown): ValidityWindow[] {
+  if (!Array.isArray(value)) return [];
+  return value.filter((entry): entry is ValidityWindow => {
+    if (typeof entry !== "object" || entry === null) return false;
+    const window = entry as Partial<ValidityWindow>;
+    return (
+      typeof window.startsAt === "string" &&
+      (window.endsAt === null || typeof window.endsAt === "string")
+    );
+  });
+}
+
+function stringList(value: unknown): string[] {
+  return Array.isArray(value)
+    ? value.filter((entry): entry is string => typeof entry === "string")
+    : [];
+}
+
+function unique(values: string[]): string[] {
+  return [...new Set(values)];
 }

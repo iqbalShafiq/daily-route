@@ -1,4 +1,4 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 
 import { SharedWork } from "./shared.js";
 
@@ -19,18 +19,25 @@ describe("SharedWork", () => {
   });
 
   it("keeps the cache until its time is up", async () => {
-    const work = new SharedWork(1);
-    let calls = 0;
-    const run = () =>
-      work.run("fresh", 1, async () => {
-        calls += 1;
-        return calls;
-      });
+    // The clock is controlled: a real millisecond can pass between two calls
+    // under load, which made a one-millisecond TTL flaky rather than wrong.
+    vi.useFakeTimers();
+    try {
+      const work = new SharedWork(1);
+      let calls = 0;
+      const run = () =>
+        work.run("fresh", 100, async () => {
+          calls += 1;
+          return calls;
+        });
 
-    expect(await run()).toBe(1);
-    expect(await run()).toBe(1);
-    await new Promise((resolve) => setTimeout(resolve, 5));
-    expect(await run()).toBe(2);
+      expect(await run()).toBe(1);
+      expect(await run()).toBe(1);
+      vi.advanceTimersByTime(101);
+      expect(await run()).toBe(2);
+    } finally {
+      vi.useRealTimers();
+    }
   });
 
   it("does not run more calls at once than its limit", async () => {

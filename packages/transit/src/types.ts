@@ -434,6 +434,9 @@ export type Disruption = {
   mark?: string | null;
 };
 
+/** The fields that decide whether a notice is in force at an instant. */
+export type NoticeTimeline = Pick<Disruption, "startsAt" | "endsAt" | "validityWindows">;
+
 /**
  * Whether a notice affects the network at an instant.
  *
@@ -442,7 +445,7 @@ export type Disruption = {
  * from 03:00 to 09:00 and be irrelevant for the rest of the day. A notice
  * without windows keeps the old `endsAt` behaviour.
  */
-export function isActiveAt(disruption: Disruption, at: Date = new Date()): boolean {
+export function isActiveAt(disruption: NoticeTimeline, at: Date = new Date()): boolean {
   const windows = disruption.validityWindows ?? [];
   if (windows.length > 0) {
     return windows.some((window) => {

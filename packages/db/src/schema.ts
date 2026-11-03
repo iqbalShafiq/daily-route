@@ -10,6 +10,7 @@ import {
   pgTable,
   primaryKey,
   real,
+  smallint,
   text,
   timestamp,
   uniqueIndex,
@@ -627,9 +628,94 @@ export const riderMemoryItems = pgTable(
   ],
 );
 
+/**
+ * The places a rider named ("Home", "Office", or a label of their own).
+ *
+ * The label is stored with the rider's spelling; the unique test is
+ * `lower(label)`, so "Home" and "home" are one place. The payload is grounded
+ * against the stations table when it is written and holds no foreign key:
+ * `db:seed` truncates the network with CASCADE and must not take the rider's
+ * places with it.
+ */
+export const riderPlaces = pgTable(
+  "rider_places",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    userId: uuid("user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    label: text("label").notNull(),
+    payload: jsonb("payload").notNull().default(sql`'{}'::jsonb`),
+    ...timestamps,
+  },
+  (table) => [
+    uniqueIndex("rider_places_user_label_unique").on(table.userId, sql`lower(${table.label})`),
+    index("rider_places_user_idx").on(table.userId),
+  ],
+);
+
+/**
+ * One journey a signed-in rider actually planned.
+ *
+ * A habit is derived from these rows, never stored as a promise: the planner
+ * still decides whether a line runs. The station keys are text, not foreign
+ * keys, for the same reason the places carry none.
+ */
+export const riderObservations = pgTable(
+  "rider_observations",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    userId: uuid("user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    originKey: text("origin_key").notNull(),
+    destinationKey: text("destination_key").notNull(),
+    originName: text("origin_name").notNull(),
+    destinationName: text("destination_name").notNull(),
+    originLabel: text("origin_label"),
+    destinationLabel: text("destination_label"),
+    lineCodes: jsonb("line_codes").notNull().default(sql`'[]'::jsonb`),
+    /** 0 Sunday … 6 Saturday, in Asia/Jakarta. */
+    weekday: smallint("weekday").notNull(),
+    minuteOfDay: integer("minute_of_day").notNull(),
+    source: text("source").notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  },
+  (table) => [
+    index("rider_observations_user_created_idx").on(table.userId, table.createdAt),
+    check(
+      "rider_observations_source_check",
+      sql`${table.source} in ('plan', 'chat')`,
+    ),
+    check(
+      "rider_observations_weekday_check",
+      sql`${table.weekday} between 0 and 6`,
+    ),
+    check(
+      "rider_observations_minute_check",
+      sql`${table.minuteOfDay} between 0 and 1439`,
+    ),
+  ],
+);
+
+/**
+ * A short-lived cache of public tool output.
+ *
+ * It deliberately has no user column: the entries are answers about the
+ * network (a news result, a line lookup), never a chat answer or one rider's
+ * places. Two riders asking the same thing therefore share one paid call.
+ */
+export const toolResultCache = pgTable("tool_result_cache", {
+  cacheKey: text("cache_key").primaryKey(),
+  value: jsonb("value").notNull(),
+  expiresAt: timestamp("expires_at", { withTimezone: true }).notNull(),
+});
+
 export const usersRelations = relations(users, ({ many }) => ({
   sessions: many(sessions),
   memoryItems: many(riderMemoryItems),
+  places: many(riderPlaces),
+  observations: many(riderObservations),
 }));
 
 export const sessionsRelations = relations(sessions, ({ one }) => ({
@@ -638,4 +724,12 @@ export const sessionsRelations = relations(sessions, ({ one }) => ({
 
 export const riderMemoryItemsRelations = relations(riderMemoryItems, ({ one }) => ({
   user: one(users, { fields: [riderMemoryItems.userId], references: [users.id] }),
+}));
+
+export const riderPlacesRelations = relations(riderPlaces, ({ one }) => ({
+  user: one(users, { fields: [riderPlaces.userId], references: [users.id] }),
+}));
+
+export const riderObservationsRelations = relations(riderObservations, ({ one }) => ({
+  user: one(users, { fields: [riderObservations.userId], references: [users.id] }),
 }));

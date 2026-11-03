@@ -294,6 +294,44 @@ watches follow the rider to another browser.
   mutation that carries the cookie is refused unless `Origin` is
   `WEB_ORIGIN`.
 
+## Rider personalization
+
+- A signed-in rider can name a place ("Home", "Office", any label of their
+  own). `rider_places` stores the rider's spelling; `lower(label)` is the
+  unique test, so the same label in another case replaces the row. A station
+  place takes its name and coordinates from the stations table, and the cap
+  of 16 distinct labels is enforced inside the write. The table has no
+  station foreign key, for the same reason the memory items do not.
+- Every successful plan with a session records a `rider_observations` row:
+  the origin and destination station keys and names, the primary itinerary's
+  line codes, and the Jakarta weekday and minute. A repeat in the same
+  15-minute bucket within two hours is a reload, not a second habit. A
+  failed write never fails the plan.
+- `habitsFrom` in `packages/transit/src/habits.ts` is the only habit rule:
+  group by origin, destination and weekday; three observations in 28 days
+  make a habit; the minute is the median and the window is ±45 minutes,
+  which may cross midnight. Four habits are kept at most. A label is the
+  latest non-null label the rider gave, never an invented one.
+- `noticesForHabit` matches a stored notice only inside that weekday window.
+  A network notice matches; a line or stop notice must share a corridor code
+  or name an endpoint. An unknown scope does not match. This reads stored
+  notices and never calls X or Tavily.
+- `GET /api/account/places`, `POST /api/account/places` and
+  `DELETE /api/account/places/:label` are on the account router, so the
+  origin check applies. `GET /api/account/alerts` answers
+  `{ alerts: [{ habit, notices }] }` from the observations and
+  `listActiveDisruptions`.
+- The chat's `list_my_places` and `list_my_habits` tools read the rider from
+  `riderStore`, an `AsyncLocalStorage` the route fills per turn; the model
+  never passes a user id. They return names and labels, never a station id.
+  `plan_journey` records a `chat` observation the same way the plan route
+  records a `plan` one.
+- `tool_result_cache` is a public cache with no user column. The news key
+  ignores word order, case and punctuation, keeps single-digit corridor
+  numbers, and includes the time range, topic and sorted domain filters. The
+  API and the worker share the same database-backed store, with the
+  in-memory `SharedWork` still coalescing in-flight calls.
+
 ## Line patterns
 
 A route code is not one stop list. Koridor 8 runs via Tomang or via Cideng;

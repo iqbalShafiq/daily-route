@@ -9,6 +9,7 @@ import {
   FARE_OPERATOR_LABELS,
   formatRupiah,
   isActiveAt,
+  jakartaDayClock,
   matchDisruptions,
   noticeScopeOf,
   serviceAt,
@@ -24,7 +25,7 @@ import {
   type TransitNetwork,
 } from "@daily-route/transit";
 
-import { listNoticeHistory } from "@daily-route/db";
+import { insertObservation, labelsForPlaces, listNoticeHistory } from "@daily-route/db";
 import { PLACE_CONFIDENCE_THRESHOLD } from "@daily-route/semantic";
 
 import type { RoadLookup } from "@daily-route/semantic";
@@ -32,6 +33,8 @@ import type { RoadLookup } from "@daily-route/semantic";
 import type { NetworkCache, TransitAgentContext } from "./context.js";
 import { createLookupTools } from "./lookup.js";
 import type { NewsSearch } from "./news.js";
+import { riderStore } from "./rider-context.js";
+import { createRiderTools } from "./rider-tools.js";
 
 /**
  * The agent's tools.
@@ -429,6 +432,15 @@ export function createRouteTool(context: TransitAgentContext, cache: NetworkCach
         notes.unshift("Pola yang dipilih juga beroperasi pada hari libur nasional; jangan sebut jadwalnya hanya Sabtu dan Minggu.");
       }
 
+      // The observation is the server's bookkeeping, not a tool argument: the
+      // model cannot name a rider, and a signed-out turn records nothing.
+      await recordRide(context, {
+        origin,
+        destination,
+        itinerary: primary,
+        at: planningAt,
+      });
+
       return {
         asal: { text: args.origin, stationId: origin.stationId, name: origin.name },
         tujuan: { text: args.destination, stationId: destination.stationId, name: destination.name },
@@ -457,6 +469,54 @@ function dedupeRoutes(routes: readonly Itinerary[]): Itinerary[] {
     unique.push(route);
   }
   return unique;
+}
+
+/**
+ * Record a journey the chat planned, when a real rider is in the turn.
+ *
+ * The write is the server's; the model never passes a user id and cannot
+ * read one back. A failure here must not turn an answer into an error.
+ */
+async function recordRide(
+  context: TransitAgentContext,
+  input: {
+    origin: { stationId: string; name: string };
+    destination: { stationId: string; name: string };
+    itinerary: Itinerary;
+    at: Date;
+  },
+): Promise<void> {
+  const userId = riderStore.getStore()?.userId ?? "";
+  if (userId.length === 0) return;
+
+  try {
+    const clock = jakartaDayClock(input.at);
+    const lineCodes = [
+      ...new Set(
+        input.itinerary.legs.flatMap((leg) => (leg.lineCode ? [leg.lineCode] : [])),
+      ),
+    ];
+    const labels = await labelsForPlaces(
+      context.db,
+      userId,
+      input.origin.stationId,
+      input.destination.stationId,
+    );
+    await insertObservation(context.db, userId, {
+      originKey: input.origin.stationId,
+      destinationKey: input.destination.stationId,
+      originName: input.origin.name,
+      destinationName: input.destination.name,
+      originLabel: labels.originLabel,
+      destinationLabel: labels.destinationLabel,
+      lineCodes,
+      weekday: clock.weekday,
+      minuteOfDay: clock.minuteOfDay,
+      source: "chat",
+    });
+  } catch {
+    // The journey is already planned; a failed habit write is not an answer.
+  }
 }
 
 function summarize(
@@ -993,6 +1053,7 @@ export function createTools(
 ) {
   return [
     createPlaceTool(context),
+    ...createRiderTools(context),
     createRouteTool(context, cache),
     createStationTool(cache),
     createDisruptionTool(cache),
