@@ -140,8 +140,9 @@ map. The map owns the window, and the controls float on it.
   confirm and not a card inside a card.
 - The phone has a bottom app bar with four places: **Plan**, **Lines**,
   **Alerts** and **Ask**. It is a navigation region, not a row of tabs in a
-  card. The active place has a paper plate behind its label and a jade rule
-  on the top edge. Lines and Alerts open the service board on that section;
+  card. The active place has a paper plate behind its label only, and a
+  short jade rule centred on the top edge. The plate does not wrap the
+  icon. Lines and Alerts open the service board on that section;
   Ask opens the assistant while the search stays visible above it.
 - The service board is a compact dock on the map, not a bar across it. It
   has two sections. **Lines** is the operator strip, the vehicles of the

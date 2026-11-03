@@ -30,10 +30,10 @@ const TABS: {
 /**
  * The bottom app bar on a phone.
  *
- * Four places, one route line. The active stop is marked twice: a jade
- * rule on the top edge and a paper plate behind the label. That is the
- * same language the map uses for a station, so the bar reads as part of
- * the city rather than as a browser chrome.
+ * Four places, one route line. The active stop is marked twice, and the
+ * two marks do not share a shape: a short jade rule sits on the top edge,
+ * and a paper plate sits behind the label only. A plate around the icon
+ * as well reads as a stain, because it is the same paper as the bar.
  */
 export function MobileTabBar({
   active,
@@ -51,11 +51,6 @@ export function MobileTabBar({
       aria-label="Primary"
       className="fixed inset-x-0 bottom-0 z-50 border-t border-line-strong bg-surface pb-[env(safe-area-inset-bottom)] shadow-[0_-10px_30px_-24px_var(--ink)] lg:hidden"
     >
-      {/* The route line that joins the four stops. */}
-      <span
-        aria-hidden
-        className="pointer-events-none absolute inset-x-0 top-0 h-px bg-line-strong/70"
-      />
       <div className="relative mx-auto grid h-[var(--bottom-bar-h)] max-w-lg grid-cols-4">
         {TABS.map((tab) => {
           const Icon = tab.icon;
@@ -67,12 +62,12 @@ export function MobileTabBar({
               onClick={() => onChange(tab.id)}
               aria-label={tab.ariaLabel}
               aria-current={selected ? "page" : undefined}
-              className="group relative flex cursor-pointer flex-col items-center justify-center gap-1 rounded-md outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-accent/50"
+              className="group relative flex cursor-pointer flex-col items-center justify-center gap-1 outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-accent/50"
             >
               {selected ? (
                 <motion.span
-                  layoutId="mobile-tab-plate"
-                  className="absolute inset-x-2 inset-y-1 rounded-md bg-surface-2"
+                  layoutId="mobile-tab-rule"
+                  className="absolute top-0 left-1/2 h-0.5 w-8 -translate-x-1/2 bg-accent"
                   transition={
                     reduceMotion
                       ? { duration: 0 }
@@ -84,7 +79,7 @@ export function MobileTabBar({
                 <Icon
                   aria-hidden
                   className={cn(
-                    "size-[18px] transition-transform duration-200 group-active:scale-90",
+                    "size-[18px]",
                     selected ? "text-ink" : "text-ink-3 group-hover:text-ink-2",
                   )}
                   strokeWidth={selected ? 2.4 : 1.8}
@@ -97,23 +92,14 @@ export function MobileTabBar({
               </span>
               <span
                 className={cn(
-                  "relative font-mono text-[12px] uppercase leading-[1.2] tracking-[0.08em] transition-colors",
-                  selected ? "font-semibold text-ink" : "text-ink-3",
+                  "relative rounded-md px-2 py-0.5 font-mono text-[12px] uppercase leading-[1.2] tracking-[0.08em]",
+                  selected
+                    ? "border border-line bg-surface-3 font-semibold text-ink"
+                    : "text-ink-3",
                 )}
               >
                 {tab.label}
               </span>
-              {selected ? (
-                <motion.span
-                  layoutId="mobile-tab-rule"
-                  className="absolute inset-x-5 top-0 h-0.5 bg-accent"
-                  transition={
-                    reduceMotion
-                      ? { duration: 0 }
-                      : { type: "spring", stiffness: 420, damping: 34, mass: 0.7 }
-                  }
-                />
-              ) : null}
             </button>
           );
         })}

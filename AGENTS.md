@@ -707,7 +707,8 @@ Read `DESIGN.md` before touching the interface. The short version:
   never crosses the line.
 - On a phone a bottom app bar holds four places: Plan, Lines, Alerts and
   Ask. It uses a real navigation element, a static icon per place, a paper
-  plate behind the active label and a jade rule on the top edge. Lines and
+  plate behind the active label only, and a short jade rule on the top
+  edge. The plate does not wrap the icon. Lines and
   Alerts open the service board on that section; Ask opens the assistant
   over the map. The search stays visible above the assistant.
 - On a phone the answer is a sheet above the bottom bar. It has a grab
