@@ -1145,12 +1145,13 @@ export function PlannerPage() {
             destination={destination.trim() || undefined}
             at={planAt}
             nightSafe={nightSafe}
+            places={memorySuggestions}
           />
         </div>
       ) : null}
 
       {accountOpen ? (
-        <div className="pointer-events-none fixed inset-x-2 bottom-[calc(var(--bottom-bar-h)+env(safe-area-inset-bottom)+8px)] z-40 flex flex-col justify-end lg:inset-auto lg:bottom-auto lg:right-3 lg:top-16 lg:w-[320px] chat-sheet-in">
+        <div className="pointer-events-none fixed inset-x-2 bottom-[calc(var(--bottom-bar-h)+env(safe-area-inset-bottom)+8px)] top-[calc(var(--bar-h)+8px)] z-40 flex flex-col lg:inset-auto lg:right-4 lg:top-16 lg:w-[400px] chat-sheet-in">
           <AccountPanel
             key={account.user?.id ?? "signed-out"}
             user={account.user}

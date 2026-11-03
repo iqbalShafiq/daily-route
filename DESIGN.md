@@ -560,9 +560,10 @@ are written down in `research/ux-search.md`; the short version:
 
 ## Named places and usual journeys
 
-Named places live in the account sheet, under the address. The label is the
-rider's own word for the place, so Home and Office are examples and not a
-list the rider must fill. A notice that touches a usual journey is one strip
+Named places live on their own tab in the account sheet. The rider types
+any name and searches a stop, a street, or another place. The same search
+offers those saved names, by the name or by the address, in the route
+fields and after @ in the assistant. A notice that touches a usual journey is one strip
 on the empty board, and it is not mixed into the operator notice list. The
 strip says "Not a live departure", because it reports a planned journey and
 a stored notice, never a vehicle.

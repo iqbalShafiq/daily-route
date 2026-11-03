@@ -61,15 +61,11 @@ function PasswordToggle({
 }
 
 /**
- * The rider's named places.
+ * The rider's saved places.
  *
- * The label is the rider's word for a place. Home and Office are offered
- * as examples, not as the only names a place may have, so the chips stay
- * usable after the rider has used them.
- *
- * The list and the two writes belong to the page, which owns the query.
- * This form only holds the name being typed and the suggestion chosen
- * from it.
+ * A place is a name the rider chose, pointing at a stop or any other
+ * location the search can find. The list and the writes belong to the
+ * page. This form only holds what is being typed.
  */
 function PlacesSection({
   places,
@@ -143,12 +139,7 @@ function PlacesSection({
   };
 
   return (
-    <div className="flex flex-col gap-3">
-      <p className="eyebrow">Places</p>
-      <p className="text-[13px] leading-[1.5] text-ink-2">
-        Name a place anything you like. Home and Office are examples, not a list you must fill.
-      </p>
-
+    <div className="flex flex-col gap-4">
       {places.length > 0 ? (
         <ul className="flex flex-col gap-2">
           {places.map((entry) => (
@@ -176,33 +167,22 @@ function PlacesSection({
             </li>
           ))}
         </ul>
-      ) : null}
+      ) : (
+        <p className="text-[13px] leading-[1.5] text-ink-2">No saved places.</p>
+      )}
 
-      <form onSubmit={submit} className="flex flex-col gap-3">
+      <form onSubmit={submit} className="flex flex-col gap-3 border-t border-line/70 pt-4">
         <Input
           label="Name"
-          placeholder="Home, Office, or any name"
+          placeholder="A name for this place"
           autoComplete="off"
           value={label}
           onChange={(event) => setLabel(event.target.value)}
         />
 
-        <div className="flex flex-wrap items-center gap-2">
-          {["Home", "Office"].map((example) => (
-            <Button
-              key={example}
-              variant="subtle"
-              size="sm"
-              onClick={() => setLabel(example)}
-            >
-              {example}
-            </Button>
-          ))}
-        </div>
-
         <Input
           label="Place"
-          placeholder="A stop, station, or landmark"
+          placeholder="Search a stop, street, or place"
           autoComplete="off"
           value={query}
           onChange={(event) => {
@@ -272,8 +252,8 @@ function PlacesSection({
           </div>
         ) : null}
 
-        <Button type="submit" variant="primary" disabled={busy || !ready}>
-          Save name
+        <Button type="submit" variant="primary" className="w-full" disabled={busy || !ready}>
+          Add place
         </Button>
         {busy ? <Spinner label="Saving name" /> : null}
       </form>
@@ -326,6 +306,7 @@ export function AccountPanel({
   const [shown, setShown] = useState(false);
   const [busy, setBusy] = useState(false);
   const [formError, setFormError] = useState<string | null>(null);
+  const [section, setSection] = useState<"account" | "places">("account");
   const [action, setAction] = useState<"summary" | "password" | "delete">("summary");
   const [currentPassword, setCurrentPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
@@ -458,7 +439,7 @@ export function AccountPanel({
   );
 
   return (
-    <section className="panel pointer-events-auto flex min-h-0 w-full flex-col overflow-hidden rounded-[12px] border-t-2 border-t-ink max-h-[72dvh] lg:max-h-[calc(100dvh-8rem)]">
+    <section className="panel pointer-events-auto flex min-h-0 w-full flex-col overflow-hidden rounded-[12px] border-t-2 border-t-ink max-h-[72dvh] max-lg:h-full lg:h-[min(520px,calc(100dvh-8rem))] lg:max-h-[calc(100dvh-8rem)]">
       <header className="flex shrink-0 items-center gap-3 border-b border-line/70 px-3 py-3">
         <div className="min-w-0 flex-1">
           <h2 className="text-[15px] font-semibold leading-[1.2] text-ink">Account</h2>
@@ -503,51 +484,77 @@ export function AccountPanel({
               ) : null}
             </div>
 
-            <div className="border-t border-line/70 pt-4">
-              <PlacesSection
-                places={places}
-                onSavePlace={onSavePlace}
-                onRemovePlace={onRemovePlace}
-              />
-            </div>
-
             {action === "summary" ? (
-              <div className="flex flex-col gap-2">
-                <div className="flex flex-wrap items-center gap-2">
-                  <Button
-                    variant="secondary"
-                    onClick={() => {
-                      setFormError(null);
-                      setAction("password");
-                    }}
-                    disabled={busy}
-                  >
-                    Change password
-                  </Button>
-                  <Button variant="ghost" onClick={() => void signOut()} disabled={busy}>
-                    Sign out
-                  </Button>
-                  <Button
-                    variant="danger"
-                    size="sm"
-                    onClick={() => {
-                      setFormError(null);
-                      setAction("delete");
-                    }}
-                    disabled={busy}
-                  >
-                    Delete account
-                  </Button>
-                </div>
-                {formError ? (
-                  <p role="alert" className="text-[13px] leading-[1.5] text-danger">
-                    {formError}
-                  </p>
-                ) : null}
-              </div>
+            <Tabs
+              value={section}
+              onValueChange={(next) => {
+                if (next !== "account" && next !== "places") return;
+                setSection(next);
+                setFormError(null);
+                setAction("summary");
+              }}
+              panels={
+                section === "places" ? (
+                  <TabPanel value="places">
+                    <PlacesSection
+                      places={places}
+                      onSavePlace={onSavePlace}
+                      onRemovePlace={onRemovePlace}
+                    />
+                  </TabPanel>
+                ) : (
+                  <TabPanel value="account">
+                    {action === "summary" ? (
+                      <div className="flex flex-col gap-2">
+                        <Button
+                          variant="secondary"
+                          className="w-full"
+                          onClick={() => {
+                            setFormError(null);
+                            setAction("password");
+                          }}
+                          disabled={busy}
+                        >
+                          Change password
+                        </Button>
+                        <Button
+                          variant="secondary"
+                          className="w-full"
+                          onClick={() => void signOut()}
+                          disabled={busy}
+                        >
+                          Sign out
+                        </Button>
+                        <div className="border-t border-line/70 pt-4">
+                          <Button
+                            variant="danger"
+                            className="w-full"
+                            onClick={() => {
+                              setFormError(null);
+                              setAction("delete");
+                            }}
+                            disabled={busy}
+                          >
+                            Delete account
+                          </Button>
+                        </div>
+                        {formError ? (
+                          <p role="alert" className="text-[13px] leading-[1.5] text-danger">
+                            {formError}
+                          </p>
+                        ) : null}
+                      </div>
+                    ) : null}
+                  </TabPanel>
+                )
+              }
+            >
+              <Tab value="account">Account</Tab>
+              <Tab value="places">Places</Tab>
+            </Tabs>
             ) : null}
 
-            {action === "password" ? (
+            {section === "account" && action === "password" ? (
               <form onSubmit={submitPassword} className="flex flex-col gap-3">
                 <Input
                   label="Current password"
@@ -576,16 +583,18 @@ export function AccountPanel({
                     {formError}
                   </p>
                 ) : null}
-                <div className="flex flex-wrap items-center gap-2">
+                <div className="flex flex-col gap-2">
                   <Button
                     type="submit"
                     variant="primary"
+                    className="w-full"
                     disabled={busy || currentPassword.length === 0 || newPassword.length === 0}
                   >
                     Change password
                   </Button>
                   <Button
-                    variant="ghost"
+                    variant="secondary"
+                    className="w-full"
                     onClick={() => {
                       setFormError(null);
                       setAction("summary");
@@ -599,7 +608,7 @@ export function AccountPanel({
               </form>
             ) : null}
 
-            {action === "delete" ? (
+            {section === "account" && action === "delete" ? (
               <form onSubmit={submitDelete} className="flex flex-col gap-3">
                 <p className="text-[13px] leading-[1.5] text-ink-2">
                   Delete this account? Places and watches stored with it are removed. This
@@ -618,16 +627,18 @@ export function AccountPanel({
                     {formError}
                   </p>
                 ) : null}
-                <div className="flex flex-wrap items-center gap-2">
+                <div className="flex flex-col gap-2">
                   <Button
                     type="submit"
                     variant="danger"
+                    className="w-full"
                     disabled={busy || deletePassword.length === 0}
                   >
                     Delete account
                   </Button>
                   <Button
-                    variant="ghost"
+                    variant="secondary"
+                    className="w-full"
                     onClick={() => {
                       setFormError(null);
                       setAction("summary");

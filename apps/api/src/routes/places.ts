@@ -77,7 +77,7 @@ export function createPlacesRouter(deps: ApiDeps): Router {
         isInterchange: false,
         lineCount: 0,
         street: place.detail,
-        detail: "Tempat",
+        detail: "Place",
         matchedRanges: [],
       }));
 

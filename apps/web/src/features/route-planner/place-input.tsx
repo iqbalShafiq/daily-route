@@ -116,7 +116,25 @@ export function PlaceInput({
   );
   const remembered = useMemo(() => memory.map(rowOfMemory), [memory]);
   const showingMemory = query.length < MINIMUM_QUERY_LENGTH;
-  const rows = showingMemory ? remembered : searched;
+  // A typed query still offers saved places, matched by the rider's label
+  // or by the place name, ahead of the stops and landmarks from the server.
+  const rememberedMatches = useMemo(() => {
+    const needle = query.trim().toLowerCase();
+    if (needle.length < MINIMUM_QUERY_LENGTH) return [];
+    return memory
+      .filter((item) =>
+        `${item.name} ${item.detail}`.toLowerCase().includes(needle),
+      )
+      .map(rowOfMemory);
+  }, [memory, query]);
+  const rows = showingMemory
+    ? remembered
+    : [
+        ...rememberedMatches,
+        ...searched.filter(
+          (row) => !rememberedMatches.some((saved) => saved.place.id === row.place.id),
+        ),
+      ].slice(0, MAXIMUM_RESULTS);
 
   // The list closes when the pointer goes somewhere else.
   useEffect(() => {

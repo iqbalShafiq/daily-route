@@ -87,6 +87,7 @@ test.describe("account", () => {
 
     await createAccount(page, email);
 
+    await page.getByRole("tab", { name: "Places" }).click();
     await page.getByLabel("Name", { exact: true }).fill("Home");
     await page.getByLabel("Place", { exact: true }).fill("Bundaran HI");
 
@@ -98,7 +99,7 @@ test.describe("account", () => {
     await expect(suggestion).toBeVisible({ timeout: 15_000 });
     await suggestion.click();
 
-    await page.getByRole("button", { name: "Save name" }).click();
+    await page.getByRole("button", { name: "Add place" }).click();
     // The row exists only after the account has accepted the write, so the
     // reload below cannot race the request. The network owns the stop name,
     // so the assertion reads the row rather than repeating the query.
@@ -110,6 +111,7 @@ test.describe("account", () => {
 
     await page.reload();
     await openAccount(page);
+    await page.getByRole("tab", { name: "Places" }).click();
     await expect(home).toBeVisible({ timeout: 15_000 });
     await expect(home).toContainText("Bundaran HI");
   });

@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { ArrowUpRight, Send, X } from "lucide-react";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 
 import { BrandMark } from "../../components/brand/brand-mark.js";
 import { NETWORK_SYSTEMS, OperatorBadge } from "../../components/map/operator-mark.js";
@@ -11,6 +11,7 @@ import { cn } from "../../lib/cn.js";
 
 import { api } from "../../lib/api.js";
 
+import type { MemorySuggestion } from "../route-planner/place-input.js";
 import { useChat, type ChatAction } from "./use-chat.js";
 import { ChatCards } from "./chat-cards.js";
 import { RichText } from "./rich-text.js";
@@ -37,6 +38,7 @@ export function ChatPanel({
   destination,
   at,
   nightSafe,
+  places = [],
 }: {
   onClose: () => void;
   onAction: (action: ChatAction) => void;
@@ -44,6 +46,8 @@ export function ChatPanel({
   destination?: string | undefined;
   at?: string | undefined;
   nightSafe?: boolean | undefined;
+  /** Saved and recent places, offered when the rider types @. */
+  places?: MemorySuggestion[] | undefined;
 }) {
   const { messages, status, error, send } = useChat();
 
@@ -55,6 +59,9 @@ export function ChatPanel({
   });
   const agentReady = health.data?.agent === true;
   const [draft, setDraft] = useState("");
+  const [cursor, setCursor] = useState(0);
+  const [mentionIndex, setMentionIndex] = useState(0);
+  const [mentionDismissed, setMentionDismissed] = useState(false);
   const scrollRef = useRef<HTMLDivElement | null>(null);
   const inputRef = useRef<HTMLInputElement | null>(null);
 
@@ -70,6 +77,54 @@ export function ChatPanel({
       : element.scrollHeight;
     element.scrollTo({ top: Math.max(0, top), behavior: "smooth" });
   }, [messages]);
+
+  const mention = mentionDismissed ? null : mentionQuery(draft, cursor);
+  const mentionNeedle = mention?.query ?? "";
+  const savedMatches = useMemo(() => {
+    if (!mention) return [];
+    const needle = mentionNeedle.toLowerCase();
+    return places.filter((place) =>
+      needle.length === 0
+        ? true
+        : `${place.name} ${place.detail}`.toLowerCase().includes(needle),
+    );
+  }, [mention, mentionNeedle, places]);
+  const placeSearch = useQuery({
+    queryKey: ["places", mentionNeedle],
+    queryFn: ({ signal }) => api.places(mentionNeedle, signal),
+    enabled: mention !== null && mentionNeedle.length >= 2,
+    staleTime: 60_000,
+  });
+  const mentionRows = useMemo(() => {
+    const savedIds = new Set(savedMatches.map((place) => place.place.id));
+    const searched = (placeSearch.data ?? [])
+      .filter((place) => !savedIds.has(place.id))
+      .slice(0, 4)
+      .map((place) => ({
+        key: place.id,
+        title: place.name,
+        detail: place.kind === "station" ? (place.systemName ?? "Stop") : "Place",
+        insert: place.name,
+      }));
+    return [
+      ...savedMatches.slice(0, 4).map((place) => ({
+        key: place.id,
+        title: place.detail && place.detail !== "Saved" && place.detail !== "Recent" ? place.detail : place.name,
+        detail: place.name,
+        insert: place.name,
+      })),
+      ...searched,
+    ].slice(0, 6);
+  }, [savedMatches, placeSearch.data]);
+
+  const insertMention = (name: string): void => {
+    if (!mention) return;
+    const next = `${draft.slice(0, mention.start)}${name}${draft.slice(cursor)}`;
+    setDraft(next);
+    setCursor(mention.start + name.length);
+    setMentionIndex(0);
+    inputRef.current?.focus();
+  };
 
   const submit = async (event: React.FormEvent): Promise<void> => {
     event.preventDefault();
@@ -248,12 +303,62 @@ export function ChatPanel({
           You can type a question after the model key is set. The route planner still runs.
         </p>
       ) : (
-        <form onSubmit={submit} className="shrink-0 border-t border-line/70 p-3">
+        <form onSubmit={submit} className="relative shrink-0 border-t border-line/70 p-3">
+          {mention && mentionRows.length > 0 ? (
+            <ul
+              role="listbox"
+              aria-label="Place suggestions"
+              className="absolute inset-x-3 bottom-full z-10 mb-2 max-h-48 overflow-y-auto rounded-lg border border-line-strong bg-surface shadow-pop"
+            >
+              {mentionRows.map((row, index) => (
+                <li key={row.key} role="presentation">
+                  <button
+                    type="button"
+                    role="option"
+                    aria-selected={index === mentionIndex}
+                    onMouseDown={(event) => event.preventDefault()}
+                    onClick={() => insertMention(row.insert)}
+                    className={cn(
+                      "flex w-full cursor-pointer flex-col px-3 py-2 text-left",
+                      index === mentionIndex ? "bg-surface-2" : "bg-surface",
+                    )}
+                  >
+                    <span className="truncate text-[13px] font-medium text-ink">{row.title}</span>
+                    <span className="truncate text-[12px] leading-[1.2] text-ink-3">{row.detail}</span>
+                  </button>
+                </li>
+              ))}
+            </ul>
+          ) : null}
           <div className="flex items-center gap-2">
             <input
               ref={inputRef}
               value={draft}
-              onChange={(event) => setDraft(event.target.value)}
+              onChange={(event) => {
+                setDraft(event.target.value);
+                setCursor(event.target.selectionStart ?? event.target.value.length);
+                setMentionIndex(0);
+                setMentionDismissed(false);
+              }}
+              onSelect={(event) => setCursor(event.currentTarget.selectionStart ?? draft.length)}
+              onKeyDown={(event) => {
+                if (!mention || mentionRows.length === 0) return;
+                if (event.key === "ArrowDown" || event.key === "ArrowUp") {
+                  event.preventDefault();
+                  setMentionIndex((index) => {
+                    const next = event.key === "ArrowDown" ? index + 1 : index - 1;
+                    if (next < 0) return mentionRows.length - 1;
+                    return next % mentionRows.length;
+                  });
+                } else if (event.key === "Enter" && !event.shiftKey) {
+                  event.preventDefault();
+                  const row = mentionRows[mentionIndex];
+                  if (row) insertMention(row.insert);
+                } else if (event.key === "Escape") {
+                  event.preventDefault();
+                  setMentionDismissed(true);
+                }
+              }}
               placeholder="Ask about a journey, a fare, or a stop…"
               aria-label="Message for the route assistant"
               className="h-10 min-w-0 flex-1 rounded-md border border-line-strong bg-surface px-3 text-[13px] text-ink outline-none transition-colors placeholder:text-ink-3 focus:border-accent"
@@ -280,4 +385,21 @@ export function ChatPanel({
       )}
     </section>
   );
+}
+
+/**
+ * The @ token the caret is inside, if the rider is naming a place.
+ *
+ * The mark has to start a word. An address that happens to contain @ is
+ * left alone.
+ */
+function mentionQuery(value: string, cursor: number): { start: number; query: string } | null {
+  if (cursor < 0 || cursor > value.length) return null;
+  const before = value.slice(0, cursor);
+  const at = before.lastIndexOf("@");
+  if (at < 0) return null;
+  if (at > 0 && !/\s/.test(before[at - 1] ?? "")) return null;
+  const query = before.slice(at + 1);
+  if (/\s/.test(query)) return null;
+  return { start: at, query };
 }
