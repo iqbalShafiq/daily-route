@@ -343,6 +343,7 @@ export function AccountPanel({
   const [shown, setShown] = useState(false);
   const [busy, setBusy] = useState(false);
   const [formError, setFormError] = useState<string | null>(null);
+  const [section, setSection] = useState<"places" | "settings">("places");
   const [confirmDelete, setConfirmDelete] = useState(false);
   const [currentPassword, setCurrentPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
@@ -518,13 +519,65 @@ export function AccountPanel({
               </div>
             ) : null}
 
-            <PlacesSection
-              places={places}
-              onSavePlace={onSavePlace}
-              onRemovePlace={onRemovePlace}
-            />
+            <Tabs
+              value={section}
+              onValueChange={(next) => {
+                if (next !== "places" && next !== "settings") return;
+                setSection(next);
+                setFormError(null);
+                setConfirmDelete(false);
+              }}
+              panels={
+                section === "settings" ? (
+                  <TabPanel value="settings">
+                    <SettingsSection />
+                  </TabPanel>
+                ) : (
+                  <TabPanel value="places">
+                    <PlacesSection
+                      places={places}
+                      onSavePlace={onSavePlace}
+                      onRemovePlace={onRemovePlace}
+                    />
+                  </TabPanel>
+                )
+              }
+            >
+              <Tab value="places">Places</Tab>
+              <Tab value="settings">Settings</Tab>
+            </Tabs>
+          </div>
+        ) : pending ? (
+          <Spinner label="Loading account" />
+        ) : (
+          <Tabs
+            value={mode}
+            onValueChange={(next) => {
+              if (next !== "signin" && next !== "create") return;
+              setMode(next);
+              setFormError(null);
+              setConfirm("");
+            }}
+            panels={
+              mode === "signin" ? (
+                <TabPanel value="signin">{credentialsPanel}</TabPanel>
+              ) : (
+                <TabPanel value="create">{credentialsPanel}</TabPanel>
+              )
+            }
+          >
+            <Tab value="signin">Sign in</Tab>
+            <Tab value="create">Create account</Tab>
+          </Tabs>
+        )}
+      </div>
+    </section>
+  );
 
-            <form onSubmit={submitPassword} className="flex flex-col gap-3 border-t border-line/70 pt-4">
+  function SettingsSection() {
+    return (
+      <div className="flex flex-col gap-4">
+            <form onSubmit={submitPassword} className="flex flex-col gap-3">
               <Input
                 label="Current password"
                 type="password"
@@ -622,33 +675,9 @@ export function AccountPanel({
                 </button>
               </div>
             )}
-          </div>
-        ) : pending ? (
-          <Spinner label="Loading account" />
-        ) : (
-          <Tabs
-            value={mode}
-            onValueChange={(next) => {
-              if (next !== "signin" && next !== "create") return;
-              setMode(next);
-              setFormError(null);
-              setConfirm("");
-            }}
-            panels={
-              mode === "signin" ? (
-                <TabPanel value="signin">{credentialsPanel}</TabPanel>
-              ) : (
-                <TabPanel value="create">{credentialsPanel}</TabPanel>
-              )
-            }
-          >
-            <Tab value="signin">Sign in</Tab>
-            <Tab value="create">Create account</Tab>
-          </Tabs>
-        )}
       </div>
-    </section>
-  );
+    );
+  }
 }
 
 /**
