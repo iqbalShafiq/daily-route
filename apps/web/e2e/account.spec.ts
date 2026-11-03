@@ -81,6 +81,39 @@ test.describe("account", () => {
     await expect(page.getByText("Fare")).toBeVisible({ timeout: 30_000 });
   });
 
+  test("names a place and keeps it across a reload", async ({ page }, testInfo) => {
+    const email = newEmail(testInfo);
+    await page.goto("/");
+
+    await createAccount(page, email);
+
+    await page.getByLabel("Name", { exact: true }).fill("Home");
+    await page.getByLabel("Place", { exact: true }).fill("Bundaran HI");
+
+    // The account sheet offers its own suggestions. The empty board also
+    // carries a "Bundaran HI → Kota" example on a wide screen, so the
+    // search is scoped to the sheet's list rather than the whole page.
+    const results = page.getByRole("list", { name: "Place suggestions" });
+    const suggestion = results.getByRole("button", { name: /Bundaran HI/ }).first();
+    await expect(suggestion).toBeVisible({ timeout: 15_000 });
+    await suggestion.click();
+
+    await page.getByRole("button", { name: "Save name" }).click();
+    // The row exists only after the account has accepted the write, so the
+    // reload below cannot race the request. The network owns the stop name,
+    // so the assertion reads the row rather than repeating the query.
+    const home = page
+      .getByRole("listitem")
+      .filter({ has: page.getByRole("button", { name: "Remove Home" }) });
+    await expect(home).toBeVisible({ timeout: 15_000 });
+    await expect(home).toContainText("Bundaran HI");
+
+    await page.reload();
+    await openAccount(page);
+    await expect(home).toBeVisible({ timeout: 15_000 });
+    await expect(home).toContainText("Bundaran HI");
+  });
+
   test("saves a place to the account, not to the device", async ({ page }, testInfo) => {
     const email = newEmail(testInfo);
     await page.goto("/");

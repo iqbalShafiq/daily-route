@@ -68,6 +68,39 @@ export type AccountMemoryWrite = {
   deleted?: boolean;
 };
 
+/**
+ * A place the rider named, as the account API stores it.
+ *
+ * The label is the rider's own word. The place underneath is grounded
+ * against the network when it is written, so its name and coordinate come
+ * from the graph and not from the rider.
+ */
+export type NamedPlace = {
+  label: string;
+  place: {
+    kind: "station" | "place";
+    id: string;
+    name: string;
+    latitude: number;
+    longitude: number;
+    systemId: string | null;
+    systemName: string | null;
+  };
+  updatedAt: string;
+};
+
+/** One usual journey, with the stored notices that touch it. */
+export type PersonalAlert = {
+  habit: {
+    originName: string;
+    destinationName: string;
+    originLabel: string | null;
+    destinationLabel: string | null;
+    count: number;
+  };
+  notices: { id: string; title: string }[];
+};
+
 export type MatchedRange = { start: number; end: number };
 
 /** A suggestion in the place field: a stop, or a place that is not one. */
@@ -676,4 +709,22 @@ export const api = {
       method: "PUT",
       body: JSON.stringify({ items }),
     }),
+
+  /** The places this rider named. A 401 means nobody is signed in. */
+  namedPlaces: () => request<{ places: NamedPlace[] }>("/account/places"),
+
+  /** Name a place. The API grounds a station against the network itself. */
+  saveNamedPlace: (label: string, place: NamedPlace["place"]) =>
+    request<{ places: NamedPlace[] }>("/account/places", {
+      method: "POST",
+      body: JSON.stringify({ label, payload: place }),
+    }),
+
+  deleteNamedPlace: (label: string) =>
+    request<{ places: NamedPlace[] }>(`/account/places/${encodeURIComponent(label)}`, {
+      method: "DELETE",
+    }),
+
+  /** The usual journeys that a stored notice touches right now. */
+  personalAlerts: () => request<{ alerts: PersonalAlert[] }>("/account/alerts"),
 };

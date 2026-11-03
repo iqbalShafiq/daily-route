@@ -557,6 +557,15 @@ are written down in `research/ux-search.md`; the short version:
 - On a phone the list is a sheet at the bottom of the screen, because the
   keyboard covers half of it.
 
+## Named places and usual journeys
+
+Named places live in the account sheet, under the address. The label is the
+rider's own word for the place, so Home and Office are examples and not a
+list the rider must fill. A notice that touches a usual journey is one strip
+on the empty board, and it is not mixed into the operator notice list. The
+strip says "Not a live departure", because it reports a planned journey and
+a stored notice, never a vehicle.
+
 ## Motion
 
 Motion is used to explain a change, never to decorate.

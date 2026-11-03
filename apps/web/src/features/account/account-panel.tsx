@@ -1,5 +1,6 @@
+import { useQuery } from "@tanstack/react-query";
 import { Eye, EyeOff, X } from "lucide-react";
-import { useState, type FormEvent } from "react";
+import { useEffect, useState, type FormEvent } from "react";
 
 import { Button } from "../../components/ui/button.js";
 import { Spinner } from "../../components/ui/feedback.js";
@@ -7,7 +8,13 @@ import { Input } from "../../components/ui/input.js";
 import { MarqueeText } from "../../components/ui/marquee-text.js";
 import { Tab, TabPanel, Tabs } from "../../components/ui/tabs.js";
 import { Tooltip } from "../../components/ui/tooltip.js";
-import { ApiError, type AccountUser } from "../../lib/api.js";
+import {
+  ApiError,
+  api,
+  type AccountUser,
+  type NamedPlace,
+  type PlaceSuggestion,
+} from "../../lib/api.js";
 
 /**
  * The account sheet.
@@ -53,9 +60,237 @@ function PasswordToggle({
   );
 }
 
+/**
+ * The rider's named places.
+ *
+ * The label is the rider's word for a place. Home and Office are offered
+ * as examples, not as the only names a place may have, so the chips stay
+ * usable after the rider has used them.
+ *
+ * The list and the two writes belong to the page, which owns the query.
+ * This form only holds the name being typed and the suggestion chosen
+ * from it.
+ */
+function PlacesSection({
+  places,
+  onSavePlace,
+  onRemovePlace,
+}: {
+  places: NamedPlace[];
+  onSavePlace: (label: string, place: NamedPlace["place"]) => Promise<void>;
+  onRemovePlace: (label: string) => Promise<void>;
+}) {
+  const [label, setLabel] = useState("");
+  const [query, setQuery] = useState("");
+  const [chosen, setChosen] = useState<PlaceSuggestion | null>(null);
+  const [busy, setBusy] = useState(false);
+  const [removing, setRemoving] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
+
+  const trimmedQuery = query.trim();
+  const debouncedQuery = useSettledValue(trimmedQuery, 250);
+  const searching = debouncedQuery.length >= 2;
+  const suggestions = useQuery({
+    queryKey: ["places", debouncedQuery],
+    queryFn: ({ signal }) => api.places(debouncedQuery, signal),
+    enabled: searching,
+    staleTime: 60_000,
+  });
+  const results = (suggestions.data ?? []).slice(0, 4);
+  const ready = chosen !== null && label.trim().length > 0;
+
+  const choose = (suggestion: PlaceSuggestion): void => {
+    setChosen(suggestion);
+    setQuery(suggestion.name);
+    setError(null);
+  };
+
+  const submit = async (event: FormEvent<HTMLFormElement>): Promise<void> => {
+    event.preventDefault();
+    if (!chosen || label.trim().length === 0) return;
+    setBusy(true);
+    setError(null);
+    try {
+      await onSavePlace(label.trim(), {
+        kind: chosen.kind,
+        id: chosen.id,
+        name: chosen.name,
+        latitude: chosen.latitude,
+        longitude: chosen.longitude,
+        systemId: chosen.systemId,
+        systemName: chosen.systemName,
+      });
+      setLabel("");
+      setQuery("");
+      setChosen(null);
+    } catch (caught) {
+      setError(messageOf(caught));
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  const remove = async (name: string): Promise<void> => {
+    setRemoving(name);
+    setError(null);
+    try {
+      await onRemovePlace(name);
+    } catch (caught) {
+      setError(messageOf(caught));
+    } finally {
+      setRemoving(null);
+    }
+  };
+
+  return (
+    <div className="flex flex-col gap-3">
+      <p className="eyebrow">Places</p>
+      <p className="text-[13px] leading-[1.5] text-ink-2">
+        Name a place anything you like. Home and Office are examples, not a list you must fill.
+      </p>
+
+      {places.length > 0 ? (
+        <ul className="flex flex-col gap-2">
+          {places.map((entry) => (
+            <li key={entry.label} className="flex items-center gap-3">
+              <div className="min-w-0 flex-1">
+                <MarqueeText
+                  text={entry.label}
+                  className="text-[15px] font-medium leading-[1.45] text-ink"
+                />
+                <MarqueeText
+                  text={entry.place.name}
+                  className="mt-0.5 text-[13px] leading-[1.5] text-ink-2"
+                />
+              </div>
+              <Button
+                variant="ghost"
+                size="sm"
+                className="shrink-0"
+                aria-label={`Remove ${entry.label}`}
+                disabled={removing === entry.label}
+                onClick={() => void remove(entry.label)}
+              >
+                Remove
+              </Button>
+            </li>
+          ))}
+        </ul>
+      ) : null}
+
+      <form onSubmit={submit} className="flex flex-col gap-3">
+        <Input
+          label="Name"
+          placeholder="Home, Office, or any name"
+          autoComplete="off"
+          value={label}
+          onChange={(event) => setLabel(event.target.value)}
+        />
+
+        <div className="flex flex-wrap items-center gap-2">
+          {["Home", "Office"].map((example) => (
+            <Button
+              key={example}
+              variant="subtle"
+              size="sm"
+              onClick={() => setLabel(example)}
+            >
+              {example}
+            </Button>
+          ))}
+        </div>
+
+        <Input
+          label="Place"
+          placeholder="A stop, station, or landmark"
+          autoComplete="off"
+          value={query}
+          onChange={(event) => {
+            setQuery(event.target.value);
+            // Editing the name means the chosen suggestion is no longer
+            // the place the field describes.
+            setChosen(null);
+          }}
+        />
+
+        {chosen ? (
+          <div className="flex items-center gap-2 rounded-md border border-line-strong/70 bg-surface px-3 py-2">
+            <span
+              aria-hidden
+              className="size-2 shrink-0 rounded-full border-2 border-accent bg-surface"
+            />
+            <span className="min-w-0 flex-1 truncate text-[13px] font-medium text-ink">
+              {chosen.name}
+            </span>
+            <span className="shrink-0 font-mono text-[12px] uppercase leading-[1.2] tracking-[0.04em] text-ink-3">
+              Chosen
+            </span>
+          </div>
+        ) : null}
+
+        {chosen === null && trimmedQuery.length >= 2 ? (
+          <div className="flex flex-col gap-1">
+            {suggestions.isPending ? <Spinner label="Searching places" /> : null}
+            {suggestions.isError ? (
+              <p className="text-[13px] leading-[1.5] text-ink-2">
+                Place suggestions could not be loaded. Check the connection and try again.
+              </p>
+            ) : null}
+            {!suggestions.isPending && !suggestions.isError && results.length === 0 ? (
+              <p className="text-[13px] leading-[1.5] text-ink-2">
+                No places match that name.
+              </p>
+            ) : null}
+            {results.length > 0 ? (
+              <ul className="grid gap-1" aria-label="Place suggestions">
+                {results.map((suggestion) => (
+                  <li key={suggestion.id}>
+                    <button
+                      type="button"
+                      onClick={() => choose(suggestion)}
+                      className="press flex w-full cursor-pointer items-center gap-2 rounded-md border border-line-strong/70 bg-surface px-3 py-2 text-left transition-colors hover:border-ink hover:bg-surface-2"
+                    >
+                      <span
+                        aria-hidden
+                        className={
+                          suggestion.kind === "station"
+                            ? "size-2 shrink-0 rounded-full border-2 border-accent bg-surface"
+                            : "size-2 shrink-0 rounded-[4px] bg-ink"
+                        }
+                      />
+                      <span className="min-w-0 flex-1 truncate text-[13px] font-medium text-ink">
+                        {suggestion.name}
+                      </span>
+                      <span className="shrink-0 font-mono text-[12px] uppercase leading-[1.2] tracking-[0.04em] text-ink-3">
+                        {suggestion.kind === "station" ? (suggestion.systemName ?? "Stop") : "Place"}
+                      </span>
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            ) : null}
+          </div>
+        ) : null}
+
+        <Button type="submit" variant="primary" disabled={busy || !ready}>
+          Save name
+        </Button>
+        {busy ? <Spinner label="Saving name" /> : null}
+      </form>
+
+      {error ? (
+        <p role="alert" className="text-[13px] leading-[1.5] text-danger">
+          {error}
+        </p>
+      ) : null}
+    </div>
+  );
+}
+
 export function AccountPanel({
   user,
   pending,
+  places,
   memoryError,
   memoryLoadFailed,
   onSignUp,
@@ -64,12 +299,18 @@ export function AccountPanel({
   onChangePassword,
   onDeleteAccount,
   onRetryMemory,
+  onSavePlace,
+  onRemovePlace,
   onClose,
 }: {
   user: AccountUser | null;
   pending: boolean;
+  /** The places this rider named, or an empty list while they load. */
+  places: NamedPlace[];
   memoryError: string | null;
   memoryLoadFailed: boolean;
+  onSavePlace: (label: string, place: NamedPlace["place"]) => Promise<void>;
+  onRemovePlace: (label: string) => Promise<void>;
   onSignUp: (email: string, password: string) => Promise<void>;
   onSignIn: (email: string, password: string) => Promise<void>;
   onSignOut: () => Promise<void>;
@@ -262,6 +503,14 @@ export function AccountPanel({
               ) : null}
             </div>
 
+            <div className="border-t border-line/70 pt-4">
+              <PlacesSection
+                places={places}
+                onSavePlace={onSavePlace}
+                onRemovePlace={onRemovePlace}
+              />
+            </div>
+
             {action === "summary" ? (
               <div className="flex flex-col gap-2">
                 <div className="flex flex-wrap items-center gap-2">
@@ -417,4 +666,21 @@ export function AccountPanel({
       </div>
     </section>
   );
+}
+
+/**
+ * A value that settles after the typing pauses.
+ *
+ * The suggestion list asks the server once the rider stops typing, so a
+ * five-letter name is one request, not five.
+ */
+function useSettledValue<T>(value: T, delayMs: number): T {
+  const [settled, setSettled] = useState(value);
+
+  useEffect(() => {
+    const timer = setTimeout(() => setSettled(value), delayMs);
+    return () => clearTimeout(timer);
+  }, [value, delayMs]);
+
+  return settled;
 }

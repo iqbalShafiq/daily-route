@@ -27,14 +27,14 @@ import type { ChosenPlace } from "../features/route-planner/place-memory.js";
 import type { MemorySuggestion } from "../features/route-planner/place-input.js";
 import { usePlan, type PlanRequest } from "../features/route-planner/use-plan.js";
 import { api } from "../lib/api.js";
-import type { PositionPlan } from "../lib/api.js";
+import type { NamedPlace, PersonalAlert, PositionPlan } from "../lib/api.js";
 import { Button } from "../components/ui/button.js";
 import { cn } from "../lib/cn.js";
 import { MODE_WIDTH, SERVICE_CLASS_COLOR, type ServiceClass } from "../lib/format.js";
 import { incidentImageId, incidentMarkOf } from "../lib/incident-mark.js";
 import { firstOpenIndex, planChoices } from "../lib/route-choice.js";
 import { useTheme } from "../lib/theme.js";
-import { useMutation, useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Tooltip } from "../components/ui/tooltip.js";
 import { useMediaQuery } from "../lib/use-media-query.js";
 
@@ -81,6 +81,15 @@ function isNightNow(): boolean {
     }).format(new Date()),
   );
   return hour >= 22 || hour < 5;
+}
+
+/** The one sentence a usual-journey notice shows on the empty board. */
+function alertSentenceOf(alert: PersonalAlert): string {
+  const { originName, destinationName, originLabel, destinationLabel } = alert.habit;
+  if (originLabel !== null && destinationLabel !== null) {
+    return `A notice touches your usual way from ${originLabel} to ${destinationLabel}.`;
+  }
+  return `A notice touches your usual way from ${originName} to ${destinationName}.`;
 }
 
 /** Turn a local time into the ISO instant the planner expects. */
@@ -135,6 +144,27 @@ export function PlannerPage() {
   });
   const [nightSafe, setNightSafe] = useState(isNightNow);
   const account = useAccount();
+  const queryClient = useQueryClient();
+  /*
+   * The rider's own data, read only while somebody is signed in.
+   *
+   * A 401 is "nobody is signed in", not a failure of the planner: the
+   * queries stay off while `account.user` is null, and a later failure
+   * only leaves the account section quiet.
+   */
+  const namedPlaces = useQuery({
+    queryKey: ["account", "places"],
+    queryFn: () => api.namedPlaces(),
+    enabled: account.user !== null,
+    retry: false,
+  });
+  const personalAlerts = useQuery({
+    queryKey: ["account", "alerts"],
+    queryFn: () => api.personalAlerts(),
+    enabled: account.user !== null,
+    refetchInterval: 5 * 60_000,
+    retry: false,
+  });
   const riderMemory = useRiderMemory(account.user?.id ?? null);
   const {
     saved,
@@ -197,6 +227,20 @@ export function PlannerPage() {
   const deleteAccount = async (password: string): Promise<void> => {
     await account.deleteAccount(password);
     resetLocal();
+  };
+
+  /** A named place is written through the account, then cached from its answer. */
+  const saveNamedPlace = async (
+    label: string,
+    place: NamedPlace["place"],
+  ): Promise<void> => {
+    const result = await api.saveNamedPlace(label, place);
+    queryClient.setQueryData(["account", "places"], result);
+  };
+
+  const removeNamedPlace = async (label: string): Promise<void> => {
+    const result = await api.deleteNamedPlace(label);
+    queryClient.setQueryData(["account", "places"], result);
   };
 
   /**
@@ -481,17 +525,33 @@ export function PlannerPage() {
     setMobileTab("plan");
   };
 
+  /*
+   * What an empty place field offers, in the order it should be read.
+   *
+   * The rider's named places come first, because the rider chose those
+   * names. A place that is already named is not listed again under "Saved"
+   * or "Recent", so the same stop does not appear three times.
+   */
   const memorySuggestions = useMemo<MemorySuggestion[]>(() => {
+    const named = namedPlaces.data?.places ?? [];
+    const namedIds = new Set(named.map((entry) => entry.place.id));
+    const savedRows = saved.filter((place) => !namedIds.has(place.id));
     const savedIds = new Set(saved.map((place) => place.id));
     return [
-      ...saved.map((place) => ({
+      ...named.map((entry) => ({
+        id: `named:${entry.label}`,
+        name: entry.place.name,
+        detail: entry.label,
+        place: entry.place,
+      })),
+      ...savedRows.map((place) => ({
         id: place.id,
         name: place.name,
         detail: "Saved",
         place,
       })),
       ...recentPlaces
-        .filter((place) => !savedIds.has(place.id))
+        .filter((place) => !namedIds.has(place.id) && !savedIds.has(place.id))
         .map((place) => ({
           id: place.id,
           name: place.name,
@@ -499,7 +559,7 @@ export function PlannerPage() {
           place,
         })),
     ];
-  }, [saved, recentPlaces]);
+  }, [namedPlaces.data, saved, recentPlaces]);
 
   /**
    * The leg of the journey the reader is pointing at.
@@ -682,6 +742,24 @@ export function PlannerPage() {
 
   const demoNotice = watch.data?.find((item) => item.demonstration);
   const activeNotices = (watch.data ?? []).filter((notice) => notice.activeNow).length;
+
+  /*
+   * One usual-journey notice for the empty board, and only while somebody
+   * is signed in. A signed-out rider is never asked to sign in for it: the
+   * board simply has no strip.
+   */
+  const firstAlert = personalAlerts.data?.alerts[0] ?? null;
+  const firstNotice = firstAlert?.notices[0] ?? null;
+  const emptyAlert =
+    account.user !== null && firstAlert !== null && firstNotice !== null
+      ? {
+          sentence: alertSentenceOf(firstAlert),
+          count: firstAlert.habit.count,
+          noticeTitle: firstNotice.title,
+          onShow: () =>
+            runExample(firstAlert.habit.originName, firstAlert.habit.destinationName),
+        }
+      : undefined;
 
   return (
     <div className="relative h-full min-h-0 overflow-hidden bg-bg">
@@ -1009,6 +1087,7 @@ export function PlannerPage() {
             <PlanEmptyState
               notices={activeNotices}
               networkReady={network.isSuccess}
+              alert={emptyAlert}
               onExample={runExample}
               onOpenNotices={openNotices}
               className="max-lg:hidden"
@@ -1076,6 +1155,7 @@ export function PlannerPage() {
             key={account.user?.id ?? "signed-out"}
             user={account.user}
             pending={account.pending}
+            places={namedPlaces.data?.places ?? []}
             memoryError={memoryError}
             memoryLoadFailed={memoryLoadFailed}
             onSignUp={account.signUp}
@@ -1084,6 +1164,8 @@ export function PlannerPage() {
             onChangePassword={account.changePassword}
             onDeleteAccount={deleteAccount}
             onRetryMemory={retryMemory}
+            onSavePlace={saveNamedPlace}
+            onRemovePlace={removeNamedPlace}
             onClose={() => setAccountOpen(false)}
           />
         </div>
@@ -1107,18 +1189,40 @@ export function PlannerPage() {
 function PlanEmptyState({
   notices,
   networkReady,
+  alert,
   onExample,
   onOpenNotices,
   className,
 }: {
   notices: number;
   networkReady: boolean;
+  /** A usual-journey notice that touches a stored plan, when one exists. */
+  alert?:
+    | {
+        sentence: string;
+        count: number;
+        noticeTitle: string;
+        onShow: () => void;
+      }
+    | undefined;
   onExample: (from: string, to: string) => void;
   onOpenNotices: () => void;
   className?: string;
 }) {
   return (
     <section className={cn("panel rounded-[12px] border-t-2 border-t-ink p-4", className)}>
+      {alert ? (
+        <div className="mb-4 border-l-2 border-warn bg-warn-soft px-3 py-2">
+          <p className="text-[13px] leading-[1.5] text-ink">{alert.sentence}</p>
+          <p className="mt-1 text-[12px] leading-[1.5] text-ink-2">{alert.noticeTitle}</p>
+          <p className="mt-1 text-[12px] leading-[1.5] text-ink-3">
+            Based on {alert.count} planned journeys. Not a live departure.
+          </p>
+          <Button variant="secondary" size="sm" className="mt-2" onClick={alert.onShow}>
+            Show this journey
+          </Button>
+        </div>
+      ) : null}
       <p className="eyebrow">Route board</p>
       <h2 className="mt-3 text-[28px] font-bold leading-[1.2] tracking-[-0.025em] text-ink">
         Where to?
