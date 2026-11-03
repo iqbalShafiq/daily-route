@@ -87,7 +87,6 @@ test.describe("account", () => {
 
     await createAccount(page, email);
 
-    await page.getByRole("tab", { name: "Places" }).click();
     await page.getByLabel("Name", { exact: true }).fill("Home");
     await page.getByLabel("Place", { exact: true }).fill("Bundaran HI");
 
@@ -111,7 +110,6 @@ test.describe("account", () => {
 
     await page.reload();
     await openAccount(page);
-    await page.getByRole("tab", { name: "Places" }).click();
     await expect(home).toBeVisible({ timeout: 15_000 });
     await expect(home).toContainText("Bundaran HI");
   });

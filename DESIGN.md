@@ -560,7 +560,7 @@ are written down in `research/ux-search.md`; the short version:
 
 ## Named places and usual journeys
 
-Named places live on their own tab in the account sheet. The rider types
+Named places live in the account sheet, above the password fields. The rider types
 any name and searches a stop, a street, or another place. The same search
 offers those saved names, by the name or by the address, in the route
 fields and after @ in the assistant. A notice that touches a usual journey is one strip

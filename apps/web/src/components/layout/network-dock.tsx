@@ -135,12 +135,9 @@ export function NetworkDock({
           <span className="flex size-7 items-center justify-center rounded-[6px] bg-accent-soft text-accent">
             <RadioTower aria-hidden className="size-4" />
           </span>
-          <div className="min-w-0">
-            <p className="eyebrow">Service board</p>
-            <p className="truncate text-[13px] font-semibold leading-[1.3] text-ink">
-              Lines &amp; notices
-            </p>
-          </div>
+          <p className="min-w-0 truncate text-[15px] font-semibold leading-[1.2] text-ink">
+            Service board
+          </p>
         </div>
         <div className="flex shrink-0 items-center gap-2">
           {onClose ? (

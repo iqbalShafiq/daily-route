@@ -306,8 +306,7 @@ export function AccountPanel({
   const [shown, setShown] = useState(false);
   const [busy, setBusy] = useState(false);
   const [formError, setFormError] = useState<string | null>(null);
-  const [section, setSection] = useState<"account" | "places">("account");
-  const [action, setAction] = useState<"summary" | "password" | "delete">("summary");
+  const [confirmDelete, setConfirmDelete] = useState(false);
   const [currentPassword, setCurrentPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [deletePassword, setDeletePassword] = useState("");
@@ -345,7 +344,6 @@ export function AccountPanel({
       setCurrentPassword("");
       setNewPassword("");
       setShown(false);
-      setAction("summary");
     } catch (error) {
       setFormError(messageOf(error));
     } finally {
@@ -360,7 +358,7 @@ export function AccountPanel({
     try {
       await onDeleteAccount(deletePassword);
       setDeletePassword("");
-      setAction("summary");
+      setConfirmDelete(false);
     } catch (error) {
       setFormError(messageOf(error));
     } finally {
@@ -439,13 +437,17 @@ export function AccountPanel({
   );
 
   return (
-    <section className="panel pointer-events-auto flex min-h-0 w-full flex-col overflow-hidden rounded-[12px] border-t-2 border-t-ink max-h-[72dvh] max-lg:h-full lg:h-[min(520px,calc(100dvh-8rem))] lg:max-h-[calc(100dvh-8rem)]">
+    <section className="panel pointer-events-auto flex max-h-[min(72dvh,560px)] min-h-0 w-full flex-col overflow-hidden rounded-[12px] border-t-2 border-t-ink lg:max-h-[min(62dvh,560px)]">
       <header className="flex shrink-0 items-center gap-3 border-b border-line/70 px-3 py-3">
         <div className="min-w-0 flex-1">
           <h2 className="text-[15px] font-semibold leading-[1.2] text-ink">Account</h2>
-          <p className="mt-0.5 font-mono text-[12px] uppercase leading-[1.2] tracking-[0.04em] text-ink-3">
-            {user ? "Signed in" : "This device"}
-          </p>
+          {user ? (
+            <p className="mt-0.5 truncate text-[13px] leading-[1.5] text-ink-2">{user.email}</p>
+          ) : (
+            <p className="mt-0.5 font-mono text-[12px] uppercase leading-[1.2] tracking-[0.04em] text-ink-3">
+              This device
+            </p>
+          )}
         </div>
         <Tooltip label="Close account">
           <Button
@@ -463,153 +465,66 @@ export function AccountPanel({
       <div className="scroll-quiet flex min-h-0 flex-col gap-4 overflow-y-auto px-4 py-4">
         {user ? (
           <div className="flex flex-col gap-4">
-            <div className="flex flex-col gap-2">
-              <p className="text-[15px] leading-[1.55] font-medium text-ink">
-                <MarqueeText text={user.email} />
+            {memoryError ? (
+              <p role="alert" className="text-[13px] leading-[1.5] text-danger">
+                {memoryError}
               </p>
-              {memoryError ? (
+            ) : null}
+            {memoryLoadFailed ? (
+              <div className="flex flex-wrap items-center gap-2">
+                <p className="text-[13px] leading-[1.5] text-danger">
+                  Could not load your places.
+                </p>
+                <Button variant="secondary" size="sm" onClick={onRetryMemory}>
+                  Retry
+                </Button>
+              </div>
+            ) : null}
+
+            <PlacesSection
+              places={places}
+              onSavePlace={onSavePlace}
+              onRemovePlace={onRemovePlace}
+            />
+
+            <form onSubmit={submitPassword} className="flex flex-col gap-3 border-t border-line/70 pt-4">
+              <Input
+                label="Current password"
+                type="password"
+                autoComplete="current-password"
+                placeholder="Password you use now"
+                value={currentPassword}
+                onChange={(event) => setCurrentPassword(event.target.value)}
+              />
+              <Input
+                label="New password"
+                type={shown ? "text" : "password"}
+                autoComplete="new-password"
+                placeholder="At least 8 characters"
+                value={newPassword}
+                onChange={(event) => setNewPassword(event.target.value)}
+                trailing={
+                  <PasswordToggle shown={shown} onToggle={() => setShown((current) => !current)} />
+                }
+              />
+              {formError && !confirmDelete ? (
                 <p role="alert" className="text-[13px] leading-[1.5] text-danger">
-                  {memoryError}
+                  {formError}
                 </p>
               ) : null}
-              {memoryLoadFailed ? (
-                <div className="flex flex-wrap items-center gap-2">
-                  <p className="text-[13px] leading-[1.5] text-danger">
-                    Could not load your places.
-                  </p>
-                  <Button variant="secondary" size="sm" onClick={onRetryMemory}>
-                    Retry
-                  </Button>
-                </div>
-              ) : null}
-            </div>
+              <Button
+                type="submit"
+                variant="primary"
+                className="w-full"
+                disabled={busy || currentPassword.length === 0 || newPassword.length === 0}
+              >
+                Update password
+              </Button>
+              {busy && !confirmDelete ? <Spinner label="Updating password" /> : null}
+            </form>
 
-            {action === "summary" ? (
-            <Tabs
-              value={section}
-              onValueChange={(next) => {
-                if (next !== "account" && next !== "places") return;
-                setSection(next);
-                setFormError(null);
-                setAction("summary");
-              }}
-              panels={
-                section === "places" ? (
-                  <TabPanel value="places">
-                    <PlacesSection
-                      places={places}
-                      onSavePlace={onSavePlace}
-                      onRemovePlace={onRemovePlace}
-                    />
-                  </TabPanel>
-                ) : (
-                  <TabPanel value="account">
-                    {action === "summary" ? (
-                      <div className="flex flex-col gap-2">
-                        <Button
-                          variant="secondary"
-                          className="w-full"
-                          onClick={() => {
-                            setFormError(null);
-                            setAction("password");
-                          }}
-                          disabled={busy}
-                        >
-                          Change password
-                        </Button>
-                        <Button
-                          variant="secondary"
-                          className="w-full"
-                          onClick={() => void signOut()}
-                          disabled={busy}
-                        >
-                          Sign out
-                        </Button>
-                        <div className="border-t border-line/70 pt-4">
-                          <Button
-                            variant="danger"
-                            className="w-full"
-                            onClick={() => {
-                              setFormError(null);
-                              setAction("delete");
-                            }}
-                            disabled={busy}
-                          >
-                            Delete account
-                          </Button>
-                        </div>
-                        {formError ? (
-                          <p role="alert" className="text-[13px] leading-[1.5] text-danger">
-                            {formError}
-                          </p>
-                        ) : null}
-                      </div>
-                    ) : null}
-                  </TabPanel>
-                )
-              }
-            >
-              <Tab value="account">Account</Tab>
-              <Tab value="places">Places</Tab>
-            </Tabs>
-            ) : null}
-
-            {section === "account" && action === "password" ? (
-              <form onSubmit={submitPassword} className="flex flex-col gap-3">
-                <Input
-                  label="Current password"
-                  type="password"
-                  autoComplete="current-password"
-                  placeholder="Password you use now"
-                  value={currentPassword}
-                  onChange={(event) => setCurrentPassword(event.target.value)}
-                />
-                <Input
-                  label="New password"
-                  type={shown ? "text" : "password"}
-                  autoComplete="new-password"
-                  placeholder="At least 8 characters"
-                  value={newPassword}
-                  onChange={(event) => setNewPassword(event.target.value)}
-                  trailing={
-                    <PasswordToggle
-                      shown={shown}
-                      onToggle={() => setShown((current) => !current)}
-                    />
-                  }
-                />
-                {formError ? (
-                  <p role="alert" className="text-[13px] leading-[1.5] text-danger">
-                    {formError}
-                  </p>
-                ) : null}
-                <div className="flex flex-col gap-2">
-                  <Button
-                    type="submit"
-                    variant="primary"
-                    className="w-full"
-                    disabled={busy || currentPassword.length === 0 || newPassword.length === 0}
-                  >
-                    Change password
-                  </Button>
-                  <Button
-                    variant="secondary"
-                    className="w-full"
-                    onClick={() => {
-                      setFormError(null);
-                      setAction("summary");
-                    }}
-                    disabled={busy}
-                  >
-                    Back
-                  </Button>
-                </div>
-                {busy ? <Spinner label="Changing password" /> : null}
-              </form>
-            ) : null}
-
-            {section === "account" && action === "delete" ? (
-              <form onSubmit={submitDelete} className="flex flex-col gap-3">
+            {confirmDelete ? (
+              <form onSubmit={submitDelete} className="flex flex-col gap-3 border-t border-line/70 pt-4">
                 <p className="text-[13px] leading-[1.5] text-ink-2">
                   Delete this account? Places and watches stored with it are removed. This
                   device keeps nothing of them.
@@ -627,29 +542,49 @@ export function AccountPanel({
                     {formError}
                   </p>
                 ) : null}
-                <div className="flex flex-col gap-2">
-                  <Button
-                    type="submit"
-                    variant="danger"
-                    className="w-full"
-                    disabled={busy || deletePassword.length === 0}
-                  >
-                    Delete account
-                  </Button>
-                  <Button
-                    variant="secondary"
-                    className="w-full"
-                    onClick={() => {
-                      setFormError(null);
-                      setAction("summary");
-                    }}
-                    disabled={busy}
-                  >
-                    Keep account
-                  </Button>
-                </div>
+                <Button
+                  type="submit"
+                  variant="danger"
+                  className="w-full"
+                  disabled={busy || deletePassword.length === 0}
+                >
+                  Delete account
+                </Button>
+                <Button
+                  variant="secondary"
+                  className="w-full"
+                  onClick={() => {
+                    setFormError(null);
+                    setConfirmDelete(false);
+                  }}
+                  disabled={busy}
+                >
+                  Keep account
+                </Button>
               </form>
-            ) : null}
+            ) : (
+              <div className="border-t border-line/70">
+                <button
+                  type="button"
+                  onClick={() => void signOut()}
+                  disabled={busy}
+                  className="flex w-full cursor-pointer items-center py-3 text-left text-[15px] text-ink hover:text-ink-2 disabled:opacity-40"
+                >
+                  Sign out
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setFormError(null);
+                    setConfirmDelete(true);
+                  }}
+                  disabled={busy}
+                  className="flex w-full cursor-pointer items-center border-t border-line/70 py-3 text-left text-[15px] text-danger disabled:opacity-40"
+                >
+                  Delete account
+                </button>
+              </div>
+            )}
           </div>
         ) : pending ? (
           <Spinner label="Loading account" />
