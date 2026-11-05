@@ -1,4 +1,5 @@
 import express, { type Express } from "express";
+import { mapPlaces } from "@daily-route/db";
 import { hasGoogleMaps } from "@daily-route/env";
 
 import type { ApiDeps } from "./deps.js";
@@ -38,7 +39,7 @@ export function createApp(deps: ApiDeps): Express {
     response.sendStatus(204);
   });
 
-  app.get("/api/health", (_request, response) => {
+  app.get("/api/health", async (_request, response) => {
     response.json({
       status: "ok",
       agent: deps.agent !== null,
@@ -48,7 +49,7 @@ export function createApp(deps: ApiDeps): Express {
           deps.env.LANGFUSE_SECRET_KEY &&
           (deps.env.LANGFUSE_BASE_URL ?? deps.env.LANGFUSE_HOST),
       ),
-      places: hasGoogleMaps(deps.env) ? "google" : "openstreetmap",
+      places: await placeSource(deps),
       lastProviderError: deps.lastProviderError,
     });
   });
@@ -72,4 +73,23 @@ export function createApp(deps: ApiDeps): Express {
   });
 
   return app;
+}
+
+/**
+ * The source the place field will use.
+ *
+ * The local Overture extract is the directory; a geocoder only fills a
+ * thin list. The check is one row from the primary key, so a health probe
+ * stays cheap. A missing table is not a reason to fail the probe.
+ */
+async function placeSource(deps: ApiDeps): Promise<string> {
+  try {
+    const rows = await deps.db.select({ id: mapPlaces.id }).from(mapPlaces).limit(1);
+    if (rows.length > 0) {
+      return hasGoogleMaps(deps.env) ? "overture+google" : "overture";
+    }
+  } catch {
+    // Fall through to the geocoder the deployment can still reach.
+  }
+  return hasGoogleMaps(deps.env) ? "google" : "openstreetmap";
 }
