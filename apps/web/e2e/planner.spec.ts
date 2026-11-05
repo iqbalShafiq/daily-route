@@ -76,6 +76,25 @@ test.describe("route planner", () => {
     await expect(option).toContainText(/Kelapa Gading/i);
   });
 
+  test("offers places from the Overture extract", async ({ page }) => {
+    const health = await page.request.get("http://localhost:3011/api/health");
+    const body = (await health.json()) as { places?: string };
+    test.skip(
+      !body.places?.startsWith("overture"),
+      "the Overture snapshot is not loaded",
+    );
+
+    await page.goto("/");
+
+    await field(page, "From").fill("Grand Indonesia");
+
+    const list = page.getByRole("listbox", { name: "Places matching From" });
+    await expect(
+      list.getByRole("option", { name: /Grand Indonesia Shopping Town/ }).first(),
+    ).toBeVisible({ timeout: 20_000 });
+    await expect(list.getByText("Places © Overture Maps")).toBeVisible();
+  });
+
   test("moves through the suggestions with the keyboard", async ({ page }) => {
     await page.goto("/");
 

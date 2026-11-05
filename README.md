@@ -195,7 +195,7 @@ the network snapshot and the line patterns.
 ### Places
 
 `data/places-jabodetabek.parquet` is the Overture Maps places extract for the
-Jabodetabek box: 272,964 places with a confidence of at least 0.5, deduplicated
+Jabodetabek box: 272,727 places with a confidence of at least 0.5, deduplicated
 by name within about 110 m. It is open data (CDLA Permissive 2.0, Apache 2.0 for
 the Foursquare records); the notices are in `data/PLACES-NOTICE.txt`, and the
 release and count are in `data/places-jabodetabek.json`.
@@ -203,14 +203,17 @@ release and count are in `data/places-jabodetabek.json`.
 ```bash
 pnpm data:places          # rebuild the extract from the latest Overture release
 pnpm db:places            # load it into map_places
+pnpm places:check         # compare the snapshot with the latest release
+pnpm places:refresh       # rebuild and load it in one step
 ```
 
-Both use the DuckDB command line (`brew install duckdb`); the first run
-downloads the S3 and Postgres extensions. `db:seed` does not load the places, so
-a fresh database needs `pnpm db:places` once. The place field reads
-`map_places` first, then falls back to Photon/Nominatim (or Google Places when
-`GOOGLE_MAPS_API_KEY` is set) only when the local list holds fewer than three
-answers.
+Both data commands use the DuckDB command line (`brew install duckdb`); the
+first run downloads the S3 and Postgres extensions. `db:seed` does not load the
+places, so a fresh database needs `pnpm db:places` once. Overture publishes
+monthly; `places:check` is cheap enough for a scheduled job. The place field
+reads `map_places` first, then falls back to Photon/Nominatim (or Google Places
+when `GOOGLE_MAPS_API_KEY` is set) only when the local list holds fewer than
+three answers.
 
 ## The planner
 

@@ -46,7 +46,11 @@ async function main(): Promise<void> {
     await load();
     return;
   }
-  throw new Error("Use `places extract` or `places load`.");
+  if (command === "check") {
+    await check();
+    return;
+  }
+  throw new Error("Use `places extract`, `places load`, or `places check`.");
 }
 
 async function extract(): Promise<void> {
@@ -73,7 +77,10 @@ COPY (
       bbox.ymin AS latitude,
       bbox.xmin AS longitude,
       ROW_NUMBER() OVER (
-        PARTITION BY lower(trim(names.primary)), round(bbox.ymin, 3), round(bbox.xmin, 3)
+        PARTITION BY
+          trim(regexp_replace(lower(trim(names.primary)), '[^a-z0-9]+', ' ', 'g')),
+          round(bbox.ymin, 3),
+          round(bbox.xmin, 3)
         ORDER BY confidence DESC
       ) AS rn
     FROM read_parquet([${list}])
@@ -84,6 +91,7 @@ COPY (
       AND names.primary IS NOT NULL
       AND length(trim(names.primary)) >= 2
       AND left(trim(names.primary), 1) NOT IN ('.', '-', '_')
+      AND NOT regexp_matches(names.primary, '[.]{2,}|[,]{2,}|[;]{2,}')
       AND confidence >= 0.5
       AND (operating_status IS NULL OR operating_status = 'open')
   )
@@ -116,6 +124,34 @@ COPY (
   };
   await writeFile(METADATA, `${JSON.stringify(metadata, null, 2)}\n`, "utf8");
   console.log(`${count} places written to ${SNAPSHOT}`);
+}
+
+/**
+ * Whether the committed snapshot follows the latest Overture release.
+ *
+ * Overture publishes monthly. The check only reads the STAC catalog and
+ * the local metadata, so it can run in a scheduled job without DuckDB or
+ * a database.
+ */
+async function check(): Promise<void> {
+  const [latest, metadata] = await Promise.all([
+    latestRelease(),
+    readFile(METADATA, "utf8").then(
+      (raw) => JSON.parse(raw) as { release?: string; count?: number },
+    ),
+  ]);
+
+  if (metadata.release === latest) {
+    console.log(
+      `Overture places ${latest} — snapshot is current (${metadata.count ?? "?"} places).`,
+    );
+    return;
+  }
+
+  console.log(
+    `Overture places ${latest} is available; the snapshot is ${metadata.release ?? "unknown"}.`,
+  );
+  console.log("Run `pnpm places:refresh` to rebuild and load it.");
 }
 
 async function load(): Promise<void> {

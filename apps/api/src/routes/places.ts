@@ -81,48 +81,52 @@ export function createPlacesRouter(deps: ApiDeps): Router {
       .map(stationOf);
 
     const stationNames = new Set(candidates.map((station) => normaliseName(station.name)));
-    const localPlaces = local
-      .filter((place) => !stationNames.has(normaliseName(place.name)))
-      .filter((place) => !candidates.some((station) => near(station, place)))
-      .map((place) => ({
-        kind: "place" as const,
-        id: `overture:${place.id}`,
-        name: place.name,
-        systemId: null,
-        systemName: null,
-        code: null,
-        latitude: place.latitude,
-        longitude: place.longitude,
-        isInterchange: false,
-        lineCount: 0,
-        street: place.address ?? place.locality ?? null,
-        detail: labelOfCategory(place.category),
-        source: "overture" as const,
-        matchedRanges: [],
-      }));
+    const localPlaces = dedupeNearby(
+      local
+        .filter((place) => !stationNames.has(normaliseName(place.name)))
+        .filter((place) => !candidates.some((station) => near(station, place)))
+        .map((place) => ({
+          kind: "place" as const,
+          id: `overture:${place.id}`,
+          name: place.name,
+          systemId: null,
+          systemName: null,
+          code: null,
+          latitude: place.latitude,
+          longitude: place.longitude,
+          isInterchange: false,
+          lineCount: 0,
+          street: place.address ?? place.locality ?? null,
+          detail: labelOfCategory(place.category),
+          source: "overture" as const,
+          matchedRanges: [],
+        })),
+    );
 
     const localNames = new Set(localPlaces.map((place) => normaliseName(place.name)));
-    const landmarks = external
-      .filter((place) => !stationNames.has(normaliseName(place.name)))
-      .filter((place) => !localNames.has(normaliseName(place.name)))
-      .filter((place) => !candidates.some((station) => near(station, place)))
-      .filter((place) => !local.some((entry) => near(entry, place, 0.0015)))
-      .map((place) => ({
-        kind: "place" as const,
-        id: place.id,
-        name: place.name,
-        systemId: null,
-        systemName: null,
-        code: null,
-        latitude: place.latitude,
-        longitude: place.longitude,
-        isInterchange: false,
-        lineCount: 0,
-        street: place.detail,
-        detail: place.kind,
-        source: place.source,
-        matchedRanges: [],
-      }));
+    const landmarks = dedupeNearby(
+      external
+        .filter((place) => !stationNames.has(normaliseName(place.name)))
+        .filter((place) => !localNames.has(normaliseName(place.name)))
+        .filter((place) => !candidates.some((station) => near(station, place)))
+        .filter((place) => !local.some((entry) => near(entry, place, 0.0015)))
+        .map((place) => ({
+          kind: "place" as const,
+          id: place.id,
+          name: place.name,
+          systemId: null,
+          systemName: null,
+          code: null,
+          latitude: place.latitude,
+          longitude: place.longitude,
+          isInterchange: false,
+          lineCount: 0,
+          street: place.detail,
+          detail: place.kind,
+          source: place.source,
+          matchedRanges: [],
+        })),
+    );
 
     /*
      * The name that starts with what was typed is the better answer.
@@ -164,7 +168,31 @@ function labelOfCategory(value: string | null): string | undefined {
 }
 
 function normaliseName(value: string): string {
-  return value.trim().toLowerCase().replace(/\s+/g, " ");
+  return value
+    .trim()
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, " ")
+    .trim();
+}
+
+/** The same name within a small box is one suggestion, not two. */
+function dedupeNearby<T extends { name: string; latitude: number; longitude: number }>(
+  rows: readonly T[],
+  tolerance = 0.0015,
+): T[] {
+  const kept: T[] = [];
+  for (const row of rows) {
+    const name = normaliseName(row.name);
+    if (
+      kept.some(
+        (other) => normaliseName(other.name) === name && near(other, row, tolerance),
+      )
+    ) {
+      continue;
+    }
+    kept.push(row);
+  }
+  return kept;
 }
 
 /** Whether two points are closer than `tolerance` degrees on both axes. */

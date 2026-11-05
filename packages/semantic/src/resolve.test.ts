@@ -30,7 +30,27 @@ afterAll(async () => {
   await db.$client.end({ timeout: 5 });
 });
 
+class CountingEncoder extends LocalHashEncoder {
+  calls = 0;
+
+  override async embed(texts: readonly string[]): Promise<number[][]> {
+    this.calls += 1;
+    return super.embed(texts);
+  }
+}
+
 describe("PlaceResolver", () => {
+  it("reuses the query embedding for the same name", async () => {
+    const provider = new CountingEncoder(env.EMBEDDINGS_DIMENSIONS);
+    const cached = new PlaceResolver(db, provider);
+
+    await cached.resolve("Kelapa Gading");
+    await cached.resolve("kelapa gading");
+    await cached.resolve("KELAPA GADING");
+
+    expect(provider.calls).toBe(1);
+  });
+
   it("finds a station by its name", async () => {
     const candidates = await resolver.resolve("Kelapa Gading");
     expect(candidates.length).toBeGreaterThan(0);

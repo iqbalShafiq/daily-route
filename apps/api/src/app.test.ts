@@ -48,6 +48,9 @@ describe("GET /api/health", () => {
     expect(response.status).toBe(200);
     expect(response.body.status).toBe("ok");
     expect(response.body.agent).toBe(false);
+    expect(["overture", "overture+google", "google", "openstreetmap"]).toContain(
+      response.body.places,
+    );
   });
 });
 

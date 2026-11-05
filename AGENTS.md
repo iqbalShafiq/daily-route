@@ -99,8 +99,10 @@ TypeScript with no framework and no database — keep it that way.
   A deterministic stand-in is acceptable only when it is *labelled* as such.
   Place lookup uses a remote embedding model when one is configured.
   Without one, the lexical and exact channels answer, and no hash vector
-  is written in their place. Live disruptions come from the monitor.
-  A record whose id starts with `contoh:` is not injected.
+  is written in their place. The resolver reuses a query embedding for
+  ten minutes, so moving between the two place fields does not pay for
+  the same name twice. Live disruptions come from the monitor. A record
+  whose id starts with `contoh:` is not injected.
 - **No backwards compatibility.** The project is pre-release. Change the
   schema, change the seed, change the consumer in one commit. Do not add
   adapters, shims or migration code for a shape that never shipped.
@@ -224,8 +226,11 @@ Apache 2.0 for the Foursquare records. `pnpm db:places` loads it into
 `map_places` through DuckDB's Postgres extension. Both commands need the
 DuckDB CLI (`brew install duckdb`); the first run installs the S3 and Postgres
 extensions. `db:seed` does not load the places, so a fresh database needs
-`pnpm db:places` once. The place field reads `map_places` first and asks a
-geocoder only when the local list holds fewer than three answers.
+`pnpm db:places` once. `pnpm places:check` compares the snapshot with the
+latest Overture release without DuckDB or a database, and `pnpm places:refresh`
+runs both steps; Overture publishes monthly, so the check can run in a
+scheduled job. The place field reads `map_places` first and asks a geocoder
+only when the local list holds fewer than three answers.
 
 `pnpm data:enrich` gives every station its administrative address. It reads
 the boundary dumps in `data/admin` (MIT, geometry from BIG; fetch them with

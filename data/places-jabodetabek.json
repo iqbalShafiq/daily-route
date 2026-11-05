@@ -10,8 +10,8 @@
     "minLatitude": -6.7,
     "maxLatitude": -6.05
   },
-  "count": 272964,
+  "count": 272727,
   "file": "data/places-jabodetabek.parquet",
   "notice": "data/PLACES-NOTICE.txt",
-  "extractedAt": "2026-11-03T17:28:33.722Z"
+  "extractedAt": "2026-11-05T03:34:17.381Z"
 }

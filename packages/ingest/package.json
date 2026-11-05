@@ -15,7 +15,8 @@
     "gtfs": "tsx src/cli/gtfs.ts",
     "enrich": "tsx src/cli/enrich.ts",
     "places:extract": "tsx src/cli/places.ts extract",
-    "places:load": "tsx src/cli/places.ts load"
+    "places:load": "tsx src/cli/places.ts load",
+    "places:check": "tsx src/cli/places.ts check"
   },
   "dependencies": {
     "@daily-route/db": "workspace:*",
