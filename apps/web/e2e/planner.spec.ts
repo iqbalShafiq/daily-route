@@ -162,6 +162,32 @@ test.describe("route planner", () => {
       }),
     ).toBeLessThan(before);
 
+    // Every vehicle on the board has its own colour, and the legend names
+    // it. Walking is the dashed row; two corridors never share a swatch.
+    const legend = page.getByRole("region", { name: "Route colours" });
+    await expect(legend).toBeVisible();
+    const rows = legend.getByRole("button");
+    expect(await rows.count()).toBeGreaterThan(1);
+    const swatches = await legend
+      .locator("li button span[aria-hidden] span")
+      .evaluateAll((nodes) =>
+        nodes.map((node) => {
+          const style = getComputedStyle(node);
+          return style.backgroundColor === "rgba(0, 0, 0, 0)"
+            ? style.borderTopColor
+            : style.backgroundColor;
+        }),
+      );
+    expect(new Set(swatches).size).toBeGreaterThan(1);
+
+    // Pointing at a row lights that line on the map, and the row explains
+    // itself without opening another surface.
+    await rows.nth(1).hover();
+    await expect(rows.nth(1)).toHaveAttribute("aria-pressed", "true");
+    await expect(page.getByRole("tooltip")).toContainText("→");
+    await page.mouse.move(510, 430);
+    await expect(rows.nth(1)).toHaveAttribute("aria-pressed", "false");
+
     // This journey shows one operator mark per mode, without line labels
     // or a "Change of vehicle" row.
     const journey = page.getByTestId("this-journey");
@@ -269,13 +295,253 @@ test.describe("route planner", () => {
   });
 });
 
+test.describe("the two ends on the map", () => {
+  test("stacks the two ends when both are the same station", async ({ page }) => {
+    await page.goto("/");
+
+    await field(page, "From").fill("Bundaran HI");
+    await page.keyboard.press("Escape");
+    await field(page, "To").fill("Bundaran HI Bank Jakarta");
+    await page.keyboard.press("Escape");
+    await page.getByRole("button", { name: "Show route" }).click();
+
+    await expect(page.getByText("Fare")).toBeVisible({ timeout: 30_000 });
+
+    // The map holds one stacked mark, not two points on top of each other.
+    await expect
+      .poll(async () =>
+        page.evaluate(() => {
+          const map = (
+            window as unknown as {
+              __dailyRouteMap?: {
+                querySourceFeatures: (id: string) => {
+                  properties?: Record<string, unknown>;
+                }[];
+              };
+            }
+          ).__dailyRouteMap;
+          return (
+            map
+              ?.querySourceFeatures("markers")
+              .some((feature) => feature.properties?.["kind"] === "endpoint") ?? false
+          );
+        }),
+      )
+      .toBe(true);
+
+    const point = await page.evaluate(() => {
+      const map = (
+        window as unknown as {
+          __dailyRouteMap?: {
+            querySourceFeatures: (id: string) => {
+              geometry: { type: string; coordinates: [number, number] };
+              properties?: Record<string, unknown>;
+            }[];
+            project: (coordinates: [number, number]) => { x: number; y: number };
+            getCanvas: () => HTMLCanvasElement;
+          };
+        }
+      ).__dailyRouteMap;
+      if (!map) return null;
+      const endpoint = map
+        .querySourceFeatures("markers")
+        .find((feature) => feature.properties?.["kind"] === "endpoint");
+      if (!endpoint || endpoint.geometry.type !== "Point") return null;
+      const [longitude, latitude] = endpoint.geometry.coordinates;
+      const projected = map.project([longitude, latitude]);
+      const rect = map.getCanvas().getBoundingClientRect();
+      return { x: rect.left + projected.x, y: rect.top + projected.y };
+    });
+    expect(point).not.toBeNull();
+    if (!point) return;
+
+    // On a phone the route board covers the map. Collapse it to the peek
+    // first, so the point the test taps is the map's, not the sheet's.
+    const journeySheet = page.getByRole("button", { name: /the journey$/ });
+    if (await journeySheet.isVisible()) {
+      await journeySheet.click();
+      await expect(journeySheet).toHaveAttribute("aria-expanded", "false");
+      const sheet = journeySheet.locator("..");
+      await expect
+        .poll(async () => {
+          const box = await sheet.boundingBox();
+          return box ? box.y > point.y + 24 : true;
+        })
+        .toBe(true);
+    }
+
+    // A click keeps both names on screen, for a finger without a hover.
+    await page.mouse.click(point.x, point.y);
+    const popup = page.locator(".map-popup");
+    await expect(popup).toBeVisible();
+    await expect(popup).toContainText("From · Bundaran HI Bank Jakarta");
+    await expect(popup).toContainText("To · Bundaran HI Bank Jakarta");
+  });
+
+  test("shows both ends when they are different stops", async ({ page }) => {
+    await page.goto("/");
+
+    await field(page, "From").fill("Bundaran HI");
+    await page.keyboard.press("Escape");
+    await field(page, "To").fill("Kelapa Gading");
+    await page.keyboard.press("Escape");
+    await page.getByRole("button", { name: "Show route" }).click();
+
+    await expect(page.getByText("Fare")).toBeVisible({ timeout: 30_000 });
+
+    // A normal journey keeps two separate marks: the start and the finish.
+    await expect
+      .poll(async () =>
+        page.evaluate(() => {
+          const map = (
+            window as unknown as {
+              __dailyRouteMap?: {
+                querySourceFeatures: (id: string) => {
+                  properties?: Record<string, unknown>;
+                }[];
+              };
+            }
+          ).__dailyRouteMap;
+          const kinds = new Set(
+            map
+              ?.querySourceFeatures("markers")
+              .map((feature) => feature.properties?.["kind"]) ?? [],
+          );
+          return kinds.has("origin") && kinds.has("destination");
+        }),
+      )
+      .toBe(true);
+  });
+});
+
+test.describe("the pedestrian bridges", () => {
+  test("names the JPO on the walk and draws the bridge layer", async ({ page }) => {
+    await page.goto("/");
+
+    await field(page, "From").fill("Jalan Dokter Susilo II A");
+    await expect(page.getByRole("option").first()).toBeVisible();
+    await page.keyboard.press("Enter");
+    await expect(page.getByRole("option")).toHaveCount(0);
+    await field(page, "To").fill("Simpang Kuningan");
+    await page.keyboard.press("Escape");
+    await page.getByRole("button", { name: "Show route" }).click();
+
+    await expect(page.getByText("Fare")).toBeVisible({ timeout: 30_000 });
+    await expect(page.getByText(/Via JPO /).first()).toBeVisible({ timeout: 30_000 });
+
+    // The place endpoint is its own circle; the station endpoint wears the
+    // operator mark. A place is not a halte.
+    const ends = await page.evaluate(() => {
+      const map = (
+        window as unknown as {
+          __dailyRouteMap?: {
+            getSource: (id: string) => {
+              serialize?: () => {
+                data?: {
+                  features?: {
+                    properties?: Record<string, unknown>;
+                  }[];
+                };
+              };
+            } | null;
+          };
+        }
+      ).__dailyRouteMap;
+      const source = map?.getSource("markers");
+      const features = source?.serialize?.().data?.features ?? [];
+      return features
+        .filter((feature) =>
+          ["origin", "destination", "endpoint"].includes(
+            String(feature.properties?.["kind"] ?? ""),
+          ),
+        )
+        .map((feature) => ({
+          kind: String(feature.properties?.["kind"] ?? ""),
+          operatorImage: String(feature.properties?.["operatorImage"] ?? ""),
+        }));
+    });
+    expect(ends.find((entry) => entry.kind === "origin")?.operatorImage).toBe("");
+    expect(ends.find((entry) => entry.kind === "destination")?.operatorImage).not.toBe("");
+
+    // The map draws the bridges of this walk, not the whole registry: the
+    // registry is a texture over the city, the walk is the information.
+    const registry = (await (await page.request.get("/api/jpo")).json()) as {
+      jpos: unknown[];
+    };
+    const drawnJpos = (): Promise<number> =>
+      page.evaluate(() => {
+        const map = (
+          window as unknown as {
+            __dailyRouteMap?: {
+              getSource: (id: string) => {
+                serialize?: () => { data?: { features?: unknown[] } };
+              } | null;
+              getLayer: (id: string) => unknown;
+            };
+          }
+        ).__dailyRouteMap;
+        if (!map || !map.getLayer("jpo-line")) return 0;
+        const source = map.getSource("jpo");
+        return source?.serialize?.().data?.features?.length ?? 0;
+      });
+    await expect.poll(drawnJpos).toBeGreaterThan(0);
+    expect(await drawnJpos()).toBeLessThan(registry.jpos.length);
+  });
+});
+
 test.describe("walking from the reader's place", () => {
   test.use({
     permissions: ["geolocation"],
     geolocation: { latitude: -6.1952, longitude: 106.8211 },
   });
 
+  test("marks the reader's place without asking for a journey yet", async ({ page }) => {
+    await page.route("**/api/places/reverse**", (route) =>
+      route.fulfill({
+        json: {
+          place: {
+            kind: "place",
+            id: "place:current:-6.19520,106.82110",
+            name: "Jalan Teluk Betung",
+            address: "Jalan Teluk Betung, Kebon Melati, Jakarta Pusat",
+            latitude: -6.1952,
+            longitude: 106.8211,
+            systemId: null,
+            systemName: null,
+          },
+        },
+      }),
+    );
+    await page.goto("/");
+
+    await page.getByRole("button", { name: "Use my location" }).click();
+
+    await expect(field(page, "From")).toHaveValue(
+      "Jalan Teluk Betung, Kebon Melati, Jakarta Pusat",
+    );
+
+    // Without a destination there is no journey, so the alternatives are
+    // not opened below the search.
+    await expect(page.getByRole("region", { name: "Ways to go" })).toHaveCount(0);
+  });
+
   test("finds the stop to walk to and the way there", async ({ page }) => {
+    await page.route("**/api/places/reverse**", (route) =>
+      route.fulfill({
+        json: {
+          place: {
+            kind: "place",
+            id: "place:current:-6.19520,106.82110",
+            name: "Jalan Teluk Betung",
+            address: "Jalan Teluk Betung, Kebon Melati, Jakarta Pusat",
+            latitude: -6.1952,
+            longitude: 106.8211,
+            systemId: null,
+            systemName: null,
+          },
+        },
+      }),
+    );
     await page.goto("/");
 
     // A journey needs a destination before the start can be weighed.
@@ -284,14 +550,41 @@ test.describe("walking from the reader's place", () => {
 
     await page.getByRole("button", { name: "Use my location" }).click();
 
-    // The stop to start from, the distance, and the ways of starting.
-    await expect(page.getByText("Start from")).toBeVisible({ timeout: 30_000 });
-    await expect(
-      page.getByRole("list", { name: "Ways to start" }).getByRole("button", { name: /^Fastest/ }),
-    ).toBeVisible();
-    await expect(page.getByText(/Walk .* to /).first()).toBeVisible({ timeout: 30_000 });
+    // The address is read back and the journey is asked for in one step.
+    await expect(field(page, "From")).toHaveValue(
+      "Jalan Teluk Betung, Kebon Melati, Jakarta Pusat",
+    );
+    await expect(page.getByText("Fare")).toBeVisible({ timeout: 30_000 });
 
-    // The journey starts from that stop.
-    await expect(field(page, "From")).toHaveValue(/.+/);
+    // The walk is one compact row: its title, where it goes, and its time.
+    const walk = page
+      .getByRole("list", { name: "Journey legs" })
+      .locator("li")
+      .filter({ has: page.getByText("Walk", { exact: true }) })
+      .first();
+    await expect(walk).toBeVisible({ timeout: 30_000 });
+    await expect(walk.getByText(/to the (stop|station) /)).toBeVisible();
+    await expect(walk.getByText(/^\d+ min$/)).toBeVisible();
+
+    // The time sits on the title's line, not on a row of its own.
+    const titleBox = await walk.getByText("Walk", { exact: true }).boundingBox();
+    const durationBox = await walk.getByText(/^\d+ min$/).boundingBox();
+    expect(Math.abs((titleBox?.y ?? 0) - (durationBox?.y ?? 0))).toBeLessThan(8);
+  });
+});
+
+test.describe("the rider's current place when the browser refuses", () => {
+  test.use({ permissions: [] });
+
+  test("says that the location could not be read", async ({ page }) => {
+    await page.goto("/");
+
+    await field(page, "To").fill("Kota");
+    await page.getByRole("button", { name: "Use my location" }).click();
+
+    await expect(
+      page.getByText("Your location could not be read. Allow location access and try again."),
+    ).toBeVisible({ timeout: 20_000 });
+    await expect(field(page, "From")).toHaveValue("");
   });
 });

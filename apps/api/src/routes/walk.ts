@@ -13,7 +13,7 @@
 import { Router } from "express";
 
 import { findStationsNear } from "@daily-route/db";
-import { planRoutes, walkingMinutes } from "@daily-route/transit";
+import { jpoWalkEstimate, jposAlongPath, planRoutes, walkingMinutes } from "@daily-route/transit";
 
 import type { ApiDeps } from "../deps.js";
 
@@ -47,10 +47,10 @@ export type WalkRoute = {
  * How a journey is weighed.
  *
  * The numbers are the ones the research settled on, and they are
- * arguments rather than constants: the profiles below are the same
- * journeys weighed differently. A change of vehicle is worth three
- * minutes, the walk to the first stop is worth more than the walk in
- * the middle, because that is the walk the rider did not choose.
+ * arguments rather than constants: the same journeys can be weighed
+ * differently. A change of vehicle is worth three minutes, the walk to
+ * the first stop is worth more than the walk in the middle, because that
+ * is the walk the rider did not choose.
  */
 export type OriginWeights = {
   /** Minutes added per change of vehicle. */
@@ -70,17 +70,6 @@ const DEFAULT_WEIGHTS: OriginWeights = {
   distancePerKm: 0.4,
 };
 
-const ORIGIN_PROFILES: Record<string, OriginWeights> = {
-  fastest: DEFAULT_WEIGHTS,
-  "fewer-transfers": { ...DEFAULT_WEIGHTS, transfer: 8 },
-  "less-walking": { ...DEFAULT_WEIGHTS, walkPerKm: 4, accessWalkPerKm: 4 },
-};
-
-const PROFILE_LABELS: Record<string, string> = {
-  fastest: "Fastest",
-  "fewer-transfers": "Fewest changes",
-  "less-walking": "Least walking",
-};
 
 type OriginCandidate = {
   stationId: string;
@@ -372,10 +361,9 @@ export function createWalkRouter(deps: ApiDeps): Router {
         distanceKm: Number(stop.distanceKm.toFixed(3)),
         durationMinutes: 1,
         steps: [],
-        geometry: [
-          { latitude, longitude },
-          { latitude: stop.latitude, longitude: stop.longitude },
-        ],
+        // The rider is already at the stop. A two-point line would be a
+        // path that does not exist; the panel says "you are there" instead.
+        geometry: [],
       } satisfies WalkRoute);
       return;
     }
@@ -444,12 +432,18 @@ export function createWalkRouter(deps: ApiDeps): Router {
       response.status(400).json({ error: "The coordinates are incomplete" });
       return;
     }
+    if (destination.trim().length === 0) {
+      response.status(400).json({ error: "A destination is required" });
+      return;
+    }
 
     const { network } = await deps.cache.get();
-    const destinationCandidates = destination
-      ? await deps.resolver.resolve(destination, { limit: 3 })
-      : [];
+    const destinationCandidates = await deps.resolver.resolve(destination, { limit: 3 });
     const destinationStation = destinationCandidates[0];
+    if (!destinationStation) {
+      response.status(404).json({ error: "That place was not found, or the name is ambiguous" });
+      return;
+    }
 
     /*
      * Every stop around the reader is a candidate.
@@ -470,30 +464,6 @@ export function createWalkRouter(deps: ApiDeps): Router {
       return;
     }
 
-    /*
-     * Without a destination there is no journey to weigh, and ranking
-     * the stops would only say which one is nearest. The reader is
-     * asked for a destination first.
-     */
-    const nearest = nearby[0];
-    if (!nearest) {
-      response.status(404).json({ error: "No stop within 1.5 km" });
-      return;
-    }
-    if (!destinationStation) {
-      response.json({
-        needsDestination: true,
-        nearest: {
-          stationId: nearest.id,
-          stationName: nearest.name,
-          accessWalkKm: Number(nearest.distanceKm.toFixed(3)),
-        },
-        candidates: [],
-        profiles: [],
-      });
-      return;
-    }
-
     const evaluated: OriginCandidate[] = [];
     for (const candidate of nearby) {
       const itineraries = planRoutes(network, candidate.id, destinationStation.stationId, {
@@ -503,9 +473,12 @@ export function createWalkRouter(deps: ApiDeps): Router {
       if (!itinerary) continue;
 
       // The walk to the first stop, estimated the way the planner
-      // estimates every other walk.
-      const accessWalkKm = Number(candidate.distanceKm.toFixed(3));
-      const accessWalkMinutes = walkingMinutes(accessWalkKm);
+      // estimates every other walk. A bridge that crosses to the stop is
+      // preferred over the straight line, so a halte on the other side of
+      // a road is not dismissed as far away.
+      const bridge = jpoWalkEstimate(deps.jpos?.jpos ?? [], { latitude, longitude }, candidate);
+      const accessWalkKm = Number((bridge?.km ?? candidate.distanceKm).toFixed(3));
+      const accessWalkMinutes = bridge?.minutes ?? walkingMinutes(accessWalkKm);
       const totalMinutes = itinerary.durationMinutes + accessWalkMinutes;
 
       evaluated.push({
@@ -529,45 +502,33 @@ export function createWalkRouter(deps: ApiDeps): Router {
     }
 
     /*
-     * The profiles.
-     *
-     * Each one asks a different question of the same journeys: the
-     * soonest, the one with the fewest changes of vehicle, and the one
-     * that asks the reader to walk the least. They often disagree about
-     * which stop to start from, which is the point.
+     * The best start is the stop whose whole journey, the walk to it
+     * included, takes the least time. The nearest stop is not always the
+     * right one: a stop a little further away may serve the line that
+     * goes straight to the destination.
      */
-    const profiles = Object.entries(ORIGIN_PROFILES).map(([id, weights]) => {
-      const ranked = [...evaluated].sort(
-        (a, b) => scoreOf(a, weights) - scoreOf(b, weights),
-      );
-      const winner = ranked[0];
-      return {
-        id,
-        label: PROFILE_LABELS[id] ?? id,
-        stationId: winner?.stationId ?? null,
-        stationName: winner?.stationName ?? null,
-        score: winner ? Math.round(scoreOf(winner, weights) * 10) / 10 : null,
-        totalMinutes: winner?.totalMinutes ?? null,
-        transferCount: winner?.transferCount ?? null,
-        accessWalkKm: winner?.accessWalkKm ?? null,
-      };
-    });
-
-    const fastest = profiles.find((profile) => profile.id === "fastest");
-    const winner = evaluated.find((candidate) => candidate.stationId === fastest?.stationId);
+    const winner = [...evaluated].sort(
+      (a, b) => scoreOf(a, DEFAULT_WEIGHTS) - scoreOf(b, DEFAULT_WEIGHTS),
+    )[0];
     if (!winner) {
       response.status(404).json({ error: "No journey starts from a stop near there" });
       return;
     }
 
-    // The real path of the walk, for the map and for the directions.
+    // The real path of the walk, for the map and for the first leg.
     const walk = await fetchWalkingRoute(
       { latitude, longitude },
       { latitude: winner.latitude, longitude: winner.longitude },
     );
 
+    const usedJpos = walk
+      ? jposAlongPath(deps.jpos?.jpos ?? [], walk.geometry, { toleranceKm: 0.02 }).filter(
+          (entry) =>
+            entry.jpo.official ||
+            (entry.jpo.name !== "Footbridge" && entry.jpo.name !== "Underpass"),
+        )
+      : [];
     response.json({
-      needsDestination: false,
       stationId: winner.stationId,
       stationName: winner.stationName,
       totalMinutes: winner.totalMinutes,
@@ -581,20 +542,14 @@ export function createWalkRouter(deps: ApiDeps): Router {
             durationMinutes: walk.durationMinutes,
             steps: walk.steps,
             geometry: walk.geometry,
+            jpo: usedJpos.map((entry) => ({
+              id: entry.jpo.id,
+              name: entry.jpo.name,
+              official: entry.jpo.official,
+              source: entry.jpo.source,
+            })),
           }
         : null,
-      profiles,
-      candidates: evaluated
-        .map((candidate) => ({
-          stationId: candidate.stationId,
-          stationName: candidate.stationName,
-          accessWalkKm: candidate.accessWalkKm,
-          totalMinutes: candidate.totalMinutes,
-          transferCount: candidate.transferCount,
-          score: Math.round(scoreOf(candidate, DEFAULT_WEIGHTS) * 10) / 10,
-        }))
-        .sort((a, b) => a.score - b.score)
-        .slice(0, 6),
     });
   });
 

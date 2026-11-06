@@ -35,6 +35,7 @@ const deps: ApiDeps = {
   agent: null,
   lastProviderError: null,
   attempts: createAttemptLimiter(100, 15 * 60_000),
+  jpos: null,
 };
 
 const app = createApp(deps);
@@ -509,6 +510,7 @@ describe("the attempt limiter", () => {
     const limited = createApp({
       ...deps,
       attempts: createAttemptLimiter(2, 60_000),
+  jpos: null,
     });
     const email = uniqueEmail();
     expect((await signUp(request(app), email)).status).toBe(201);

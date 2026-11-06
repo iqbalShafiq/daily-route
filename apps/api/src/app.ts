@@ -5,6 +5,7 @@ import { hasGoogleMaps } from "@daily-route/env";
 import type { ApiDeps } from "./deps.js";
 import { createAccountRouter } from "./routes/account.js";
 import { createAgentRouter } from "./routes/agent.js";
+import { createJpoRouter } from "./routes/jpo.js";
 import { createMonitorRouter } from "./routes/monitor.js";
 import { createPlacesRouter } from "./routes/places.js";
 import { createRoutesRouter } from "./routes/routes.js";
@@ -59,6 +60,7 @@ export function createApp(deps: ApiDeps): Express {
   app.use("/api/places", createPlacesRouter(deps));
   app.use("/api/routes", createRoutesRouter(deps));
   app.use("/api/walk", createWalkRouter(deps));
+  app.use("/api/jpo", createJpoRouter(deps));
   app.use("/api/agent", createAgentRouter(deps));
   app.use("/api/monitor", createMonitorRouter(deps));
 

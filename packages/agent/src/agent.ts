@@ -1,6 +1,7 @@
 import { Agent } from "@anvia/core";
 import { hasAgentProvider, type Env } from "@daily-route/env";
 import { createUsageSink, type Database } from "@daily-route/db";
+import type { Jpo } from "@daily-route/transit";
 
 import { setUsageSink } from "./usage.js";
 import { createEmbeddingProvider, RoadLookup } from "@daily-route/semantic";
@@ -33,16 +34,18 @@ export type RouteAgentBundle = {
 export type CreateRouteAgentOptions = {
   env: Env;
   db: Database;
+  /** The JPO registry, when the build has one. */
+  jpos?: readonly Jpo[];
 };
 
 export function createRouteAgent(options: CreateRouteAgentOptions): RouteAgentBundle {
-  const { env, db } = options;
+  const { env, db, jpos } = options;
   const usageSink = createUsageSink(db);
   setUsageSink(usageSink);
 
   const provider = createEmbeddingProvider(env);
   const resolver = new PlaceResolver(db, provider);
-  const context: TransitAgentContext = { db, resolver };
+  const context: TransitAgentContext = { db, resolver, ...(jpos ? { jpos: [...jpos] } : {}) };
   const cache = new NetworkCache(context);
 
   const work = new SharedWork(2);

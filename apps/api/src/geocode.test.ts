@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { searchPlaces, type FetchLike } from "./geocode.js";
+import { searchPlaces, reversePlace, type FetchLike } from "./geocode.js";
 
 /**
  * The place search, without the two public indexes.
@@ -230,6 +230,88 @@ describe("searchPlaces", () => {
     await searchPlaces("monas park cached", { fetch: fetcher });
     const first = calls;
     await searchPlaces("monas park cached", { fetch: fetcher });
+
+    expect(calls).toBe(first);
+  });
+});
+
+describe("reversePlace", () => {
+  it("turns a coordinate into a short place and a full address", async () => {
+    const calls: string[] = [];
+    const fetcher: FetchLike = (input) => {
+      calls.push(input);
+      return json({
+        name: "Bundaran HI",
+        display_name: "Bundaran Hotel Indonesia, Jalan M.H. Thamrin, Jakarta Pusat, DKI Jakarta",
+        address: {
+          road: "Jalan M.H. Thamrin",
+          neighbourhood: "Kebon Melati",
+          city: "Jakarta Pusat",
+          state: "DKI Jakarta",
+        },
+      });
+    };
+
+    const place = await reversePlace(-6.1949, 106.8228, { fetch: fetcher });
+
+    expect(place).toMatchObject({
+      name: "Bundaran HI",
+      address:
+        "Bundaran Hotel Indonesia, Jalan M.H. Thamrin, Jakarta Pusat, DKI Jakarta",
+      latitude: -6.1949,
+      longitude: 106.8228,
+      source: "openstreetmap",
+    });
+    expect(calls[0]).toContain("nominatim.openstreetmap.org/reverse");
+    expect(calls[0]).toContain("lat=-6.1949");
+  });
+
+  it("builds an address when the index sends parts instead of a line", async () => {
+    const fetcher: FetchLike = () =>
+      json({
+        address: {
+          road: "Jalan Teluk Betung",
+          house_number: "1",
+          neighbourhood: "Kebon Melati",
+          city: "Jakarta Pusat",
+        },
+      });
+
+    const place = await reversePlace(-6.1953, 106.8211, { fetch: fetcher });
+
+    expect(place).toMatchObject({
+      name: "Jalan Teluk Betung",
+      address: "Jalan Teluk Betung, 1, Kebon Melati, Jakarta Pusat",
+    });
+  });
+
+  it("does not answer outside the box or when the index is down", async () => {
+    await expect(
+      reversePlace(48.8566, 2.3522, {
+        fetch: () => json({}),
+      }),
+    ).resolves.toBeNull();
+
+    await expect(
+      reversePlace(-6.2, 106.8, {
+        fetch: () => Promise.reject(new Error("offline")),
+      }),
+    ).resolves.toBeNull();
+  });
+
+  it("does not ask the same point twice", async () => {
+    let calls = 0;
+    const fetcher: FetchLike = () => {
+      calls += 1;
+      return json({
+        display_name: "Jalan Teluk Betung, Jakarta Pusat",
+        address: { road: "Jalan Teluk Betung" },
+      });
+    };
+
+    await reversePlace(-6.1961, 106.8222, { fetch: fetcher });
+    const first = calls;
+    await reversePlace(-6.1961, 106.8222, { fetch: fetcher });
 
     expect(calls).toBe(first);
   });

@@ -1,4 +1,4 @@
-import { Eye, EyeOff, LogOut, Trash2, X } from "lucide-react";
+import { Eye, EyeOff, LocateFixed, LogOut, Plus, Trash2, X } from "lucide-react";
 import { useLayoutEffect, useMemo, useRef, useState, type FormEvent } from "react";
 
 import { Button } from "../../components/ui/button.js";
@@ -12,6 +12,7 @@ import { ApiError, type AccountUser, type NamedPlace } from "../../lib/api.js";
 import { cn } from "../../lib/cn.js";
 import { PlaceInput, type MemorySuggestion } from "../route-planner/place-input.js";
 import type { ChosenPlace } from "../route-planner/place-memory.js";
+import type { LocateResult } from "../route-planner/use-current-place.js";
 
 /**
  * The account sheet.
@@ -68,15 +69,19 @@ function PlacesSection({
   places,
   onSavePlace,
   onRemovePlace,
+  onUseCurrentLocation,
 }: {
   places: NamedPlace[];
   onSavePlace: (label: string, place: NamedPlace["place"]) => Promise<void>;
   onRemovePlace: (label: string) => Promise<void>;
+  /** Read the rider's position and turn it into a place with an address. */
+  onUseCurrentLocation: () => Promise<LocateResult>;
 }) {
   const [label, setLabel] = useState("");
   const [query, setQuery] = useState("");
   const [chosen, setChosen] = useState<ChosenPlace | null>(null);
   const [busy, setBusy] = useState(false);
+  const [locating, setLocating] = useState(false);
   const [removing, setRemoving] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [adding, setAdding] = useState(false);
@@ -93,11 +98,12 @@ function PlacesSection({
       places.map((entry) => ({
         id: `${entry.label}:${entry.place.id}`,
         name: entry.label,
-        detail: entry.place.name,
+        detail: entry.place.address ?? entry.place.name,
         place: {
           kind: entry.place.kind,
           id: entry.place.id,
           name: entry.place.name,
+          address: entry.place.address,
           latitude: entry.place.latitude,
           longitude: entry.place.longitude,
           systemId: entry.place.systemId,
@@ -112,13 +118,41 @@ function PlacesSection({
   /** A suggestion from the find field becomes the place being added. */
   const chooseFromFind = (place: ChosenPlace): void => {
     setChosen(place);
-    setQuery(place.name);
-    setFilter(place.name);
+    setQuery(place.address ?? place.name);
+    setFilter(place.address ?? place.name);
     setError(null);
     setAdding(true);
     // The find field is about to fold away; the caret belongs on the
     // name of the place that was just chosen.
     requestAnimationFrame(() => nameRef.current?.focus());
+  };
+
+  /**
+   * Mark where the rider is.
+   *
+   * The form opens with the address already in the place field and
+   * "Current location" as the label; the rider only has to give it a
+   * name they will recognise, such as Home or Office.
+   */
+  const markCurrentLocation = async (): Promise<void> => {
+    setError(null);
+    setLocating(true);
+    try {
+      const result = await onUseCurrentLocation();
+      if (!result.ok) {
+        setError(result.error);
+        return;
+      }
+      const place = result.place;
+      setChosen(place);
+      setQuery(place.address ?? place.name);
+      setFilter(place.address ?? place.name);
+      setLabel("Current location");
+      setAdding(true);
+      requestAnimationFrame(() => nameRef.current?.focus());
+    } finally {
+      setLocating(false);
+    }
   };
 
   const startAdding = (): void => {
@@ -145,6 +179,7 @@ function PlacesSection({
         kind: chosen.kind,
         id: chosen.id,
         name: chosen.name,
+        address: chosen.address ?? null,
         latitude: chosen.latitude,
         longitude: chosen.longitude,
         systemId: chosen.systemId ?? null,
@@ -211,11 +246,11 @@ function PlacesSection({
 
       {places.length > 0 ? (
         visible.length > 0 ? (
-          <ul className="scroll-quiet max-h-48 overflow-y-auto border-t border-line/70">
+          <ul className="scroll-quiet max-h-48 overflow-y-auto">
             {visible.map((entry) => (
               <li
                 key={entry.label}
-                className="flex items-center gap-3 border-b border-line/70 py-2"
+                className="flex items-center gap-3 py-2"
               >
                 <div className="min-w-0 flex-1">
                   <MarqueeText
@@ -223,7 +258,7 @@ function PlacesSection({
                     className="text-[15px] font-medium leading-[1.2] text-ink"
                   />
                   <p className="mt-0.5 truncate text-[13px] leading-[1.5] text-ink-2">
-                    {entry.place.name}
+                    {entry.place.address ?? entry.place.name}
                   </p>
                 </div>
                 <Tooltip label={`Remove ${entry.label}`}>
@@ -261,7 +296,7 @@ function PlacesSection({
             onSubmit={submit}
             className={cn(
               "flex flex-col gap-3",
-              places.length > 0 && "border-t border-line/70 pt-4",
+              places.length > 0 && "pt-2",
             )}
           >
             <Input
@@ -287,22 +322,20 @@ function PlacesSection({
               }}
               onSelectPlace={(place) => {
                 setChosen(place);
-                setQuery(place.name);
+                setQuery(place.address ?? place.name);
               }}
             />
 
             {chosen ? (
-              <div className="flex items-center gap-2 rounded-md border border-line-strong/70 bg-surface px-3 py-2">
+              <div className="flex items-center gap-2 px-1 py-1">
                 <span
                   aria-hidden
-                  className="size-2 shrink-0 rounded-full border-2 border-accent bg-surface"
+                  className="size-2 shrink-0 rounded-full border-2 border-ink bg-surface"
                 />
                 <span className="min-w-0 flex-1 truncate text-[13px] font-medium text-ink">
-                  {chosen.name}
+                  {chosen.address ?? chosen.name}
                 </span>
-                <span className="shrink-0 font-mono text-[12px] uppercase leading-[1.2] tracking-[0.04em] text-ink-3">
-                  Chosen
-                </span>
+                <span className="shrink-0 text-[12px] leading-[1.35] text-ink-3">Chosen</span>
               </div>
             ) : null}
 
@@ -318,9 +351,21 @@ function PlacesSection({
       </div>
 
       {adding ? null : (
-        <Button variant="secondary" className="w-full" onClick={startAdding}>
-          Add a place
-        </Button>
+        <div className="grid grid-cols-2 gap-2">
+          <Button
+            variant="secondary"
+            className="w-full"
+            onClick={() => void markCurrentLocation()}
+            disabled={locating}
+          >
+            <LocateFixed aria-hidden className="size-4" />
+            {locating ? "Locating" : "Current location"}
+          </Button>
+          <Button variant="secondary" className="w-full" onClick={startAdding}>
+            <Plus aria-hidden className="size-4" />
+            Add a place
+          </Button>
+        </div>
       )}
 
       {error ? (
@@ -346,6 +391,7 @@ export function AccountPanel({
   onRetryMemory,
   onSavePlace,
   onRemovePlace,
+  onUseCurrentLocation,
   onClose,
 }: {
   user: AccountUser | null;
@@ -356,6 +402,7 @@ export function AccountPanel({
   memoryLoadFailed: boolean;
   onSavePlace: (label: string, place: NamedPlace["place"]) => Promise<void>;
   onRemovePlace: (label: string) => Promise<void>;
+  onUseCurrentLocation: () => Promise<LocateResult>;
   onSignUp: (email: string, password: string) => Promise<void>;
   onSignIn: (email: string, password: string) => Promise<void>;
   onSignOut: () => Promise<void>;
@@ -579,33 +626,29 @@ export function AccountPanel({
   return (
     <section
       ref={shellRef}
-      className="panel pointer-events-auto flex max-h-[min(72dvh,560px)] min-h-0 w-full flex-col overflow-hidden rounded-[12px] border-t-2 border-t-ink transition-[height] duration-300 ease-[cubic-bezier(0.4,0,0.2,1)] motion-reduce:transition-none lg:max-h-[min(62dvh,560px)]"
+      className="panel pointer-events-auto flex max-h-[min(72dvh,560px)] min-h-0 w-full flex-col overflow-hidden rounded-[4px] transition-[height] duration-300 ease-[cubic-bezier(0.4,0,0.2,1)] motion-reduce:transition-none lg:max-h-[min(62dvh,560px)]"
     >
       <header
         ref={headerRef}
-        className="flex shrink-0 items-center gap-3 border-b border-line/70 px-3 py-3"
+        className="flex shrink-0 items-center gap-3 px-3 py-3"
       >
         <div className="min-w-0 flex-1">
           <h2 className="text-[15px] font-semibold leading-[1.2] text-ink">Account</h2>
           {user ? (
             <p className="mt-0.5 truncate text-[13px] leading-[1.5] text-ink-2">{user.email}</p>
           ) : (
-            <p className="mt-0.5 font-mono text-[12px] uppercase leading-[1.2] tracking-[0.04em] text-ink-3">
-              This device
-            </p>
+            <p className="mt-0.5 text-[12px] leading-[1.35] text-ink-3">This device</p>
           )}
         </div>
-        <Tooltip label="Close account">
-          <Button
-            variant="ghost"
-            size="icon"
-            aria-label="Close account"
-            onClick={onClose}
-            className="size-8"
-          >
-            <X aria-hidden className="size-4" />
-          </Button>
-        </Tooltip>
+        <button
+          type="button"
+          aria-label="Close account"
+          title="Close account"
+          onClick={onClose}
+          className="flex size-11 shrink-0 cursor-pointer items-center justify-center text-ink transition-colors pointer-fine:hover:bg-surface-2"
+        >
+          <X aria-hidden className="size-4" />
+        </button>
       </header>
 
       <div ref={bodyRef} className="scroll-quiet min-h-0 flex-1 overflow-y-auto px-4 py-4">
@@ -647,6 +690,7 @@ export function AccountPanel({
                       places={places}
                       onSavePlace={onSavePlace}
                       onRemovePlace={onRemovePlace}
+                      onUseCurrentLocation={onUseCurrentLocation}
                     />
                   </TabPanel>
                 )
@@ -723,7 +767,7 @@ export function AccountPanel({
               {busy && !confirmDelete && !confirmSignOut ? <Spinner label="Updating password" /> : null}
             </form>
 
-            <div className="flex flex-col gap-2 border-t border-line/70 pt-4">
+            <div className="flex flex-col gap-2 pt-2">
               <p className="text-[13px] leading-[1.5] text-ink-2">
                 Sign out leaves this device. Deleting the account removes the places stored with it.
               </p>

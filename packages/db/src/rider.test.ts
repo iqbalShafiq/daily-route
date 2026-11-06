@@ -111,6 +111,7 @@ describe("rider places", () => {
       kind: "station",
       id: station.id,
       name: station.name,
+      address: null,
       latitude: station.latitude,
       longitude: station.longitude,
       systemId: station.systemId,
@@ -128,6 +129,34 @@ describe("rider places", () => {
 
     // The refusal wrote nothing: the rider still has exactly one place.
     expect(await listRiderPlaces(db, user.id)).toHaveLength(1);
+  });
+
+  it("keeps the address of a place marked from the rider's position", async () => {
+    const user = await createUser();
+    const id = `fixture_rider_place_${randomUUID()}`;
+
+    const saved = await upsertRiderPlace(db, user.id, {
+      label: "Current location",
+      payload: {
+        kind: "place",
+        id,
+        name: "Jalan Teluk Betung",
+        address: "Jalan Teluk Betung No. 1, Jakarta Pusat",
+        latitude: -6.1952,
+        longitude: 106.8211,
+        systemId: null,
+        systemName: null,
+      },
+    });
+    expect(saved.ok).toBe(true);
+    if (!saved.ok) return;
+
+    expect(saved.places[0]?.place).toMatchObject({
+      kind: "place",
+      id,
+      name: "Jalan Teluk Betung",
+      address: "Jalan Teluk Betung No. 1, Jakarta Pusat",
+    });
   });
 
   it("replaces a label that differs only in case instead of duplicating it", async () => {

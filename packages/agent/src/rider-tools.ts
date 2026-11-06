@@ -21,7 +21,13 @@ export type MyPlacesOutput =
   | { signedIn: false }
   | {
       signedIn: true;
-      places: { label: string; name: string; kind: "station" | "place" }[];
+      places: {
+        label: string;
+        name: string;
+        kind: "station" | "place";
+        /** The street address, when the rider marked a current location. */
+        address: string | null;
+      }[];
     };
 
 export type MyHabitsOutput =
@@ -49,8 +55,9 @@ export function createRiderTools(context: TransitAgentContext) {
     description:
       "Read the places the signed-in rider named, such as Home or Office. Call it " +
       "when the rider uses a saved label before asking them to repeat the stop. It " +
-      "returns the label and the place name; pass that name to resolve_place or " +
-      "plan_journey. It returns signedIn: false when nobody is signed in.",
+      "returns the label, the place name and the address the rider saved; pass that " +
+      "name to resolve_place or plan_journey. It returns signedIn: false when nobody " +
+      "is signed in.",
     inputSchema: emptyInput,
     execute: async (): Promise<MyPlacesOutput> => {
       const userId = riderStore.getStore()?.userId ?? "";
@@ -63,6 +70,7 @@ export function createRiderTools(context: TransitAgentContext) {
           label: place.label,
           name: place.place.name,
           kind: place.place.kind,
+          address: place.place.address,
         })),
       };
     },

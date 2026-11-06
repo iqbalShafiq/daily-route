@@ -184,13 +184,16 @@ def worst_pair(palette: dict[str, str]) -> tuple[float, str]:
 # --------------------------------------------------------------------------
 
 # ASSUMPTION: basemap land colour. Sample a real OpenFreeMap tile to confirm.
-BASEMAP_LIGHT = "#f2f0ec"
+BASEMAP_LIGHT = "#e6dfd2"
 BASEMAP_DARK = "#1c1c1c"
 
-SURFACE_LIGHT = "#ffffff"
-SURFACE_DARK = "#1a1c18"
-ACCENT_LIGHT = "#0b6b4f"
-ACCENT_DARK = "#4ade9e"
+SURFACE_LIGHT = "#fbf8f0"
+SURFACE_DARK = "#151914"
+# The accent is the headsign: a near-black board, not a text colour. It is
+# the same board in both themes, and it is read as a surface with lamp ink
+# on it (`--accent-ink` #f4efe4), never as a foreground on paper.
+ACCENT_LIGHT = "#17140f"
+ACCENT_DARK = "#17140f"
 
 PROPOSED_LIGHT = {
     "bus": "#1d4ed8",
@@ -207,18 +210,18 @@ PROPOSED_DARK = {
     "rail": "#a78bfa",
 }
 CURRENT_LIGHT = {
-    "bus": "#0b6b4f",
-    "metro": "#1d4ed8",
-    "tram": "#c2410c",
-    "lrt-jabodebek": "#6d28d9",
-    "rail": "#334155",
+    "bus": "#1f4fbf",
+    "metro": "#b3262e",
+    "tram": "#a45a0a",
+    "lrt-jabodebek": "#0e6f6a",
+    "rail": "#343f52",
 }
 CURRENT_DARK = {
-    "bus": "#4ade9e",
-    "metro": "#93b4fd",
-    "tram": "#fb923c",
-    "lrt-jabodebek": "#a78bfa",
-    "rail": "#94a3b8",
+    "bus": "#5aa2ff",
+    "metro": "#ff6b6b",
+    "tram": "#f3a63a",
+    "lrt-jabodebek": "#4fd7c9",
+    "rail": "#a9a2f5",
 }
 OKABE_ITO = {
     "black": "#000000",
@@ -233,28 +236,28 @@ OKABE_ITO = {
 
 INK = {
     "light": {
-        "bg": "#fbfaf8",
-        "surface": "#ffffff",
-        "surface-2": "#f4f2ee",
-        "ink": "#17150f",
-        "ink-2": "#4a4740",
-        "ink-3": "#7a766c",
-        "accent": "#0b6b4f",
-        "warn": "#a85b00",
-        "danger": "#a4262c",
-        "info": "#1d4ed8",
+        "bg": "#f2ede2",
+        "surface": "#fbf8f0",
+        "surface-2": "#ebe4d6",
+        "ink": "#14140f",
+        "ink-2": "#49453a",
+        "ink-3": "#6f695c",
+        "accent": "#17140f",
+        "warn": "#965900",
+        "danger": "#a22b2b",
+        "info": "#2348b8",
     },
     "dark": {
-        "bg": "#111310",
-        "surface": "#1a1c18",
-        "surface-2": "#22251f",
-        "ink": "#f2efe7",
-        "ink-2": "#c6c2b6",
-        "ink-3": "#8e8a7e",
-        "accent": "#4ade9e",
-        "warn": "#f0b45e",
-        "danger": "#f28b82",
-        "info": "#93b4fd",
+        "bg": "#0d100d",
+        "surface": "#151914",
+        "surface-2": "#1d231c",
+        "ink": "#f4efe2",
+        "ink-2": "#c9c1b0",
+        "ink-3": "#918977",
+        "accent": "#17140f",
+        "warn": "#f1b76a",
+        "danger": "#f28f85",
+        "info": "#9db8ff",
     },
 }
 

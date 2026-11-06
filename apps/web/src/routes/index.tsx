@@ -23,16 +23,18 @@ import type { ChatAction } from "../features/chat/use-chat.js";
 import type { DisruptionSummary } from "../lib/api.js";
 import { RouteResult } from "../features/route-planner/route-result.js";
 import { RouteSearch } from "../features/route-planner/route-search.js";
-import type { ChosenPlace } from "../features/route-planner/place-memory.js";
+import { displayNameOf, type ChosenPlace } from "../features/route-planner/place-memory.js";
+import { useCurrentPlace } from "../features/route-planner/use-current-place.js";
 import type { MemorySuggestion } from "../features/route-planner/place-input.js";
 import { usePlan, type PlanRequest } from "../features/route-planner/use-plan.js";
 import { api } from "../lib/api.js";
 import type { NamedPlace, PersonalAlert, PositionPlan } from "../lib/api.js";
 import { Button } from "../components/ui/button.js";
 import { cn } from "../lib/cn.js";
-import { MODE_WIDTH, SERVICE_CLASS_COLOR, type ServiceClass } from "../lib/format.js";
+import { MODE_WIDTH, formatDistance, formatDuration } from "../lib/format.js";
 import { incidentImageId, incidentMarkOf } from "../lib/incident-mark.js";
 import { firstOpenIndex, planChoices } from "../lib/route-choice.js";
+import { lineColorsOf, lineKeyOf, ROUTE_WALK_COLOR } from "../lib/route-colors.js";
 import { useTheme } from "../lib/theme.js";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Tooltip } from "../components/ui/tooltip.js";
@@ -46,11 +48,7 @@ type Submission = {
 };
 
 /** Coordinates travel only for a place that is not itself a stop. */
-function requestOf(
-  submission: Submission,
-  at: string | undefined,
-  nightSafe: boolean,
-): PlanRequest {
+function requestOf(submission: Submission, at: string | undefined): PlanRequest {
   const originPin = submission.originPlace?.kind === "place" ? submission.originPlace : null;
   const destinationPin =
     submission.destinationPlace?.kind === "place" ? submission.destinationPlace : null;
@@ -67,20 +65,7 @@ function requestOf(
         }
       : {}),
     ...(at ? { at } : {}),
-    ...(nightSafe ? { nightSafe: true } : {}),
   };
-}
-
-/** Whether Jakarta is currently after dark, for the default night mode. */
-function isNightNow(): boolean {
-  const hour = Number(
-    new Intl.DateTimeFormat("en-GB", {
-      timeZone: "Asia/Jakarta",
-      hour: "2-digit",
-      hourCycle: "h23",
-    }).format(new Date()),
-  );
-  return hour >= 22 || hour < 5;
 }
 
 /** The one sentence a usual-journey notice shows on the empty board. */
@@ -105,20 +90,27 @@ function departureAt(time: string): string | undefined {
 }
 
 /**
- * A window control on the map.
+ * A window control: one cell of the window strip.
  *
- * An open panel fills the button with ink. The icon stays the same mark,
- * so the rider can still see which control they opened.
+ * The strip is paper, the same surface as the panels, with a line border and
+ * a 4 px radius. An idle cell shows its full ink icon; a fine pointer washes
+ * it with surface-2. Only the open assistant or account cell becomes the
+ * near-black headsign, with lamp ink; there is no second underline. The theme
+ * is never an open toggle and stays paper in both themes.
  */
-function mapControlClass(active: boolean, compact = false): string {
+function mapControlClass(active: boolean): string {
   return cn(
-    "pointer-events-auto rounded-lg backdrop-blur",
-    compact ? "size-9 shadow-raised" : "size-10 shadow-pop",
+    "pointer-events-auto relative flex size-11 cursor-pointer items-center justify-center",
+    "text-ink transition-colors duration-150",
     active
-      ? "border-ink bg-ink text-bg hover:border-ink hover:bg-ink hover:text-bg"
-      : "border-line-strong bg-surface/95",
+      ? "bg-accent text-accent-ink pointer-fine:hover:bg-accent-hover"
+      : "pointer-fine:hover:bg-surface-2",
   );
 }
+
+/** The strip the window controls sit in: one paper well, never a row of buttons. */
+const mapControlStripClass =
+  "pointer-events-none flex overflow-hidden rounded-[4px] border border-line bg-surface";
 
 /**
  * The planner page.
@@ -142,7 +134,6 @@ export function PlannerPage() {
       hourCycle: "h23",
     }).format(new Date());
   });
-  const [nightSafe, setNightSafe] = useState(isNightNow);
   const account = useAccount();
   const queryClient = useQueryClient();
   /*
@@ -166,6 +157,7 @@ export function PlannerPage() {
     retry: false,
   });
   const riderMemory = useRiderMemory(account.user?.id ?? null);
+  const currentPlace = useCurrentPlace();
   const {
     saved,
     recentPlaces,
@@ -322,6 +314,12 @@ export function PlannerPage() {
     staleTime: 10 * 60_000,
     retry: false,
   });
+  const jpos = useQuery({
+    queryKey: ["jpo-registry"],
+    queryFn: api.jpos,
+    staleTime: 60 * 60_000,
+    retry: false,
+  });
   const [hiddenSystems, setHiddenSystems] = useState<ReadonlySet<string>>(() => new Set());
   const visibleSystems = useMemo(
     () => NETWORK_SYSTEMS.map((entry) => entry.id).filter((id) => !hiddenSystems.has(id)),
@@ -405,7 +403,7 @@ export function PlannerPage() {
   });
 
   const planAt = departureMode === "at" ? departureAt(departureTime) : undefined;
-  const plan = usePlan(submitted ? requestOf(submitted, planAt, nightSafe) : null);
+  const plan = usePlan(submitted ? requestOf(submitted, planAt) : null);
 
   useEffect(() => {
     if (!plan.data || !submitted) return;
@@ -424,6 +422,7 @@ export function PlannerPage() {
 
   const [selection, setSelection] = useState<{ key: string; index: number | null } | null>(null);
   const [legState, setLegState] = useState<{ key: string; leg: string | null }>({ key: "", leg: null });
+  const [hoveredRouteLine, setHoveredRouteLine] = useState<string | null>(null);
   const activeIndex =
     selection && selection.key === planKey
       ? selection.index
@@ -439,7 +438,7 @@ export function PlannerPage() {
     .map((leg) => leg.lineCode as string);
   const watchKey =
     plan.data && watchedLines.length > 0
-      ? `${plan.data.origin.id}>${plan.data.destination.id}:${watchedLines.join(",")}`
+      ? `${plan.data.origin.stationId}>${plan.data.destination.stationId}:${watchedLines.join(",")}`
       : null;
   const watching = isWatching(watchKey);
   const toggleWatchTrip = (): void => {
@@ -540,13 +539,13 @@ export function PlannerPage() {
     return [
       ...named.map((entry) => ({
         id: `named:${entry.label}`,
-        name: entry.place.name,
+        name: displayNameOf(entry.place),
         detail: entry.label,
         place: entry.place,
       })),
       ...savedRows.map((place) => ({
         id: place.id,
-        name: place.name,
+        name: displayNameOf(place),
         detail: "Saved",
         place,
       })),
@@ -554,7 +553,7 @@ export function PlannerPage() {
         .filter((place) => !namedIds.has(place.id) && !savedIds.has(place.id))
         .map((place) => ({
           id: place.id,
-          name: place.name,
+          name: displayNameOf(place),
           detail: "Recent",
           place,
         })),
@@ -573,6 +572,11 @@ export function PlannerPage() {
 
   const { legs: mapLegs, markers, frame } = useMemo(() => {
     const data = plan.data;
+    // A place that is not a stop is drawn as its own circle, not with the
+    // operator's plate and ring: the rider is standing at the address, not
+    // at a halte or a stasiun.
+    const originIsPlace = submitted?.originPlace?.kind === "place";
+    const destinationIsPlace = submitted?.destinationPlace?.kind === "place";
     // On the idle map the notice board carries the disruptions. Drawing a
     // red plate at every closed stop turns the city into a rash; once the
     // rider has a journey, or follows a notice, the map shows the ones
@@ -609,24 +613,40 @@ export function PlannerPage() {
     const choices = planChoices(data);
     const primary = activeIndex === null ? undefined : choices[activeIndex];
 
-    // Every leg is drawn in the colour of its own mode, so a journey that
-    // changes mode is readable on the map without a legend.
+    /*
+     * Every leg is drawn in the colour of its operator, because that is the
+     * taxonomy the rider already knows. A second line of the same operator
+     * takes a secondary colour, so two corridors never look like one road.
+     */
+    const lineColors = lineColorsOf(choices);
     const legs: MapLeg[] = [];
     for (const [index, leg] of (primary?.legs ?? []).entries()) {
       if (leg.geometry.length < 2) continue;
+      const key = lineKeyOf(leg);
+      const id = legIdOf(leg, index);
+      const routeText = `${leg.fromName} → ${leg.toName}`;
       legs.push({
-        id: legIdOf(leg, index),
-        highlighted: activeLeg === legIdOf(leg, index),
+        id,
+        highlighted: activeLeg === id,
+        hovered: hoveredRouteLine === key,
         coordinates: leg.geometry,
         color:
           leg.kind === "walk"
-            ? "var(--ink-3)"
-            : (SERVICE_CLASS_COLOR[leg.serviceClass as ServiceClass] ?? "var(--accent)"),
+            ? ROUTE_WALK_COLOR
+            : (lineColors.get(leg.lineId ?? "") ?? "var(--ink-2)"),
         width: leg.kind === "walk" ? 3 : (MODE_WIDTH[leg.mode] ?? 4),
         kind: leg.kind,
+        lineKey: key,
         serviceClass: leg.serviceClass,
         systemId: leg.lineId ? leg.lineId.split(":")[0] ?? null : null,
-        label: leg.kind === "walk" ? "Walk" : (leg.lineName ?? leg.lineCode ?? ""),
+        label:
+          leg.kind === "walk"
+            ? "Walk"
+            : (leg.lineName ?? leg.lineCode ?? "Transit"),
+        detail:
+          leg.kind === "walk"
+            ? `${routeText} · ${formatDuration(leg.durationMinutes)} · ${formatDistance(leg.distanceKm)}`
+            : `${routeText} · ${formatDuration(leg.durationMinutes)}`,
         order: index + 1,
       });
     }
@@ -638,29 +658,57 @@ export function PlannerPage() {
     if (walk?.walk && walk.stationName) {
       legs.unshift({
         id: "walk-from-here",
+        hovered: hoveredRouteLine === "walk",
         coordinates: walk.walk.geometry,
-        color: "var(--ink-3)",
+        color: ROUTE_WALK_COLOR,
         width: 3,
         kind: "walk",
+        lineKey: "walk",
         label: `Walk to ${walk.stationName}`,
+        detail: `${formatDuration(walk.walk.durationMinutes)} · ${formatDistance(walk.walk.distanceKm)}`,
         order: 0,
       });
     }
 
     const firstRide = legs.find((leg) => leg.kind === "ride");
     const lastRide = [...legs].reverse().find((leg) => leg.kind === "ride");
-    const markers: MapMarker[] = [
-      {
-        id: "origin",
-        latitude: data.origin.latitude,
-        longitude: data.origin.longitude,
-        label: data.origin.name,
-        detail: "Origin",
-        kind: "origin",
-        systemId: firstRide?.systemId ?? null,
-        order: 1,
-      },
-    ];
+    /*
+     * A journey can start and finish at the same stop: a loop, or two
+     * places that resolve to one station. One mark would hide the other,
+     * so the two ends become one stacked mark that names both.
+     */
+    const endpointsMeet =
+      Math.abs(data.origin.latitude - data.destination.latitude) < 0.00005 &&
+      Math.abs(data.origin.longitude - data.destination.longitude) < 0.00005;
+    const markers: MapMarker[] = endpointsMeet
+      ? [
+          {
+            id: "endpoints",
+            latitude: data.origin.latitude,
+            longitude: data.origin.longitude,
+            label:
+              data.origin.name === data.destination.name
+                ? data.origin.name
+                : `${data.origin.name} / ${data.destination.name}`,
+            detail: "From and To",
+            kind: "endpoint",
+            systemId: originIsPlace ? null : data.origin.systemId || null,
+            order: 1,
+            pair: { from: data.origin.name, to: data.destination.name },
+          },
+        ]
+      : [
+          {
+            id: "origin",
+            latitude: data.origin.latitude,
+            longitude: data.origin.longitude,
+            label: data.origin.name,
+            detail: "Origin",
+            kind: "origin",
+            systemId: originIsPlace ? null : (data.origin.systemId || firstRide?.systemId || null),
+            order: 1,
+          },
+        ];
 
     // The points where the rider changes vehicle. They are marked first,
     // because they sit on a stop of the line before and after it.
@@ -715,21 +763,25 @@ export function PlannerPage() {
     markers.push(...transfers);
     markers.push(...incidents);
 
-    markers.push({
-      id: "destination",
-      latitude: data.destination.latitude,
-      longitude: data.destination.longitude,
-      label: data.destination.name,
-      detail: "Destination",
-      kind: "destination",
-      systemId: lastRide?.systemId ?? null,
-      order: (primary?.legs.length ?? 0) + 1,
-    });
+    if (!endpointsMeet) {
+      markers.push({
+        id: "destination",
+        latitude: data.destination.latitude,
+        longitude: data.destination.longitude,
+        label: data.destination.name,
+        detail: "Destination",
+        kind: "destination",
+        systemId: destinationIsPlace
+          ? null
+          : (data.destination.systemId || lastRide?.systemId || null),
+        order: (primary?.legs.length ?? 0) + 1,
+      });
+    }
 
     // The camera follows the way being read. A closure that this way
     // avoids stays a point on the map, and does not pull the frame open.
     return { legs, markers, frame: [] };
-  }, [plan.data, activeIndex, activeLeg, walk, watch.data, glance, activeFocus]);
+  }, [plan.data, activeIndex, activeLeg, hoveredRouteLine, walk, watch.data, glance, activeFocus, submitted]);
 
   // Under a journey the map keeps the trunk lines and the journey's own
   // stops. The full local network and 5,700 stop symbols are the idle
@@ -739,6 +791,23 @@ export function PlannerPage() {
     return plan.data ? lines.filter((line) => line.tier === "primary") : lines;
   }, [network.data, plan.data]);
   const mapPlaces = plan.data ? [] : (network.data?.places ?? []);
+
+  /*
+   * The only bridges on the map are the ones the rider is about to walk
+   * over. The registry has hundreds of records; painting all of them is a
+   * texture over the city, not information.
+   */
+  const activeJpos = useMemo(() => {
+    const ids = new Set<string>();
+    const choices = plan.data ? planChoices(plan.data) : [];
+    const primary = activeIndex === null ? undefined : choices[activeIndex];
+    for (const leg of primary?.legs ?? []) {
+      for (const bridge of leg.jpo ?? []) ids.add(bridge.id);
+    }
+    for (const bridge of walk?.walk?.jpo ?? []) ids.add(bridge.id);
+    if (ids.size === 0) return [];
+    return (jpos.data?.jpos ?? []).filter((bridge) => ids.has(bridge.id));
+  }, [plan.data, activeIndex, walk, jpos.data]);
 
   const demoNotice = watch.data?.find((item) => item.demonstration);
   const activeNotices = (watch.data ?? []).filter((notice) => notice.activeNow).length;
@@ -779,6 +848,7 @@ export function PlannerPage() {
           frame={plan.data ? frame : []}
           network={mapNetwork}
           platforms={(network.data?.platforms ?? []) as NetworkPlatform[]}
+          jpos={activeJpos}
           places={mapPlaces}
           visibleSystems={visibleSystems}
           glance={glance}
@@ -799,7 +869,7 @@ export function PlannerPage() {
             }
           }}
         />
-        <p className="pointer-events-none absolute right-2 bottom-[calc(var(--bottom-bar-h)+env(safe-area-inset-bottom)+6px)] z-10 font-mono text-[12px] leading-[1.2] text-ink-3 lg:bottom-2 lg:left-[440px] lg:right-auto">
+        <p className="pointer-events-none absolute right-2 bottom-[calc(var(--bottom-bar-h)+env(safe-area-inset-bottom)+6px)] z-10 text-[12px] leading-[1.35] text-ink-3 lg:bottom-2 lg:left-[440px] lg:right-auto">
           © OpenStreetMap · OpenFreeMap
         </p>
       </div>
@@ -811,79 +881,85 @@ export function PlannerPage() {
        * zoom buttons: the scroll wheel, a pinch, and the keyboard still
        * zoom.
        */}
-      <div className="pointer-events-none absolute right-3 top-3 z-50 hidden items-center gap-2 lg:flex">
+      <div
+        className={cn(
+          mapControlStripClass,
+          "absolute right-3 top-3 z-50 hidden lg:flex",
+        )}
+      >
         <Tooltip label={view === "chat" ? "Hide assistant" : "Ask the assistant"}>
-          <Button
-            variant="secondary"
-            size="icon"
+          <button
+            type="button"
             aria-label="Ask the assistant"
             aria-pressed={view === "chat"}
             onClick={() => (view === "chat" ? closeChat() : openChat())}
             className={mapControlClass(view === "chat")}
           >
             <MessageSquare aria-hidden className="size-4" />
-          </Button>
+          </button>
         </Tooltip>
 
         <Tooltip label={accountOpen ? "Close account" : "Account"}>
-          <Button
-            variant="secondary"
-            size="icon"
+          <button
+            type="button"
             aria-label="Account"
             aria-pressed={accountOpen}
             onClick={openAccount}
             className={mapControlClass(accountOpen)}
           >
             <UserRound aria-hidden className="size-4" />
-          </Button>
+          </button>
         </Tooltip>
 
         <Tooltip label={theme === "dark" ? "Light mode" : "Dark mode"}>
-          <Button
-            variant="secondary"
-            size="icon"
+          <button
+            type="button"
             onClick={toggleTheme}
             aria-label="Switch theme"
-            className="pointer-events-auto size-10 rounded-lg border-line-strong bg-surface/95 shadow-pop backdrop-blur"
+            className={mapControlClass(false)}
           >
             {theme === "dark" ? (
-              <Sun aria-hidden className="size-4 transition-transform duration-300 hover:rotate-45" />
+              <Sun aria-hidden className="size-4" />
             ) : (
-              <Moon aria-hidden className="size-4 transition-transform duration-300 hover:-rotate-12" />
+              <Moon aria-hidden className="size-4" />
             )}
-          </Button>
+          </button>
         </Tooltip>
       </div>
 
-      {/* The theme switch and the account stay on the map on a phone; the
-          bottom bar owns the assistant. */}
-      <div className={cn("pointer-events-none absolute right-3 top-[calc(var(--bar-h)+8px)] z-30 flex items-center gap-2 lg:hidden", view === "chat" && "max-lg:hidden")}>
+      {/* The account and the theme are the same strip on a phone; the bottom
+          bar owns the assistant. */}
+      <div
+        className={cn(
+          mapControlStripClass,
+          "absolute right-3 top-[calc(var(--bar-h)+8px)] z-30 lg:hidden",
+          view === "chat" && "max-lg:hidden",
+        )}
+      >
         <Tooltip label={accountOpen ? "Close account" : "Account"}>
-          <Button
-            variant="secondary"
-            size="icon"
+          <button
+            type="button"
             onClick={openAccount}
             aria-label="Account"
             aria-pressed={accountOpen}
-            className={mapControlClass(accountOpen, true)}
+            className={mapControlClass(accountOpen)}
           >
             <UserRound aria-hidden className="size-4" />
-          </Button>
+          </button>
         </Tooltip>
         <Tooltip label={theme === "dark" ? "Light mode" : "Dark mode"}>
-          <Button
-            variant="secondary"
-            size="icon"
+          <button
+            type="button"
             onClick={toggleTheme}
             aria-label="Switch theme"
-            className="pointer-events-auto size-9 rounded-lg border-line-strong bg-surface/95 shadow-raised"
+            className={mapControlClass(false)}
           >
             {theme === "dark" ? (
-              <Sun aria-hidden className="size-4 transition-transform duration-300 hover:rotate-45" />
+              <Sun aria-hidden className="size-4" />
             ) : (
-              <Moon aria-hidden className="size-4 transition-transform duration-300 hover:-rotate-12" />
+              <Moon aria-hidden className="size-4" />
             )}
-          </Button>
+          </button>
         </Tooltip>
       </div>
 
@@ -906,19 +982,23 @@ export function PlannerPage() {
             destination={destination}
             onOriginChange={(value) => {
               setOrigin(value);
-              setOriginPlace((current) => (current && current.name === value ? current : null));
+              setOriginPlace((current) =>
+                current && displayNameOf(current) === value ? current : null,
+              );
             }}
             onDestinationChange={(value) => {
               setDestination(value);
-              setDestinationPlace((current) => (current && current.name === value ? current : null));
+              setDestinationPlace((current) =>
+                current && displayNameOf(current) === value ? current : null,
+              );
             }}
             onSelectOrigin={(place) => {
-              setOrigin(place.name);
+              setOrigin(displayNameOf(place));
               setOriginPlace(place);
               rememberPlace(place);
             }}
             onSelectDestination={(place) => {
-              setDestination(place.name);
+              setDestination(displayNameOf(place));
               setDestinationPlace(place);
               rememberPlace(place);
             }}
@@ -962,11 +1042,7 @@ export function PlannerPage() {
             onDepartureTimeChange={(time) => {
               setDepartureTime(time);
               setDepartureMode("at");
-              const hour = Number(time.slice(0, 2));
-              if (Number.isFinite(hour) && (hour >= 22 || hour < 5)) setNightSafe(true);
             }}
-            nightSafe={nightSafe}
-            onNightSafeChange={setNightSafe}
             onSubmit={() => {
               setActiveIndex(0);
               setWalk(null);
@@ -978,64 +1054,44 @@ export function PlannerPage() {
                 destinationPlace,
               });
             }}
+            locating={currentPlace.locating}
             onUseMyPosition={async () => {
-              if (typeof navigator === "undefined" || !navigator.geolocation) return;
-              const position = await new Promise<GeolocationPosition | null>((resolve) => {
-                navigator.geolocation.getCurrentPosition(resolve, () => resolve(null), {
-                  enableHighAccuracy: true,
-                  timeout: 15_000,
-                });
-              });
-              if (!position) return;
-              const here: ChosenPlace = {
-                kind: "place",
-                id: `place:${position.coords.latitude.toFixed(5)},${position.coords.longitude.toFixed(5)}`,
-                name: "My location",
-                latitude: position.coords.latitude,
-                longitude: position.coords.longitude,
-              };
-              setOrigin(here.name);
-              setOriginPlace(here);
-              setWalk(null);
               setWalkError(null);
-              if (destination.trim().length <= 1) {
-                setWalk({
-                  needsDestination: true,
-                  stationId: null,
-                  stationName: null,
-                  totalMinutes: null,
-                  transferCount: null,
-                  distanceKm: null,
-                  walkingKm: null,
-                  accessWalkKm: null,
-                  walk: null,
-                  profiles: [],
-                  candidates: [],
-                });
+              const result = await currentPlace.locate();
+              if (!result.ok) {
+                setWalkError(result.error);
                 return;
               }
+              const here = result.place;
+              const hereName = displayNameOf(here);
+              setOrigin(hereName);
+              setOriginPlace(here);
+              rememberPlace(here);
+              setWalk(null);
+              setWalkError(null);
+              setActiveIndex(0);
+              if (destination.trim().length <= 1) {
+                // The place is marked, but there is no journey to weigh
+                // yet. The panel returns once a destination is set.
+                return;
+              }
+              // The journey from the rider's own place, asked in one step.
+              // The API plans from the pin and adds the walk to the stop as
+              // the first leg; the panel below still offers another start.
+              setSubmitted({
+                origin: hereName,
+                destination: destination.trim(),
+                originPlace: here,
+                destinationPlace,
+              });
               walkPlan.mutate({
                 coordinates: {
-                  latitude: position.coords.latitude,
-                  longitude: position.coords.longitude,
+                  latitude: here.latitude,
+                  longitude: here.longitude,
                 },
                 destination: destination.trim(),
               });
             }}
-            onChooseOrigin={(profileId) => {
-              const profile = walk?.profiles.find((item) => item.id === profileId);
-              if (!profile?.stationName) return;
-              setOrigin(profile.stationName);
-              setOriginPlace(null);
-              setActiveIndex(0);
-              setSubmitted({
-                origin: profile.stationName,
-                destination: destination.trim(),
-                originPlace: null,
-                destinationPlace,
-              });
-            }}
-            walk={walk}
             walkError={walkError}
           />
         </div>
@@ -1073,6 +1129,9 @@ export function PlannerPage() {
               }}
               watching={watching}
               onToggleWatch={toggleWatchTrip}
+              pendingDestination={submitted?.destination}
+              hoveredLine={hoveredRouteLine}
+              onHoverLine={setHoveredRouteLine}
               onClose={() => {
                 setSubmitted(null);
                 setWalk(null);
@@ -1149,11 +1208,15 @@ export function PlannerPage() {
           <ChatPanel
             onClose={closeChat}
             onAction={runChatAction}
-            origin={origin.trim() || undefined}
+            origin={
+              currentPlace.place && origin.trim() === displayNameOf(currentPlace.place)
+                ? undefined
+                : origin.trim() || undefined
+            }
             destination={destination.trim() || undefined}
             at={planAt}
-            nightSafe={nightSafe}
             places={memorySuggestions}
+            currentPlace={currentPlace.place}
           />
         </div>
       ) : null}
@@ -1175,6 +1238,7 @@ export function PlannerPage() {
             onRetryMemory={retryMemory}
             onSavePlace={saveNamedPlace}
             onRemovePlace={removeNamedPlace}
+            onUseCurrentLocation={currentPlace.locate}
             onClose={() => setAccountOpen(false)}
           />
         </div>
@@ -1219,7 +1283,7 @@ function PlanEmptyState({
   className?: string;
 }) {
   return (
-    <section className={cn("panel rounded-[12px] border-t-2 border-t-ink p-4", className)}>
+    <section className={cn("panel rounded-[4px] p-4", className)}>
       {alert ? (
         <div className="mb-4 border-l-2 border-warn bg-warn-soft px-3 py-2">
           <p className="text-[13px] leading-[1.5] text-ink">{alert.sentence}</p>
@@ -1232,24 +1296,28 @@ function PlanEmptyState({
           </Button>
         </div>
       ) : null}
-      <p className="eyebrow">Route board</p>
-      <h2 className="mt-3 text-[28px] font-bold leading-[1.2] tracking-[-0.025em] text-ink">
-        Where to?
-      </h2>
-      <p className="mt-1 max-w-[34ch] text-[13px] leading-[1.5] text-ink-2">
-        Choose a start and a destination. The board shows the fare, the
-        changes, and any closure on the way.
-      </p>
+      <h2 className="headsign__name text-[28px] text-ink">Where to?</h2>
+      <div className="mt-3 flex items-start gap-3">
+        <div aria-hidden className="mt-1 flex flex-col items-center">
+          <span className="size-2.5 rounded-full border-2 border-ink bg-surface" />
+          <span className="my-1 h-6 w-px bg-ink/60" />
+          <span className="size-2.5 rounded-full bg-ink" />
+        </div>
+        <p className="min-w-0 max-w-[34ch] text-[13px] leading-[1.5] text-ink-2">
+          Choose a start and a destination. The board shows the fare, the
+          changes, and any closure on the way.
+        </p>
+      </div>
 
-      <div className="mt-4 border-t border-line/70 pt-3">
-        <p className="eyebrow">Try a route</p>
+      <div className="mt-4">
+        <p className="eyebrow">Try a journey</p>
         <div className="mt-2 grid gap-1">
           <button
             type="button"
             onClick={() => onExample("Bundaran HI", "Kota")}
-            className="press flex w-full cursor-pointer items-center gap-2 rounded-md border border-line-strong/70 bg-surface px-3 py-2 text-left transition-colors hover:border-ink hover:bg-surface-2"
+            className="press flex min-h-11 w-full cursor-pointer items-center gap-2 rounded-[4px] px-2 py-2 text-left transition-colors hover:bg-surface-2"
           >
-            <span className="size-2 rounded-full border-2 border-accent bg-surface" />
+            <span className="size-2 rounded-full border-2 border-ink bg-surface" />
             <span className="min-w-0 flex-1 truncate text-[13px] font-medium text-ink">
               Bundaran HI
               <span className="mx-2 text-ink-3">→</span>
@@ -1260,9 +1328,9 @@ function PlanEmptyState({
           <button
             type="button"
             onClick={() => onExample("Lebak Bulus", "Dukuh Atas")}
-            className="press flex w-full cursor-pointer items-center gap-2 rounded-md border border-line-strong/70 bg-surface px-3 py-2 text-left transition-colors hover:border-ink hover:bg-surface-2"
+            className="press flex min-h-11 w-full cursor-pointer items-center gap-2 rounded-[4px] px-2 py-2 text-left transition-colors hover:bg-surface-2"
           >
-            <span className="size-2 rounded-[4px] bg-ink" />
+            <span className="size-2 rounded-full bg-ink" />
             <span className="min-w-0 flex-1 truncate text-[13px] font-medium text-ink">
               Lebak Bulus
               <span className="mx-2 text-ink-3">→</span>
@@ -1273,17 +1341,17 @@ function PlanEmptyState({
         </div>
       </div>
 
-      <div className="mt-3 flex items-center justify-between gap-2 border-t border-line/70 pt-3">
-        <p className="font-mono text-[12px] leading-[1.2] text-ink-3">
+      <div className="mt-3 flex items-center justify-between gap-2">
+        <p className="text-[12px] leading-[1.35] text-ink-3">
           {networkReady ? `${notices} ${notices === 1 ? "notice" : "notices"} open` : "Loading the network"}
         </p>
         <button
           type="button"
           onClick={onOpenNotices}
-          className="inline-flex cursor-pointer items-center gap-1 font-mono text-[12px] font-medium uppercase leading-[1.2] tracking-[0.04em] text-accent hover:text-accent-hover"
+          className="inline-flex min-h-11 cursor-pointer items-center gap-1 text-[13px] font-medium text-ink underline decoration-line-strong underline-offset-4 hover:decoration-ink"
         >
           Open board
-          <ArrowRight aria-hidden className="size-3" />
+          <ArrowRight aria-hidden className="size-3.5" />
         </button>
       </div>
     </section>

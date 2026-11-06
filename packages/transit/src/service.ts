@@ -110,6 +110,18 @@ export function jakartaClock(at: Date): { minute: number; weekday: number; night
 }
 
 /**
+ * Whether a departure falls in the silent night window.
+ *
+ * The rule follows the departure, not the moment the page was opened: a
+ * 23:00 journey prefers fewer dark walks even when the rider is looking in
+ * the afternoon, and a 10:00 journey does not, even when the screen is dark.
+ * Jakarta is the only clock the network runs on.
+ */
+export function isNightDeparture(at: Date): boolean {
+  return jakartaClock(at).night;
+}
+
+/**
  * Whether one feed row is a complete schedule rather than a template.
  *
  * A full-day row (at least four hours) with a plausible headway is trusted

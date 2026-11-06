@@ -32,7 +32,7 @@ export function Tabs({
     >
       <BaseTabs.List
         className={cn(
-          "inline-flex w-fit items-center gap-0.5 rounded-lg border border-line-strong bg-surface-2 p-0.5",
+          "inline-flex w-fit items-center gap-0.5 rounded-[4px] border border-line-strong bg-surface-2 p-0.5",
           className,
         )}
       >
@@ -60,7 +60,7 @@ export function Tab({
       value={value}
       title={title}
       className={cn(
-        "inline-flex h-8 cursor-pointer items-center gap-2 rounded-md px-3 text-[13px] font-medium text-ink-3",
+        "inline-flex h-11 cursor-pointer items-center gap-2 rounded-[4px] px-3 text-[13px] font-medium text-ink-3",
         "transition-[background-color,color,box-shadow] duration-150",
         "hover:text-ink",
         // The chosen tab is unmistakable: ink on paper, the way a station

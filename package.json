@@ -38,13 +38,16 @@
     "data:gtfs": "pnpm --filter @daily-route/ingest gtfs",
     "data:enrich": "dotenv -e .env -- pnpm --filter @daily-route/ingest enrich",
     "data:places": "dotenv -e .env -- pnpm --filter @daily-route/ingest places:extract",
+    "data:jpo": "pnpm --filter @daily-route/ingest jpo",
     "db:places": "dotenv -e .env -- pnpm --filter @daily-route/ingest places:load",
     "places:check": "dotenv -e .env -- pnpm --filter @daily-route/ingest places:check",
     "places:refresh": "pnpm data:places && pnpm db:places",
     "verify:notices": "dotenv -e .env -- pnpm --filter @daily-route/agent verify:notices",
     "backtest:notices": "dotenv -e .env -- pnpm --filter @daily-route/agent backtest",
     "eval:fetch": "dotenv -e .env -- pnpm --filter @daily-route/agent eval:fetch",
-    "eval:notices": "dotenv -e .env -- pnpm --filter @daily-route/agent eval:notices"
+    "eval:notices": "dotenv -e .env -- pnpm --filter @daily-route/agent eval:notices",
+    "trial:current-place": "pnpm --filter @daily-route/api trial:current-place",
+    "eval:current-place": "pnpm --filter @daily-route/api eval:current-place"
   },
   "devDependencies": {
     "dotenv-cli": "^11.0.0",

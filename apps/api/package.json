@@ -8,7 +8,9 @@
     "start": "dotenv -e ../../.env -- tsx src/index.ts",
     "typecheck": "tsc --noEmit",
     "lint": "eslint src",
-    "test": "dotenv -e ../../.env -- vitest run"
+    "test": "dotenv -e ../../.env -- vitest run",
+    "trial:current-place": "dotenv -e ../../.env -- tsx src/cli/current-place-trial.ts",
+    "eval:current-place": "dotenv -e ../../.env -- tsx src/cli/current-place-eval.ts"
   },
   "dependencies": {
     "@anvia/client": "^1.6.0",

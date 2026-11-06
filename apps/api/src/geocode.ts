@@ -14,6 +14,7 @@
 
 const PHOTON = "https://photon.komoot.io/api/";
 const NOMINATIM = "https://nominatim.openstreetmap.org/search";
+const NOMINATIM_REVERSE = "https://nominatim.openstreetmap.org/reverse";
 
 /** The box the network covers: Bogor, Depok, Tangerang, Bekasi, Jakarta. */
 export const JABODETABEK = {
@@ -47,6 +48,21 @@ export type GeocodedPlace = {
   longitude: number;
   /** The index that answered, so the interface can name it. */
   source: PlaceSource;
+};
+
+/**
+ * A point turned back into a place.
+ *
+ * The current location is a coordinate, not a name. The reverse lookup
+ * gives the rider a readable address for it; `name` is the short place,
+ * and `address` is the full line the browser can prefill into a form.
+ */
+export type ReversedPlace = {
+  name: string;
+  address: string | null;
+  latitude: number;
+  longitude: number;
+  source: "openstreetmap" | "none";
 };
 
 export type FetchLike = (input: string, init?: RequestInit) => Promise<Response>;
@@ -99,7 +115,15 @@ type NominatimPlace = {
   address?: Record<string, string>;
 };
 
+type NominatimReverse = {
+  name?: string;
+  display_name?: string;
+  address?: Record<string, string>;
+  error?: string;
+};
+
 const cache = new Map<string, { expiresAt: number; places: GeocodedPlace[] }>();
+const reverseCache = new Map<string, { expiresAt: number; place: ReversedPlace | null }>();
 
 /** Whether a coordinate sits inside the area this app plans for. */
 export function insideJabodetabek(latitude: number, longitude: number): boolean {
@@ -109,6 +133,114 @@ export function insideJabodetabek(latitude: number, longitude: number): boolean 
     longitude >= JABODETABEK.minLongitude &&
     longitude <= JABODETABEK.maxLongitude
   );
+}
+
+/**
+ * The address of a point.
+ *
+ * A rider who marks the current location should not have to type the
+ * street they are standing on. The reverse lookup answers with the short
+ * place, the full address and the same coordinate; a point outside the
+ * box, or an index that does not answer, returns `null` rather than a
+ * made-up address. A repeat look at the same ten-metre box is cached.
+ */
+export async function reversePlace(
+  latitude: number,
+  longitude: number,
+  options: GeocodeOptions = {},
+): Promise<ReversedPlace | null> {
+  if (!Number.isFinite(latitude) || !Number.isFinite(longitude)) return null;
+  if (!insideJabodetabek(latitude, longitude)) return null;
+
+  const key = `${latitude.toFixed(4)},${longitude.toFixed(4)}`;
+  const cached = reverseCache.get(key);
+  if (cached && cached.expiresAt > Date.now()) return cached.place;
+
+  const fetchImpl = options.fetch ?? fetch;
+  const url = `${NOMINATIM_REVERSE}?${new URLSearchParams({
+    lat: String(latitude),
+    lon: String(longitude),
+    format: "jsonv2",
+    addressdetails: "1",
+    zoom: "18",
+    "accept-language": "id,en",
+  }).toString()}`;
+
+  try {
+    const response = await fetchImpl(url, {
+      headers: {
+        "User-Agent": "daily-route/0.1 (Jakarta transit planner)",
+        Accept: "application/json",
+      },
+      signal: options.signal ?? AbortSignal.timeout(NOMINATIM_TIMEOUT_MS),
+    });
+    if (!response.ok) {
+      reverseCache.set(key, { expiresAt: Date.now() + FAILURE_CACHE_MS, place: null });
+      return null;
+    }
+
+    const payload = (await response.json()) as unknown;
+    const place = reversePlaceOf(payload, latitude, longitude);
+    reverseCache.set(key, {
+      expiresAt: Date.now() + (place ? CACHE_MS : FAILURE_CACHE_MS),
+      place,
+    });
+    return place;
+  } catch {
+    reverseCache.set(key, { expiresAt: Date.now() + FAILURE_CACHE_MS, place: null });
+    return null;
+  }
+}
+
+function reversePlaceOf(
+  value: unknown,
+  latitude: number,
+  longitude: number,
+): ReversedPlace | null {
+  if (!value || typeof value !== "object") return null;
+  const entry = value as NominatimReverse;
+  if (entry.error) return null;
+
+  const address = cleanAddress(entry.display_name) ?? addressLineOf(entry.address);
+  const shortAddress = address?.split(",")[0]?.trim() ?? null;
+  const name =
+    cleanName(entry.name) ??
+    cleanName(entry.address?.["road"]) ??
+    cleanName(entry.address?.["neighbourhood"]) ??
+    cleanName(entry.address?.["suburb"]) ??
+    cleanName(entry.address?.["city_district"]) ??
+    (shortAddress && shortAddress.length > 0 ? cleanName(shortAddress) : null);
+  if (!name && !address) return null;
+
+  return {
+    name: name ?? "Current location",
+    address,
+    latitude,
+    longitude,
+    source: "openstreetmap",
+  };
+}
+
+/** A structured Nominatim address, when it did not send one line. */
+function addressLineOf(address: Record<string, string> | undefined): string | null {
+  if (!address) return null;
+  const parts = [
+    address["road"],
+    address["house_number"],
+    address["neighbourhood"],
+    address["suburb"],
+    address["city_district"],
+    address["city"] ?? address["town"],
+    address["state"],
+  ]
+    .map((part) => part?.trim())
+    .filter((part): part is string => Boolean(part) && part !== "-");
+
+  const unique: string[] = [];
+  for (const part of parts) {
+    if (unique[unique.length - 1] !== part) unique.push(part);
+  }
+  return unique.length > 0 ? unique.join(", ") : null;
 }
 
 /**
@@ -477,4 +609,11 @@ function cleanName(value: string | undefined): string | null {
   const name = value?.trim();
   if (!name) return null;
   return name.length > 80 ? name.slice(0, 80).trimEnd() : name;
+}
+
+/** An address is longer than a name; it is cut at a readable line. */
+function cleanAddress(value: string | undefined): string | null {
+  const address = value?.trim().replace(/\s+/g, " ");
+  if (!address) return null;
+  return address.length > 300 ? address.slice(0, 300).trimEnd() : address;
 }

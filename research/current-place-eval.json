@@ -1,0 +1,355 @@
+{
+  "at": "2026-11-05T06:48:58.134Z",
+  "model": "deepseek/deepseek-v4.1-flash-1017",
+  "langfuseSessionPrefix": "current-place-eval:2026-11-05T06:48:19.713Z",
+  "cases": {
+    "total": 7,
+    "passed": 7,
+    "failed": 0,
+    "invalid": 0
+  },
+  "metrics": {
+    "total": 21,
+    "passed": 21,
+    "failed": 0,
+    "invalid": 0
+  },
+  "usage": {
+    "target": {
+      "inputTokens": 68562,
+      "outputTokens": 1671,
+      "totalTokens": 70233,
+      "cachedInputTokens": 63744,
+      "cacheCreationInputTokens": 0,
+      "details": {
+        "input": 4818,
+        "input_cached_tokens": 63744,
+        "output": 1024,
+        "output_reasoning_tokens": 647,
+        "total": 70233
+      }
+    },
+    "evaluation": {
+      "inputTokens": 5983,
+      "outputTokens": 2227,
+      "totalTokens": 8210,
+      "cachedInputTokens": 2304,
+      "cacheCreationInputTokens": 0,
+      "details": {
+        "input": 3679,
+        "input_cached_tokens": 2304,
+        "output": 831,
+        "output_reasoning_tokens": 1396,
+        "total": 8210
+      }
+    },
+    "total": {
+      "inputTokens": 74545,
+      "outputTokens": 3898,
+      "totalTokens": 78443,
+      "cachedInputTokens": 66048,
+      "cacheCreationInputTokens": 0,
+      "details": {
+        "input": 8497,
+        "input_cached_tokens": 66048,
+        "output": 1855,
+        "output_reasoning_tokens": 2043,
+        "total": 78443
+      }
+    }
+  },
+  "durationMs": 37938,
+  "results": [
+    {
+      "id": "route-from-here",
+      "outcome": "pass",
+      "targetStatus": "succeeded",
+      "targetError": null,
+      "text": "Walk 4 min (310 m) from Bundaran HI to Imam Bonjol, then:\nBoard 4C (Jiep - Bundaran Senayan) on the Bundaran Senayan 1 → TU Gas 2 side at Imam Bonjol, and alight at Tugu Proklamasi.\nWalk 4 min (300 m) to Proklamasi.\nBoard the LRT Jakarta South Line towards Kelapa Gading at Proklamasi, and alight at Kelapa Gading.\n\nAbout 65 minutes, one change, Rp8.500 total (Rp3.500 Transjakarta Metrotrans/Minitrans plus Rp5.000 LRT Jakarta, paid separately).\n\nNothing is closed: the journey comes back open and no active notice touches it. Don't miss the short walk between Tugu Proklamasi and Proklamasi — the bus and the LRT stop at different places, and it is not a free transfer.",
+      "tools": [
+        "plan_journey",
+        "list_active_disruptions"
+      ],
+      "plan": {
+        "hasRoute": true,
+        "asal": "Jalan M.H. Thamrin, Kebon Melati, Jakarta Pusat",
+        "boardingStop": "Imam Bonjol",
+        "walkMinutes": 4,
+        "firstRoute": [
+          "Imam Bonjol → Tugu Proklamasi",
+          "Tugu Proklamasi → Proklamasi",
+          "Proklamasi → Kelapa Gading"
+        ],
+        "notes": [
+          "Mulai dari Bundaran HI (Jalan M.H. Thamrin, Kebon Melati, Jakarta Pusat). Naik dari Imam Bonjol, jalan kaki sekitar 4 menit (0.31 km). Gunakan asal.dari dan asal.jalanKaki sebagai langkah pertama; jangan menyebut halte lain yang tidak ada di rute."
+        ]
+      },
+      "trace": {
+        "observer": "langfuse",
+        "traceId": "56b84fc4b92ffd8fcf36ce417da53017",
+        "observationId": "9c9ac76f28335b8a"
+      },
+      "scores": {
+        "0": {
+          "outcome": "pass",
+          "score": true,
+          "comment": null
+        },
+        "1": {
+          "outcome": "pass",
+          "score": true,
+          "comment": "Every named stop came from a tool result."
+        },
+        "2": {
+          "outcome": "pass",
+          "score": {
+            "pass": true,
+            "reason": "The answer starts from Bundaran HI, uses plan_journey and disruption checking, describes the first returned route via Imam Bonjol, Tugu Proklamasi, and Proklamasi to Kelapa Gading, and all named stops are in the allowed list.",
+            "invented_stop": false
+          },
+          "comment": null
+        }
+      }
+    },
+    {
+      "id": "where-am-i",
+      "outcome": "pass",
+      "targetStatus": "succeeded",
+      "targetError": null,
+      "text": "You are at Bundaran HI, on Jalan M.H. Thamrin in Kebon Melati, Jakarta Pusat — the browser's marked position.\n\nThe two nearest stops:\n- MRT Jakarta: Bundaran HI Bank Jakarta (code BHI) — right on your position.\n- Transjakarta: Bundaran HI ASTRA (code 1-10) — a short walk south along Thamrin.\n\nIf you tell me where you want to go, I can plan the journey from here and name the exact stop and platform to board.",
+      "tools": [
+        "resolve_place"
+      ],
+      "plan": null,
+      "trace": {
+        "observer": "langfuse",
+        "traceId": "4aa4c946c028dc49381eb165ca5f5464",
+        "observationId": "47b3be2bae05db6e"
+      },
+      "scores": {
+        "0": {
+          "outcome": "pass",
+          "score": true,
+          "comment": null
+        },
+        "1": {
+          "outcome": "pass",
+          "score": true,
+          "comment": "No route was returned, so there is no stop to ground."
+        },
+        "2": {
+          "outcome": "pass",
+          "score": {
+            "pass": true,
+            "reason": "Answer states the rider is at Bundaran HI on Jalan M.H. Thamrin, Jakarta Pusat and names nearby stops Bundaran HI Bank Jakarta (BHI) and Bundaran HI ASTRA (1-10), all present in the allowed names. Only resolve_place was used and no journey was planned, matching the expected behaviour.",
+            "invented_stop": false
+          },
+          "comment": null
+        }
+      }
+    },
+    {
+      "id": "no-current-place",
+      "outcome": "pass",
+      "targetStatus": "succeeded",
+      "targetError": null,
+      "text": "Your current location is not marked, so I can't plan from \"here\". Please press \"Use my location\" in the From field, or tell me the stop or landmark you are starting from, and I'll plan the journey to Kota.",
+      "tools": [],
+      "plan": null,
+      "trace": {
+        "observer": "langfuse",
+        "traceId": "e2386e96932e36598b663ff48e57fd2c",
+        "observationId": "f4aefc5c5de84d03"
+      },
+      "scores": {
+        "0": {
+          "outcome": "pass",
+          "score": true,
+          "comment": null
+        },
+        "1": {
+          "outcome": "pass",
+          "score": true,
+          "comment": "No route was returned, so there is no stop to ground."
+        },
+        "2": {
+          "outcome": "pass",
+          "score": {
+            "pass": true,
+            "reason": "The answer correctly avoids planning, asks the rider to use their location or provide a starting point, and names no transit stop beyond the rider's stated destination Kota.",
+            "invented_stop": false
+          },
+          "comment": null
+        }
+      }
+    },
+    {
+      "id": "outside-jabodetabek",
+      "outcome": "pass",
+      "targetStatus": "succeeded",
+      "targetError": null,
+      "text": "I can't use your marked current location: the browser reported a position outside Jabodetabek, so it isn't a valid starting point on this network. Tell me the stop, station or landmark you're starting from (for example \"Bundaran HI\" or \"Stasiun Juanda\"), and I'll plan the journey to Kota.",
+      "tools": [],
+      "plan": null,
+      "trace": {
+        "observer": "langfuse",
+        "traceId": "c4ff5c63145377670c4ebdb95d5c2e8a",
+        "observationId": "96275bd76354cd11"
+      },
+      "scores": {
+        "0": {
+          "outcome": "pass",
+          "score": true,
+          "comment": null
+        },
+        "1": {
+          "outcome": "pass",
+          "score": true,
+          "comment": "No route was returned, so there is no stop to ground."
+        },
+        "2": {
+          "outcome": "pass",
+          "score": {
+            "pass": true,
+            "reason": "The answer declines to plan from the out-of-Jabodetabek current position, states that limitation, and asks for a starting point while giving clearly hypothetical examples, as expected.",
+            "invented_stop": false
+          },
+          "comment": null
+        }
+      }
+    },
+    {
+      "id": "no-destination",
+      "outcome": "pass",
+      "targetStatus": "succeeded",
+      "targetError": null,
+      "text": "Where would you like to go? Tell me the destination and I'll plan the journey from Bundaran HI.",
+      "tools": [],
+      "plan": null,
+      "trace": {
+        "observer": "langfuse",
+        "traceId": "0e612ff42447c87ebd86bb2f6648b3ff",
+        "observationId": "e16b2b4115565f3e"
+      },
+      "scores": {
+        "0": {
+          "outcome": "pass",
+          "score": true,
+          "comment": null
+        },
+        "1": {
+          "outcome": "pass",
+          "score": true,
+          "comment": "No route was returned, so there is no stop to ground."
+        },
+        "2": {
+          "outcome": "pass",
+          "score": {
+            "pass": true,
+            "reason": "The answer correctly avoids planning a journey and asks for the rider's destination, matching the expected behaviour. The only stop named, Bundaran HI, appears in the allowed names list, so no invented stop.",
+            "invented_stop": false
+          },
+          "comment": null
+        }
+      }
+    },
+    {
+      "id": "saved-home",
+      "outcome": "pass",
+      "targetStatus": "succeeded",
+      "targetError": null,
+      "text": "Walk 4 min (310 m) from Home to Imam Bonjol.\n\nBoard 4C (Jiep - Bundaran Senayan) at Imam Bonjol, towards Bundaran Senayan 1 → TU Gas 2, and alight at Tugu Proklamasi.\n\nWalk 4 min (300 m) from Tugu Proklamasi to Proklamasi.\n\nThen board LRT Jakarta Line S at Proklamasi, towards Manggarai → Kelapa Gading, and alight at Kelapa Gading.\n\nAbout 65 minutes, 13.71 km, Rp8.500 (Transjakarta Metrotrans/Minitrans Rp3.500 + LRT Jakarta Rp5.000), one change.\n\nDon't miss: the change at Proklamasi is a short walk between Tugu Proklamasi and Proklamasi — that is where you pick up the LRT. The way is open; no notices affect this journey.",
+      "tools": [
+        "list_my_places",
+        "list_my_habits",
+        "plan_journey"
+      ],
+      "plan": {
+        "hasRoute": true,
+        "asal": "Bundaran HI",
+        "boardingStop": "Imam Bonjol",
+        "walkMinutes": 4,
+        "firstRoute": [
+          "Imam Bonjol → Tugu Proklamasi",
+          "Tugu Proklamasi → Proklamasi",
+          "Proklamasi → Kelapa Gading"
+        ],
+        "notes": [
+          "Mulai dari Home (Jalan M.H. Thamrin, Kebon Melati, Jakarta Pusat). Naik dari Imam Bonjol, jalan kaki sekitar 4 menit (0.31 km). Gunakan asal.dari dan asal.jalanKaki sebagai langkah pertama; jangan menyebut halte lain yang tidak ada di rute."
+        ]
+      },
+      "trace": {
+        "observer": "langfuse",
+        "traceId": "1e7d682daef65bb236004b0deb609ce7",
+        "observationId": "614a73e26997d3be"
+      },
+      "scores": {
+        "0": {
+          "outcome": "pass",
+          "score": true,
+          "comment": null
+        },
+        "1": {
+          "outcome": "pass",
+          "score": true,
+          "comment": "Every named stop came from a tool result."
+        },
+        "2": {
+          "outcome": "pass",
+          "score": {
+            "pass": true,
+            "reason": "Calls list_my_places and plan_journey, starts from saved Home/Bundaran HI, and uses only allowed stop names.",
+            "invented_stop": false
+          },
+          "comment": null
+        }
+      }
+    },
+    {
+      "id": "too-far-from-stop",
+      "outcome": "pass",
+      "targetStatus": "succeeded",
+      "targetError": null,
+      "text": "Your marked current location (\"A field outside the serviced area\") has no stop within walking distance, so I can't plan a route from there.\n\nTell me the stop or station you can reach, and I'll plan the journey to Kota from it.",
+      "tools": [
+        "plan_journey"
+      ],
+      "plan": {
+        "hasRoute": false,
+        "asal": "A field outside the serviced area",
+        "boardingStop": null,
+        "walkMinutes": null,
+        "firstRoute": [],
+        "notes": [
+          "Tidak ada halte dalam jarak jalan kaki dari lokasi sekarang (A field outside the serviced area). Minta pengguna memilih halte asal sendiri."
+        ]
+      },
+      "trace": {
+        "observer": "langfuse",
+        "traceId": "b0f522b6019bacb89bbfc05593a6e813",
+        "observationId": "06bd3aa0ed17b194"
+      },
+      "scores": {
+        "0": {
+          "outcome": "pass",
+          "score": true,
+          "comment": null
+        },
+        "1": {
+          "outcome": "pass",
+          "score": true,
+          "comment": "No route was returned, so there is no stop to ground."
+        },
+        "2": {
+          "outcome": "pass",
+          "score": {
+            "pass": true,
+            "reason": "Answer correctly states there is no stop within walking distance of the marked location, avoids inventing a route, and asks the rider for a reachable starting stop. Tools match the case (plan_journey returned hasRoute:false), and all named places (\"A field outside the serviced area\", \"Kota\") appear in the allowed names.",
+            "invented_stop": false
+          },
+          "comment": null
+        }
+      }
+    }
+  ]
+}

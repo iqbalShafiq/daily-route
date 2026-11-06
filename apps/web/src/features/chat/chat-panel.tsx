@@ -1,16 +1,15 @@
 import { useQuery } from "@tanstack/react-query";
-import { ArrowUpRight, Send, X } from "lucide-react";
+import { Send, X } from "lucide-react";
 import { useEffect, useMemo, useRef, useState } from "react";
 
-import { BrandMark } from "../../components/brand/brand-mark.js";
 import { NETWORK_SYSTEMS, OperatorBadge } from "../../components/map/operator-mark.js";
 import { Button } from "../../components/ui/button.js";
 import { Spinner } from "../../components/ui/feedback.js";
-import { Tooltip } from "../../components/ui/tooltip.js";
 import { cn } from "../../lib/cn.js";
 
 import { api } from "../../lib/api.js";
 
+import type { ChosenPlace } from "../route-planner/place-memory.js";
 import type { MemorySuggestion } from "../route-planner/place-input.js";
 import { useChat, type ChatAction } from "./use-chat.js";
 import { ChatCards } from "./chat-cards.js";
@@ -37,17 +36,18 @@ export function ChatPanel({
   origin,
   destination,
   at,
-  nightSafe,
   places = [],
+  currentPlace = null,
 }: {
   onClose: () => void;
   onAction: (action: ChatAction) => void;
   origin?: string | undefined;
   destination?: string | undefined;
   at?: string | undefined;
-  nightSafe?: boolean | undefined;
   /** Saved and recent places, offered when the rider types @. */
   places?: MemorySuggestion[] | undefined;
+  /** The place the rider marked as "here", from the browser's position. */
+  currentPlace?: ChosenPlace | null | undefined;
 }) {
   const { messages, status, error, send } = useChat();
 
@@ -155,6 +155,17 @@ export function ChatPanel({
     inputRef.current?.focus();
   };
 
+  const currentContext = currentPlace
+    ? {
+        current: {
+          name: currentPlace.name,
+          address: currentPlace.address ?? null,
+          latitude: currentPlace.latitude,
+          longitude: currentPlace.longitude,
+        },
+      }
+    : {};
+
   const submit = async (event: React.FormEvent): Promise<void> => {
     event.preventDefault();
     const text = draft;
@@ -162,42 +173,32 @@ export function ChatPanel({
     await send(text, {
       ...(origin ? { origin } : {}),
       ...(destination ? { destination } : {}),
+      ...currentContext,
       ...(at ? { at } : {}),
-      ...(nightSafe ? { nightSafe } : {}),
     });
     inputRef.current?.focus();
   };
 
   return (
-    <section className="panel pointer-events-auto flex min-h-0 w-full max-h-[72dvh] flex-col overflow-hidden rounded-[12px] border-t-2 border-t-ink max-lg:h-full max-lg:max-h-none lg:h-[min(520px,calc(100dvh-8rem))] lg:max-h-[calc(100dvh-8rem)]">
-      <header className="flex shrink-0 items-center gap-3 border-b border-line/70 px-3 py-3">
-        <BrandMark className="size-7" />
+    <section className="panel pointer-events-auto flex min-h-0 w-full max-h-[72dvh] flex-col overflow-hidden rounded-[4px] max-lg:h-full max-lg:max-h-none lg:h-[min(520px,calc(100dvh-8rem))] lg:max-h-[calc(100dvh-8rem)]">
+      <header className="flex shrink-0 items-center gap-3 px-3 py-3">
         <div className="min-w-0 flex-1">
           <h2 className="truncate text-[15px] font-semibold leading-[1.2] text-ink">
             Route assistant
           </h2>
-          <p className="mt-0.5 flex items-center gap-2 font-mono text-[12px] uppercase leading-[1.2] tracking-[0.04em] text-ink-3">
-            <span
-              aria-hidden
-              className={cn(
-                "h-px w-3",
-                agentReady === false ? "bg-line-strong" : "bg-accent",
-              )}
-            />
+          <p className="mt-0.5 text-[12px] leading-[1.35] text-ink-3">
             {agentReady === false ? "Not connected" : "Same network, same notices"}
           </p>
         </div>
-        <Tooltip label="Close assistant">
-          <Button
-            variant="ghost"
-            size="icon"
-            aria-label="Close assistant"
-            onClick={onClose}
-            className="size-8"
-          >
-            <X aria-hidden className="size-4" />
-          </Button>
-        </Tooltip>
+        <button
+          type="button"
+          aria-label="Close assistant"
+          title="Close assistant"
+          onClick={onClose}
+          className="flex size-11 shrink-0 cursor-pointer items-center justify-center text-ink transition-colors pointer-fine:hover:bg-surface-2"
+        >
+          <X aria-hidden className="size-4" />
+        </button>
       </header>
 
       <div
@@ -212,9 +213,9 @@ export function ChatPanel({
             </p>
           ) : (
             <div className="flex h-full flex-col">
-              <p className="eyebrow">Ask about the city</p>
-              <p className="mt-1 text-[13px] leading-[1.5] text-ink-2">
-                A journey, a fare, a closed stop, or the next service at a stop.
+              <p className="text-[13px] leading-[1.5] text-ink-2">
+                Ask about the city. A journey, a fare, a closed stop, or the next
+                service at a stop.
               </p>
               <div className="mt-3 grid gap-1">
                 {PROMPTS.map((prompt) => (
@@ -225,22 +226,21 @@ export function ChatPanel({
                       void send(prompt, {
                         ...(origin ? { origin } : {}),
                         ...(destination ? { destination } : {}),
+                        ...currentContext,
                         ...(at ? { at } : {}),
-                        ...(nightSafe ? { nightSafe } : {}),
                       });
                     }}
-                    className="press group flex w-full cursor-pointer items-center gap-2 rounded-md border border-line-strong/70 bg-surface px-3 py-2 text-left text-[13px] leading-[1.45] text-ink transition-colors hover:border-ink hover:bg-surface-2"
+                    className="press flex min-h-11 w-full cursor-pointer items-center rounded-[4px] px-2 text-left text-[13px] leading-[1.45] text-ink transition-colors pointer-fine:hover:bg-surface-2"
                   >
                     <span className="min-w-0 flex-1">{prompt}</span>
-                    <ArrowUpRight
-                      aria-hidden
-                      className="size-3.5 shrink-0 text-ink-3 transition-transform group-hover:-translate-y-0.5 group-hover:translate-x-0.5"
-                    />
                   </button>
                 ))}
               </div>
-              <div className="mt-auto border-t border-line/70 pt-3">
-                <p className="eyebrow">Reads the same network</p>
+              <div className="mt-auto pt-3">
+                <p className="text-[13px] leading-[1.5] text-ink-2">
+                  The planner is the source of truth. The assistant explains the
+                  board; it does not invent a stop, a fare, or a time.
+                </p>
                 <div className="mt-2 flex flex-wrap items-center gap-3">
                   {NETWORK_SYSTEMS.map((system) => (
                     <OperatorBadge
@@ -250,10 +250,6 @@ export function ChatPanel({
                     />
                   ))}
                 </div>
-                <p className="mt-2 text-[12px] leading-[1.45] text-ink-3">
-                  The planner is the source of truth. The assistant explains the
-                  board; it does not invent a stop, a fare, or a time.
-                </p>
               </div>
             </div>
           )
@@ -265,21 +261,21 @@ export function ChatPanel({
                 <li
                   key={message.id}
                   data-message-role={message.role}
-                  className={cn("flex flex-col gap-1", user ? "items-end" : "items-start")}
+                  className="flex flex-col gap-1"
                 >
-                  <p className="px-1 font-mono text-[12px] uppercase leading-[1.2] tracking-[0.08em] text-ink-3">
+                  <p className="px-1 text-[12px] leading-[1.35] text-ink-3">
                     {user ? "You" : "Daily Route"}
                   </p>
+                  {/* The rider's words are a sentence on the paper, not a
+                      bubble: the chat is a conversation, not a message app. */}
                   <div
                     className={cn(
-                      "min-w-0 rounded-lg border px-3 py-2 text-[13px] leading-[1.55] text-ink",
-                      user
-                        ? "max-w-[92%] border-line-strong/70 bg-surface-2"
-                        : "w-full border-line bg-surface",
+                      "min-w-0 text-[13px] leading-[1.55] text-ink",
+                      user ? "max-w-[92%] text-ink-2" : "w-full",
                     )}
                   >
                     {message.activity && message.text.length === 0 ? (
-                      <p className="font-mono text-[12px] leading-[1.2] text-ink-3">
+                      <p className="text-[12px] leading-[1.35] text-ink-3">
                         {message.activity}
                       </p>
                     ) : null}
@@ -289,7 +285,7 @@ export function ChatPanel({
                       <Spinner label="Writing the answer…" />
                     )}
                     {message.tools.length > 0 ? (
-                      <p className="mt-2 border-t border-line/60 pt-2 font-mono text-[12px] uppercase leading-[1.2] tracking-[0.04em] text-ink-3">
+                      <p className="mt-2 pt-2 text-[12px] leading-[1.35] text-ink-3">
                         {message.tools.join(" · ")}
                       </p>
                     ) : null}
@@ -306,7 +302,7 @@ export function ChatPanel({
                             key={action.key}
                             type="button"
                             onClick={() => onAction(action)}
-                            className="cursor-pointer rounded-[4px] border border-line-strong px-2 py-1 text-left text-[12px] leading-[1.45] text-accent transition-colors hover:bg-surface-2"
+                            className="min-h-11 cursor-pointer rounded-[4px] border border-line-strong px-2 py-1 text-left text-[12px] leading-[1.45] text-ink underline decoration-line-strong underline-offset-2 transition-colors hover:bg-surface-2"
                           >
                             {action.label}
                           </button>
@@ -322,7 +318,7 @@ export function ChatPanel({
       </div>
 
       {error ? (
-        <p className="border-t border-line/70 px-3 py-2 font-mono text-[12px] leading-[1.2] text-danger">
+        <p className="px-3 py-2 text-[12px] leading-[1.35] text-danger">
           {error}
         </p>
       ) : null}
@@ -337,7 +333,7 @@ export function ChatPanel({
             <ul
               role="listbox"
               aria-label="Place suggestions"
-              className="absolute inset-x-3 bottom-full z-10 mb-2 max-h-48 overflow-y-auto rounded-lg border border-line-strong bg-surface shadow-pop"
+              className="absolute inset-x-3 bottom-full z-10 mb-2 max-h-48 overflow-y-auto rounded-[4px] border border-line bg-surface shadow-pop"
             >
               {mentionRows.map((row, index) => (
                 <li key={row.key} role="presentation">
@@ -373,12 +369,12 @@ export function ChatPanel({
                 </li>
               ) : null}
               {mentionRows.some((row) => row.overture) ? (
-                <li className="sticky bottom-0 z-10 border-t border-line/70 bg-surface px-3 py-2 font-mono text-[12px] uppercase leading-[1.2] tracking-[0.04em] text-ink-3">
+                <li className="sticky bottom-0 z-10 border-t border-line/70 bg-surface px-3 py-2 text-[12px] leading-[1.35] text-ink-3">
                   Places © Overture Maps
                 </li>
               ) : null}
               {mentionRows.some((row) => row.google) ? (
-                <li className="sticky bottom-0 z-10 border-t border-line/70 bg-surface px-3 py-2 font-mono text-[12px] uppercase leading-[1.2] tracking-[0.04em] text-ink-3">
+                <li className="sticky bottom-0 z-10 border-t border-line/70 bg-surface px-3 py-2 text-[12px] leading-[1.35] text-ink-3">
                   Powered by Google
                 </li>
               ) : null}
@@ -415,7 +411,7 @@ export function ChatPanel({
               }}
               placeholder="Ask about a journey, a fare, or a stop…"
               aria-label="Message for the route assistant"
-              className="h-10 min-w-0 flex-1 rounded-md border border-line-strong bg-surface px-3 text-[13px] text-ink outline-none transition-colors placeholder:text-ink-3 focus:border-accent"
+              className="h-11 min-w-0 flex-1 rounded-[4px] border border-line-strong bg-surface px-3 text-[13px] text-ink outline-none transition-colors placeholder:text-ink-3 focus:border-ink"
             />
             <Button
               type="submit"
@@ -423,7 +419,7 @@ export function ChatPanel({
               size="icon"
               disabled={draft.trim().length === 0 || status === "streaming"}
               aria-label="Send"
-              className="size-10 rounded-md"
+              className="size-10 rounded-[4px]"
             >
               {status === "streaming" ? (
                 <Spinner className="[&_svg]:text-accent-ink" />
@@ -432,7 +428,7 @@ export function ChatPanel({
               )}
             </Button>
           </div>
-          <p className="mt-2 px-0.5 font-mono text-[12px] uppercase leading-[1.2] tracking-[0.04em] text-ink-3">
+          <p className="mt-2 px-0.5 text-[12px] leading-[1.35] text-ink-3">
             Schedule-based. Not a live arrival.
           </p>
         </form>

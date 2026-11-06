@@ -12,11 +12,25 @@ export type ChosenPlace = {
   kind: "station" | "place";
   id: string;
   name: string;
+  /** The full address, when the place was marked from the rider's position. */
+  address?: string | null;
   latitude: number;
   longitude: number;
   systemId?: string | null;
   systemName?: string | null;
 };
+
+/**
+ * What the route field shows for a place.
+ *
+ * A marked current location is useful as the address the rider is standing
+ * on, not as the short name of the nearest object. A station keeps its
+ * name because it has no address in the graph.
+ */
+export function displayNameOf(place: ChosenPlace): string {
+  const address = typeof place.address === "string" ? place.address.trim() : "";
+  return address.length > 0 ? address : place.name;
+}
 
 export type RecentJourney = {
   originName: string;
@@ -40,7 +54,10 @@ export function isPlace(value: unknown): value is ChosenPlace {
     typeof place["id"] === "string" &&
     typeof place["name"] === "string" &&
     typeof place["latitude"] === "number" &&
-    typeof place["longitude"] === "number"
+    typeof place["longitude"] === "number" &&
+    (place["address"] === undefined ||
+      place["address"] === null ||
+      typeof place["address"] === "string")
   );
 }
 

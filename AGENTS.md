@@ -32,17 +32,20 @@ pnpm data:embed             # recompute the station embeddings
 pnpm data:gtfs              # fill lines with no stops from the operator GTFS
 pnpm data:enrich            # name the kelurahan/kecamatan/kota of every stop
 pnpm data:places            # rebuild the Jabodetabek place extract from Overture
+pnpm data:jpo               # rebuild the JPO and footbridge registry
 pnpm db:places              # load the place extract into map_places
 pnpm verify:notices         # verify notice windows from X, news, and pages
 pnpm db:sync                # apply the snapshot without clearing the notices
 pnpm backtest:notices       # replay stored announcements through the pipeline
 pnpm eval:fetch             # fetch the rail corpus once, into research/eval
 pnpm eval:notices           # judge the pipeline against the labelled cases
+pnpm eval:current-place     # Anvia eval of the current-place assistant
 pnpm dev                    # API (3011), worker (4012) and web (3010)
 pnpm typecheck              # tsc --noEmit in every package
 pnpm lint                   # eslint in every package
 pnpm test                   # unit and integration tests
 pnpm test:e2e               # Playwright, starts the API and the web app
+pnpm trial:current-place    # real-model trial of the current-place feature
 pnpm build                  # production builds
 ```
 
@@ -90,6 +93,16 @@ TypeScript with no framework and no database — keep it that way.
   changes together**, and the waiting time for a new vehicle is part of
   it. The search uses that cost. The list the rider sees is ordered by
   duration, then by the number of changes.
+- A line on the map is a path, never a connection between two points. A
+  ride takes its geometry from the stored OSM-derived line path, cut at the
+  foot of the boarding and alighting stop so the line meets the platform
+  and does not overshoot it; a ride with no stored path draws no line. A
+  walk is asked of the pedestrian router; when the router has no answer,
+  the walk draws no line. The list still shows the walk's time and distance.
+  The walk is closed to the exact stop or place at both ends when the
+  router snapped it by at most 120 m, so the dashed walk meets the ride; a
+  larger snap keeps its gap. The API never falls back to a straight
+  segment to stand in for a router that did not answer.
 - A gate charges one fare for the whole stay in the paid area. Changing
   corridor or platform at the same station, without a walk, is still that
   fare. A reader on the vehicle charges every boarding. A station group
@@ -242,6 +255,51 @@ the GTFS stops are added last. A point on a boundary sliver is assigned to the
 nearest polygon within 300 m and marked `boundaryApproximate`. The measured
 coverage and the known gaps are in `research/data-completeness.md`.
 
+## Pedestrian bridges (JPO)
+
+- `pnpm data:jpo` builds `data/jpo-network.json` from two sources: the
+  official Dinas Bina Marga DKI Jakarta `JPO Bina Marga 2024` FeatureServer
+  on Jakarta Satu (203 points, `PERIODE_DA` 2025), and OpenStreetMap
+  footway/pedestrian bridges and tunnels in the Jabodetabek box. The
+  official point gives the name, address, type and remark; OpenStreetMap
+  gives the line. OpenStreetMap is ODbL 1.0, and the official layer is a
+  city asset record. The notice is `data/JPO-NOTICE.txt`; the research is
+  `research/jpo.md`.
+- An official point matches the nearest OSM bridge line within 80 m. 192 of
+  the 203 matched; the other 11 stay point-only and are never used to route
+  a walk. A point-only record is drawn as a point, not as a line.
+- An OSM bridge without an official point is kept only when it is named as
+  a JPO, skywalk, penyeberangan or busway, or when an end is within 120 m
+  of a transit stop. A park bridge is not transit access. A bridge end
+  within 120 m of a stop links the two.
+- The build produced 801 records: 203 official, 598 OSM-only, and 772
+  linked to a stop. The official geometry is DKI Jakarta only; Bodetabek is
+  OSM-only and is marked `official: false`. An underpass is not a JPO
+  unless the source says so: the Kuningan pedestrian underpass is not in
+  the official JPO layer, and the registry does not invent it.
+- The transit package's `jpoWalkEstimate` is the only bridge rule for
+  choosing an access stop. It accepts a bridge only when the place is
+  nearer the entry than the far end and the stop is nearer the exit than
+  the entry. The access walk is still the pedestrian router's path; the
+  bridge only changes which stop is weighed.
+- A routed walk that passes within 20 m of a **named official** bridge
+  carries `jpo` on the walk leg, and the route board says "Via JPO ...".
+  An unnamed OSM segment is not promoted to a named JPO.
+- The map draws the named official bridge as a thin solid ochre line with a
+  paper casing from zoom 12.5; its two end rings appear from zoom 14. An
+  OSM-only bridge is a quiet dashed ink line from zoom 15. No bridge carries
+  a label on the map: the pointer names it and the stops it serves. At city
+  zoom the layer is hidden.
+- The assistant's `find_jpo` tool returns only the registry records, with
+  the source and the nearby stops, and says when there is no record. The
+  prompt treats an underpass as not a JPO, and a bridge near a stop as not
+  proof that the walk uses it.
+- Run `pnpm data:jpo` after a network rebuild so the stop ids in the
+  registry are current. `pnpm data:jpo -- --refresh` ignores both caches.
+- The data is generated independently of `db:seed`; the API loads the
+  committed file at process start and serves it at `GET /api/jpo`. A
+  missing file reports the missing cause and the map draws no bridge line.
+
 ## Scheduled service
 
 - `data:gtfs` reads `frequencies.txt` and `calendar.txt` and attaches
@@ -258,10 +316,14 @@ coverage and the known gaps are in `research/data-completeness.md`.
   filters the graph with it, uses half the median headway as the wait, and
   carries `serviceLabel`, `headwayMinMinutes`, `headwayMaxMinutes` and the
   daily window on every ride leg. It is a schedule, never a live arrival.
-- A journey can set `nightSafe`. It adds a walking penalty and orders the
-  result by the night cost, so a shorter ride with a long dark walk does not
-  automatically win. The line windows still decide what runs; nightSafe does
-  not invent a service and does not promise personal safety.
+- The night rule is silent. A departure between 22:00 and 05:00 WIB, taken
+  from the instant the planner receives (`at`, or now when it is omitted),
+  adds a walking penalty and orders the result by the night cost, so a shorter
+  ride with a long dark walk does not automatically win. It follows the
+  departure, not the moment the page was opened. The rider is never told that
+  it is on: there is no switch, label or result sentence. An explicit
+  `nightSafe` still wins. The line windows still decide what runs; the rule
+  does not invent a service and does not promise personal safety.
 - `/api/stations/:id/departures` returns the scheduled lines at a stop.
   The stop popover labels the list "Schedule-based, not live arrivals".
 - `Line.metadata` is loaded from the database so the planner can read the
@@ -276,7 +338,9 @@ coverage and the known gaps are in `research/data-completeness.md`.
   `apps/web/src/features/chat/chat-cards.tsx`.
 - The SSE stream carries `card` next to `delta`, `tool`, `actions` and
   `done`. A card cannot contain a station id, fare or duration the tool did
-  not return. The browser dedupes a stop card from `resolve_place` when the
+  not return. The `done` event also carries the Langfuse trace handle when
+  tracing is configured; the browser ignores it, and the current-place eval
+  uses it to put its scores on the trace that produced the answer. The browser dedupes a stop card from `resolve_place` when the
   richer `get_station` card arrives.
 - Actions are buttons on the card: open the journey, show a stop, set an
   endpoint, show a notice or open a source. They go through the same
@@ -324,6 +388,14 @@ watches follow the rider to another browser.
   place takes its name and coordinates from the stations table, and the cap
   of 16 distinct labels is enforced inside the write. The table has no
   station foreign key, for the same reason the memory items do not.
+- A rider can mark where they are standing. The browser gives the position,
+  `GET /api/places/reverse` turns it into a short name, a full address and the
+  same coordinate, and the Places tab opens the add form with the address in
+  the place field and "Current location" as the label. The rider renames the
+  label and saves it through the same `POST /api/account/places` write. A
+  reverse lookup that cannot answer falls back to a nearby stop; it never
+  invents an address. The place payload carries `address` beside `name`, and
+  the list shows the address.
 - Every successful plan with a session records a `rider_observations` row:
   the origin and destination station keys and names, the primary itinerary's
   line codes, and the Jakarta weekday and minute. A repeat in the same
@@ -345,9 +417,16 @@ watches follow the rider to another browser.
   `listActiveDisruptions`.
 - The chat's `list_my_places` and `list_my_habits` tools read the rider from
   `riderStore`, an `AsyncLocalStorage` the route fills per turn; the model
-  never passes a user id. They return names and labels, never a station id.
-  `plan_journey` records a `chat` observation the same way the plan route
-  records a `plan` one.
+  never passes a user id. They return names, labels and the saved address,
+  never a station id. `plan_journey` records a `chat` observation the same way
+  the plan route records a `plan` one.
+- The chat request may carry the marked current place. The route validates
+  that the coordinate is inside Jabodetabek and fills `currentPlaceStore`, a
+  second `AsyncLocalStorage`; the prompt tells the model the name and address
+  and that `plan_journey` takes `originCurrent: true`. The tool reads the
+  coordinate from the store, finds the stop whose whole journey is quickest,
+  and reports the walk to that stop in `catatan`. The model never passes a
+  coordinate and never chooses the stop.
 - `tool_result_cache` is a public cache with no user column. The news key
   ignores word order, case and punctuation, keeps single-digit corridor
   numbers, and includes the time range, topic and sorted domain filters. The
@@ -618,7 +697,7 @@ express. A pattern is stored separately from the line:
   `stops_on_street`; the notice reader uses `find_stop` and
   `list_street_stops` when a name needs grounding. The assistant also has
   `resolve_place`, `plan_journey`, `get_station`, `list_active_disruptions`,
-  `find_toll_routes` and `search_news` (Tavily, on demand), plus
+  `find_toll_routes`, `find_jpo` and `search_news` (Tavily, on demand), plus
   `list_notice_history` (active and closed notices). The planner reads stored
   notices; Tavily is the only live search the chat model can call. The history
   tool is what lets the assistant answer "is it open again" and "why did the
@@ -723,17 +802,17 @@ Read `DESIGN.md` before touching the interface. The short version:
   search. `research/tools/ux-visual/layout_check.py` reads the source and
   must report nothing.
 - The search is one surface, not a card with a form inside it. Its first
-  line is the brand plate: "Daily Route", then "Jabodetabek" without an
-  icon. There is no clock or notice count in the header. On a phone it is
-  the full width of the window. The button that runs the search is the last
-  control of the form, and the button that swaps the two places sits next
-  to it. The two place rows are joined by a vertical route line and a
-  marker; the hairline between them starts after the marker column, so it
-  never crosses the line.
+  line is the headsign: "Daily Route" in Barlow Condensed on a near-black
+  board, then "Jabodetabek" in sentence case, without an icon. There is no
+  clock or notice count in the header. On a phone it is the full width of
+  the window. The button that runs the search is the last control of the
+  form, and the button that swaps the two places sits next to it. The two
+  place rows are joined by one vertical ink line, with a hollow From dot and
+  a filled To dot. There is no hairline between them.
 - On a phone a bottom app bar holds four places: Plan, Lines, Alerts and
-  Ask. It uses a real navigation element, a static icon per place, a paper
-  plate behind the active label only, and a short jade rule on the top
-  edge. The plate does not wrap the icon. Lines and
+  Ask. It uses a real navigation element, a static icon per place, and a
+  2 px ink underline under the active label. There is no plate behind the
+  label and no rule on the top edge. Lines and
   Alerts open the service board on that section; Ask opens the assistant
   over the map. The search stays visible above the assistant.
 - On a phone the answer is a sheet above the bottom bar. It has a grab
@@ -748,10 +827,13 @@ Read `DESIGN.md` before touching the interface. The short version:
   search bar on a phone is `--bar-h`.
 - Motion is short and purposeful: an answer rises into place, a list
   of suggestions opens from its field, the map moves with `easeTo` and
-  `fitBounds`, the dock folds in one height/grid transition, and the
-  loading line travels inside its track from the left edge to the right.
-  There are no pulse dots and no tilted stamps anywhere. A status is a
-  static mark or an icon. `prefers-reduced-motion` turns all of it off.
+  `fitBounds`, the dock folds in one height/grid transition, and the loading
+  slit travels inside the headsign. A result puts three punch chads once at
+  its ticket bite, flips the destination in once, and the map sends one
+  enamel bead along the journey once. The only rotated mark is the Closed
+  stamp on a blocked result, which lands once and then sits still. There are
+  no pulse dots. `prefers-reduced-motion` puts the letters, the stamp, the
+  chads and the bead in their final state.
 - A name that is longer than its line runs instead of being cut into
   three dots, and it only runs while the reader points at it. The name
   of a stop is a button: pointing at it, focusing it or touching it
@@ -804,8 +886,9 @@ Read `DESIGN.md` before touching the interface. The short version:
   control.
 - The departure tabs share the surface's pointer and hover treatment. "Now"
   uses a clock mark and "Leave at" a calendar mark. Each tab carries a hover
-  popover explaining what it does; Night-safe says it prefers fewer night
-  walks and still only offers services that run then. "Leave at" opens a small
+  popover explaining what it does. There is no night switch: the silent night
+  rule follows the chosen departure, so a 23:00 journey prefers fewer dark
+  walks even when the rider is looking in the afternoon. "Leave at" opens a small
   12-hour analog clock: tap a number or drag a hand, switch AM/PM, then
   choose the minute on the same face. Hovering the face previews the active
   hand without changing the chosen time. The native platform time picker is
@@ -838,20 +921,47 @@ Read `DESIGN.md` before touching the interface. The short version:
   suggestion has copied its place into the form.
 - A rider who is standing somewhere can ask for the walk to the stop
   that serves that place. The browser gives the position, the server
-  asks the pedestrian router for the path, and the panel shows the
-  street names and the distance. The walk is the first leg of the
-  journey, on the map as well as in the list.
+  asks the pedestrian router for the path, and the leg shows the
+  distance and the time. The walk is the first leg of the
+  journey, on the map as well as in the list. It is one compact row: its
+  title, where it goes, and its time on the title's line; it has no
+  service class and no corridor code. When the routed path passes a named
+  official JPO, the row says "Via JPO ...", and the map draws the bridge
+  line in the ochre JPO layer. The same button marks the
+  current place: the server reverse-geocodes it, the From field shows the
+  address, and the route is asked for in one step when a destination is
+  already set. The Places tab offers the same action and opens its form
+  with the address prefilled.
+- The marked current place is part of the chat context. The browser sends
+  its name, address and coordinate with the turn; the API validates the
+  box, and the tool reads it through the turn's store. When the From field is the
+  marked place, the chat does not send it again as a typed origin.
 - The map answers a pointer with a popover and a click with a move. The
   camera moves with `easeTo` for a point and `fitBounds` for a journey;
   `flyTo` is for a jump between places that are far apart. A zoom or a
   pan the reader makes stays until the journey being followed changes.
 - The list of the journey and the map are one system: pointing at a leg
   in the list keeps that leg bright on the map.
-- A route stop on the map wears the **operator's official mark**, not a
-  generic red dot. The mark is a square plate with the operator's logo; an
+- Every vehicle on the route board wears its operator's colour, not a
+  generic route colour: walking is the dashed ink line, and a ride line takes
+  the mode colour of its operator. When one journey uses the same operator
+  twice, the second line takes the next token of the secondary palette
+  (`--route-1` … `--route-6`), so two corridors never look like one road. The
+  same line keeps the same colour when the rider switches alternatives.
+  The current journey's legend sits under its summary, names each vehicle
+  and its time, and lights that line on the map on hover or focus. A line
+  on the map also carries a small hover card with its from/to and time, so
+  the route is readable without opening the list.
+- A route stop far away is an **enamel disc**: a paper fill in a ring of the
+  operator's colour. Close up the disc becomes a small plate with the
+  operator's official mark inside it, not a generic red dot; an
   origin, destination and transfer add a ring around it, while an ordinary
-  intermediate stop is just the mark. The same image is cached under a
-  route-specific id, and an incident keeps its own plate.
+  intermediate stop is just the mark. A place that is not a stop is a
+  paper-filled ring with a From/To border, not an operator mark and not a
+  glossy dot. The same image is cached under a route-specific id, and an
+  incident keeps its own plate. When the From and To ends stand on the same
+  stop, the map draws one stacked mark with the two rings offset, and its
+  popover names both ends; a click keeps it open.
 - A journey chooses up to three alternatives with different primary lines,
   not just the fastest and the cheapest. 9 and 9A are different choices even
   when they share a destination.
@@ -884,9 +994,23 @@ Read `DESIGN.md` before touching the interface. The short version:
 - Evaluation is for model behaviour. A rule that can be tested exactly
   (geometry, a planner rule, a scope derivation) belongs in a unit or
   integration test instead.
+- `pnpm eval:current-place` is the Anvia evaluation of the current-place
+  assistant. The target is the real HTTP route, planner and model; the
+  runner supplies the cases, the exact metrics and the report. The metrics
+  are `tool_use` (the required and forbidden tools), `grounded_stops` (a
+  network stop named by the answer must appear in a tool result or the
+  marked place) and an `answer_quality` Anvia `llmJudge` that reads the
+  expected behaviour, the tools, the plan and the allowed names. It writes
+  `research/current-place-eval.json`; the readable findings are in
+  `research/current-place-trial.md`. It is a manual live-model run, not
+  part of `pnpm test`.
 - Traces go to Langfuse through `langfuseObservability`. The eval run uses
   its run id as the session, so the classifier, the grounder and the judge
-  of one run are one trace group.
+  of one run are one trace group. The current-place eval puts each case in
+  its own session, `<run id>:<case id>`, and the trial uses one session for
+  the whole run. Both are shown in the report. The API route names the
+  trace `chat-rute`; the agent, turns, generations and tool calls are its
+  children.
 
 ## Testing
 
@@ -898,6 +1022,20 @@ Read `DESIGN.md` before touching the interface. The short version:
 - Unit tests are welcome for pure logic, but the priority is integration and
   end-to-end coverage. Prefer a test that exercises the whole path over
   several tests that exercise a mock.
+- `pnpm trial:current-place` runs the real configured model against the
+  current-place scenarios through the real API: route from here, where am
+  I, no current place, a position outside Jabodetabek, no destination, a
+  saved place used by its label, and a position too far from a stop. It
+  writes `research/current-place-trial.json`; the findings and the case
+  table are in `research/current-place-trial.md`. It does not touch X. It is a
+  manual trial, not part of `pnpm test`, because a live model costs money
+  and changes its wording.
+- `pnpm eval:current-place` is the same feature through the Anvia eval
+  runner. The trial is the strict regression check with a written pass/fail
+  per scenario; the eval is the behaviour score with an LLM judge and the
+  same exact grounding checks. Both share
+  `apps/api/src/cli/observed-agent.ts`, so both send the same trace to
+  Langfuse. Run both after a change to the current-place contract.
 - `src/x-stub-trial.test.ts` is the offline X API trial: a real local HTTP
   server returns the v2 `data`/`includes.media`/`meta` envelope with four
   images and a `note_post`; the real client, writer, table and planner run on

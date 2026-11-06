@@ -29,6 +29,7 @@ const app = createApp({
   agent: null,
   lastProviderError: null,
   attempts: createAttemptLimiter(100, 15 * 60_000),
+  jpos: null,
 } satisfies ApiDeps);
 
 const service: TemporaryService = {

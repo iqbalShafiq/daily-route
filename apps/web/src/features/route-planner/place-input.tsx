@@ -300,7 +300,7 @@ export function PlaceInput({
           title={saved ? "Remove from saved" : "Save place"}
           aria-pressed={saved}
           onClick={onToggleSaved}
-          className="flex size-6 cursor-pointer items-center justify-center rounded-md text-ink-3 transition-colors hover:bg-surface-2 hover:text-ink"
+          className="flex size-6 cursor-pointer items-center justify-center rounded-[4px] text-ink-3 transition-colors hover:bg-surface-2 hover:text-ink"
         >
           <Star aria-hidden className={cn("size-3.5", saved && "fill-current text-ink")} />
         </button>
@@ -315,7 +315,7 @@ export function PlaceInput({
               onValueChange("");
               setOpen(false);
             }}
-            className="flex size-6 cursor-pointer items-center justify-center rounded-md text-ink-3 transition-colors hover:bg-surface-2 hover:text-ink"
+            className="flex size-6 cursor-pointer items-center justify-center rounded-[4px] text-ink-3 transition-colors hover:bg-surface-2 hover:text-ink"
           >
             <X aria-hidden className="size-3.5" />
           </button>
@@ -351,7 +351,7 @@ export function PlaceInput({
       role="listbox"
       aria-label={`Places matching ${label}`}
       className={cn(
-        "list-in overflow-y-auto overscroll-contain rounded-lg border border-line-strong bg-surface shadow-pop",
+        "list-in overflow-y-auto overscroll-contain rounded-[4px] border border-line bg-surface shadow-pop",
         floating
           ? "fixed z-[75] max-md:inset-x-0 max-md:bottom-0 max-md:top-auto max-md:max-h-[62dvh] max-md:rounded-b-none max-md:rounded-t-[16px] max-md:border-x-0 max-md:border-b-0 max-md:pb-[calc(12px+env(safe-area-inset-bottom))]"
           : [
@@ -410,7 +410,7 @@ export function PlaceInput({
               onClick={() => choose(suggestion)}
               className="flex w-full cursor-pointer items-center gap-3 px-3 py-3 text-left transition-colors"
             >
-              <span className="flex size-6 shrink-0 items-center justify-center rounded-[4px] border border-line bg-surface-2 text-ink-3">
+              <span className="flex size-6 shrink-0 items-center justify-center rounded-[4px] border border-line bg-surface text-ink">
                 <MapPin aria-hidden className="size-3" />
               </span>
               <span className="min-w-0 flex-1">
@@ -418,13 +418,13 @@ export function PlaceInput({
                   <Highlighted text={suggestion.name} ranges={suggestion.ranges} />
                 </span>
                 {suggestion.detail ? (
-                  <span className="mt-0.5 block truncate font-mono text-[12px] uppercase leading-[1.2] tracking-[0.04em] text-ink-3">
+                  <span className="mt-0.5 block truncate text-[12px] leading-[1.35] text-ink-3">
                     {suggestion.detail}
                   </span>
                 ) : null}
               </span>
               {suggestion.interchange ? (
-                <span className="shrink-0 rounded-[4px] border border-line-strong px-2 py-0.5 font-mono text-[12px] uppercase leading-[1.2] tracking-[0.04em] text-ink-3">
+                <span className="shrink-0 rounded-[4px] border border-line-strong px-2 py-0.5 text-[12px] leading-[1.35] text-ink-3">
                   Interchange
                 </span>
               ) : null}
@@ -436,7 +436,7 @@ export function PlaceInput({
       {rows.some((row) => row.source === "overture") ? (
         <li
           role="presentation"
-          className="sticky bottom-0 z-10 border-t border-line/70 bg-surface px-3 py-2 font-mono text-[12px] uppercase leading-[1.2] tracking-[0.04em] text-ink-3"
+          className="sticky bottom-0 z-10 border-t border-line/70 bg-surface px-3 py-2 text-[12px] leading-[1.35] text-ink-3"
         >
           Places © Overture Maps
         </li>
@@ -445,7 +445,7 @@ export function PlaceInput({
       {rows.some((row) => row.source === "google") ? (
         <li
           role="presentation"
-          className="sticky bottom-0 z-10 border-t border-line/70 bg-surface px-3 py-2 font-mono text-[12px] uppercase leading-[1.2] tracking-[0.04em] text-ink-3"
+          className="sticky bottom-0 z-10 border-t border-line/70 bg-surface px-3 py-2 text-[12px] leading-[1.35] text-ink-3"
         >
           Powered by Google
         </li>

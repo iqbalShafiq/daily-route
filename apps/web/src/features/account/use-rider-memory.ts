@@ -46,6 +46,7 @@ function placePayload(place: ChosenPlace): Record<string, unknown> {
     kind: place.kind,
     id: place.id,
     name: place.name,
+    address: place.address ?? null,
     latitude: place.latitude,
     longitude: place.longitude,
     systemId: place.systemId ?? null,

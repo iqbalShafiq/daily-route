@@ -66,7 +66,7 @@ export function PayHint({ notes, children }: { notes: readonly string[]; childre
               onMouseEnter={show}
               onMouseLeave={scheduleClose}
               style={positionOf(anchor)}
-              className="fade-in fixed z-50 w-72 rounded-[10px] border border-line bg-surface p-3 shadow-pop"
+              className="fade-in fixed z-50 w-72 rounded-[4px] border border-line bg-surface p-3 shadow-pop"
             >
               <p className="text-[13px] font-semibold text-ink">How to pay</p>
               <div className="scroll-quiet mt-2 flex max-h-64 flex-col gap-2 overflow-y-auto">

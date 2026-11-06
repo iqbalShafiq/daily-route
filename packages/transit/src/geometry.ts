@@ -60,6 +60,51 @@ export function polylineLengthKm(points: readonly Coordinate[]): number {
   return total;
 }
 
+/** How far the pedestrian router may snap a walk's end from the place it joins. */
+const WALK_JOIN_KM = 0.12;
+
+/** A gap below this is the same point; no join segment is added. */
+const WALK_JOIN_EPSILON_KM = 0.002;
+
+/**
+ * Close a routed walk to the two places it joins.
+ *
+ * The pedestrian router snaps each end to the nearest footpath. A station
+ * entrance that stands 40 m off that path leaves the walk line floating
+ * away from the ride line it continues, and the rider reads a break in a
+ * journey that has none. The gap is the forecourt between the platform and
+ * the path, so the line is closed to the exact place: the first point is
+ * the stop or the place, and the last is the other one.
+ *
+ * A router that answered from a street far away keeps its gap. A straight
+ * line across a block is not a walk, and the map must not invent one.
+ */
+export function joinWalkEnds(
+  geometry: readonly Coordinate[],
+  from: Coordinate,
+  to: Coordinate,
+  maxKm: number = WALK_JOIN_KM,
+): Coordinate[] {
+  if (geometry.length < 2) return [];
+  const first = geometry[0];
+  const last = geometry[geometry.length - 1];
+  if (!first || !last) return [];
+
+  const points: Coordinate[] = [];
+  const startGap = haversineKm(first, from);
+  const endGap = haversineKm(last, to);
+  if (startGap <= maxKm && startGap > WALK_JOIN_EPSILON_KM) {
+    points.push({ latitude: from.latitude, longitude: from.longitude });
+  }
+  for (const point of geometry) {
+    points.push({ latitude: point.latitude, longitude: point.longitude });
+  }
+  if (endGap <= maxKm && endGap > WALK_JOIN_EPSILON_KM) {
+    points.push({ latitude: to.latitude, longitude: to.longitude });
+  }
+  return points;
+}
+
 /**
  * The part of a line between two of its stops.
  *
@@ -95,15 +140,35 @@ export function sliceGeometry(
  */
 const STOP_SNAP_KM = 0.5;
 
+/** Where a stop meets the path: the segment, how far along it, and the point. */
+type PathFoot = {
+  /** The index of the segment's first vertex. */
+  index: number;
+  /** How far along that segment the foot lies, from 0 to 1. */
+  t: number;
+  /** The foot itself, on the segment. */
+  point: Coordinate;
+  /** How far the stop stands from the path, in kilometres. */
+  distanceKm: number;
+};
+
 /**
  * The part of a line between two stops, found on the path itself.
  *
  * The stored stop offsets are a single increasing index. On a loop whose
  * first stop is matched at the wrong end, that index pins every later
  * stop to the same place, and the leg drawn on the map is a short chord
- * that never reaches the station the rider gets off at. Snapping the two
- * stops to the path and keeping the short stretch between them draws the
- * rail the vehicle actually travels.
+ * that never reaches the station the rider gets off at. Cutting the path
+ * at the two stops and keeping the stretch between them draws the rail
+ * the vehicle actually travels.
+ *
+ * The cut is the foot of each stop on the nearest segment, not the
+ * nearest vertex. A station often stands beside the path, between two
+ * vertices, and the nearest vertex can be on the far side of it: the
+ * Bundaran HI station is 91 m south of the first vertex of its rail, and
+ * snapping to that vertex draws the train 91 m north of the platform
+ * before it comes back. Cutting at the foot starts the line at the
+ * station and leaves that vertex out.
  */
 export function sliceGeometryNearStops(
   geometry: LineGeometry,
@@ -113,68 +178,205 @@ export function sliceGeometryNearStops(
   const points = fromFlatCoordinates(geometry.coordinates);
   if (points.length < 2) return null;
 
-  const fromIndex = vertexWithin(points, from, STOP_SNAP_KM);
-  const toIndex = vertexWithin(points, to, STOP_SNAP_KM);
-  if (fromIndex === null || toIndex === null || fromIndex === toIndex) return null;
+  const fromFoot = footWithin(points, from, STOP_SNAP_KM);
+  const toFoot = footWithin(points, to, STOP_SNAP_KM);
+  if (!fromFoot || !toFoot) return null;
+
+  const fromPosition = fromFoot.index + fromFoot.t;
+  const toPosition = toFoot.index + toFoot.t;
+  if (Math.abs(fromPosition - toPosition) < 1e-9) return null;
 
   const straightKm = haversineKm(from, to);
   const limitKm = Math.max(straightKm * 2.5, straightKm + 4);
-  const candidates = [sliceBetween(points, fromIndex, toIndex)];
-  if (haversineKm(points[0] ?? from, points[points.length - 1] ?? to) <= STOP_SNAP_KM) {
-    candidates.push(wrapBetween(points, fromIndex, toIndex));
-  }
+  const isLoop = haversineKm(points[0] ?? from, points[points.length - 1] ?? to) <= STOP_SNAP_KM;
 
-  let best: Coordinate[] | null = null;
-  let bestMiss = Number.POSITIVE_INFINITY;
+  // A ride that runs against the stored order is drawn back along the
+  // same vertices; a loop whose joining station was passed continues
+  // across the join instead, and that is the route the vehicle takes.
+  const candidates: Coordinate[][] = [];
+  if (isLoop && fromPosition > toPosition) {
+    const wrap = wrapVertices(points, fromFoot, toFoot);
+    if (wrap) candidates.push(joinFeet(from, fromFoot, wrap, toFoot, to));
+  }
+  const span =
+    fromPosition < toPosition
+      ? forwardVertices(points, fromFoot, toFoot)
+      : backwardVertices(points, fromFoot, toFoot);
+  candidates.push(joinFeet(from, fromFoot, span, toFoot, to));
+
   for (const candidate of candidates) {
     if (candidate.length < 2) continue;
-    const lengthKm = polylineLengthKm(candidate);
-    if (lengthKm > limitKm) continue;
+    if (polylineLengthKm(candidate) > limitKm) continue;
     if (longestHopKm(candidate) > 2.5) continue;
-    const miss = haversineKm(candidate[0] ?? from, from) + haversineKm(candidate[candidate.length - 1] ?? to, to);
-    if (miss > STOP_SNAP_KM * 2) continue;
-    if (miss < bestMiss) {
-      best = candidate;
-      bestMiss = miss;
-    }
+    return candidate;
   }
-  if (!best) return null;
-
-  const anchored = [...best];
-  const start = anchored[0];
-  const end = anchored[anchored.length - 1];
-  if (start && haversineKm(start, from) > 0.02) anchored.unshift(from);
-  if (end && haversineKm(end, to) > 0.02) anchored.push(to);
-  return anchored;
-}
-
-/** The closest vertex, when it is close enough to be the same place. */
-function vertexWithin(
-  points: readonly Coordinate[],
-  target: Coordinate,
-  maxKm: number,
-): number | null {
-  const index = closestVertexIndexOnPolyline(points, target);
-  const point = points[index];
-  if (!point || haversineKm(point, target) > maxKm) return null;
-  return index;
-}
-
-/** The stretch of a path from one vertex to another, in that direction. */
-function sliceBetween(points: readonly Coordinate[], fromIndex: number, toIndex: number): Coordinate[] {
-  if (fromIndex <= toIndex) return points.slice(fromIndex, toIndex + 1);
-  return points.slice(toIndex, fromIndex + 1).reverse();
+  return null;
 }
 
 /**
- * The stretch that crosses the join of a loop.
+ * Trim a path that is already ordered from one stop to the other.
+ *
+ * `ridePath` keeps the stored offset slice when its two ends land on the
+ * stops, but that slice can still begin at a vertex past the boarding
+ * stop. Trimming it with the same rule keeps the spur off the map and
+ * makes the ends meet the stops exactly.
+ */
+export function clipSliceToStops(
+  slice: readonly Coordinate[],
+  from: Coordinate,
+  to: Coordinate,
+): Coordinate[] | null {
+  if (slice.length < 2) return null;
+
+  const fromFoot = footWithin(slice, from, STOP_SNAP_KM);
+  const toFoot = footWithin(slice, to, STOP_SNAP_KM);
+  if (!fromFoot || !toFoot) return null;
+
+  const fromPosition = fromFoot.index + fromFoot.t;
+  const toPosition = toFoot.index + toFoot.t;
+  if (fromPosition >= toPosition) return null;
+
+  return joinFeet(from, fromFoot, forwardVertices(slice, fromFoot, toFoot), toFoot, to);
+}
+
+/** The foot of a stop on the path, when it is close enough to be that stop. */
+function footWithin(
+  points: readonly Coordinate[],
+  target: Coordinate,
+  maxKm: number,
+): PathFoot | null {
+  const foot = footOnPolyline(points, target);
+  return foot.distanceKm <= maxKm ? foot : null;
+}
+
+/**
+ * The closest point of the path to a coordinate, on the segment itself.
+ *
+ * The foot is the point a rider would stand on, so the line is cut
+ * there. Answering with the nearest vertex instead moves every cut to a
+ * vertex that can be on the far side of the stop.
+ */
+function footOnPolyline(points: readonly Coordinate[], target: Coordinate): PathFoot {
+  const lonScale = 111.32 * Math.cos((target.latitude * Math.PI) / 180);
+  const latScale = 110.574;
+  let best: PathFoot = {
+    index: 0,
+    t: 0,
+    point: points[0] ?? target,
+    distanceKm: Number.POSITIVE_INFINITY,
+  };
+
+  for (let index = 0; index < points.length - 1; index += 1) {
+    const start = points[index];
+    const end = points[index + 1];
+    if (!start || !end) continue;
+    const ex = (end.longitude - start.longitude) * lonScale;
+    const ey = (end.latitude - start.latitude) * latScale;
+    const px = (target.longitude - start.longitude) * lonScale;
+    const py = (target.latitude - start.latitude) * latScale;
+    const lengthSquared = ex * ex + ey * ey;
+    const t = lengthSquared === 0 ? 0 : Math.min(1, Math.max(0, (px * ex + py * ey) / lengthSquared));
+    const distanceKm = Math.hypot(px - t * ex, py - t * ey);
+    if (distanceKm < best.distanceKm) {
+      best = {
+        index,
+        t,
+        point: {
+          latitude: start.latitude + (end.latitude - start.latitude) * t,
+          longitude: start.longitude + (end.longitude - start.longitude) * t,
+        },
+        distanceKm,
+      };
+    }
+  }
+
+  return best;
+}
+
+/**
+ * The vertices strictly between two feet, in the order the path runs.
+ *
+ * A vertex at a foot is not repeated: the foot itself is drawn there. A
+ * station the vehicle passes without serving is between the two feet and
+ * stays on the line.
+ */
+function forwardVertices(
+  points: readonly Coordinate[],
+  fromFoot: PathFoot,
+  toFoot: PathFoot,
+): Coordinate[] {
+  const vertices: Coordinate[] = [];
+  for (let index = fromFoot.index + 1; index <= toFoot.index; index += 1) {
+    const point = points[index];
+    if (point) vertices.push(point);
+  }
+  return vertices;
+}
+
+/** The vertices between two feet when the ride runs against the stored order. */
+function backwardVertices(
+  points: readonly Coordinate[],
+  fromFoot: PathFoot,
+  toFoot: PathFoot,
+): Coordinate[] {
+  const vertices: Coordinate[] = [];
+  const start = fromFoot.t > 0 ? fromFoot.index : fromFoot.index - 1;
+  for (let index = start; index >= toFoot.index + 1; index -= 1) {
+    const point = points[index];
+    if (point) vertices.push(point);
+  }
+  return vertices;
+}
+
+/**
+ * The vertices that cross the join of a loop.
  *
  * The path of a loop is stored with its two ends at the same station, so
- * a ride that passes that station continues from the end back to the start.
+ * a ride that passes that station continues from the end back to the
+ * start.
  */
-function wrapBetween(points: readonly Coordinate[], fromIndex: number, toIndex: number): Coordinate[] {
-  if (fromIndex <= toIndex) return [];
-  return [...points.slice(fromIndex), ...points.slice(0, toIndex + 1)];
+function wrapVertices(
+  points: readonly Coordinate[],
+  fromFoot: PathFoot,
+  toFoot: PathFoot,
+): Coordinate[] | null {
+  if (fromFoot.index + fromFoot.t <= toFoot.index + toFoot.t) return null;
+  const vertices: Coordinate[] = [];
+  for (let index = fromFoot.index + 1; index < points.length; index += 1) {
+    const point = points[index];
+    if (point) vertices.push(point);
+  }
+  for (let index = 0; index <= toFoot.index; index += 1) {
+    const point = points[index];
+    if (point) vertices.push(point);
+  }
+  return vertices;
+}
+
+/**
+ * The drawn path: the boarding stop, the foot it stands beside, the road
+ * between the two feet, the alighting foot, and the alighting stop.
+ */
+function joinFeet(
+  from: Coordinate,
+  fromFoot: PathFoot,
+  vertices: readonly Coordinate[],
+  toFoot: PathFoot,
+  to: Coordinate,
+): Coordinate[] {
+  const path: Coordinate[] = [from];
+  const push = (point: Coordinate): void => {
+    const last = path[path.length - 1];
+    if (last && haversineKm(last, point) < 0.001) return;
+    path.push(point);
+  };
+  push(fromFoot.point);
+  for (const vertex of vertices) push(vertex);
+  push(toFoot.point);
+  // The leg always ends on the alighting stop itself, not on the foot
+  // beside it, so a ride line meets both of its stops.
+  path.push(to);
+  return path;
 }
 
 /** The longest single step of a path. A long step is a line across the city. */
@@ -276,4 +478,23 @@ export function closestVertexIndexOnPolyline(
   }
 
   return bestIndex;
+}
+
+/**
+ * The distance from a point to the closest place on a path.
+ */
+export function distanceToPathKm(
+  path: readonly Coordinate[],
+  point: Coordinate,
+): number {
+  const longitudeScale = 111.32 * Math.cos((point.latitude * Math.PI) / 180);
+  let best = Number.POSITIVE_INFINITY;
+  for (let index = 0; index < path.length - 1; index += 1) {
+    const start = path[index];
+    const end = path[index + 1];
+    if (!start || !end) continue;
+    const distance = distanceToSegmentKm(point, start, end, longitudeScale);
+    if (distance < best) best = distance;
+  }
+  return best;
 }

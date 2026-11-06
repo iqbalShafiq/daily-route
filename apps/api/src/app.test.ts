@@ -3,13 +3,14 @@ import { parseEnv } from "@daily-route/env";
 import { eq } from "drizzle-orm";
 import { createEmbeddingProvider, PlaceResolver } from "@daily-route/semantic";
 import { NetworkCache } from "@daily-route/agent";
-import { DEMO_DISRUPTION_ID } from "@daily-route/transit";
+import { DEMO_DISRUPTION_ID, haversineKm } from "@daily-route/transit";
 import request from "supertest";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 
 import { createApp } from "./app.js";
 import { createAttemptLimiter } from "./attempts.js";
 import type { ApiDeps } from "./deps.js";
+import { loadJpoDocument } from "./jpo-store.js";
 
 /**
  * Integration tests for the HTTP API.
@@ -34,6 +35,7 @@ const deps: ApiDeps = {
   agent: null,
   lastProviderError: null,
   attempts: createAttemptLimiter(100, 15 * 60_000),
+  jpos: loadJpoDocument(),
 };
 
 const app = createApp(deps);
@@ -51,6 +53,38 @@ describe("GET /api/health", () => {
     expect(["overture", "overture+google", "google", "openstreetmap"]).toContain(
       response.body.places,
     );
+  });
+});
+
+describe("GET /api/jpo", () => {
+  it("returns the official and OpenStreetMap bridge registry", async () => {
+    const response = await request(app).get("/api/jpo");
+    expect(response.status).toBe(200);
+    expect(response.body.jpos.length).toBeGreaterThan(100);
+
+    const official = response.body.jpos.find(
+      (jpo: { id: string }) => jpo.id === "jpo:JPO210800249",
+    );
+    expect(official?.official).toBe(true);
+    expect(official?.geometry.length).toBeGreaterThan(1);
+    expect(
+      official?.stations.some((station: { stationName: string }) =>
+        station.stationName.includes("Grogol"),
+      ),
+    ).toBe(true);
+  });
+
+  it("filters the registry by stop", async () => {
+    const response = await request(app).get(
+      "/api/jpo?stationId=transjakarta:grogol-reformasi",
+    );
+    expect(response.status).toBe(200);
+    expect(response.body.jpos.length).toBeGreaterThan(0);
+    expect(
+      response.body.jpos.every((jpo: { stations: { stationId: string }[] }) =>
+        jpo.stations.some((station) => station.stationId === "transjakarta:grogol-reformasi"),
+      ),
+    ).toBe(true);
   });
 });
 
@@ -206,6 +240,31 @@ describe("GET /api/routes/plan", () => {
     expect(response.body.itineraries.length).toBeGreaterThan(0);
   });
 
+  it("draws every walk up to the stop or the place it joins", async () => {
+    const response = await request(app).get(
+      "/api/routes/plan?origin=Bundaran%20HI&destination=Kota",
+    );
+    expect(response.status).toBe(200);
+
+    type Point = { latitude: number; longitude: number };
+    const legs = response.body.itineraries[0].legs as {
+      kind: string;
+      geometry: Point[];
+    }[];
+    for (let index = 1; index < legs.length; index += 1) {
+      const previous = legs[index - 1];
+      const current = legs[index];
+      if (!previous || !current) continue;
+      if (previous.geometry.length === 0 || current.geometry.length === 0) continue;
+      const end = previous.geometry[previous.geometry.length - 1];
+      const start = current.geometry[0];
+      if (!end || !start) continue;
+      // A walk the router snapped to a footpath used to leave a gap of
+      // tens of metres at the Jakarta Kota end of this journey.
+      expect(haversineKm(end, start)).toBeLessThan(0.02);
+    }
+  });
+
   it("does not offer a one-way scheduled route after its last departure", async () => {
     const codesAt = async (at: string): Promise<string[]> => {
       const response = await request(app).get(
@@ -322,11 +381,32 @@ describe("GET /api/routes/plan", () => {
     expect(response.status).toBe(400);
   });
 
+  it("names the official JPO on the walk from a place", async () => {
+    const response = await request(app).get(
+      "/api/routes/plan?origin=Jalan%20Dokter%20Susilo%20II%20A&destination=Simpang%20Kuningan" +
+        "&originLatitude=-6.1655382&originLongitude=106.7913463",
+    );
+    expect(response.status).toBe(200);
+    const walk = response.body.itineraries[0].legs.find(
+      (leg: { kind: string }) => leg.kind === "walk",
+    );
+    expect(walk?.jpo?.some((jpo: { official: boolean }) => jpo.official)).toBe(true);
+  });
+
   it("answers 404 when a place cannot be found", async () => {
     const response = await request(app).get(
       "/api/routes/plan?origin=xyzzyplugh&destination=Senen",
     );
     expect(response.status).toBe(404);
+  });
+});
+
+describe("GET /api/walk/plan", () => {
+  it("refuses to plan from the reader's place without a destination", async () => {
+    const response = await request(app).get(
+      "/api/walk/plan?latitude=-6.1952&longitude=106.8211",
+    );
+    expect(response.status).toBe(400);
   });
 });
 

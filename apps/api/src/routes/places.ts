@@ -1,8 +1,8 @@
 import { Router } from "express";
 import { z } from "zod";
-import { searchMapPlaces } from "@daily-route/db";
+import { findStationsNear, searchMapPlaces } from "@daily-route/db";
 
-import { searchPlaces } from "../geocode.js";
+import { insideJabodetabek, reversePlace, searchPlaces } from "../geocode.js";
 import type { ApiDeps } from "../deps.js";
 
 /**
@@ -17,6 +17,11 @@ import type { ApiDeps } from "../deps.js";
 const querySchema = z.object({
   q: z.string().trim().min(2).max(120),
   limit: z.coerce.number().int().min(1).max(8).default(8),
+});
+
+const reverseQuerySchema = z.object({
+  latitude: z.coerce.number().min(-90).max(90),
+  longitude: z.coerce.number().min(-180).max(180),
 });
 
 const MINIMUM_SUGGESTION_SCORE = 0.32;
@@ -154,6 +159,53 @@ export function createPlacesRouter(deps: ApiDeps): Router {
       .map((entry) => entry.row);
 
     response.json(ordered);
+  });
+
+  /**
+   * The rider's own position, as a place.
+   *
+   * A coordinate is not an address the rider can read or save. The
+   * reverse lookup gives the street, and the nearest stop is the fallback
+   * when the public index does not answer. The browser never calls a
+   * geocoder; it asks this route and gets the same place shape the rest
+   * of the form uses.
+   */
+  router.get("/reverse", async (request, response) => {
+    const parsed = reverseQuerySchema.safeParse(request.query);
+    if (!parsed.success) {
+      response.status(400).json({ error: "The coordinates are incomplete." });
+      return;
+    }
+
+    const { latitude, longitude } = parsed.data;
+    if (!insideJabodetabek(latitude, longitude)) {
+      response.status(400).json({
+        error: "That place is outside Jabodetabek, so it is not on this network.",
+      });
+      return;
+    }
+
+    const [reversed, nearby] = await Promise.all([
+      reversePlace(latitude, longitude),
+      findStationsNear(deps.db, { latitude, longitude }, { radiusKm: 0.3, limit: 1 }),
+    ]);
+    const nearest = nearby[0] ?? null;
+    const address =
+      reversed?.address ??
+      (nearest ? `${nearest.name} · ${nearest.systemName}` : null);
+
+    response.json({
+      place: {
+        kind: "place" as const,
+        id: `place:current:${latitude.toFixed(5)},${longitude.toFixed(5)}`,
+        name: reversed?.name ?? nearest?.name ?? "Current location",
+        address,
+        latitude,
+        longitude,
+        systemId: null,
+        systemName: null,
+      },
+    });
   });
 
   return router;

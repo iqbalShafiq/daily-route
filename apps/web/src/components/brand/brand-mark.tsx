@@ -1,64 +1,52 @@
 import { cn } from "../../lib/cn.js";
 
 /**
- * The Daily Route mark.
+ * The compact mark.
  *
- * A route with a bend: two ends, one intermediate stop, and the jade line
- * that joins them. It is drawn here, not imported, so the mark is ours and
- * the same geometry can be used at every size.
+ * The brand object is a bus headsign, so the small form is a black board
+ * with an operator-blue square and a cream slit where the destination
+ * would be. It is drawn at 16 px only: the favicon, and the assistant
+ * header. It is not a pause icon and it is not an app glyph.
  */
 export function BrandMark({ className }: { className?: string }) {
   return (
     <svg
-      viewBox="0 0 32 32"
+      viewBox="0 0 16 16"
       fill="none"
       aria-hidden
       className={cn("shrink-0", className)}
     >
-      <rect x="1" y="1" width="30" height="30" rx="8" fill="var(--ink)" />
-      <path
-        className="brand-mark__line"
-        d="M8.5 25V18.4C8.5 16.5 10 15 11.9 15H20.1C22 15 23.5 13.5 23.5 11.6V7"
-        stroke="var(--accent)"
-        strokeWidth="2.6"
-        strokeLinecap="round"
-        pathLength="1"
-      />
-      <circle cx="8.5" cy="25.2" r="2.1" fill="var(--surface)" stroke="var(--accent)" strokeWidth="1.6" />
-      <circle className="brand-mark__dot" cx="23.5" cy="6.8" r="2.1" fill="var(--accent)" />
-      <circle cx="15.9" cy="15" r="1.5" fill="var(--surface)" stroke="var(--accent)" strokeWidth="1.4" />
+      <rect x="0.5" y="0.5" width="15" height="15" rx="2" fill="var(--accent)" />
+      <rect x="2.5" y="3.5" width="2.5" height="9" rx="0.5" fill="var(--mode-bus)" />
+      <rect x="6.5" y="6.75" width="7" height="2.5" rx="0.5" fill="var(--accent-ink)" />
     </svg>
   );
 }
 
 /**
- * The lockup: the mark, the name, and the city.
+ * The lockup: the headsign.
  *
- * The name is set in the interface face; the city is a station label in
- * the monospaced face, so the identity reads as part of the map rather
- * than as a logo pasted onto it.
+ * "Daily Route" is set in the sign face, uppercase, the way a destination
+ * board is printed. "Jabodetabek" sits under it in the interface face, in
+ * sentence case. There is no icon beside the name.
  */
 export function BrandLockup({
   className,
   aside,
-  compact = false,
 }: {
   className?: string;
   aside?: React.ReactNode;
-  compact?: boolean;
 }) {
   return (
-    <div className={cn("flex min-w-0 items-center justify-between gap-3", className)}>
-      <div className="flex min-w-0 items-center gap-3">
-        <BrandMark className={compact ? "size-7" : "size-8"} />
-        <div className="min-w-0">
-          <p className="truncate text-[16px] font-extrabold leading-[1.05] tracking-[-0.03em] text-ink">
-            Daily Route
-          </p>
-          <p className="mt-0.5 font-mono text-[12px] font-medium leading-[1.2] tracking-[0.08em] text-ink-3">
-            Jabodetabek
-          </p>
-        </div>
+    <div
+      className={cn(
+        "headsign flex min-w-0 items-center justify-between gap-3 rounded-[4px] px-3 py-2",
+        className,
+      )}
+    >
+      <div className="min-w-0">
+        <p className="headsign__name truncate text-[28px] uppercase text-accent-ink">Daily Route</p>
+        <p className="text-[13px] leading-[1.35] text-accent-ink/80">Jabodetabek</p>
       </div>
       {aside ? <div className="shrink-0">{aside}</div> : null}
     </div>

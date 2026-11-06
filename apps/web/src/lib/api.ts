@@ -5,6 +5,8 @@
  * module, which talks to the application API.
  */
 
+import type { JpoDocument } from "@daily-route/transit";
+
 const BASE_URL = "/api";
 
 export class ApiError extends Error {
@@ -81,6 +83,8 @@ export type NamedPlace = {
     kind: "station" | "place";
     id: string;
     name: string;
+    /** The full address, for a place the rider marked from their position. */
+    address: string | null;
     latitude: number;
     longitude: number;
     systemId: string | null;
@@ -120,6 +124,24 @@ export type PlaceSuggestion = {
   /** The index the place came from, when it is not the network graph. */
   source?: "google" | "openstreetmap" | "overture";
   matchedRanges?: MatchedRange[];
+};
+
+/**
+ * The rider's current position, as the server names it.
+ *
+ * The coordinate comes from the browser; the short name and the full
+ * address come from the reverse lookup. A place that the lookup could not
+ * name still carries its coordinate, so the journey can be planned from it.
+ */
+export type ReversedPlace = {
+  kind: "place";
+  id: string;
+  name: string;
+  address: string | null;
+  latitude: number;
+  longitude: number;
+  systemId: null;
+  systemName: null;
 };
 
 export type StationSummary = {
@@ -245,6 +267,8 @@ export type ItineraryLeg = {
   stops: LegStop[];
   /** What a walk is for: to the first vehicle, to the last one, or a change. */
   walkReason: "access" | "egress" | "transfer" | null;
+  /** The pedestrian bridges the walked path crosses. */
+  jpo?: { id: string; name: string; official: boolean; source: "jakarta-bina-marga" | "osm" }[];
   /** The line the rider takes after this walk, for a change of vehicle. */
   nextLineName: string | null;
   /** The average wait for the vehicle, for a ride. */
@@ -431,9 +455,21 @@ export type DisruptionSummary = {
   stationName: string | null;
 };
 
+/** The resolved place at one end of a planned journey. */
+export type PlanPlace = {
+  /** The words the rider typed. */
+  text: string;
+  stationId: string;
+  name: string;
+  systemId: string;
+  latitude: number;
+  longitude: number;
+  score: number;
+};
+
 export type PlanResult = {
-  origin: StationSummary & { text: string };
-  destination: StationSummary & { text: string };
+  origin: PlanPlace;
+  destination: PlanPlace;
   itineraries: Itinerary[];
   alternatives: Itinerary[];
   /** Notices that touch the fastest journey. */
@@ -520,7 +556,6 @@ export type WalkRoute = {
 
 /** The journey planned from the reader's own position. */
 export type PositionPlan = {
-  needsDestination: boolean;
   stationId: string | null;
   stationName: string | null;
   totalMinutes: number | null;
@@ -533,25 +568,8 @@ export type PositionPlan = {
     durationMinutes: number;
     steps: { instruction: string; street: string | null; distanceKm: number }[];
     geometry: { latitude: number; longitude: number }[];
+    jpo?: { id: string; name: string; official: boolean; source: "jakarta-bina-marga" | "osm" }[];
   } | null;
-  profiles: {
-    id: string;
-    label: string;
-    stationId: string | null;
-    stationName: string | null;
-    score: number | null;
-    totalMinutes: number | null;
-    transferCount: number | null;
-    accessWalkKm: number | null;
-  }[];
-  candidates: {
-    stationId: string;
-    stationName: string;
-    accessWalkKm: number;
-    totalMinutes: number;
-    transferCount: number;
-    score: number;
-  }[];
 };
 
 export const api = {
@@ -592,6 +610,13 @@ export const api = {
   places: (query: string, signal?: AbortSignal) =>
     request<PlaceSuggestion[]>(
       `/places?q=${encodeURIComponent(query)}&limit=6`,
+      signal ? { signal } : undefined,
+    ),
+
+  /** The address of a coordinate, for the place the rider is standing on. */
+  reversePlace: (latitude: number, longitude: number, signal?: AbortSignal) =>
+    request<{ place: ReversedPlace }>(
+      `/places/reverse?latitude=${latitude}&longitude=${longitude}`,
       signal ? { signal } : undefined,
     ),
 
@@ -654,6 +679,9 @@ export const api = {
   },
 
   disruptions: () => request<DisruptionSummary[]>("/routes/disruptions"),
+
+  /** The committed JPO and footbridge registry. */
+  jpos: () => request<JpoDocument>("/jpo"),
 
   agentTools: () =>
     request<{ configured: boolean; model: string; provider: string }>("/agent/tools"),

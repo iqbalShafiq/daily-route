@@ -6,6 +6,7 @@ import { createEmbeddingProvider, PlaceResolver } from "@daily-route/semantic";
 import { createApp } from "./app.js";
 import { createAttemptLimiter } from "./attempts.js";
 import type { ApiDeps } from "./deps.js";
+import { loadJpoDocument } from "./jpo-store.js";
 
 /**
  * The API entry point.
@@ -19,8 +20,13 @@ async function main(): Promise<void> {
 
   const provider = createEmbeddingProvider(env);
   const resolver = new PlaceResolver(db, provider);
+  const jpos = loadJpoDocument();
 
-  const bundle = createRouteAgent({ env, db });
+  const bundle = createRouteAgent({
+    env,
+    db,
+    ...(jpos ? { jpos: jpos.jpos } : {}),
+  });
 
   // Without a provider key the agent is not constructed at all, so the API
   // reports it as unavailable instead of failing on the first question.
@@ -34,6 +40,7 @@ async function main(): Promise<void> {
     agent,
     lastProviderError: null,
     attempts: createAttemptLimiter(10, 15 * 60_000),
+    jpos,
   };
 
   const app = createApp(deps);

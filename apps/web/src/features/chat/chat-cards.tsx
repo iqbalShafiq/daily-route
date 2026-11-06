@@ -1,15 +1,9 @@
-import {
-  ArrowRight,
-  Clock3,
-  ExternalLink,
-  MapPin,
-  Navigation,
-  Route as RouteIcon,
-  TriangleAlert,
-} from "lucide-react";
+import { Clock3, ExternalLink, MapPin, Navigation, TriangleAlert } from "lucide-react";
 
 import { Button } from "../../components/ui/button.js";
+import { Headsign } from "../../components/ui/headsign.js";
 import { cn } from "../../lib/cn.js";
+import { SERVICE_CLASS_COLOR, type ServiceClass } from "../../lib/format.js";
 import type { ChatCard } from "@daily-route/transit";
 
 import type { ChatAction } from "./use-chat.js";
@@ -64,54 +58,66 @@ function ChatCardView({
         origin: card.origin,
         destination: card.destination,
       } satisfies ChatAction);
+    const firstRide = card.primary.legs.find((leg) => leg.kind === "ride");
+    const rideColor = firstRide
+      ? (SERVICE_CLASS_COLOR[firstRide.serviceClass as ServiceClass] ?? "var(--mode-bus)")
+      : null;
     return (
-      <article className="overflow-hidden rounded-[10px] border border-line bg-surface">
-        <div className="flex items-start gap-3 px-3 py-3">
-          <span className="mt-0.5 flex size-7 shrink-0 items-center justify-center rounded-full bg-accent-soft text-accent">
-            <RouteIcon aria-hidden className="size-4" />
-          </span>
-          <div className="min-w-0 flex-1">
-            <p className="text-[12px] font-semibold uppercase tracking-[0.04em] text-ink-3">
-              {card.status === "terhalang" ? "Route has a notice" : "Route"}
-            </p>
-            <p className="mt-0.5 truncate text-[13px] text-ink">
-              {card.origin} <ArrowRight aria-hidden className="inline size-3 text-ink-3" />{" "}
-              {card.destination}
-            </p>
-            <div className="mt-2 flex flex-wrap items-baseline gap-x-3 gap-y-1">
-              <span className="text-[20px] leading-[1.05] font-semibold tabular-nums text-ink">
-                {Math.round(card.primary.durationMinutes)} min
-              </span>
-              {card.primary.fareLabel ? (
-                <span className="text-[13px] font-medium tabular-nums text-ink">
-                  {card.primary.fareLabel}
-                </span>
-              ) : null}
-              <span className="text-[12px] text-ink-3">
+      <article className="overflow-hidden rounded-[4px] border border-line">
+        {/* A route answer is the same headsign as the planner's result,
+            not a second card style. */}
+        <Headsign
+          code={firstRide?.lineCode ?? null}
+          codeColor={rideColor}
+          destination={card.destination}
+          closed={card.status === "terhalang"}
+          meta={
+            <>
+              <span>{Math.round(card.primary.durationMinutes)} min</span>
+              <span aria-hidden>·</span>
+              <span>
                 {card.primary.transfers > 0
                   ? `${card.primary.transfers} change${card.primary.transfers === 1 ? "" : "s"}`
                   : "no changes"}
-                {card.primary.walkingKm > 0 ? ` · walk ${card.primary.walkingKm.toFixed(1)} km` : ""}
               </span>
-            </div>
-          </div>
-        </div>
+              {card.primary.fareLabel ? (
+                <>
+                  <span aria-hidden>·</span>
+                  <span>Fare</span>
+                  <span>{card.primary.fareLabel}</span>
+                </>
+              ) : null}
+            </>
+          }
+        />
+        <div aria-hidden className="ticket-perforation" />
 
-        <div className="border-t border-line px-3 py-2">
-          <ul className="space-y-2">
+        <div className="px-3 py-2">
+          <p className="text-[12px] leading-[1.45] text-ink-3">
+            From {card.origin} to {card.destination}
+            {card.primary.walkingKm > 0
+              ? ` · walk ${card.primary.walkingKm.toFixed(1)} km`
+              : ""}
+          </p>
+          <ul className="mt-2 space-y-2">
             {card.primary.legs.slice(0, 6).map((leg, index) => (
               <li key={`${leg.from}-${leg.to}-${index}`} className="flex items-center gap-2">
                 <span
                   className={cn(
-                    "w-9 shrink-0 rounded-[3px] px-1 py-px text-center font-mono text-[12px]",
+                    "w-9 shrink-0 rounded-[3px] px-1 py-px text-center text-[12px] font-semibold tabular-nums",
                     leg.kind === "walk"
                       ? "bg-surface-2 text-ink-3"
-                      : "bg-accent-soft text-accent",
+                      : "bg-surface-2 text-ink",
                   )}
+                  style={
+                    leg.kind === "walk"
+                      ? undefined
+                      : { color: SERVICE_CLASS_COLOR[leg.serviceClass as ServiceClass] }
+                  }
                 >
                   {leg.kind === "walk" ? "walk" : (leg.lineCode ?? "ride")}
                 </span>
-                <span className="min-w-0 flex-1 truncate text-[12px] text-ink-2">
+                <span className="min-w-0 flex-1 truncate text-[12px] leading-[1.45] text-ink-2">
                   {leg.from} → {leg.to}
                 </span>
                 {leg.kind === "ride" ? <FrequencyBadge leg={leg} /> : null}
@@ -124,7 +130,7 @@ function ChatCardView({
         </div>
 
         {card.notices.length > 0 ? (
-          <div className="border-t border-line bg-warn/5 px-3 py-2">
+          <div className="bg-warn-soft px-3 py-2">
             {card.notices.slice(0, 2).map((notice) => {
               const noticeAction = actions.find(
                 (action) => action.type === "show_notice" && action.disruptionId === notice.id,
@@ -137,7 +143,7 @@ function ChatCardView({
                     <button
                       type="button"
                       onClick={() => onAction(noticeAction)}
-                      className="shrink-0 cursor-pointer text-[12px] text-accent hover:underline"
+                      className="shrink-0 cursor-pointer text-[12px] text-ink underline underline-offset-2 hover:text-ink-2"
                     >
                       Show
                     </button>
@@ -149,8 +155,8 @@ function ChatCardView({
         ) : null}
 
         {card.alternatives.length > 0 ? (
-          <div className="border-t border-line px-3 py-2">
-            <p className="text-[12px] text-ink-3">Other ways</p>
+          <div className="px-3 py-2">
+            <p className="text-[12px] leading-[1.45] text-ink-3">Other ways</p>
             <ul className="mt-1 space-y-0.5">
               {card.alternatives.map((option, index) => (
                 <li key={index} className="flex items-baseline gap-2 text-[12px] text-ink-2">
@@ -170,7 +176,7 @@ function ChatCardView({
         ) : null}
 
         {routeAction ? (
-          <div className="border-t border-line px-3 py-2">
+          <div className="px-3 py-2">
             <Button type="button" variant="secondary" size="sm" onClick={() => onAction(routeAction)}>
               Open this journey
             </Button>
@@ -221,8 +227,8 @@ function ChatCardView({
         longitude: card.longitude,
       } satisfies ChatAction);
     return (
-      <article className="rounded-[10px] border border-line bg-surface px-3 py-3">
-        <p className="flex items-center gap-2 text-[12px] font-semibold uppercase tracking-[0.04em] text-ink-3">
+      <article className="rounded-[4px] border border-line bg-surface px-3 py-3">
+        <p className="flex items-center gap-2 text-[12px] font-semibold leading-[1.35] text-ink-3">
           <MapPin aria-hidden className="size-3" />
           Stop
         </p>
@@ -231,14 +237,14 @@ function ChatCardView({
         {card.lines.length > 0 ? (
           <p className="mt-2 flex flex-wrap gap-1">
             {card.lines.slice(0, 8).map((line) => (
-              <span key={line.code} className="rounded-[3px] bg-surface-2 px-2 py-px font-mono text-[12px] text-ink-2">
+              <span key={line.code} className="rounded-[3px] bg-surface-2 px-2 py-px text-[12px] font-semibold text-ink-2">
                 {line.code}
               </span>
             ))}
           </p>
         ) : null}
         {card.departures.length > 0 ? (
-          <div className="mt-2 border-t border-line pt-2">
+          <div className="mt-2">
             <p className="flex items-center gap-1 text-[12px] text-ink-3">
               <Clock3 aria-hidden className="size-3" />
               Scheduled departures
@@ -246,7 +252,7 @@ function ChatCardView({
             <ul className="mt-1 space-y-0.5">
               {card.departures.slice(0, 5).map((row, index) => (
                 <li key={`${row.code}-${row.direction}-${index}`} className="flex items-baseline gap-2 text-[12px] text-ink-2">
-                  <span className="w-9 shrink-0 font-mono text-ink-3">{row.code}</span>
+                  <span className="w-9 shrink-0 font-semibold text-ink-3">{row.code}</span>
                   <span className="min-w-0 flex-1 truncate">{row.headsign ?? "Towards the end"}</span>
                   <span className="shrink-0 tabular-nums text-ink-3">
                     {row.headwayMinMinutes === null ? "unknown" : `~${Math.round(row.headwayMinMinutes)} min`}
@@ -291,8 +297,8 @@ function ChatCardView({
           } satisfies ChatAction)
         : undefined);
     return (
-      <article className="rounded-[10px] border border-line bg-surface px-3 py-3">
-        <p className="flex items-center gap-2 text-[12px] font-semibold uppercase tracking-[0.04em] text-warn">
+      <article className="rounded-[4px] border border-line bg-surface px-3 py-3">
+        <p className="flex items-center gap-2 text-[12px] font-semibold leading-[1.35] text-warn">
           <TriangleAlert aria-hidden className="size-3" />
           {card.kind} · {card.scope}
         </p>
@@ -307,12 +313,12 @@ function ChatCardView({
   }
 
   return (
-    <article className="rounded-[10px] border border-line bg-surface px-3 py-2">
+    <article className="rounded-[4px] border border-line bg-surface px-3 py-2">
       <a
         href={card.url}
         target="_blank"
         rel="noreferrer"
-        className="flex items-center gap-2 text-[12px] text-accent hover:underline"
+        className="flex items-center gap-2 text-[12px] text-ink underline underline-offset-2 hover:text-ink-2"
       >
         <ExternalLink aria-hidden className="size-3" />
         <span className="min-w-0 truncate">{card.title}</span>

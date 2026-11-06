@@ -72,7 +72,7 @@ export function ConfirmDialog({
         >
           <Dialog.Popup
             className={cn(
-              "panel pointer-events-auto w-full max-w-[400px] rounded-[12px] border-t-2 border-t-ink p-4",
+              "panel pointer-events-auto w-full max-w-[400px] rounded-[4px] p-4",
               "transition-[opacity,transform] duration-200 ease-[cubic-bezier(0.22,1,0.36,1)] motion-reduce:transition-none",
               "data-[ending-style]:translate-y-2 data-[ending-style]:opacity-0",
               "data-[starting-style]:translate-y-2 data-[starting-style]:opacity-0",

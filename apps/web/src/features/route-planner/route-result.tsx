@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import {
   AlertCircle,
   Bell,
@@ -6,12 +6,13 @@ import {
   ChevronLeft,
   ChevronRight,
   Route as RouteIcon,
-  X,
 } from "lucide-react";
 
 import { Button } from "../../components/ui/button.js";
+import { Tooltip } from "../../components/ui/tooltip.js";
 import { QuietScroll } from "../../components/ui/quiet-scroll.js";
-import { AnimatedNumber } from "../../components/ui/animated-number.js";
+import { Headsign } from "../../components/ui/headsign.js";
+import { iconWellClass } from "../../components/ui/icon-well.js";
 import { IncidentIcon } from "../../components/transit/incident-icon.js";
 import { RideIdentity } from "../../components/map/operator-mark.js";
 import { LegList } from "../../components/transit/leg-list.js";
@@ -33,6 +34,7 @@ import {
   formatTime,
   type ServiceClass,
 } from "../../lib/format.js";
+import { legendEntries, type RouteLegendEntry } from "../../lib/route-colors.js";
 import {
   closedStationIds,
   planChoices,
@@ -42,12 +44,29 @@ import {
 
 import type { UsePlanResult } from "./use-plan.js";
 
+/** The one ride that names the headsign, and its operator colour. */
+function primaryRideOf(route: Itinerary | undefined) {
+  return route?.legs.find((leg) => leg.kind === "ride");
+}
+
+/** The corridor code of the first ride, or null when the way starts on foot. */
+function codeOf(route: Itinerary | undefined): string | null {
+  return primaryRideOf(route)?.lineCode ?? null;
+}
+
+/** The colour of the vehicle the headsign belongs to. */
+function colorOf(route: Itinerary | undefined): string | null {
+  const ride = primaryRideOf(route);
+  if (!ride) return null;
+  return SERVICE_CLASS_COLOR[ride.serviceClass as ServiceClass] ?? "var(--mode-bus)";
+}
+
 /**
  * The result of the search.
  *
- * It is a printed route board: the way being followed at the top, the
- * alternatives as tickets under it, then the journey and the stops. The
- * board can be empty, loading or broken, and it says which.
+ * It is a printed route board: one black headsign that names the way, a
+ * perforation, and the paper slip with the alternatives and the legs under
+ * it. The board can be empty, loading or broken, and it says which.
  */
 export function RouteResult({
   plan,
@@ -60,6 +79,9 @@ export function RouteResult({
   watching = false,
   onToggleWatch,
   onClose,
+  hoveredLine = null,
+  onHoverLine,
+  pendingDestination,
   className,
 }: {
   plan: UsePlanResult;
@@ -76,6 +98,11 @@ export function RouteResult({
   onToggleWatch?: (() => void) | undefined;
   /** Dismiss the route and return to the empty board. */
   onClose?: (() => void) | undefined;
+  /** The line the reader is pointing at in the legend, if any. */
+  hoveredLine?: string | null | undefined;
+  onHoverLine?: ((lineKey: string | null) => void) | undefined;
+  /** The destination being planned, for the loading headsign. */
+  pendingDestination?: string | undefined;
   className?: string;
 }) {
   const data: PlanResult | undefined = plan.data;
@@ -84,14 +111,13 @@ export function RouteResult({
   const notices = data?.disruptions ?? [];
   const closed = closedStationIds(notices);
 
-  if (plan.isFetching && !data) return <RouteLoading className={className} />;
+  if (plan.isFetching && !data) {
+    return <RouteLoading destination={pendingDestination ?? ""} className={className} />;
+  }
 
   if (plan.isError) {
     return (
-      <section
-        className={cn("panel rise-in rounded-[12px] border-t-2 border-t-danger p-4", className)}
-        role="alert"
-      >
+      <section className={cn("panel rise-in rounded-[4px] p-4", className)} role="alert">
         <p className="flex items-center gap-2 text-[13px] font-semibold text-ink">
           <AlertCircle aria-hidden className="size-4 shrink-0 text-danger" />
           The route could not be calculated
@@ -110,28 +136,39 @@ export function RouteResult({
     if (data.routeBlocked) {
       return (
         <section
-          className={cn("panel rise-in rounded-[12px] p-4", className)}
+          className={cn("rise-in overflow-hidden rounded-[4px]", className)}
           role="alert"
         >
-          <p className="flex items-center gap-2 text-[13px] font-semibold text-ink">
-            <AlertCircle aria-hidden className="size-4 shrink-0 text-danger" />
-            No open journey
-          </p>
-          <p className="mt-1 text-[13px] leading-[1.5] text-ink-2">
-            Every way we found between {data.origin.name} and{" "}
-            {data.destination.name} is closed or diverted. Check the service
-            board before you travel.
-          </p>
-          {data.disruptions[0] ? (
-            <p className="mt-2 text-[13px] leading-[1.45] text-ink-3">
-              {data.disruptions[0].title}
+          <Headsign
+            destination={data.destination.name}
+            closed
+            onClose={onClose}
+            meta={
+              <span>
+                {data.origin.name} to {data.destination.name} is closed or
+                diverted on every way we found.
+              </span>
+            }
+          />
+          <div className="panel rounded-none border-t-0 px-4 py-3">
+            <p className="flex items-center gap-2 text-[13px] font-semibold text-ink">
+              <AlertCircle aria-hidden className="size-4 shrink-0 text-danger" />
+              No open journey
             </p>
-          ) : null}
+            <p className="mt-1 text-[13px] leading-[1.5] text-ink-2">
+              Check the service board before you travel.
+            </p>
+            {data.disruptions[0] ? (
+              <p className="mt-2 text-[13px] leading-[1.45] text-ink-3">
+                {data.disruptions[0].title}
+              </p>
+            ) : null}
+          </div>
         </section>
       );
     }
     return (
-      <section className={cn("panel rise-in rounded-[12px] p-4", className)}>
+      <section className={cn("panel rise-in rounded-[4px] p-4", className)}>
         <p className="flex items-center gap-2 text-[13px] font-semibold text-ink">
           <RouteIcon aria-hidden className="size-4 shrink-0 text-ink-3" />
           No connected journey
@@ -146,41 +183,47 @@ export function RouteResult({
 
   if (!data || routes.length === 0) return null;
 
+  const blocked = current ? routeIsBlocked(current, notices) : false;
+  const fare = current?.fare;
+
   return (
-    <div className={cn("flex min-h-0 flex-col lg:flex-1", className)}>
+    <div className={cn("relative flex min-h-0 flex-col lg:flex-1", className)}>
       <section
-        key={`${data.origin.id}:${data.destination.id}`}
-        className="rise-in panel relative flex min-h-0 flex-1 flex-col overflow-hidden rounded-[12px] border-t-2 border-t-ink"
+        key={`${data.origin.stationId}:${data.destination.stationId}`}
+        className="rise-in panel ticket-bite relative flex min-h-0 flex-1 flex-col overflow-hidden rounded-[4px]"
         aria-live="polite"
         aria-busy={plan.isFetching}
       >
-        {plan.isFetching ? (
-          <span aria-hidden className="absolute inset-x-0 top-0 z-10 h-0.5 overflow-hidden bg-line">
-            <span className="route-loader" />
-          </span>
-        ) : null}
-        <div className="flex shrink-0 items-center justify-between gap-3 border-b border-line/70 px-4 py-3">
-          <div className="flex min-w-0 items-center gap-2">
-            <RouteIcon aria-hidden className="size-3.5 text-accent" />
-            <p className="eyebrow">Route board</p>
-          </div>
-          <div className="flex shrink-0 items-center gap-1">
-            <p className="font-mono text-[12px] font-medium tabular-nums leading-[1.2] text-ink-3">
-              {formatTime(data.computedAt)} WIB
-            </p>
-            {onClose ? (
-              <button
-                type="button"
-                onClick={onClose}
-                aria-label="Close the route"
-                title="Close the route"
-                className="flex size-7 cursor-pointer items-center justify-center rounded-md text-ink-3 transition-colors hover:bg-surface-2 hover:text-ink"
-              >
-                <X aria-hidden className="size-3.5" />
-              </button>
-            ) : null}
-          </div>
-        </div>
+        <Chads />
+
+        <Headsign
+          code={codeOf(current)}
+          codeColor={colorOf(current)}
+          destination={data.destination.name}
+          closed={blocked}
+          loading={plan.isFetching}
+          onClose={onClose}
+          meta={
+            <>
+              <span>{formatDuration(current?.durationMinutes ?? 0)}</span>
+              <span aria-hidden>·</span>
+              <span>
+                {current && current.transferCount > 0
+                  ? `${current.transferCount} ${current.transferCount === 1 ? "change" : "changes"}`
+                  : "no changes"}
+              </span>
+              {fare?.available && fare.label ? (
+                <>
+                  <span aria-hidden>·</span>
+                  <span>Fare</span>
+                  <span>{fare.label}</span>
+                </>
+              ) : null}
+            </>
+          }
+        />
+
+        <div aria-hidden className="ticket-perforation shrink-0" />
 
         {data.disruptions.length > 0 ? <RouteAlerts disruptions={data.disruptions} /> : null}
 
@@ -198,11 +241,12 @@ export function RouteResult({
             <JourneyDetail
               data={data}
               route={current}
-              routes={routes}
               activeLeg={activeLeg}
               onLegSelect={onLegSelect}
               onStopHover={onStopHover}
               closed={closed}
+              hoveredLine={hoveredLine}
+              onHoverLine={onHoverLine}
             />
           ) : (
             <p className="px-4 py-4 text-[13px] leading-[1.5] text-ink-3">
@@ -212,8 +256,8 @@ export function RouteResult({
         </QuietScroll>
 
         {current ? (
-          <footer className="flex shrink-0 items-center justify-between gap-3 border-t border-line/70 px-4 py-2">
-            <p className="min-w-0 truncate font-mono text-[12px] leading-[1.2] text-ink-3">
+          <footer className="flex shrink-0 items-center justify-between gap-3 px-4 py-2">
+            <p className="min-w-0 truncate text-[12px] leading-[1.45] text-ink-3">
               Last calculated {formatTime(data.computedAt)} WIB
             </p>
             {onToggleWatch ? (
@@ -222,16 +266,16 @@ export function RouteResult({
                 onClick={onToggleWatch}
                 aria-pressed={watching}
                 className={cn(
-                  "inline-flex shrink-0 cursor-pointer items-center gap-2 rounded-md border px-2 py-1 font-mono text-[12px] font-medium uppercase leading-[1.2] tracking-[0.04em] transition-colors",
+                  "inline-flex min-h-11 shrink-0 cursor-pointer items-center gap-2 rounded-[4px] border px-2 text-[12px] font-medium transition-colors",
                   watching
-                    ? "border-accent bg-accent-soft text-ink"
-                    : "border-line-strong bg-surface text-ink-2 hover:border-ink hover:text-ink",
+                    ? "border-accent-hover bg-accent text-accent-ink hover:bg-accent-hover"
+                    : "border-line bg-surface text-ink hover:bg-surface-2",
                 )}
               >
                 {watching ? (
-                  <BellRing aria-hidden className="size-3" />
+                  <BellRing aria-hidden className="size-3.5" />
                 ) : (
-                  <Bell aria-hidden className="size-3" />
+                  <Bell aria-hidden className="size-3.5" />
                 )}
                 {watching ? "Watching" : "Watch"}
               </button>
@@ -243,41 +287,54 @@ export function RouteResult({
   );
 }
 
+/**
+ * Three paper discs fall once from the ticket bite, then they are gone.
+ *
+ * They are the punch chad of a ticket, not sparkles: no loop, no pointer
+ * tracking, and nothing on the map. A reader who asked for less motion
+ * never sees them.
+ */
+function Chads() {
+  return (
+    <span aria-hidden className="pointer-events-none absolute left-0 top-[84px] z-10">
+      {[
+        { x: "-6px", spin: "-28deg", delay: "0ms", color: "var(--surface)" },
+        { x: "5px", spin: "34deg", delay: "36ms", color: "var(--line-strong)" },
+        { x: "12px", spin: "12deg", delay: "72ms", color: "var(--surface-3)" },
+      ].map((chad) => (
+        <span
+          key={chad.x}
+          className="chad absolute size-2 rounded-full"
+          style={{
+            backgroundColor: chad.color,
+            animationDelay: chad.delay,
+            ["--chad-x" as string]: chad.x,
+            ["--chad-spin" as string]: chad.spin,
+          }}
+        />
+      ))}
+    </span>
+  );
+}
+
 /** The board while the geometry is being computed. */
-function RouteLoading({ className }: { className?: string | undefined }) {
+function RouteLoading({
+  destination,
+  className,
+}: {
+  destination: string;
+  className?: string | undefined;
+}) {
   return (
     <section
-      className={cn("panel rise-in rounded-[12px] border-t-2 border-t-ink p-4", className)}
+      className={cn("rise-in panel flex min-h-0 flex-col overflow-hidden rounded-[4px]", className)}
       aria-busy="true"
       aria-live="polite"
     >
-      <p className="sr-only">Calculating the route…</p>
-      <div className="flex items-center justify-between gap-3">
-        <div className="flex items-center gap-2">
-          <RouteIcon aria-hidden className="size-3.5 text-accent" />
-          <p className="eyebrow">Drawing the route</p>
-        </div>
-      </div>
-      <div className="relative mt-5 h-px w-full overflow-hidden bg-line">
-        <span aria-hidden className="route-loader" />
-        <span
-          aria-hidden
-          className="absolute -top-1 left-0 size-2 rounded-full border-2 border-accent bg-surface"
-        />
-        <span aria-hidden className="absolute -top-1 right-0 size-2 rounded-[4px] bg-ink" />
-      </div>
-      <div className="mt-5 flex items-end gap-3">
-        <span className="h-9 w-32 rounded-[4px] bg-surface-2" />
-        <span className="h-4 w-20 rounded-[4px] bg-surface-2" />
-      </div>
-      <div className="mt-4 space-y-3">
-        {[0, 1, 2].map((index) => (
-          <div key={index} className="flex items-center gap-3">
-            <span className="size-7 shrink-0 rounded-[4px] bg-surface-2" />
-            <span className="h-3 flex-1 rounded-[4px] bg-surface-2" />
-          </div>
-        ))}
-      </div>
+      <p className="sr-only">Calculating the route</p>
+      <Headsign destination={destination} loading />
+      <div aria-hidden className="ticket-perforation shrink-0" />
+      <div className="min-h-24 flex-1" />
     </section>
   );
 }
@@ -286,8 +343,9 @@ function RouteLoading({ className }: { className?: string | undefined }) {
  * The ways of getting there.
  *
  * A row of tabs hides the comparison: the rider sees three names and no
- * difference. A list of tickets shows what each way costs and what it
- * buys, the way a departure board does.
+ * difference. A list of rows shows what each way costs and what it buys,
+ * the way a departure board does. The chosen row is paper with an ink rail
+ * on its left.
  */
 function RouteChoices({
   routes,
@@ -302,14 +360,14 @@ function RouteChoices({
 }) {
   const visible = visibleChoiceIndexes(routes, notices);
   return (
-    <section aria-label="Ways to go" className="border-b border-line/70 px-3 pb-3 pt-3">
-      <div className="mb-2 flex items-center justify-between gap-3">
+    <section aria-label="Ways to go" className="px-4 pb-1 pt-3">
+      <div className="mb-1 flex items-baseline justify-between gap-3">
         <p className="eyebrow">Ways to go</p>
-        <p className="font-mono text-[12px] leading-[1.2] text-ink-3">
+        <p className="text-[12px] leading-[1.35] tabular-nums text-ink-3">
           {visible.length} {visible.length === 1 ? "option" : "options"}
         </p>
       </div>
-      <ul className="flex flex-col gap-2">
+      <ul className="flex flex-col">
         {visible.map((index, order) => {
           const route = routes[index];
           if (!route) return null;
@@ -317,7 +375,7 @@ function RouteChoices({
           const chosen = index === activeIndex;
           const ride = route.legs.find((leg) => leg.kind === "ride");
           const color = ride
-            ? (SERVICE_CLASS_COLOR[ride.serviceClass as ServiceClass] ?? "var(--accent)")
+            ? (SERVICE_CLASS_COLOR[ride.serviceClass as ServiceClass] ?? "var(--mode-bus)")
             : "var(--ink-3)";
           return (
             <li
@@ -331,21 +389,11 @@ function RouteChoices({
                   onClick={() => onChange(chosen ? null : index)}
                   aria-pressed={chosen}
                   className={cn(
-                    "press relative flex w-full min-w-0 cursor-pointer items-center gap-3 overflow-hidden rounded-lg border px-3 py-3 text-left",
-                    chosen
-                      ? "border-ink bg-surface shadow-raised"
-                      : "border-line-strong/70 bg-surface/60 hover:border-line-strong hover:bg-surface",
+                    "press relative flex min-h-11 w-full min-w-0 cursor-pointer items-center gap-3 border-b border-line/70 px-1 py-2 text-left last:border-b-0",
+                    chosen ? "border-l-2 border-l-ink bg-surface-2" : "",
                   )}
                 >
-                  <span
-                    aria-hidden
-                    className="absolute inset-y-0 left-0 w-[3px]"
-                    style={{ backgroundColor: chosen ? color : "transparent" }}
-                  />
-                  <span
-                    className="flex size-8 shrink-0 items-center justify-center rounded-[4px] border border-line bg-surface-2"
-                    style={{ color }}
-                  >
+                  <span className={iconWellClass} style={{ color }}>
                     <RideIdentity
                       lineId={ride?.lineId}
                       serviceClass={ride?.serviceClass}
@@ -356,28 +404,23 @@ function RouteChoices({
                     <span className="flex min-w-0 items-center gap-2">
                       <span
                         className={cn(
-                          "truncate text-[13px] font-semibold",
-                          label.blocked ? "text-danger" : "text-ink",
+                          "truncate text-[15px] font-semibold",
+                          label.blocked ? "text-danger line-through" : "text-ink",
                         )}
                       >
                         {label.name}
                       </span>
-                      {chosen ? (
-                        <span className="hidden shrink-0 font-mono text-[12px] font-medium uppercase leading-[1.2] tracking-[0.04em] text-accent sm:inline">
-                          Selected
-                        </span>
-                      ) : null}
                     </span>
-                    <span className="mt-0.5 block truncate font-mono text-[12px] uppercase leading-[1.2] tracking-[0.04em] text-ink-3">
+                    <span className="mt-0.5 block truncate text-[12px] leading-[1.45] text-ink-3">
                       {label.detail || "Direct"}
                     </span>
                   </span>
                   <span className="flex shrink-0 flex-col items-end gap-0.5">
-                    <span className="font-mono text-[15px] font-semibold leading-[1.2] tabular-nums text-ink">
+                    <span className="text-[15px] font-semibold leading-[1.2] tabular-nums text-ink">
                       {formatDuration(route.durationMinutes)}
                     </span>
                     {route.fare.available && route.fare.label ? (
-                      <span className="font-mono text-[12px] leading-[1.2] tabular-nums text-ink-2">
+                      <span className="text-[12px] leading-[1.45] tabular-nums text-ink-2">
                         {route.fare.label}
                       </span>
                     ) : null}
@@ -392,112 +435,176 @@ function RouteChoices({
   );
 }
 
+/**
+ * The colours of this journey.
+ *
+ * Each vehicle keeps its operator's colour, and walking keeps a dashed ink
+ * line. Pointing at a row lights that line on the map, so the board and the
+ * map share one reading.
+ */
+function RouteLegend({
+  route,
+  hoveredLine,
+  onHoverLine,
+}: {
+  route: Itinerary;
+  hoveredLine: string | null;
+  onHoverLine?: ((lineKey: string | null) => void) | undefined;
+}) {
+  const entries = useMemo(() => legendEntries(route), [route]);
+  if (entries.length === 0) return null;
+
+  return (
+    <section aria-label="Route colours" className="mt-4">
+      <div className="flex items-baseline justify-between gap-3">
+        <p className="eyebrow">Route colours</p>
+        <p className="text-[12px] leading-[1.35] text-ink-3">Point to follow</p>
+      </div>
+      <ul className="mt-2 flex flex-wrap gap-2">
+        {entries.map((entry) => {
+          const active = hoveredLine === entry.key;
+          return (
+            <li key={entry.key}>
+              <Tooltip
+                variant="panel"
+                side="top"
+                label={<RouteLegendDetail entry={entry} />}
+              >
+                <button
+                  type="button"
+                  aria-pressed={active}
+                  aria-label={`${entry.label}${entry.name && entry.name !== entry.label ? `, ${entry.name}` : ""}, ${formatDuration(entry.durationMinutes)}`}
+                  onMouseEnter={() => onHoverLine?.(entry.key)}
+                  onMouseLeave={() => onHoverLine?.(null)}
+                  onFocus={() => onHoverLine?.(entry.key)}
+                  onBlur={() => onHoverLine?.(null)}
+                  onClick={() => onHoverLine?.(active ? null : entry.key)}
+                  className={cn(
+                    "press flex min-h-11 cursor-pointer items-center gap-2 rounded-[4px] border px-2 py-1 text-left transition-colors",
+                    active
+                      ? "border-l-2 border-l-ink bg-surface-2"
+                      : "border-line bg-surface hover:bg-surface-2",
+                  )}
+                >
+                  <span aria-hidden className="flex w-5 shrink-0 items-center">
+                    {entry.kind === "walk" ? (
+                      <span
+                        className="h-0 w-5 border-t-2 border-dashed"
+                        style={{ borderColor: entry.color }}
+                      />
+                    ) : (
+                      /* The enamel route: a thick operator line with a
+                         paper casing, not a thin swatch. */
+                      <span
+                        className="h-[6px] w-5 rounded-full border-2"
+                        style={{
+                          backgroundColor: entry.color,
+                          borderColor: "var(--surface)",
+                        }}
+                      />
+                    )}
+                  </span>
+                  <span className="text-[13px] font-semibold leading-[1.2] text-ink">
+                    {entry.label}
+                  </span>
+                  <span className="text-[12px] leading-[1.45] tabular-nums text-ink-3">
+                    {formatDuration(entry.durationMinutes)}
+                  </span>
+                </button>
+              </Tooltip>
+            </li>
+          );
+        })}
+      </ul>
+    </section>
+  );
+}
+
+function RouteLegendDetail({ entry }: { entry: RouteLegendEntry }) {
+  return (
+    <div className="flex flex-col gap-1">
+      <p className="text-[13px] font-semibold leading-[1.3] text-ink">
+        {entry.label}
+        {entry.name && entry.name !== entry.label ? ` · ${entry.name}` : ""}
+      </p>
+      <p className="text-[12px] leading-[1.45] text-ink-2">
+        {entry.fromName} → {entry.toName}
+      </p>
+      <p className="text-[12px] leading-[1.45] tabular-nums text-ink-3">
+        {entry.kind === "walk"
+          ? `Walk · ${formatDuration(entry.durationMinutes)}`
+          : `${entry.stopCount} stops · ${formatDuration(entry.durationMinutes)}`}
+      </p>
+      {entry.directionLabel ? (
+        <p className="text-[12px] leading-[1.45] text-ink-2">Towards {entry.directionLabel}</p>
+      ) : null}
+      {entry.temporary ? (
+        <p className="text-[12px] leading-[1.45] text-ink-3">Temporary service</p>
+      ) : null}
+    </div>
+  );
+}
+
 function JourneyDetail({
   data,
   route,
-  routes,
   activeLeg,
   onLegSelect,
   onStopHover,
   closed,
+  hoveredLine,
+  onHoverLine,
 }: {
   data: PlanResult;
   route: Itinerary;
-  routes: readonly Itinerary[];
   activeLeg?: string | null | undefined;
   onLegSelect?: ((legId: string | null) => void) | undefined;
   onStopHover?: ((stationId: string | null) => void) | undefined;
   closed: ReadonlySet<string>;
+  hoveredLine?: string | null | undefined;
+  onHoverLine?: ((lineKey: string | null) => void) | undefined;
 }) {
   const patternLabel = route.legs.find((leg) => leg.kind === "ride" && leg.patternLabel)
     ?.patternLabel;
   return (
     <>
-      <div className="px-4 pb-3 pt-4">
-        <div className="flex items-start justify-between gap-3">
-          <div className="min-w-0 flex-1">
-            <p className="eyebrow">Journey</p>
-            <div className="mt-1 flex items-start gap-2">
-              <div aria-hidden className="flex flex-col items-center pt-1">
-                <span className="size-2.5 rounded-full border-2 border-accent bg-surface" />
-                <span className="my-1 h-6 w-px bg-line-strong/70" />
-                <span className="size-2.5 rounded-[4px] bg-ink" />
-              </div>
-              <div className="min-w-0 flex-1">
-                <p className="eyebrow">From</p>
-                <p className="truncate text-[15px] font-semibold text-ink">
-                  {data.origin.name}
-                </p>
-                <p className="eyebrow mt-2">To</p>
-                <p className="truncate text-[15px] font-semibold text-ink">{data.destination.name}</p>
-              </div>
-            </div>
-          </div>
-          {route.fare.available && route.fare.label ? (
-            <div className="shrink-0 text-right">
-              <p className="eyebrow">Fare</p>
-              {routes.length === 1 ? (
-                <PayHint notes={payLines(route.fare)}>
-                  <p className="mt-1 font-mono text-[20px] font-semibold leading-[1.3] tabular-nums text-ink">
-                    {route.fare.label}
-                  </p>
-                </PayHint>
-              ) : (
-                <p className="mt-1 font-mono text-[20px] font-semibold leading-[1.3] tabular-nums text-ink">
-                  {route.fare.label}
-                </p>
-              )}
-            </div>
-          ) : null}
-        </div>
+      <div className="px-4 pb-3 pt-3">
+        <p className="text-[13px] leading-[1.5] text-ink-2">
+          <span className="text-ink-3">From</span> {data.origin.name}
+          <span className="mx-2 text-ink-3">·</span>
+          <span className="text-ink-3">To</span> {data.destination.name}
+        </p>
 
-        <div className="mt-3 flex items-end justify-between gap-3 border-t border-line/70 pt-3">
-          <div className="min-w-0">
-            <p className="text-[40px] font-semibold leading-[1.05] tracking-[-0.03em] tabular-nums text-ink">
-              <AnimatedNumber value={route.durationMinutes} format={formatDuration} />
-            </p>
-            <p className="mt-1 text-[13px] leading-[1.5] text-ink-2">
-              {formatDistance(route.distanceKm)} ·{" "}
-              {route.transferCount > 0
-                ? `${route.transferCount} ${route.transferCount === 1 ? "change" : "changes"}`
-                : "no changes"}
-              {route.walkingKm > 0 ? ` · walk ${formatDistance(route.walkingKm)}` : ""}
-            </p>
-          </div>
-          <div className="shrink-0 text-right">
-            <p className="font-mono text-[12px] font-medium leading-[1.2] tabular-nums text-ink-2">
-              {data.quotedAt ? `${formatTime(data.quotedAt)} WIB` : ""}
-            </p>
-            <p className="mt-0.5 font-mono text-[12px] uppercase leading-[1.2] tracking-[0.04em] text-ink-3">
-              {data.nightSafe ? "Night-safe" : data.scheduled ? "Leave at" : "Now"}
-            </p>
-          </div>
-        </div>
+        <p className="mt-1 text-[13px] leading-[1.5] text-ink-2">
+          {formatDistance(route.distanceKm)} ·{" "}
+          {route.transferCount > 0
+            ? `${route.transferCount} ${route.transferCount === 1 ? "change" : "changes"}`
+            : "no changes"}
+          {route.walkingKm > 0 ? ` · walk ${formatDistance(route.walkingKm)}` : ""}
+        </p>
 
-        <div className="mt-2 flex flex-wrap items-center gap-2">
-          <span className="rounded-[4px] border border-line-strong px-2 py-0.5 font-mono text-[12px] uppercase leading-[1.2] tracking-[0.04em] text-ink-3">
-            Schedule-based
+        <div className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1 text-[12px] leading-[1.45] text-ink-3">
+          <span>Schedule-based</span>
+          {patternLabel ? <span>{patternLabel}</span> : null}
+          <span className="ml-auto tabular-nums text-ink-2">
+            {data.quotedAt ? `${formatTime(data.quotedAt)} WIB` : ""}
           </span>
-          {patternLabel ? (
-            <span className="rounded-[4px] border border-line-strong px-2 py-0.5 font-mono text-[12px] uppercase leading-[1.2] tracking-[0.04em] text-ink-3">
-              {patternLabel}
-            </span>
-          ) : null}
-          {data.nightSafe ? (
-            <span className="rounded-[4px] bg-accent-soft px-2 py-0.5 font-mono text-[12px] uppercase leading-[1.2] tracking-[0.04em] text-accent">
-              Fewer night walks
-            </span>
-          ) : null}
         </div>
+
+        <RouteLegend
+          route={route}
+          hoveredLine={hoveredLine ?? null}
+          onHoverLine={onHoverLine}
+        />
 
         <Verdict route={route} plan={data} />
 
         {route.fare.available &&
         (route.fare.breakdown.length > 0 || route.fare.alternatives.length > 0) ? (
-          <div className="mt-3 rounded-lg border border-dashed border-line-strong bg-surface-2/40 px-3 py-3">
+          <div className="mt-4 rounded-[4px] border border-dashed border-line-strong px-3 py-3">
             <div className="flex items-baseline justify-between gap-3">
               <p className="eyebrow">Ticket</p>
-              <p className="font-mono text-[12px] font-medium tabular-nums text-ink">
+              <p className="text-[12px] font-medium tabular-nums text-ink">
                 {route.fare.label}
               </p>
             </div>
@@ -511,7 +618,7 @@ function JourneyDetail({
                     <span className="min-w-0 flex-1 text-[13px] leading-[1.5] text-ink">
                       {item.label}
                     </span>
-                    <span className="shrink-0 font-mono text-[13px] font-medium tabular-nums text-ink">
+                    <span className="shrink-0 text-[13px] font-medium tabular-nums text-ink">
                       {formatRupiah(item.amountIdr)}
                     </span>
                   </div>
@@ -528,7 +635,7 @@ function JourneyDetail({
                   <span className="min-w-0 flex-1 text-[12px] leading-[1.45] text-ink-3">
                     {alternative.label}
                   </span>
-                  <span className="shrink-0 font-mono text-[13px] font-medium tabular-nums text-ink">
+                  <span className="shrink-0 text-[13px] font-medium tabular-nums text-ink">
                     {formatRupiah(alternative.amountIdr)}
                   </span>
                 </li>
@@ -539,15 +646,13 @@ function JourneyDetail({
         ) : null}
       </div>
 
-      <div className="border-t border-line/70">
-        <LegList
-          legs={route.legs}
-          activeLegId={activeLeg}
-          onLegSelect={onLegSelect}
-          onStopHover={onStopHover}
-          closedStationIds={closed}
-        />
-      </div>
+      <LegList
+        legs={route.legs}
+        activeLegId={activeLeg}
+        onLegSelect={onLegSelect}
+        onStopHover={onStopHover}
+        closedStationIds={closed}
+      />
     </>
   );
 }
@@ -604,7 +709,7 @@ function Verdict({ route, plan }: { route: Itinerary; plan: PlanResult }) {
     const place =
       plan.disruptions.find((item) => item.blocksService)?.stationName ?? "a closed stop";
     return (
-      <p className="mt-2 flex items-start gap-2 text-[13px] leading-[1.5] text-danger">
+      <p className="mt-3 flex items-start gap-2 text-[13px] leading-[1.5] text-danger">
         <AlertCircle aria-hidden className="mt-0.5 size-3.5 shrink-0" />
         Blocked at {place}. This journey uses a stop that is not in service.
       </p>
@@ -619,7 +724,7 @@ function Verdict({ route, plan }: { route: Itinerary; plan: PlanResult }) {
       watched.find((item) => item.stationName)?.stationName ??
       "a watched stop";
     return (
-      <p className="mt-2 text-[13px] leading-[1.5] text-accent">
+      <p className="mt-3 text-[13px] leading-[1.5] text-ink-2">
         Open for this journey. It does not pass the notice at {name}.
       </p>
     );
@@ -653,10 +758,10 @@ function RouteAlerts({ disruptions }: { disruptions: readonly DisruptionSummary[
   return (
     <section
       aria-label="Service alerts on this route"
-      className="relative shrink-0 border-b border-line/70 bg-surface-2/40"
+      className="relative shrink-0 bg-surface-2/40 px-4 py-2"
     >
-      <span aria-hidden className={cn("absolute inset-y-0 left-0 w-[3px]", rail)} />
-      <div className="flex items-start gap-2 py-3 pl-4 pr-3">
+      <span aria-hidden className={cn("absolute inset-y-2 left-0 w-[3px]", rail)} />
+      <div className="flex items-start gap-2">
         <IncidentIcon
           mark={alert.mark}
           kind={alert.kind}
@@ -667,7 +772,7 @@ function RouteAlerts({ disruptions }: { disruptions: readonly DisruptionSummary[
             {alert.title}
           </p>
           <div className="mt-0.5 flex items-center justify-between gap-2">
-            <p className="min-w-0 truncate font-mono text-[12px] leading-[1.2] text-ink-3">
+            <p className="min-w-0 truncate text-[12px] leading-[1.45] text-ink-3">
               {DISRUPTION_KIND_LABEL[alert.kind] ?? alert.kind}
               {alert.stationName ? ` · ${alert.stationName}` : ""}
               {window ? ` · ${window}` : ""}
@@ -693,18 +798,18 @@ function RouteAlerts({ disruptions }: { disruptions: readonly DisruptionSummary[
                   onClick={() =>
                     setIndex((active - 1 + disruptions.length) % disruptions.length)
                   }
-                  className="inline-flex size-6 cursor-pointer items-center justify-center rounded text-ink-3 transition-colors hover:bg-surface-3 hover:text-ink"
+                  className="inline-flex size-8 cursor-pointer items-center justify-center rounded-[4px] text-ink-3 transition-colors hover:bg-surface-3 hover:text-ink"
                 >
                   <ChevronLeft aria-hidden className="size-3.5" />
                 </button>
-                <span className="font-mono text-[12px] tabular-nums text-ink-3">
+                <span className="text-[12px] tabular-nums text-ink-3">
                   {active + 1}/{disruptions.length}
                 </span>
                 <button
                   type="button"
                   aria-label="Next alert"
                   onClick={() => setIndex((active + 1) % disruptions.length)}
-                  className="inline-flex size-6 cursor-pointer items-center justify-center rounded text-ink-3 transition-colors hover:bg-surface-3 hover:text-ink"
+                  className="inline-flex size-8 cursor-pointer items-center justify-center rounded-[4px] text-ink-3 transition-colors hover:bg-surface-3 hover:text-ink"
                 >
                   <ChevronRight aria-hidden className="size-3.5" />
                 </button>

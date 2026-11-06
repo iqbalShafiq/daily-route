@@ -27,6 +27,8 @@ export type MemoryPlace = {
   kind: "station" | "place";
   id: string;
   name: string;
+  /** The full address a marked current location carries, when there is one. */
+  address: string | null;
   latitude: number;
   longitude: number;
   systemId: string | null;
@@ -504,6 +506,7 @@ async function resolvePlace(
         kind: "station",
         id: station.id,
         name: station.name,
+        address: null,
         latitude: station.latitude,
         longitude: station.longitude,
         systemId: station.systemId,
@@ -582,6 +585,7 @@ export function memoryPlaceOf(value: unknown): MemoryPlace | null {
     kind,
     id,
     name,
+    address: typeof value["address"] === "string" ? value["address"] : null,
     latitude,
     longitude,
     systemId: typeof value["systemId"] === "string" ? value["systemId"] : null,

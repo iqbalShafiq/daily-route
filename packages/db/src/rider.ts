@@ -383,7 +383,7 @@ async function loadStationPlace(db: Database, id: string): Promise<MemoryPlace |
     .limit(1);
   const row = rows[0];
   if (!row) return null;
-  return { kind: "station", ...row };
+  return { kind: "station", address: null, ...row };
 }
 
 /** The label a rider gave to each station place, by station id. */

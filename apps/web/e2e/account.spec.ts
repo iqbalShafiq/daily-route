@@ -182,3 +182,65 @@ test.describe("account", () => {
     expect(keys).not.toContain("daily-route.watched-trips");
   });
 });
+
+test.describe("the rider's current place", () => {
+  test.use({
+    permissions: ["geolocation"],
+    geolocation: { latitude: -6.1952, longitude: 106.8211 },
+  });
+
+  test("keeps the reason when the position is outside the network", async ({ page }, testInfo) => {
+    await page.route("**/api/places/reverse**", (route) =>
+      route.fulfill({
+        status: 400,
+        json: { error: "That place is outside Jabodetabek, so it is not on this network." },
+      }),
+    );
+    await page.goto("/");
+
+    await createAccount(page, newEmail(testInfo));
+    await page.getByRole("button", { name: "Current location" }).click();
+
+    await expect(
+      page.getByText("That place is outside Jabodetabek, so it is not on this network."),
+    ).toBeVisible();
+  });
+
+  test("prefills the saved place with the current address", async ({ page }, testInfo) => {
+    await page.route("**/api/places/reverse**", (route) =>
+      route.fulfill({
+        json: {
+          place: {
+            kind: "place",
+            id: "place:current:-6.19520,106.82110",
+            name: "Jalan Teluk Betung",
+            address: "Jalan Teluk Betung No. 1, Kebon Melati, Jakarta Pusat",
+            latitude: -6.1952,
+            longitude: 106.8211,
+            systemId: null,
+            systemName: null,
+          },
+        },
+      }),
+    );
+    await page.goto("/");
+
+    await createAccount(page, newEmail(testInfo));
+    await page.getByRole("button", { name: "Current location" }).click();
+
+    // The address and the label are already there; the rider only names it.
+    await expect(page.getByLabel("Place", { exact: true })).toHaveValue(
+      "Jalan Teluk Betung No. 1, Kebon Melati, Jakarta Pusat",
+    );
+    await expect(page.getByLabel("Name", { exact: true })).toHaveValue("Current location");
+
+    await page.getByLabel("Name", { exact: true }).fill("Home");
+    await page.getByRole("button", { name: "Add place" }).click();
+
+    const home = page
+      .getByRole("listitem")
+      .filter({ has: page.getByRole("button", { name: "Remove Home" }) });
+    await expect(home).toBeVisible({ timeout: 15_000 });
+    await expect(home).toContainText("Jalan Teluk Betung No. 1");
+  });
+});

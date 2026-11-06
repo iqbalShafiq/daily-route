@@ -51,6 +51,7 @@ const deps: ApiDeps = {
   agent: null,
   lastProviderError: null,
   attempts: createAttemptLimiter(100, 15 * 60_000),
+  jpos: null,
 };
 
 const app = createApp(deps);
