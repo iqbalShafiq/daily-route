@@ -51,6 +51,16 @@ export type ResolveOptions = {
 const CANDIDATES_PER_CHANNEL = 120;
 
 /**
+ * A query embedding is reused for a short while.
+ *
+ * The place field asks the same name again when a rider corrects a
+ * letter or moves between the two fields. Embedding is the slow and paid
+ * part of the resolve; the station query itself is a few milliseconds.
+ */
+const EMBEDDING_CACHE_MS = 10 * 60 * 1000;
+const EMBEDDING_CACHE_LIMIT = 200;
+
+/**
  * The score a candidate must reach to count as a confident match.
  *
  * Below it, the caller should ask the rider for a more specific name
@@ -82,6 +92,7 @@ export const PLACE_CONFIDENCE_THRESHOLD = 0.3;
 export class PlaceResolver {
   readonly #db: Database;
   readonly #provider: EmbeddingProvider;
+  readonly #embeddings = new Map<string, { at: number; vector: number[] }>();
 
   constructor(db: Database, provider: EmbeddingProvider) {
     this.#db = db;
@@ -95,7 +106,7 @@ export class PlaceResolver {
     const limit = options.limit ?? 8;
     const vectorWeight = options.vectorWeight ?? 0.55;
 
-    const [embedding] = await this.#provider.embed([query]);
+    const embedding = await this.#embeddingFor(query);
     const vectorLiteral =
       embedding && embedding.length > 0 ? toVectorLiteral(embedding) : null;
 
@@ -238,6 +249,25 @@ export class PlaceResolver {
           a.name.localeCompare(b.name, "id"),
       )
       .slice(0, limit);
+  }
+
+  async #embeddingFor(query: string): Promise<number[]> {
+    const key = query.trim().toLowerCase().replace(/\s+/g, " ");
+    const cached = this.#embeddings.get(key);
+    if (cached && Date.now() - cached.at < EMBEDDING_CACHE_MS) {
+      return cached.vector;
+    }
+
+    const [vector] = await this.#provider.embed([query]);
+    const embedding = vector ?? [];
+    if (embedding.length === 0) return [];
+
+    this.#embeddings.set(key, { at: Date.now(), vector: embedding });
+    if (this.#embeddings.size > EMBEDDING_CACHE_LIMIT) {
+      const oldest = this.#embeddings.keys().next().value;
+      if (oldest !== undefined) this.#embeddings.delete(oldest);
+    }
+    return embedding;
   }
 
   /** The searchable document stored next to a station for semantic lookups. */

@@ -1,4 +1,5 @@
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
+import { eq } from "drizzle-orm";
 
 import { createDb } from "./client.js";
 import {
@@ -8,9 +9,11 @@ import {
   listSystems,
   loadInterchangeSiblings,
   loadNetwork,
+  searchMapPlaces,
   searchStationsLexical,
   updateNotice,
 } from "./queries.js";
+import { mapPlaces } from "./schema.js";
 
 /**
  * The database layer, against the real database.
@@ -38,6 +41,34 @@ beforeAll(async () => {
 
 afterAll(async () => {
   await db.$client.end({ timeout: 5 });
+});
+
+describe("searchMapPlaces", () => {
+  it("finds a place by a prefix and leaves the other rows alone", async () => {
+    const id = `test:${Date.now()}`;
+    await db.insert(mapPlaces).values({
+      id,
+      name: "Test Grand Indonesia Place",
+      category: "shopping_mall",
+      address: "Jl. Test",
+      locality: "Jakarta",
+      confidence: 0.9,
+      latitude: -6.1958,
+      longitude: 106.8215,
+      release: "test",
+    });
+
+    try {
+      const rows = await searchMapPlaces(db, "Test Grand");
+      expect(rows.some((row) => row.id === id)).toBe(true);
+      expect(rows[0]?.name).toContain("Test Grand");
+
+      const empty = await searchMapPlaces(db, "zzzz-no-such-place");
+      expect(empty).toEqual([]);
+    } finally {
+      await db.delete(mapPlaces).where(eq(mapPlaces.id, id));
+    }
+  });
 });
 
 describe("loadNetwork", () => {

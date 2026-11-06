@@ -7,6 +7,7 @@ import {
   type GeoJSONSource,
 } from "maplibre-gl";
 import type { FeatureCollection } from "geojson";
+import type { Jpo } from "@daily-route/transit";
 import { useEffect, useRef } from "react";
 
 import { cn } from "../../lib/cn.js";
@@ -20,7 +21,7 @@ import {
   operatorLogo,
   operatorMark,
 } from "./operator-mark.js";
-import { routeFlowDash, routeFlowIndex } from "./route-flow.js";
+import { BEAD_DURATION_MS, beadPointAt } from "./route-bead.js";
 
 /**
  * The route map.
@@ -43,12 +44,18 @@ export type MapLeg = {
   width?: number;
   /** The station this marker stands for. */
   stationId?: string;
-  /** Whether the reader is pointing at this leg of the journey. */
+  /** Whether the reader chose this leg in the list. */
   highlighted?: boolean;
+  /** Whether the reader is pointing at this line in the legend. */
+  hovered?: boolean;
   /** What the segment is: a ride, or the walk between two vehicles. */
   kind: "ride" | "walk";
+  /** The line this segment belongs to, for the legend and the hover. */
+  lineKey: string;
   /** The name of the vehicle, for the popover. */
   label: string;
+  /** What the popover says below the name. */
+  detail: string;
   /** The service, so the legend can show its mark. */
   serviceClass?: string | null | undefined;
   /** The operator the line belongs to, for the official wordmark. */
@@ -66,7 +73,7 @@ export type MapMarker = {
   label: string;
   /** A second line: the operator, or what happens at this point. */
   detail?: string | undefined;
-  kind: "origin" | "destination" | "stop" | "transfer" | "incident";
+  kind: "origin" | "destination" | "endpoint" | "stop" | "transfer" | "incident";
   /** The order of the point in the journey. */
   order?: number | undefined;
   /** The station the point stands for, so the map can point back at it. */
@@ -77,6 +84,11 @@ export type MapMarker = {
   mark?: string | undefined;
   /** 1 when this notice is the one the reader opened. */
   selected?: number | undefined;
+  /**
+   * Both ends of a journey that starts and finishes at the same place.
+   * The two are drawn as one stacked mark and named together.
+   */
+  pair?: { from: string; to: string } | undefined;
 };
 
 export type RouteMapProps = {
@@ -104,6 +116,8 @@ export type RouteMapProps = {
   /** Halte and stasiun of operating lines. Symbols, not DOM markers. */
   places?: readonly NetworkPlace[] | undefined;
   platforms?: readonly NetworkPlatform[] | undefined;
+  /** The JPO and footbridge registry. */
+  jpos?: readonly Jpo[] | undefined;
   /**
    * Operators left on the idle map.
    *
@@ -174,10 +188,13 @@ const ROUTE_HALO_LAYER = "route-halo";
 const ALT_ROUTE_LAYER = "route-line-alt";
 const WALK_LAYER = "route-line-walk";
 const WALK_HALO_LAYER = "route-line-walk-halo";
-const ROUTE_FLOW_LAYER = "route-flow";
+const BEAD_SOURCE = "route-bead";
+const BEAD_LAYER = "route-bead";
 const SOURCE_ID = "routes";
 const MARKER_SOURCE_ID = "markers";
 const MARKER_HIT_LAYER = "marker-hit";
+const ENDPOINT_FROM_LAYER = "endpoint-from";
+const ENDPOINT_TO_LAYER = "endpoint-to";
 const INCIDENT_PULSE_LAYER = "incident-pulse";
 const INCIDENT_ICON_LAYER = "incident-icon";
 const NETWORK_SOURCE = "network";
@@ -192,6 +209,12 @@ const PLACE_RAIL = "network-place-rail";
 const PLACE_LAYERS = [PLACE_BUS, PLACE_RAIL] as const;
 const PLATFORM_SOURCE = "network-platforms";
 const PLATFORM_LAYER = "network-platform";
+const JPO_SOURCE = "jpo";
+const JPO_CASING_LAYER = "jpo-casing";
+const JPO_LAYER = "jpo-line";
+const JPO_END_LAYER = "jpo-end";
+const JPO_OSM_LAYER = "jpo-line-osm";
+const JPO_OSM_END_LAYER = "jpo-end-osm";
 
 export function RouteMap({
   legs,
@@ -204,6 +227,7 @@ export function RouteMap({
   network = [],
   places = EMPTY_PLACES,
   platforms = EMPTY_PLATFORMS,
+  jpos = [],
   visibleSystems = ALL_SYSTEMS,
   glance = null,
   focus = null,
@@ -235,6 +259,7 @@ export function RouteMap({
   const placesKeyRef = useRef<string | null>(null);
   const platformsRef = useRef(platforms);
   const platformsKeyRef = useRef<string | null>(null);
+  const jposRef = useRef(jpos);
   const systemsRef = useRef(visibleSystems);
 
   // --- Create the map once ---------------------------------------------
@@ -251,8 +276,10 @@ export function RouteMap({
     });
 
     // The popover of a point. It lives with the map, because the handlers
-    // that show it belong to the map too.
+    // that show it belong to the map too. Hover and click keep separate
+    // popovers: a clicked one stays while the pointer moves.
     let popup: Popup | null = null;
+    let clickPopup: Popup | null = null;
 
     // The style is the only thing that is reloaded, and every reload wipes
     // the layers this component owns. One handler puts them back and
@@ -263,11 +290,11 @@ export function RouteMap({
       // every time a leg is chosen.
       const routesMissing = !map.getSource(SOURCE_ID);
       const markersMissing = !map.getSource(MARKER_SOURCE_ID);
-      if (!routesMissing && !markersMissing) return;
-      if (routesMissing) {
-        addNetworkLayers(map);
-        addRouteLayers(map);
-      }
+      const jpoMissing = !map.getSource(JPO_SOURCE);
+      if (!routesMissing && !markersMissing && !jpoMissing) return;
+      if (routesMissing) addNetworkLayers(map);
+      if (jpoMissing) addJpoLayers(map);
+      if (routesMissing) addRouteLayers(map);
       if (markersMissing) addMarkerLayers(map);
       addFocusLayers(map);
       placeWalkAboveStops(map);
@@ -279,6 +306,7 @@ export function RouteMap({
       syncFocusLine(map, focusRef.current, networkRef.current);
       syncPlaces(map, placesRef.current);
       syncPlatforms(map, platformsRef.current);
+      syncJpos(map, jposRef.current);
       applyNetworkSystems(map, systemsRef.current);
       syncLegs(map, legsRef.current);
       paintNetworkDim(map, legsRef.current.some((leg) => leg.kind === "ride"));
@@ -311,28 +339,49 @@ export function RouteMap({
     /*
      * The line under the pointer.
      *
-     * The line grows a little and the cursor says it can be pointed at,
-     * so the reader knows the map is not a picture but a thing to be
-     * read.
+     * The line grows a little and a small card names the vehicle and the
+     * stretch it covers, so the map is readable without the legend. The
+     * card is the same DOM popover the stops use; its text is written as
+     * text, never as markup.
      */
+    const lineLayers = [ROUTE_LAYER, WALK_LAYER];
     let hoveredLine: number | string | null = null;
-    map.on("mousemove", ROUTE_LAYER, (event) => {
+    map.on("mousemove", lineLayers, (event) => {
       const feature = event.features?.[0];
-      const id = feature?.id;
-      if (id === undefined || id === hoveredLine) return;
+      if (!feature) return;
+      const id = feature.id ?? feature.properties?.["id"];
+      if (id === undefined || id === hoveredLine) {
+        popup?.setLngLat(event.lngLat);
+        return;
+      }
       if (hoveredLine !== null) {
         map.setFeatureState({ source: SOURCE_ID, id: hoveredLine }, { hover: false });
       }
       hoveredLine = id;
-      map.setFeatureState({ source: SOURCE_ID, id }, { hover: true });
+      if (id !== undefined) {
+        map.setFeatureState({ source: SOURCE_ID, id }, { hover: true });
+      }
       map.getCanvas().style.cursor = "pointer";
+      showTextPopup(
+        map,
+        () => popup,
+        (created) => {
+          popup = created;
+        },
+        event.lngLat.lng,
+        event.lngLat.lat,
+        String(feature.properties?.["label"] ?? ""),
+        String(feature.properties?.["detail"] ?? ""),
+      );
     });
-    map.on("mouseleave", ROUTE_LAYER, () => {
+    map.on("mouseleave", lineLayers, () => {
       if (hoveredLine !== null) {
         map.setFeatureState({ source: SOURCE_ID, id: hoveredLine }, { hover: false });
         hoveredLine = null;
       }
       map.getCanvas().style.cursor = "";
+      popup?.remove();
+      popup = null;
     });
 
     const placeLayers = [...PLACE_LAYERS];
@@ -369,12 +418,61 @@ export function RouteMap({
       });
     });
 
+    /*
+     * A pedestrian bridge names itself under the pointer. The line is a
+     * piece of walking infrastructure, not a transit corridor: the card says
+     * which kind of record it is and the stop it serves.
+     */
+    const jpoLayers = [JPO_LAYER, JPO_END_LAYER, JPO_OSM_LAYER, JPO_OSM_END_LAYER];
+    map.on("mouseenter", jpoLayers, (event) => {
+      const feature = event.features?.[0];
+      if (!feature) return;
+      map.getCanvas().style.cursor = "pointer";
+      const name = String(feature.properties?.["name"] ?? "");
+      const detail = String(feature.properties?.["detail"] ?? "");
+      showTextPopup(
+        map,
+        () => popup,
+        (created) => {
+          popup = created;
+        },
+        event.lngLat.lng,
+        event.lngLat.lat,
+        name,
+        detail,
+      );
+    });
+    map.on("mouseleave", jpoLayers, () => {
+      map.getCanvas().style.cursor = "";
+      popup?.remove();
+      popup = null;
+    });
+
     map.on("click", MARKER_HIT_LAYER, (event) => {
       const feature = event.features?.[0];
       if (!feature) return;
       const id = feature.properties?.["id"];
       const marker = markersRef.current.find((candidate) => candidate.id === id);
       if (!marker) return;
+
+      // A clicked point keeps its name on screen, so a finger can read it
+      // without a hover. The two ends of a loop name both in one popover.
+      popup?.remove();
+      popup = null;
+      clickPopup?.remove();
+      clickPopup = null;
+      if (marker.kind === "origin" || marker.kind === "destination" || marker.kind === "endpoint") {
+        showPopup(
+          map,
+          () => clickPopup,
+          (created) => {
+            clickPopup = created;
+          },
+          feature,
+          markersRef.current,
+          { sticky: true },
+        );
+      }
 
       onMarkerClickRef.current?.(marker);
 
@@ -397,6 +495,7 @@ export function RouteMap({
 
     return () => {
       popup?.remove();
+      clickPopup?.remove();
       map.remove();
       mapRef.current = null;
     };
@@ -533,6 +632,14 @@ export function RouteMap({
     syncMarkers(map, markers);
   }, [markers]);
 
+  // --- Draw the pedestrian bridges --------------------------------------
+  useEffect(() => {
+    jposRef.current = jpos;
+    const map = mapRef.current;
+    if (!map) return;
+    syncJpos(map, jpos);
+  }, [jpos]);
+
   /*
    * The stop the reader is pointing at grows on the map, so the list
    * and the map point at the same place.
@@ -558,37 +665,6 @@ export function RouteMap({
       map.setLayoutProperty(INCIDENT_ICON_LAYER, "icon-size", incidentBaseSize(station));
     }
   }, [highlightedStationId, markers]);
-
-  /*
-   * A closure keeps asking to be seen. The stop stays still; an outline
-   * of its plate travels out and fades. The loop runs only while a closure
-   * is on the map, and not at all when the reader asked for less motion.
-   */
-  const hasRide = legs.some((leg) => leg.kind === "ride" && !leg.dashed);
-  useEffect(() => {
-    const map = mapRef.current;
-    if (!map) return;
-    const media = window.matchMedia("(prefers-reduced-motion: reduce)");
-    let stop = (): void => {};
-
-    const sync = (): void => {
-      stop();
-      stop = () => {};
-      if (!hasRide || media.matches) {
-        quietRouteFlow(map);
-        return;
-      }
-      stop = runRouteFlow(map);
-    };
-
-    sync();
-    media.addEventListener("change", sync);
-    return () => {
-      media.removeEventListener("change", sync);
-      stop();
-      quietRouteFlow(map);
-    };
-  }, [hasRide]);
 
   const hasIncident = markers.some((marker) => marker.kind === "incident");
   useEffect(() => {
@@ -629,7 +705,7 @@ function resolveColor(value: string, fallback: string): string {
 /** The colours the map paints with, read from the theme tokens. */
 function themeColors() {
   return {
-    origin: resolveColor("var(--accent)", "var(--accent)"),
+    origin: resolveColor("var(--ink)", "var(--ink)"),
     destination: resolveColor("var(--ink)", "var(--ink)"),
     danger: resolveColor("var(--danger)", "var(--danger)"),
     stop: resolveColor("var(--ink-2)", "var(--ink-2)"),
@@ -638,6 +714,7 @@ function themeColors() {
     halo: resolveColor("var(--map-halo)", "var(--map-halo)"),
     alternative: resolveColor("var(--warn)", "var(--warn)"),
     onColour: resolveColor("var(--accent-ink)", "var(--accent-ink)"),
+    jpo: resolveColor("var(--jpo)", "var(--jpo)"),
   };
 }
 
@@ -1004,7 +1081,7 @@ function addFocusLayers(map: MapLibreMap): void {
     source: FOCUS_SOURCE,
     layout: { "line-cap": "round", "line-join": "round" },
     paint: {
-      "line-color": resolveColor("var(--accent)", "var(--accent)"),
+      "line-color": resolveColor("var(--ink)", "var(--ink)"),
       "line-width": 7,
       "line-offset": BUS_LEFT_OFFSET,
       "line-opacity": 0.22,
@@ -1016,7 +1093,7 @@ function addFocusLayers(map: MapLibreMap): void {
     source: FOCUS_SOURCE,
     layout: { "line-cap": "round", "line-join": "round" },
     paint: {
-      "line-color": resolveColor("var(--accent)", "var(--accent)"),
+      "line-color": resolveColor("var(--ink)", "var(--ink)"),
       "line-width": 3.5,
       "line-offset": BUS_LEFT_OFFSET,
       "line-opacity": 0.95,
@@ -1153,7 +1230,7 @@ function addRouteLayers(map: MapLibreMap): void {
     layout: { "line-cap": "round", "line-join": "round" },
     paint: {
       "line-color": colors.halo,
-      "line-width": 12,
+      "line-width": 18,
       "line-offset": BUS_LEG_OFFSET,
       "line-opacity": 1,
       "line-opacity-transition": { duration: 0, delay: 0 },
@@ -1168,7 +1245,7 @@ function addRouteLayers(map: MapLibreMap): void {
     layout: { "line-cap": "round", "line-join": "round" },
     paint: {
       "line-color": colors.casing,
-      "line-width": 10,
+      "line-width": 15,
       "line-offset": BUS_LEG_OFFSET,
       "line-opacity": 1,
       "line-opacity-transition": { duration: 0, delay: 0 },
@@ -1193,33 +1270,27 @@ function addRouteLayers(map: MapLibreMap): void {
       "line-width": [
         "case",
         ["boolean", ["feature-state", "hover"], false],
-        ["+", ["get", "width"], 1.5],
-        ["get", "width"],
+        ["+", ["get", "width"], 3.5],
+        ["+", ["get", "width"], 2],
       ],
       "line-opacity-transition": { duration: 0, delay: 0 },
       "line-width-transition": { duration: 0, delay: 0 },
     },
   } as never);
 
-  // A dash that travels along the ride, so the direction can be read
-  // without a legend. It starts invisible; the flow loop paints it, and
-  // a reader who asked for less motion never sees it move.
+  // One enamel bead travels the open journey once and then rests. It is
+  // not a live vehicle and it does not loop: the ride is the journey being
+  // read, drawn once.
+  map.addSource(BEAD_SOURCE, { type: "geojson", data: emptyFeatureCollection() });
   map.addLayer({
-    id: ROUTE_FLOW_LAYER,
-    type: "line",
-    source: SOURCE_ID,
-    filter: ["all", ["==", ["get", "variant"], 0], ["==", ["get", "kind"], "ride"]],
-    layout: { "line-cap": "butt", "line-join": "round" },
+    id: BEAD_LAYER,
+    type: "circle",
+    source: BEAD_SOURCE,
     paint: {
-      "line-color": colors.casing,
-      "line-offset": BUS_LEG_OFFSET,
-      "line-width": ["max", 1.5, ["-", ["get", "width"], 2.5]],
-      "line-dasharray": [0, 4, 3, 0],
-      // A transition here crossfades two dashes. Updating the dash while
-      // that fade is running redraws the whole ride, which blinks.
-      "line-dasharray-transition": { duration: 0, delay: 0 },
-      "line-opacity": 0,
-      "line-opacity-transition": { duration: 0, delay: 0 },
+      "circle-radius": 5,
+      "circle-color": colors.casing,
+      "circle-stroke-width": 3,
+      "circle-stroke-color": ["get", "color"],
     },
   });
 
@@ -1241,8 +1312,11 @@ function addRouteLayers(map: MapLibreMap): void {
     },
   });
 
-  // The walk between two vehicles is dashed and thin: it is not a ride,
-  // and it should not look like one.
+  // The walk between two vehicles is dashed ink at the thickness of the
+  // ride's paper casing: it is a long part of the journey on foot, and it
+  // reads at the same weight as the ride. The dash and the ink are what
+  // keep it from being a ride, so it takes no operator colour and no
+  // casing of its own.
   map.addLayer({
     id: WALK_LAYER,
     type: "line",
@@ -1251,7 +1325,7 @@ function addRouteLayers(map: MapLibreMap): void {
     layout: { "line-cap": "round", "line-join": "round" },
     paint: {
       "line-color": ["get", "color"],
-      "line-width": 3,
+      "line-width": 15,
       "line-dasharray": [1, 2],
       "line-opacity": 0.9,
       "line-opacity-transition": { duration: 0, delay: 0 },
@@ -1303,44 +1377,53 @@ function addMarkerLayers(map: MapLibreMap): void {
     id: MARKER_SOURCE_ID,
     type: "circle",
     source: MARKER_SOURCE_ID,
+    filter: ["!=", ["get", "kind"], "endpoint"],
     paint: {
       "circle-radius": [
         "case",
         ["==", ["get", "stationId"], ""],
-        ["match", ["get", "kind"], "origin", 5, "destination", 6.5, "transfer", 4.5, "incident", 0, 2.5],
+        ["match", ["get", "kind"], "origin", 6.5, "destination", 7.5, "transfer", 4.5, "incident", 0, 2.5],
         ["match", ["get", "kind"], "incident", 0, 6],
       ],
       "circle-color": [
         "match",
         ["get", "kind"],
-        "origin",
-        colors.origin,
-        "destination",
-        colors.destination,
-        "transfer",
-        colors.casing,
         "incident",
         colors.danger,
-        colors.destination,
+        colors.casing,
       ],
-      "circle-stroke-width": ["match", ["get", "kind"], "transfer", 2.5, "incident", 0, 1.5],
+      "circle-stroke-width": [
+        "match",
+        ["get", "kind"],
+        "origin",
+        2.5,
+        "destination",
+        2.5,
+        "transfer",
+        2.5,
+        "incident",
+        0,
+        1.5,
+      ],
       "circle-stroke-color": [
         "match",
         ["get", "kind"],
         "origin",
-        colors.casing,
-        "destination",
         colors.origin,
+        "destination",
+        colors.destination,
         "transfer",
         colors.transfer,
         "incident",
         colors.casing,
-        colors.casing,
+        ["coalesce", ["get", "operatorColor"], colors.stop],
       ],
       "circle-opacity": [
         "case",
+        ["==", ["get", "kind"], "incident"],
+        1,
         ["!=", ["get", "operatorImage"], ""],
-        0,
+        ["interpolate", ["linear"], ["zoom"], 12.4, 0.9, 13.2, 0],
         ["match", ["get", "kind"], "stop", 0.75, 1],
       ],
     },
@@ -1358,6 +1441,7 @@ function addMarkerLayers(map: MapLibreMap): void {
       ["!=", ["get", "operatorImage"], ""],
       ["!=", ["get", "kind"], "stop"],
       ["!=", ["get", "kind"], "incident"],
+      ["!=", ["get", "kind"], "endpoint"],
     ],
     paint: {
       "circle-radius": ["match", ["get", "kind"], "origin", 12, "destination", 13, "transfer", 11, 10],
@@ -1382,13 +1466,57 @@ function addMarkerLayers(map: MapLibreMap): void {
     id: "route-marker-icon",
     type: "symbol",
     source: MARKER_SOURCE_ID,
-    filter: ["!=", ["get", "operatorImage"], ""],
+    filter: [
+      "all",
+      ["!=", ["get", "operatorImage"], ""],
+      ["!=", ["get", "kind"], "endpoint"],
+    ],
     layout: {
       "icon-image": ["get", "operatorImage"],
       "icon-size": ["match", ["get", "kind"], "origin", 0.62, "destination", 0.7, "transfer", 0.55, 0.5],
       "icon-allow-overlap": true,
       "icon-ignore-placement": true,
       "icon-anchor": "center",
+    },
+    paint: {
+      // Far away a stop is an enamel disc with the operator's ring. Close
+      // up it is the operator's own mark inside a small paper plate.
+      "icon-opacity": ["interpolate", ["linear"], ["zoom"], 12.4, 0, 13.2, 1],
+    },
+  });
+
+  /*
+   * The two ends of a journey that starts and finishes at the same place.
+   *
+   * The dots are offset in screen pixels, so both stay visible at every
+   * zoom instead of one covering the other. The hit area below covers the
+   * pair, and its popover names both.
+   */
+  map.addLayer({
+    id: ENDPOINT_FROM_LAYER,
+    type: "circle",
+    source: MARKER_SOURCE_ID,
+    filter: ["==", ["get", "kind"], "endpoint"],
+    paint: {
+      "circle-radius": 7,
+      "circle-color": colors.casing,
+      "circle-stroke-width": 2.5,
+      "circle-stroke-color": colors.origin,
+      "circle-translate": [-7, -7],
+    },
+  });
+
+  map.addLayer({
+    id: ENDPOINT_TO_LAYER,
+    type: "circle",
+    source: MARKER_SOURCE_ID,
+    filter: ["==", ["get", "kind"], "endpoint"],
+    paint: {
+      "circle-radius": 7,
+      "circle-color": colors.casing,
+      "circle-stroke-width": 2.5,
+      "circle-stroke-color": colors.destination,
+      "circle-translate": [7, 7],
     },
   });
 
@@ -1444,7 +1572,15 @@ function addMarkerLayers(map: MapLibreMap): void {
     id: "marker-order",
     type: "symbol",
     source: MARKER_SOURCE_ID,
-    filter: ["match", ["get", "kind"], "origin", true, "destination", true, "transfer", true, false],
+    filter: [
+      "any",
+      ["==", ["get", "kind"], "transfer"],
+      [
+        "all",
+        ["match", ["get", "kind"], "origin", true, "destination", true, false],
+        ["!=", ["get", "operatorImage"], ""],
+      ],
+    ],
     layout: {
       "text-field": ["get", "orderText"],
       "text-size": 10,
@@ -1478,6 +1614,177 @@ function addMarkerLayers(map: MapLibreMap): void {
   });
 }
 
+/**
+ * The pedestrian bridges.
+ *
+ * They are drawn only when the map is close enough for a crossing to be
+ * read: at city zoom the line would be a scribble over the roads. The line
+ * is solid and ochre, unlike the dashed walk, and each end carries a dot so
+ * the rider can see where the steps are.
+ */
+function addJpoLayers(map: MapLibreMap): void {
+  if (map.getSource(JPO_SOURCE)) return;
+  const colors = themeColors();
+  map.addSource(JPO_SOURCE, { type: "geojson", data: emptyFeatureCollection() });
+
+  map.addLayer({
+    id: JPO_CASING_LAYER,
+    type: "line",
+    source: JPO_SOURCE,
+    filter: ["all", ["==", ["geometry-type"], "LineString"], ["==", ["get", "official"], 1]],
+    minzoom: 12.5,
+    layout: { "line-cap": "round", "line-join": "round" },
+    paint: {
+      "line-color": colors.casing,
+      "line-width": 4.5,
+      "line-opacity": 0.7,
+    },
+  });
+
+  map.addLayer({
+    id: JPO_LAYER,
+    type: "line",
+    source: JPO_SOURCE,
+    filter: ["all", ["==", ["geometry-type"], "LineString"], ["==", ["get", "official"], 1]],
+    minzoom: 12.5,
+    layout: { "line-cap": "round", "line-join": "round" },
+    paint: {
+      "line-color": colors.jpo,
+      "line-width": 2.2,
+      "line-opacity": 0.95,
+    },
+  });
+
+  // An OSM-only bridge is a secondary record, not a named city asset. It
+  // is thinner, quieter and only appears when the map is close.
+  map.addLayer({
+    id: JPO_OSM_LAYER,
+    type: "line",
+    source: JPO_SOURCE,
+    filter: ["all", ["==", ["geometry-type"], "LineString"], ["==", ["get", "official"], 0]],
+    minzoom: 15,
+    layout: { "line-cap": "round", "line-join": "round" },
+    paint: {
+      "line-color": colors.stop,
+      "line-width": 1.4,
+      "line-opacity": 0.55,
+      "line-dasharray": [2, 2],
+    },
+  });
+
+  map.addLayer({
+    id: JPO_END_LAYER,
+    type: "circle",
+    source: JPO_SOURCE,
+    filter: ["all", ["==", ["geometry-type"], "Point"], ["==", ["get", "official"], 1]],
+    minzoom: 14,
+    paint: {
+      "circle-radius": 2.8,
+      "circle-color": colors.casing,
+      "circle-stroke-width": 1.5,
+      "circle-stroke-color": colors.jpo,
+    },
+  });
+
+  map.addLayer({
+    id: JPO_OSM_END_LAYER,
+    type: "circle",
+    source: JPO_SOURCE,
+    filter: ["all", ["==", ["geometry-type"], "Point"], ["==", ["get", "official"], 0]],
+    minzoom: 15,
+    paint: {
+      "circle-radius": 2,
+      "circle-color": colors.casing,
+      "circle-stroke-width": 1,
+      "circle-stroke-color": colors.stop,
+    },
+  });
+}
+
+function syncJpos(map: MapLibreMap, jpos: readonly Jpo[]): void {
+  const source = map.getSource(JPO_SOURCE) as GeoJSONSource | undefined;
+  if (!source) return;
+  const colors = themeColors();
+  if (map.getLayer(JPO_LAYER)) map.setPaintProperty(JPO_LAYER, "line-color", colors.jpo);
+  if (map.getLayer(JPO_CASING_LAYER)) {
+    map.setPaintProperty(JPO_CASING_LAYER, "line-color", colors.casing);
+  }
+  if (map.getLayer(JPO_OSM_LAYER)) {
+    map.setPaintProperty(JPO_OSM_LAYER, "line-color", colors.stop);
+  }
+  if (map.getLayer(JPO_END_LAYER)) {
+    map.setPaintProperty(JPO_END_LAYER, "circle-color", colors.casing);
+    map.setPaintProperty(JPO_END_LAYER, "circle-stroke-color", colors.jpo);
+  }
+  if (map.getLayer(JPO_OSM_END_LAYER)) {
+    map.setPaintProperty(JPO_OSM_END_LAYER, "circle-color", colors.casing);
+    map.setPaintProperty(JPO_OSM_END_LAYER, "circle-stroke-color", colors.stop);
+  }
+
+  const features = jpos.flatMap((jpo) => {
+    const name = jpo.name;
+    const detail = [
+      jpo.kind === "skywalk"
+        ? "Skywalk"
+        : jpo.kind === "underpass"
+          ? "Underpass · OSM"
+          : jpo.official
+            ? "JPO · Dinas Bina Marga"
+            : "Footbridge · OSM",
+      jpo.stations.length > 0
+        ? `Near ${jpo.stations.slice(0, 2).map((station) => station.stationName).join(", ")}`
+        : null,
+    ]
+      .filter(Boolean)
+      .join(" · ");
+    const properties = {
+      id: jpo.id,
+      name,
+      detail,
+      official: jpo.official ? 1 : 0,
+    };
+    if (jpo.geometry.length < 2) {
+      const point = jpo.officialPoint ?? jpo.startsAt;
+      if (!point) return [];
+      return [
+        {
+          type: "Feature" as const,
+          properties: { ...properties, end: "point" },
+          geometry: { type: "Point" as const, coordinates: [point.longitude, point.latitude] },
+        },
+      ];
+    }
+    const line = {
+      type: "Feature" as const,
+      properties,
+      geometry: {
+        type: "LineString" as const,
+        coordinates: jpo.geometry.map((point) => [point.longitude, point.latitude]),
+      },
+    };
+    const first = jpo.geometry[0];
+    const last = jpo.geometry[jpo.geometry.length - 1];
+    const ends =
+      first && last
+        ? [
+            {
+              type: "Feature" as const,
+              properties: { ...properties, end: "start" },
+              geometry: { type: "Point" as const, coordinates: [first.longitude, first.latitude] },
+            },
+            {
+              type: "Feature" as const,
+              properties: { ...properties, end: "end" },
+              geometry: { type: "Point" as const, coordinates: [last.longitude, last.latitude] },
+            },
+          ]
+        : [];
+    return [line, ...ends];
+  });
+
+  source.setData({ type: "FeatureCollection", features });
+}
+
 function syncLegs(map: MapLibreMap, legs: readonly MapLeg[]): void {
   const source = map.getSource(SOURCE_ID) as GeoJSONSource | undefined;
   if (!source) return;
@@ -1488,12 +1795,15 @@ function syncLegs(map: MapLibreMap, legs: readonly MapLeg[]): void {
     .filter((leg) => leg.coordinates.length > 1)
     .map((leg) => ({
       type: "Feature" as const,
+      id: leg.id,
       properties: {
         id: leg.id,
         color: resolveColor(leg.color, colors.origin),
         variant: leg.dashed ? 1 : 0,
         kind: leg.kind,
+        lineKey: leg.lineKey,
         label: leg.label,
+        detail: leg.detail,
         order: leg.order,
         width: leg.dashed ? 4 : leg.kind === "walk" ? 3 : leg.width ?? 5,
         serviceClass: leg.serviceClass ?? "",
@@ -1505,6 +1815,75 @@ function syncLegs(map: MapLibreMap, legs: readonly MapLeg[]): void {
     }));
 
   source.setData({ type: "FeatureCollection", features });
+  startBead(map, legs);
+}
+
+/** The frames and the journey each map has already drawn the bead for. */
+const beadFrames = new WeakMap<MapLibreMap, number>();
+const beadKeys = new WeakMap<MapLibreMap, string>();
+
+/**
+ * Send one enamel bead along the open journey, once.
+ *
+ * A reader who asked for less motion sees it at the destination without the
+ * travel. The bead stays there: it is not a vehicle, it does not loop, and
+ * it does not follow the pointer.
+ */
+function startBead(map: MapLibreMap, legs: readonly MapLeg[]): void {
+  const source = map.getSource(BEAD_SOURCE) as GeoJSONSource | undefined;
+  if (!source) return;
+  const path = legs
+    .filter((leg) => !leg.dashed && leg.coordinates.length > 1)
+    .flatMap((leg) => leg.coordinates);
+  const first = path[0];
+  const last = path[path.length - 1];
+  if (!first || !last || path.length < 2) {
+    source.setData(emptyFeatureCollection());
+    return;
+  }
+  const ride = legs.find((leg) => leg.kind === "ride" && !leg.dashed);
+  const color = resolveColor(ride?.color ?? "var(--ink)", "var(--ink)");
+
+  const paint = (progress: number): void => {
+    const point = beadPointAt(path, progress);
+    if (!point) {
+      source.setData(emptyFeatureCollection());
+      return;
+    }
+    source.setData({
+      type: "FeatureCollection",
+      features: [
+        {
+          type: "Feature",
+          properties: { color },
+          geometry: { type: "Point", coordinates: [point.longitude, point.latitude] },
+        },
+      ],
+    });
+  };
+
+  const key = `${path.length}:${first.longitude},${first.latitude}:${last.longitude},${last.latitude}`;
+  const previous = beadFrames.get(map);
+  if (previous !== undefined) cancelAnimationFrame(previous);
+  if (beadKeys.get(map) === key) {
+    // A style reload repaints the layers. The bead does not travel twice.
+    paint(1);
+    return;
+  }
+  beadKeys.set(map, key);
+
+  if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+    paint(1);
+    return;
+  }
+
+  const started = performance.now();
+  const tick = (now: number): void => {
+    const progress = Math.min(1, (now - started) / BEAD_DURATION_MS);
+    paint(easeInOutStrong(progress));
+    if (progress < 1) beadFrames.set(map, requestAnimationFrame(tick));
+  };
+  beadFrames.set(map, requestAnimationFrame(tick));
 }
 
 /**
@@ -1573,6 +1952,9 @@ function geometrySignature(legs: readonly MapLeg[]): string {
         leg.color,
         leg.width ?? "",
         leg.dashed ? 1 : 0,
+        leg.lineKey,
+        leg.label,
+        leg.detail,
       ].join(":");
     })
     .join("|");
@@ -1672,9 +2054,9 @@ function syncMarkers(map: MapLibreMap, markers: readonly MapMarker[]): void {
       "match",
       ["get", "kind"],
       "origin",
-      colors.origin,
+      colors.casing,
       "destination",
-      colors.destination,
+      colors.casing,
       "transfer",
       colors.casing,
       "incident",
@@ -1685,9 +2067,9 @@ function syncMarkers(map: MapLibreMap, markers: readonly MapMarker[]): void {
       "match",
       ["get", "kind"],
       "origin",
-      colors.casing,
+      colors.origin,
       "destination",
-      colors.casing,
+      colors.destination,
       "transfer",
       colors.transfer,
       "incident",
@@ -1697,6 +2079,14 @@ function syncMarkers(map: MapLibreMap, markers: readonly MapMarker[]): void {
   }
   if (map.getLayer("transfer-ring")) {
     map.setPaintProperty("transfer-ring", "circle-stroke-color", colors.transfer);
+  }
+  if (map.getLayer(ENDPOINT_FROM_LAYER)) {
+    map.setPaintProperty(ENDPOINT_FROM_LAYER, "circle-color", colors.casing);
+    map.setPaintProperty(ENDPOINT_FROM_LAYER, "circle-stroke-color", colors.origin);
+  }
+  if (map.getLayer(ENDPOINT_TO_LAYER)) {
+    map.setPaintProperty(ENDPOINT_TO_LAYER, "circle-color", colors.casing);
+    map.setPaintProperty(ENDPOINT_TO_LAYER, "circle-stroke-color", colors.destination);
   }
   source.setData({
     type: "FeatureCollection",
@@ -1709,6 +2099,10 @@ function syncMarkers(map: MapLibreMap, markers: readonly MapMarker[]): void {
         detail: marker.detail ?? "",
         stationId: marker.stationId ?? "",
         systemId: marker.systemId ?? "",
+        operatorColor: resolveColor(
+          SYSTEM_COLOR[marker.systemId ?? ""] ?? "var(--ink-2)",
+          colors.stop,
+        ),
         operatorImage: marker.systemId ? routeOperatorImageId(marker.systemId) : "",
         mark: marker.mark ?? "",
         selected: marker.selected ?? 0,
@@ -1772,6 +2166,7 @@ function showPopup(
   remember: (popup: Popup) => void,
   feature: { properties?: Record<string, unknown> | null },
   markers: readonly MapMarker[],
+  options: { sticky?: boolean } = {},
 ): void {
   const id = feature.properties?.["id"];
   const marker = markers.find((candidate) => candidate.id === id);
@@ -1785,21 +2180,35 @@ function showPopup(
   name.textContent = marker.label;
   container.append(name);
 
-  if (marker.detail) {
+  if (marker.pair) {
+    // Both ends stand on the same point. The popover names them in the
+    // order the journey uses them, because the map has only one mark.
+    for (const [role, value] of [
+      ["From", marker.pair.from],
+      ["To", marker.pair.to],
+    ] as const) {
+      const row = document.createElement("p");
+      row.className = "map-popup-pair";
+      row.textContent = `${role} · ${value}`;
+      container.append(row);
+    }
+  } else if (marker.detail) {
     const detail = document.createElement("p");
     detail.className = "map-popup-detail";
     detail.textContent = marker.detail;
     container.append(detail);
   }
 
+  const sticky = options.sticky === true;
   const popup =
     current() ??
     new Popup({
       closeButton: false,
-      closeOnClick: false,
-      // The popover follows the camera: a popover left behind on the old
-      // position would point at the wrong thing.
-      closeOnMove: true,
+      closeOnClick: sticky,
+      // A popover that follows the camera is wrong on hover, where the
+      // reader is still pointing at a point. A clicked popover stays until
+      // the reader clicks the map again.
+      closeOnMove: !sticky,
       // A popover that takes the focus would take it away from the field
       // the reader is typing in.
       focusAfterOpen: false,
@@ -1822,57 +2231,38 @@ function showPopup(
  * between two vehicles disappears under the transfer ring.
  */
 function paintLegEmphasis(map: MapLibreMap, legs: readonly MapLeg[]): void {
-  const active = legs.find((leg) => leg.highlighted);
-  const highlighted = active?.id ?? "";
+  // A leg the reader chose in the list is the focus; a line the reader
+  // points at in the legend is the same emphasis without moving the
+  // camera. One legend row can cover several segments of one vehicle.
+  const strong = legs.filter((leg) => leg.highlighted || leg.hovered).map((leg) => leg.id);
+  const active = strong.length > 0;
+  const ids = strong.length > 0 ? strong : [""];
+  const match = (on: number, off: number): ExpressionSpecification => {
+    const expression: unknown[] = ["match", ["get", "id"]];
+    for (const id of ids) expression.push(id, on);
+    expression.push(off);
+    return expression as unknown as ExpressionSpecification;
+  };
   // Always an expression. Switching between a plain number and an
   // expression rebuilds the line, and the ride blinks.
-  const rideOpacity: DataDrivenPropertyValueSpecification<number> = [
-    "case",
-    ["==", ["get", "id"], highlighted],
-    1,
-    highlighted ? 0.28 : 1,
-  ];
+  const rideOpacity: DataDrivenPropertyValueSpecification<number> = match(1, active ? 0.28 : 1);
   if (map.getLayer(ROUTE_LAYER)) map.setPaintProperty(ROUTE_LAYER, "line-opacity", rideOpacity);
   if (map.getLayer(ROUTE_CASING_LAYER)) {
     map.setPaintProperty(ROUTE_CASING_LAYER, "line-opacity", rideOpacity);
   }
   if (map.getLayer(ROUTE_HALO_LAYER)) map.setPaintProperty(ROUTE_HALO_LAYER, "line-opacity", rideOpacity);
-  if (map.getLayer(ROUTE_FLOW_LAYER)) {
-    const still = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    map.setPaintProperty(ROUTE_FLOW_LAYER, "line-opacity", still ? 0 : rideOpacity);
-  }
   if (!map.getLayer(WALK_LAYER)) return;
   const colors = themeColors();
   if (map.getLayer(WALK_HALO_LAYER)) {
     map.setPaintProperty(WALK_HALO_LAYER, "line-color", colors.destination);
-    map.setPaintProperty(WALK_HALO_LAYER, "line-width", [
-      "case",
-      ["==", ["get", "id"], highlighted],
-      11,
-      0,
-    ]);
-    map.setPaintProperty(WALK_HALO_LAYER, "line-opacity", [
-      "case",
-      ["==", ["get", "id"], highlighted],
-      1,
-      0,
-    ]);
+    map.setPaintProperty(WALK_HALO_LAYER, "line-width", match(11, 0));
+    map.setPaintProperty(WALK_HALO_LAYER, "line-opacity", match(1, 0));
   }
-  map.setPaintProperty(WALK_LAYER, "line-opacity", [
-    "case",
-    ["==", ["get", "id"], highlighted],
-    1,
-    highlighted ? 0.28 : 0.9,
-  ]);
-  map.setPaintProperty(WALK_LAYER, "line-width", [
-    "case",
-    ["==", ["get", "id"], highlighted],
-    4,
-    3,
-  ]);
+  map.setPaintProperty(WALK_LAYER, "line-opacity", match(1, active ? 0.28 : 0.9));
+  map.setPaintProperty(WALK_LAYER, "line-width", match(15, 15));
   map.setPaintProperty(WALK_LAYER, "line-color", [
     "case",
-    ["==", ["get", "id"], highlighted],
+    ["in", ["get", "id"], ["literal", ids]],
     colors.casing,
     ["get", "color"],
   ]);
@@ -1894,50 +2284,7 @@ function placeWalkAboveStops(map: MapLibreMap): void {
   map.moveLayer(WALK_LAYER);
 }
 
-/** Move a dash along every ride until `stop` is called. */
-function runRouteFlow(map: MapLibreMap): () => void {
-  let frame = 0;
-  let stopped = false;
-  let lastStep = -1;
-  const origin = performance.now();
-
-  const tick = (now: number): void => {
-    if (stopped || document.hidden) return;
-    if (map.getLayer(ROUTE_FLOW_LAYER)) {
-      const step = routeFlowIndex(now - origin);
-      // A new array every frame re-tessellates the ride. The dash only
-      // needs to move when the step changes.
-      if (step !== lastStep) {
-        lastStep = step;
-        map.setPaintProperty(ROUTE_FLOW_LAYER, "line-dasharray", routeFlowDash(now - origin));
-      }
-    }
-    frame = requestAnimationFrame(tick);
-  };
-
-  const onVisibility = (): void => {
-    if (stopped || document.hidden) return;
-    cancelAnimationFrame(frame);
-    frame = requestAnimationFrame(tick);
-  };
-
-  document.addEventListener("visibilitychange", onVisibility);
-  frame = requestAnimationFrame(tick);
-
-  return () => {
-    stopped = true;
-    cancelAnimationFrame(frame);
-    document.removeEventListener("visibilitychange", onVisibility);
-  };
-}
-
-/** Leave the travelling dash invisible. The route underneath stays. */
-function quietRouteFlow(map: MapLibreMap): void {
-  if (!map.getLayer(ROUTE_FLOW_LAYER)) return;
-  map.setPaintProperty(ROUTE_FLOW_LAYER, "line-opacity", 0);
-}
-
-/** Strong ease-in-out, cubic-bezier(0.77, 0, 0.175, 1). The camera moves on screen. */
+/** Strong ease-in-out, cubic-bezier(0.77, 0, 0.175, 1). The bead and the camera move on screen. */
 function easeInOutStrong(t: number): number {
   return bezierY(t, 0.77, 0, 0.175, 1);
 }

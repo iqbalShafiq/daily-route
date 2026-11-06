@@ -210,11 +210,11 @@ export function TimePicker({
         <div
           role="dialog"
           aria-label="Choose departure time"
-          className="fade-in absolute left-1/2 top-[calc(100%+6px)] z-50 w-[300px] max-w-[calc(100vw-24px)] -translate-x-1/2 rounded-[12px] border border-line bg-surface p-4 shadow-pop"
+          className="fade-in absolute left-1/2 top-[calc(100%+6px)] z-50 w-[300px] max-w-[calc(100vw-24px)] -translate-x-1/2 rounded-[4px] border border-line bg-surface p-4 shadow-pop"
         >
           <div className="flex items-start justify-between gap-2">
             <div>
-              <p className="flex items-center gap-2 font-mono text-[12px] font-medium uppercase leading-[1.2] tracking-[0.08em] text-ink-3">
+              <p className="flex items-center gap-2 text-[12px] font-medium leading-[1.35] text-ink-3">
                 <CalendarClock aria-hidden className="size-3.5" />
                 Leave at · WIB
               </p>
@@ -302,7 +302,7 @@ export function TimePicker({
               <span
                 className={cn(
                   "absolute bottom-1/2 left-1/2 h-[56px] w-[2px] -translate-x-1/2 rounded-full",
-                  mode === "hour" ? "bg-accent" : "bg-ink-3",
+                  mode === "hour" ? "bg-ink" : "bg-ink-3",
                 )}
               />
             </div>
@@ -313,11 +313,11 @@ export function TimePicker({
               <span
                 className={cn(
                   "absolute bottom-1/2 left-1/2 h-[82px] w-px -translate-x-1/2 rounded-full",
-                  mode === "minute" ? "bg-accent" : "bg-ink-2",
+                  mode === "minute" ? "bg-ink" : "bg-ink-2",
                 )}
               />
             </div>
-            <span className="pointer-events-none absolute left-1/2 top-1/2 z-10 size-2 -translate-x-1/2 -translate-y-1/2 rounded-full border-2 border-surface bg-accent" />
+            <span className="pointer-events-none absolute left-1/2 top-1/2 z-10 size-2 -translate-x-1/2 -translate-y-1/2 rounded-full border-2 border-surface bg-ink" />
             {labels.map((label, index) => {
               const angle = angleFor(index, 12);
               const active = mode === "hour" ? label === hour12 : label === minute;
@@ -335,7 +335,7 @@ export function TimePicker({
                   aria-label={mode === "hour" ? `Hour ${label}` : `Minute ${String(label).padStart(2, "0")}`}
                   className={cn(
                     "absolute z-10 flex size-8 -translate-x-1/2 -translate-y-1/2 cursor-pointer items-center justify-center rounded-full text-[12px] font-medium tabular-nums transition-colors",
-                    active ? "bg-accent text-bg shadow-sm" : "text-ink-2 hover:bg-surface",
+                    active ? "bg-ink text-bg" : "text-ink-2 hover:bg-surface",
                   )}
                   style={placeAt(LABEL_RADIUS, angle)}
                 >
@@ -351,7 +351,7 @@ export function TimePicker({
               onPointerUp={onFacePointerUp}
               onPointerCancel={onFacePointerUp}
               onKeyDown={onFaceKeyDown}
-              className="absolute inset-0 z-0 cursor-crosshair rounded-full outline-none focus-visible:ring-2 focus-visible:ring-accent/50"
+              className="absolute inset-0 z-0 cursor-crosshair rounded-full outline-none focus-visible:ring-2 focus-visible:ring-ink"
             />
             {Array.from({ length: 60 }, (_, index) => {
               const major = index % 5 === 0;

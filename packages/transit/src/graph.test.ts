@@ -43,6 +43,11 @@ describe("planRoutes", () => {
     expect(itinerary?.transferCount).toBe(0);
   });
 
+  it("draws no line for a ride when the snapshot has no path", () => {
+    const itinerary = planRoutes(network, "a", "c")[0];
+    expect(itinerary?.legs[0]?.coordinates).toEqual([]);
+  });
+
   it("returns an empty result for unknown stations", () => {
     expect(planRoutes(network, "a", "missing")).toEqual([]);
   });

@@ -12,6 +12,7 @@ import {
   withTemporaryServices,
   type Disruption,
   type FareRules,
+  type Jpo,
   type TemporaryService,
   type TransitNetwork,
 } from "@daily-route/transit";
@@ -42,6 +43,8 @@ function diversionDescriptionOf(value: unknown): Disruption["diversionDescriptio
 export type TransitAgentContext = {
   db: Database;
   resolver: PlaceResolver;
+  /** The JPO registry, when the build has one. */
+  jpos?: Jpo[];
   /** How long a cached network snapshot stays fresh, in milliseconds. */
   cacheTtlMs?: number;
 };

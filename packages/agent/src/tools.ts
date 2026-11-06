@@ -9,6 +9,10 @@ import {
   FARE_OPERATOR_LABELS,
   formatRupiah,
   isActiveAt,
+  isNightDeparture,
+  jakartaDayClock,
+  jposAtStation,
+  jposNearPoint,
   matchDisruptions,
   noticeScopeOf,
   serviceAt,
@@ -21,10 +25,16 @@ import {
   routeIsClear,
   type FareRules,
   type Itinerary,
+  type Jpo,
   type TransitNetwork,
 } from "@daily-route/transit";
 
-import { listNoticeHistory } from "@daily-route/db";
+import {
+  insertObservation,
+  labelsForPlaces,
+  listNoticeHistory,
+  listRiderPlaces,
+} from "@daily-route/db";
 import { PLACE_CONFIDENCE_THRESHOLD } from "@daily-route/semantic";
 
 import type { RoadLookup } from "@daily-route/semantic";
@@ -32,6 +42,8 @@ import type { RoadLookup } from "@daily-route/semantic";
 import type { NetworkCache, TransitAgentContext } from "./context.js";
 import { createLookupTools } from "./lookup.js";
 import type { NewsSearch } from "./news.js";
+import { currentPlaceStore, riderStore, type CurrentPlace } from "./rider-context.js";
+import { createRiderTools } from "./rider-tools.js";
 
 /**
  * The agent's tools.
@@ -102,7 +114,20 @@ export function createPlaceTool(context: TransitAgentContext) {
 }
 
 const routeSchema = z.object({
-  origin: z.string().trim().min(2).max(160).describe("Where the rider starts"),
+  origin: z
+    .string()
+    .trim()
+    .min(2)
+    .max(160)
+    .optional()
+    .describe("Where the rider starts. Leave it out when originCurrent is true."),
+  originCurrent: z
+    .boolean()
+    .optional()
+    .describe(
+      "Start at the rider's marked current location. The server supplies the " +
+        "coordinates and chooses the stop; never pass a coordinate yourself.",
+    ),
   destination: z.string().trim().min(2).max(160).describe("Where the rider is going"),
   maxAlternatives: z
     .number()
@@ -110,17 +135,33 @@ const routeSchema = z.object({
     .min(1)
     .max(5)
     .optional()
-    .describe("Berapa banyak rute yang dikembalikan"),
+    .describe(
+      "How many routes to return. Leave it out for the one main journey; " +
+        "pass 3 only when the rider asks to compare options.",
+    ),
   departAt: z
     .string()
     .datetime({ offset: true })
     .optional()
     .describe("Waktu berangkat ISO-8601 dengan offset, bila rider menyebut hari/tanggal"),
-  nightSafe: z.boolean().optional().describe("Prefer fewer walks and lines that run after dark"),
+  nightSafe: z
+    .boolean()
+    .optional()
+    .describe(
+      "Leave it out. The server applies the silent night rule from the departure time.",
+    ),
 });
 
 export type RouteToolOutput = {
-  asal: { text: string; stationId: string | null; name: string | null };
+  asal: {
+    text: string;
+    stationId: string | null;
+    name: string | null;
+    /** The rider's own place, when the journey starts with a walk to the stop. */
+    dari?: string | null;
+    /** That walk, with the same minutes and distance the planner used. */
+    jalanKaki?: { menit: number; km: number } | null;
+  };
   tujuan: { text: string; stationId: string | null; name: string | null };
   rute: RouteSummary[];
   gangguan: DisruptionSummary[];
@@ -135,6 +176,19 @@ export type RouteToolOutput = {
   /** Why the route is obstructed, when it is. */
   hambatan: string[];
   catatan: string[];
+  /** The pedestrian bridges recorded beside the boarding and alighting stops. */
+  jpo?: {
+    naik: JpoBrief[];
+    turun: JpoBrief[];
+  };
+};
+
+type JpoBrief = {
+  name: string;
+  kind: Jpo["kind"];
+  official: boolean;
+  source: Jpo["source"];
+  stations: string[];
 };
 
 type FareSummary = {
@@ -239,40 +293,201 @@ export function createRouteTool(context: TransitAgentContext, cache: NetworkCach
     inputSchema: routeSchema,
     execute: async (args): Promise<RouteToolOutput> => {
       const planningAt = args.departAt ? new Date(args.departAt) : new Date();
-      const [{ network, disruptions, fareRules }, originCandidates, destinationCandidates] = await Promise.all([
+      // The night rule is silent and belongs to the departure instant.
+      // An explicit flag from a caller still wins.
+      const nightSafe = args.nightSafe ?? isNightDeparture(planningAt);
+      const current = args.originCurrent === true ? currentPlaceStore.getStore() : undefined;
+      const originText = (current ? (current.address ?? current.name) : (args.origin ?? "")).trim();
+      const [{ network, disruptions, fareRules }, destinationCandidates] = await Promise.all([
         cache.get(),
-        context.resolver.resolve(args.origin, { limit: 5 }),
         context.resolver.resolve(args.destination, { limit: 5 }),
       ]);
 
       const notes: string[] = [];
-      const origin = originCandidates[0];
       const destination = destinationCandidates[0];
+
+      if (!destination) {
+        return {
+          asal: { text: originText, stationId: null, name: null },
+          tujuan: { text: args.destination, stationId: null, name: null },
+          rute: [],
+          gangguan: [],
+          status: "tidak-diketahui",
+          hambatan: [],
+          catatan: [
+            `Tidak menemukan tempat tujuan "${args.destination}". Minta pengguna memberi nama yang lebih spesifik.`,
+          ],
+        };
+      }
+
+      let origin: {
+        stationId: string;
+        name: string;
+        score: number;
+        latitude: number;
+        longitude: number;
+        systemId: string;
+      } | undefined;
+      let originWalk: { minutes: number; distanceKm: number } | null = null;
+      /*
+       * A marked current place and a saved place ("Home") are both
+       * coordinates the rider chose, not names the model made up. They
+       * reach the tool through the rider store, never through an argument.
+       */
+      let start: { label: string; place: CurrentPlace } | null = current
+        ? { label: current.name, place: current }
+        : null;
+
+      if (args.originCurrent === true) {
+        if (!current) {
+          return {
+            asal: { text: originText, stationId: null, name: null },
+            tujuan: {
+              text: args.destination,
+              stationId: destination.stationId,
+              name: destination.name,
+            },
+            rute: [],
+            gangguan: [],
+            status: "tidak-diketahui",
+            hambatan: [],
+            catatan: [
+              "Lokasi sekarang belum ditandai. Minta pengguna menekan tombol lokasi di kolom From terlebih dahulu; jangan menebak di mana mereka berada.",
+            ],
+          };
+        }
+
+        /*
+         * The stop the rider walks to is the one whose whole journey,
+         * walk included, is quickest. The nearest stop can belong to a
+         * line that does not go where the rider is going.
+         */
+        const access = bestAccess(
+          stopsWithinWalk(network, current, { maxKm: 1.5, limit: 20 }),
+          (station) =>
+            planRoutes(network, station.id, destination.stationId, {
+              maxAlternatives: 1,
+              at: planningAt,
+            })[0]?.durationMinutes ?? null,
+        );
+        if (!access) {
+          return {
+            asal: { text: originText, stationId: null, name: null },
+            tujuan: {
+              text: args.destination,
+              stationId: destination.stationId,
+              name: destination.name,
+            },
+            rute: [],
+            gangguan: [],
+            status: "tidak-diketahui",
+            hambatan: [],
+            catatan: [
+              `Tidak ada halte dalam jarak jalan kaki dari lokasi sekarang (${current.name}). Minta pengguna memilih halte asal sendiri.`,
+            ],
+          };
+        }
+
+        origin = {
+          stationId: access.access.station.id,
+          name: access.access.station.name,
+          score: 1,
+          latitude: access.access.station.latitude,
+          longitude: access.access.station.longitude,
+          systemId: access.access.station.systemId,
+        };
+        originWalk = {
+          minutes: access.access.minutes,
+          distanceKm: access.access.distanceKm,
+        };
+      } else {
+        const saved = await savedPlaceForOrigin(context, args.origin ?? "");
+        const savedPlace: CurrentPlace | null = saved
+          ? {
+              name: saved.place.name,
+              address: saved.place.address,
+              latitude: saved.place.latitude,
+              longitude: saved.place.longitude,
+            }
+          : null;
+        if (savedPlace) {
+          const access = bestAccess(
+            stopsWithinWalk(network, savedPlace, { maxKm: 1.5, limit: 20 }),
+            (station) =>
+              planRoutes(network, station.id, destination.stationId, {
+                maxAlternatives: 1,
+                at: planningAt,
+              })[0]?.durationMinutes ?? null,
+          );
+          if (access) {
+            start = { label: saved?.label ?? savedPlace.name, place: savedPlace };
+            origin = {
+              stationId: access.access.station.id,
+              name: access.access.station.name,
+              score: 1,
+              latitude: access.access.station.latitude,
+              longitude: access.access.station.longitude,
+              systemId: access.access.station.systemId,
+            };
+            originWalk = {
+              minutes: access.access.minutes,
+              distanceKm: access.access.distanceKm,
+            };
+          }
+        }
+        if (!origin) {
+          const originCandidates = await context.resolver.resolve(args.origin ?? "", { limit: 5 });
+          const candidate = originCandidates[0];
+          if (candidate) {
+            origin = {
+              stationId: candidate.stationId,
+              name: candidate.name,
+              score: candidate.score,
+              latitude: candidate.latitude,
+              longitude: candidate.longitude,
+              systemId: candidate.systemId,
+            };
+          }
+        }
+      }
 
       const confident =
         origin !== undefined &&
-        destination !== undefined &&
         origin.score >= PLACE_CONFIDENCE_THRESHOLD &&
         destination.score >= PLACE_CONFIDENCE_THRESHOLD;
 
-      if (!origin || !destination || !confident) {
+      if (!origin || !confident) {
         return {
-          asal: { text: args.origin, stationId: origin?.stationId ?? null, name: origin?.name ?? null },
+          asal: {
+            text: originText,
+            stationId: origin?.stationId ?? null,
+            name: origin?.name ?? null,
+          },
           tujuan: {
             text: args.destination,
-            stationId: destination?.stationId ?? null,
-            name: destination?.name ?? null,
+            stationId: destination.stationId,
+            name: destination.name,
           },
           rute: [],
           gangguan: [],
           status: "tidak-diketahui",
           hambatan: [],
           catatan: [
-            !origin || origin.score < PLACE_CONFIDENCE_THRESHOLD
-              ? `Tidak menemukan tempat asal "${args.origin}". Minta pengguna memberi nama yang lebih spesifik.`
-              : `Tidak menemukan tempat tujuan "${args.destination}". Minta pengguna memberi nama yang lebih spesifik.`,
+            args.originCurrent === true
+              ? "Tidak menemukan halte dari lokasi sekarang. Minta pengguna memilih halte asal sendiri."
+              : `Tidak menemukan tempat asal "${originText}". Minta pengguna memberi nama yang lebih spesifik.`,
           ],
         };
+      }
+
+      if (start && originWalk) {
+        const walk =
+          originWalk.distanceKm < 0.05
+            ? `Naik dari ${origin.name}.`
+            : `Naik dari ${origin.name}, jalan kaki sekitar ${Math.round(originWalk.minutes)} menit (${originWalk.distanceKm.toFixed(2)} km).`;
+        notes.push(
+          `Mulai dari ${start.label}${start.place.address ? ` (${start.place.address})` : ""}. ${walk} Gunakan asal.dari dan asal.jalanKaki sebagai langkah pertama; jangan menyebut halte lain yang tidak ada di rute.`,
+        );
       }
 
       /**
@@ -330,15 +545,15 @@ export function createRouteTool(context: TransitAgentContext, cache: NetworkCach
       }
 
       const routes = planRoutes(network, boardingId, alightingId, {
-        maxAlternatives: args.maxAlternatives ?? 3,
+        maxAlternatives: args.maxAlternatives ?? 1,
         at: planningAt,
-        nightSafe: args.nightSafe === true,
+        nightSafe,
         avoidLineIds: [...closedLines],
       });
 
       if (routes.length === 0) {
         return {
-          asal: { text: args.origin, stationId: origin.stationId, name: origin.name },
+          asal: { text: originText, stationId: origin.stationId, name: origin.name },
           tujuan: { text: args.destination, stationId: destination.stationId, name: destination.name },
           rute: [],
           gangguan: [],
@@ -351,7 +566,7 @@ export function createRouteTool(context: TransitAgentContext, cache: NetworkCach
       const primary = routes[0];
       if (!primary) {
         return {
-          asal: { text: args.origin, stationId: origin.stationId, name: origin.name },
+          asal: { text: originText, stationId: origin.stationId, name: origin.name },
           tujuan: { text: args.destination, stationId: destination.stationId, name: destination.name },
           rute: [],
           gangguan: [],
@@ -380,7 +595,7 @@ export function createRouteTool(context: TransitAgentContext, cache: NetworkCach
         const replanned = planRoutes(network, boardingId, alightingId, {
           maxAlternatives: 2,
           at: planningAt,
-          nightSafe: args.nightSafe === true,
+          nightSafe,
           avoidLineIds: [...avoidLineIds],
           avoidStationIds: [...avoidStationIds],
         }).filter((route) => routeIsClear(route, disruptions, planningAt));
@@ -429,17 +644,87 @@ export function createRouteTool(context: TransitAgentContext, cache: NetworkCach
         notes.unshift("Pola yang dipilih juga beroperasi pada hari libur nasional; jangan sebut jadwalnya hanya Sabtu dan Minggu.");
       }
 
+      // The observation is the server's bookkeeping, not a tool argument: the
+      // model cannot name a rider, and a signed-out turn records nothing.
+      await recordRide(context, {
+        origin,
+        destination,
+        originName: start ? originText : null,
+        itinerary: primary,
+        at: planningAt,
+      });
+
+      const jposNaik = context.jpos ? jposAtStation(context.jpos, boardingId).slice(0, 2) : [];
+      const jposTurun = context.jpos ? jposAtStation(context.jpos, alightingId).slice(0, 2) : [];
+      if (jposNaik.length > 0) {
+        notes.push(
+          `Di dekat halte naik ada ${jposNaik.map((jpo) => `${jpo.name}${jpo.official ? " (resmi)" : " (OSM)"}`).join(", ")}. Sebut hanya sebagai JPO di dekat halte; jangan mengklaim jalan kaki memakainya kecuali datanya mengatakan begitu.`,
+        );
+      }
+      if (jposTurun.length > 0) {
+        notes.push(
+          `Di dekat halte turun ada ${jposTurun.map((jpo) => `${jpo.name}${jpo.official ? " (resmi)" : " (OSM)"}`).join(", ")}. Sebut hanya sebagai JPO di dekat halte.`,
+        );
+      }
+
       return {
-        asal: { text: args.origin, stationId: origin.stationId, name: origin.name },
+        asal: {
+          text: originText,
+          stationId: origin.stationId,
+          name: origin.name,
+          ...(start
+            ? {
+                dari: start.label,
+                jalanKaki:
+                  originWalk && originWalk.distanceKm >= 0.05
+                    ? {
+                        menit: Math.round(originWalk.minutes),
+                        km: Number(originWalk.distanceKm.toFixed(2)),
+                      }
+                    : null,
+              }
+            : {}),
+        },
         tujuan: { text: args.destination, stationId: destination.stationId, name: destination.name },
         rute: summaries,
         gangguan: matches.map((match) => summarizeDisruption(match, primary)),
         status: obstructions.length > 0 ? "terhalang" : "terbuka",
         hambatan: obstructions,
         catatan: notes,
+        jpo: {
+          naik: jposNaik.map(jpoBrief),
+          turun: jposTurun.map(jpoBrief),
+        },
       };
     },
   });
+}
+
+/** The small JPO shape the model may name. It never includes geometry. */
+function jpoBrief(jpo: Jpo): JpoBrief {
+  return {
+    name: jpo.name,
+    kind: jpo.kind,
+    official: jpo.official,
+    source: jpo.source,
+    stations: jpo.stations.map((station) => station.stationName),
+  };
+}
+
+/** The saved place a rider's own word refers to, if there is one. */
+async function savedPlaceForOrigin(
+  context: TransitAgentContext,
+  text: string,
+): Promise<Awaited<ReturnType<typeof listRiderPlaces>>[number] | null> {
+  const userId = riderStore.getStore()?.userId ?? "";
+  const needle = text.trim().toLowerCase();
+  if (userId.length === 0 || needle.length < 2) return null;
+  const saved = await listRiderPlaces(context.db, userId);
+  return (
+    saved.find((entry) => entry.label.toLowerCase() === needle) ??
+    saved.find((entry) => entry.place.name.toLowerCase() === needle) ??
+    null
+  );
 }
 
 function dedupeRoutes(routes: readonly Itinerary[]): Itinerary[] {
@@ -457,6 +742,56 @@ function dedupeRoutes(routes: readonly Itinerary[]): Itinerary[] {
     unique.push(route);
   }
   return unique;
+}
+
+/**
+ * Record a journey the chat planned, when a real rider is in the turn.
+ *
+ * The write is the server's; the model never passes a user id and cannot
+ * read one back. A failure here must not turn an answer into an error.
+ */
+async function recordRide(
+  context: TransitAgentContext,
+  input: {
+    origin: { stationId: string; name: string };
+    destination: { stationId: string; name: string };
+    /** The rider's place when the journey starts from the current location. */
+    originName: string | null;
+    itinerary: Itinerary;
+    at: Date;
+  },
+): Promise<void> {
+  const userId = riderStore.getStore()?.userId ?? "";
+  if (userId.length === 0) return;
+
+  try {
+    const clock = jakartaDayClock(input.at);
+    const lineCodes = [
+      ...new Set(
+        input.itinerary.legs.flatMap((leg) => (leg.lineCode ? [leg.lineCode] : [])),
+      ),
+    ];
+    const labels = await labelsForPlaces(
+      context.db,
+      userId,
+      input.origin.stationId,
+      input.destination.stationId,
+    );
+    await insertObservation(context.db, userId, {
+      originKey: input.origin.stationId,
+      destinationKey: input.destination.stationId,
+      originName: input.originName ?? input.origin.name,
+      destinationName: input.destination.name,
+      originLabel: labels.originLabel,
+      destinationLabel: labels.destinationLabel,
+      lineCodes,
+      weekday: clock.weekday,
+      minuteOfDay: clock.minuteOfDay,
+      source: "chat",
+    });
+  } catch {
+    // The journey is already planned; a failed habit write is not an answer.
+  }
 }
 
 function summarize(
@@ -985,6 +1320,126 @@ function createTollTool() {
   });
 }
 
+/** The JPO records near a stop or a coordinate. */
+export function createJpoTool(context: TransitAgentContext) {
+  return createTool({
+    name: "find_jpo",
+    description:
+      "Find the pedestrian bridges (JPO), skywalks, footbridges, or underpasses " +
+      "near a stop, a place, or a coordinate. Call it when the rider asks about " +
+      "a crossing, a JPO, or which side or entrance to use. It returns only " +
+      "records in the registry. An underpass is a record of kind underpass, " +
+      "not a JPO; never call it a JPO. Never invent a JPO name or a connection " +
+      "the tool did not return.",
+    inputSchema: z.object({
+      station: z
+        .string()
+        .trim()
+        .min(2)
+        .max(160)
+        .optional()
+        .describe("A stop or station name, such as 'Simpang Kuningan'"),
+      query: z
+        .string()
+        .trim()
+        .min(2)
+        .max(160)
+        .optional()
+        .describe("A JPO name or the street it crosses"),
+      latitude: z.number().min(-90).max(90).optional(),
+      longitude: z.number().min(-180).max(180).optional(),
+      radiusM: z.number().int().min(30).max(1000).optional(),
+    }),
+    execute: async (args): Promise<{
+      jpos: {
+        id: string;
+        name: string;
+        kind: Jpo["kind"];
+        official: boolean;
+        source: Jpo["source"];
+        city: string | null;
+        address: string | null;
+        remark: string | null;
+        lengthM: number | null;
+        distanceM: number | null;
+        stations: string[];
+      }[];
+      catatan: string[];
+    }> => {
+      const all = context.jpos ?? [];
+      const notes: string[] = [];
+      const found: { jpo: Jpo; distanceKm: number | null }[] = [];
+
+      if (args.latitude !== undefined && args.longitude !== undefined) {
+        const nearby = jposNearPoint(
+          all,
+          { latitude: args.latitude, longitude: args.longitude },
+          { radiusKm: (args.radiusM ?? 250) / 1000, limit: 6 },
+        );
+        found.push(...nearby.map((entry) => ({ jpo: entry.jpo, distanceKm: entry.distanceKm })));
+      }
+
+      if (args.station) {
+        const candidates = await context.resolver.resolve(args.station, { limit: 1 });
+        const station = candidates[0];
+        if (station) {
+          for (const jpo of jposAtStation(all, station.stationId)) {
+            if (!found.some((entry) => entry.jpo.id === jpo.id)) {
+              found.push({ jpo, distanceKm: null });
+            }
+          }
+          for (const entry of jposNearPoint(
+            all,
+            { latitude: station.latitude, longitude: station.longitude },
+            { radiusKm: 0.2, limit: 6 },
+          )) {
+            if (!found.some((candidate) => candidate.jpo.id === entry.jpo.id)) {
+              found.push({ jpo: entry.jpo, distanceKm: entry.distanceKm });
+            }
+          }
+          notes.push(`Station: ${station.name}.`);
+        } else {
+          notes.push(`No stop or station matched "${args.station}".`);
+        }
+      }
+
+      if (args.query) {
+        const needle = args.query.toLowerCase();
+        for (const jpo of all) {
+          const haystack = `${jpo.name} ${jpo.address ?? ""} ${jpo.remark ?? ""}`.toLowerCase();
+          if (!haystack.includes(needle)) continue;
+          if (found.some((entry) => entry.jpo.id === jpo.id)) continue;
+          found.push({ jpo, distanceKm: null });
+        }
+      }
+
+      if (found.length === 0) {
+        notes.push(
+          "No JPO, skywalk, or footbridge in the registry matches. Say so; do not invent one. An underpass is not a JPO.",
+        );
+      }
+
+      return {
+        jpos: found.slice(0, 6).map((entry) => ({
+          id: entry.jpo.id,
+          name: entry.jpo.name,
+          kind: entry.jpo.kind,
+          official: entry.jpo.official,
+          source: entry.jpo.source,
+          city: entry.jpo.city,
+          address: entry.jpo.address,
+          remark: entry.jpo.remark,
+          lengthM: entry.jpo.lengthM,
+          distanceM:
+            entry.distanceKm === null ? null : Number((entry.distanceKm * 1000).toFixed(0)),
+          stations: entry.jpo.stations.map((station) => station.stationName),
+        })),
+        catatan: notes,
+      };
+    },
+  });
+}
+
 export function createTools(
   context: TransitAgentContext,
   cache: NetworkCache,
@@ -993,11 +1448,13 @@ export function createTools(
 ) {
   return [
     createPlaceTool(context),
+    ...createRiderTools(context),
     createRouteTool(context, cache),
     createStationTool(cache),
     createDisruptionTool(cache),
     createNoticeHistoryTool(context, cache),
     createTollTool(),
+    ...(context.jpos && context.jpos.length > 0 ? [createJpoTool(context)] : []),
     ...(roads ? createLookupTools(cache, roads) : []),
     ...(news.enabled ? [createNewsTool(news)] : []),
   ];

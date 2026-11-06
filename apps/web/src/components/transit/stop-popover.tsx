@@ -57,7 +57,7 @@ export function StopPopover({
       role="dialog"
       aria-label={`Details for ${name}`}
       style={{ left: `${left}px`, top: `${top}px`, width: `${width}px` }}
-      className="fade-in fixed z-50 rounded-[10px] border border-line bg-surface p-3 shadow-pop"
+      className="fade-in fixed z-50 rounded-[4px] border border-line bg-surface p-3 shadow-pop"
     >
       <p className="text-[13px] font-semibold text-ink">{name}</p>
 
@@ -84,7 +84,7 @@ export function StopPopover({
               {lines.slice(0, 8).map((line) => (
                 <span
                   key={line.id}
-                  className="rounded-[4px] bg-surface-2 px-2 py-px font-mono text-[12px] text-ink-2"
+                  className="rounded-[4px] bg-surface-2 px-2 py-px text-[12px] font-semibold text-ink-2"
                 >
                   {line.code}
                 </span>
@@ -104,7 +104,7 @@ export function StopPopover({
               <ul className="mt-2 space-y-2">
                 {departures.data.lines.slice(0, 6).map((row) => (
                   <li key={`${row.lineId}-${row.direction}`} className="flex items-baseline gap-2">
-                    <span className="w-10 shrink-0 rounded-[3px] bg-surface-2 px-1 py-px text-center font-mono text-[12px] text-ink-2">
+                    <span className="w-10 shrink-0 rounded-[3px] bg-surface-2 px-1 py-px text-center text-[12px] font-semibold tabular-nums text-ink-2">
                       {row.code}
                     </span>
                     <span className="min-w-0 flex-1 truncate text-[12px] text-ink-2">

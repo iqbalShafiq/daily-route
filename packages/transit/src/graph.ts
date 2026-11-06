@@ -11,7 +11,14 @@
  */
 
 import { haversineKm, walkingMinutes } from "./geo.js";
-import { geometryKey, sliceGeometry, sliceGeometryNearStops, type Coordinate, type LineGeometry } from "./geometry.js";
+import {
+  clipSliceToStops,
+  geometryKey,
+  sliceGeometry,
+  sliceGeometryNearStops,
+  type Coordinate,
+  type LineGeometry,
+} from "./geometry.js";
 import { isNationalHoliday } from "./calendar.js";
 import { serviceAt, type ServiceState } from "./service.js";
 import type {
@@ -1012,7 +1019,10 @@ function toItinerary(graph: Graph, result: SearchResult): Itinerary {
     const to = { latitude: alighted.latitude, longitude: alighted.longitude };
 
     const slice = ridePath(graph, leg, from, to);
-    if (slice.length >= 2) leg.coordinates = slice;
+    // A ride is drawn on the road the vehicle travels. When the snapshot
+    // has no path for this stretch, the leg keeps no line at all: a
+    // straight line between the stops would be a road that does not exist.
+    leg.coordinates = slice.length >= 2 ? slice : [];
   }
 
   // Boarding a vehicle means waiting for it. Staying on the same one does
@@ -1096,10 +1106,11 @@ function toItinerary(graph: Graph, result: SearchResult): Itinerary {
 /**
  * The path a ride draws on the map.
  *
- * The offset slice is kept when it already starts and ends at the stops.
- * Otherwise the path is the stretch of the stored rail nearest to those
- * two stops, so a loop whose offsets collapsed still draws the ride the
- * vehicle takes.
+ * The offset slice is kept when its ends land on the stops, once it is
+ * trimmed to them, so a vertex left behind the boarding stop is not
+ * drawn. Otherwise the path is the stretch of the stored rail nearest to
+ * those two stops, so a loop whose offsets collapsed still draws the
+ * ride the vehicle takes.
  */
 function ridePath(graph: Graph, leg: ItineraryLeg, from: Coordinate, to: Coordinate): Coordinate[] {
   let best: Coordinate[] = [];
@@ -1117,7 +1128,13 @@ function ridePath(graph: Graph, leg: ItineraryLeg, from: Coordinate, to: Coordin
     }
   };
 
-  for (const direction of ["forward", "backward"] as const) {
+  // Every candidate now meets both stops, so the endpoint miss no longer
+  // separates the two directions. The direction the rider travels is
+  // asked first: the return of a line may use another street, and that
+  // street is the one this leg rides.
+  const directions: Array<"forward" | "backward"> =
+    leg.direction === "backward" ? ["backward", "forward"] : ["forward", "backward"];
+  for (const direction of directions) {
     const path = patternGeometry ?? graph.geometries.get(geometryKey(leg.lineId ?? "", direction));
     if (!path) continue;
     const snapped = sliceGeometryNearStops(path, from, to);
@@ -1125,7 +1142,8 @@ function ridePath(graph: Graph, leg: ItineraryLeg, from: Coordinate, to: Coordin
 
     const positions = positionsOfLeg(graph, leg, direction);
     if (!positions) continue;
-    consider(sliceGeometry(path, positions.from, positions.to));
+    const offset = clipSliceToStops(sliceGeometry(path, positions.from, positions.to), from, to);
+    if (offset) consider(offset);
   }
 
   return best;

@@ -17,7 +17,7 @@ export function ServiceChip({ leg }: { leg: ItineraryLeg }) {
 
   if (leg.outsideService) {
     return (
-      <span className="inline-flex items-center gap-1 rounded-[4px] bg-danger-soft px-2 py-px font-mono text-[12px] leading-[1.2] font-medium text-danger">
+      <span className="inline-flex items-center gap-1 rounded-[4px] bg-danger-soft px-2 py-px text-[12px] leading-[1.35] font-medium text-danger">
         <Clock3 aria-hidden className="size-3" />
         No service
       </span>
@@ -47,7 +47,7 @@ export function ServiceChip({ leg }: { leg: ItineraryLeg }) {
       : `${Math.round(min)}-${Math.round(max)} min`;
   const tone =
     band === "very-frequent" || band === "frequent"
-      ? "bg-accent-soft text-accent"
+      ? "bg-surface-3 text-ink"
       : band === "regular"
         ? "bg-info-soft text-info"
         : band === "infrequent"
@@ -67,7 +67,7 @@ export function ServiceChip({ leg }: { leg: ItineraryLeg }) {
       variant="panel"
       label={
         <div>
-          <p className="text-[12px] font-semibold uppercase tracking-[0.04em] text-ink-3">
+          <p className="text-[12px] font-semibold leading-[1.35] text-ink-3">
             Service window
           </p>
           <p className="mt-1 text-[13px] font-medium text-ink">
@@ -84,7 +84,7 @@ export function ServiceChip({ leg }: { leg: ItineraryLeg }) {
         tabIndex={0}
         aria-label={`${description}, every ${range}. ${leg.serviceDetail ?? ""}`}
         className={cn(
-          "inline-flex cursor-help items-center gap-1 rounded-[4px] px-2 py-px font-mono text-[12px] leading-[1.2] font-medium tabular-nums outline-none transition-colors focus-visible:ring-2 focus-visible:ring-accent/40",
+          "inline-flex cursor-help items-center gap-1 rounded-[4px] px-2 py-px font-mono text-[12px] leading-[1.2] font-medium tabular-nums outline-none transition-colors focus-visible:ring-2 focus-visible:ring-ink",
           tone,
         )}
       >

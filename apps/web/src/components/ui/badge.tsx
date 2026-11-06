@@ -12,7 +12,7 @@ export type BadgeTone = "neutral" | "accent" | "warn" | "danger" | "info";
 
 const TONES: Record<BadgeTone, string> = {
   neutral: "bg-surface-2 text-ink-2",
-  accent: "bg-accent-soft text-accent",
+  accent: "bg-accent-soft text-ink",
   warn: "bg-warn-soft text-warn",
   danger: "bg-danger-soft text-danger",
   info: "bg-info-soft text-info",
@@ -31,7 +31,7 @@ export function Badge({
   return (
     <span
       className={cn(
-        "inline-flex items-center gap-1 rounded-[4px] px-2 py-0.5 font-mono text-[12px] font-medium uppercase leading-[1.2] tracking-[0.04em]",
+        "inline-flex items-center gap-1 rounded-[4px] px-2 py-0.5 text-[12px] font-semibold leading-[1.2]",
         TONES[tone],
         className,
       )}
@@ -55,7 +55,7 @@ export function DotBadge({
   return (
     <span
       className={cn(
-        "inline-flex items-center gap-2 rounded-[4px] bg-surface-2 px-2 py-0.5 font-mono text-[12px] font-medium uppercase leading-[1.2] tracking-[0.04em] text-ink-2",
+        "inline-flex items-center gap-2 rounded-[4px] bg-surface-2 px-2 py-0.5 text-[12px] font-semibold leading-[1.2] text-ink-2",
         className,
       )}
     >

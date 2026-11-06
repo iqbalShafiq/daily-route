@@ -5,6 +5,8 @@
  * module, which talks to the application API.
  */
 
+import type { JpoDocument } from "@daily-route/transit";
+
 const BASE_URL = "/api";
 
 export class ApiError extends Error {
@@ -20,6 +22,9 @@ export class ApiError extends Error {
 async function request<T>(path: string, init?: RequestInit): Promise<T> {
   const response = await fetch(`${BASE_URL}${path}`, {
     ...init,
+    // The session is a cookie, so every call carries it. The browser only
+    // ever talks to the application API; the cookie never leaves this origin.
+    credentials: "include",
     headers: {
       ...(init?.body ? { "Content-Type": "application/json" } : {}),
       ...init?.headers,
@@ -31,8 +36,74 @@ async function request<T>(path: string, init?: RequestInit): Promise<T> {
     throw new ApiError(payload?.error ?? `Permintaan gagal (${response.status})`, response.status);
   }
 
+  // A 204 is a complete answer with no body. Parsing it as JSON would turn
+  // a successful sign-out or password change into a failure.
+  if (response.status === 204) {
+    return undefined as T;
+  }
+
   return (await response.json()) as T;
 }
+
+/** The signed-in rider. The account API returns this shape under `user`. */
+export type AccountUser = { id: string; email: string };
+
+export type AccountMemoryKind = "saved-place" | "recent-place" | "recent-journey" | "watch";
+
+/**
+ * One row of the rider's memory as the account API stores it.
+ *
+ * The web package owns this shape: it may not import the database package.
+ */
+export type AccountMemoryItem = {
+  kind: AccountMemoryKind;
+  itemKey: string;
+  payload: unknown;
+  updatedAt: string;
+  deletedAt: string | null;
+};
+
+export type AccountMemoryWrite = {
+  kind: AccountMemoryKind;
+  itemKey: string;
+  payload?: unknown;
+  deleted?: boolean;
+};
+
+/**
+ * A place the rider named, as the account API stores it.
+ *
+ * The label is the rider's own word. The place underneath is grounded
+ * against the network when it is written, so its name and coordinate come
+ * from the graph and not from the rider.
+ */
+export type NamedPlace = {
+  label: string;
+  place: {
+    kind: "station" | "place";
+    id: string;
+    name: string;
+    /** The full address, for a place the rider marked from their position. */
+    address: string | null;
+    latitude: number;
+    longitude: number;
+    systemId: string | null;
+    systemName: string | null;
+  };
+  updatedAt: string;
+};
+
+/** One usual journey, with the stored notices that touch it. */
+export type PersonalAlert = {
+  habit: {
+    originName: string;
+    destinationName: string;
+    originLabel: string | null;
+    destinationLabel: string | null;
+    count: number;
+  };
+  notices: { id: string; title: string }[];
+};
 
 export type MatchedRange = { start: number; end: number };
 
@@ -50,7 +121,27 @@ export type PlaceSuggestion = {
   lineCount?: number;
   street?: string | null;
   detail?: string;
+  /** The index the place came from, when it is not the network graph. */
+  source?: "google" | "openstreetmap" | "overture";
   matchedRanges?: MatchedRange[];
+};
+
+/**
+ * The rider's current position, as the server names it.
+ *
+ * The coordinate comes from the browser; the short name and the full
+ * address come from the reverse lookup. A place that the lookup could not
+ * name still carries its coordinate, so the journey can be planned from it.
+ */
+export type ReversedPlace = {
+  kind: "place";
+  id: string;
+  name: string;
+  address: string | null;
+  latitude: number;
+  longitude: number;
+  systemId: null;
+  systemName: null;
 };
 
 export type StationSummary = {
@@ -176,6 +267,8 @@ export type ItineraryLeg = {
   stops: LegStop[];
   /** What a walk is for: to the first vehicle, to the last one, or a change. */
   walkReason: "access" | "egress" | "transfer" | null;
+  /** The pedestrian bridges the walked path crosses. */
+  jpo?: { id: string; name: string; official: boolean; source: "jakarta-bina-marga" | "osm" }[];
   /** The line the rider takes after this walk, for a change of vehicle. */
   nextLineName: string | null;
   /** The average wait for the vehicle, for a ride. */
@@ -362,9 +455,21 @@ export type DisruptionSummary = {
   stationName: string | null;
 };
 
+/** The resolved place at one end of a planned journey. */
+export type PlanPlace = {
+  /** The words the rider typed. */
+  text: string;
+  stationId: string;
+  name: string;
+  systemId: string;
+  latitude: number;
+  longitude: number;
+  score: number;
+};
+
 export type PlanResult = {
-  origin: StationSummary & { text: string };
-  destination: StationSummary & { text: string };
+  origin: PlanPlace;
+  destination: PlanPlace;
   itineraries: Itinerary[];
   alternatives: Itinerary[];
   /** Notices that touch the fastest journey. */
@@ -451,7 +556,6 @@ export type WalkRoute = {
 
 /** The journey planned from the reader's own position. */
 export type PositionPlan = {
-  needsDestination: boolean;
   stationId: string | null;
   stationName: string | null;
   totalMinutes: number | null;
@@ -464,25 +568,8 @@ export type PositionPlan = {
     durationMinutes: number;
     steps: { instruction: string; street: string | null; distanceKm: number }[];
     geometry: { latitude: number; longitude: number }[];
+    jpo?: { id: string; name: string; official: boolean; source: "jakarta-bina-marga" | "osm" }[];
   } | null;
-  profiles: {
-    id: string;
-    label: string;
-    stationId: string | null;
-    stationName: string | null;
-    score: number | null;
-    totalMinutes: number | null;
-    transferCount: number | null;
-    accessWalkKm: number | null;
-  }[];
-  candidates: {
-    stationId: string;
-    stationName: string;
-    accessWalkKm: number;
-    totalMinutes: number;
-    transferCount: number;
-    score: number;
-  }[];
 };
 
 export const api = {
@@ -523,6 +610,13 @@ export const api = {
   places: (query: string, signal?: AbortSignal) =>
     request<PlaceSuggestion[]>(
       `/places?q=${encodeURIComponent(query)}&limit=6`,
+      signal ? { signal } : undefined,
+    ),
+
+  /** The address of a coordinate, for the place the rider is standing on. */
+  reversePlace: (latitude: number, longitude: number, signal?: AbortSignal) =>
+    request<{ place: ReversedPlace }>(
+      `/places/reverse?latitude=${latitude}&longitude=${longitude}`,
       signal ? { signal } : undefined,
     ),
 
@@ -586,6 +680,81 @@ export const api = {
 
   disruptions: () => request<DisruptionSummary[]>("/routes/disruptions"),
 
+  /** The committed JPO and footbridge registry. */
+  jpos: () => request<JpoDocument>("/jpo"),
+
   agentTools: () =>
     request<{ configured: boolean; model: string; provider: string }>("/agent/tools"),
+
+  /**
+   * The signed-in rider, or null.
+   *
+   * A 401 is the answer "nobody is signed in", not a failure: the planner
+   * works without an account, so the panel must open in its signed-out
+   * shape rather than show an error.
+   */
+  account: async (): Promise<AccountUser | null> => {
+    try {
+      const payload = await request<{ user: AccountUser }>("/account");
+      return payload.user;
+    } catch (error) {
+      if (error instanceof ApiError && error.status === 401) return null;
+      throw error;
+    }
+  },
+
+  signUp: (email: string, password: string) =>
+    request<{ user: AccountUser }>("/account", {
+      method: "POST",
+      body: JSON.stringify({ email, password }),
+    }),
+
+  signIn: (email: string, password: string) =>
+    request<{ user: AccountUser }>("/account/session", {
+      method: "POST",
+      body: JSON.stringify({ email, password }),
+    }),
+
+  signOut: () => request<void>("/account/session", { method: "DELETE" }),
+
+  changePassword: (currentPassword: string, password: string) =>
+    request<void>("/account/password", {
+      method: "POST",
+      body: JSON.stringify({ currentPassword, password }),
+    }),
+
+  deleteAccount: (password: string) =>
+    request<void>("/account", {
+      method: "DELETE",
+      body: JSON.stringify({ password }),
+    }),
+
+  accountMemory: (after?: string) =>
+    request<{ items: AccountMemoryItem[] }>(
+      `/account/memory${after ? `?after=${encodeURIComponent(after)}` : ""}`,
+    ),
+
+  putAccountMemory: (items: AccountMemoryWrite[]) =>
+    request<{ items: AccountMemoryItem[] }>("/account/memory", {
+      method: "PUT",
+      body: JSON.stringify({ items }),
+    }),
+
+  /** The places this rider named. A 401 means nobody is signed in. */
+  namedPlaces: () => request<{ places: NamedPlace[] }>("/account/places"),
+
+  /** Name a place. The API grounds a station against the network itself. */
+  saveNamedPlace: (label: string, place: NamedPlace["place"]) =>
+    request<{ places: NamedPlace[] }>("/account/places", {
+      method: "POST",
+      body: JSON.stringify({ label, payload: place }),
+    }),
+
+  deleteNamedPlace: (label: string) =>
+    request<{ places: NamedPlace[] }>(`/account/places/${encodeURIComponent(label)}`, {
+      method: "DELETE",
+    }),
+
+  /** The usual journeys that a stored notice touches right now. */
+  personalAlerts: () => request<{ alerts: PersonalAlert[] }>("/account/alerts"),
 };

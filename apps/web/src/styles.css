@@ -3,15 +3,17 @@
 
 @import "@fontsource-variable/plus-jakarta-sans";
 @import "@fontsource-variable/jetbrains-mono";
+@import "@fontsource/barlow-condensed/700.css";
 
 /* ---------------------------------------------------------------------------
    Daily Route — the design tokens.
 
    The interface is a printed transit board for Jakarta: warm paper, ink,
-   one jade signal, and operator colour used only as data. The palette is
-   defined once as custom properties and exposed to Tailwind through
-   `@theme inline`, so a utility such as `bg-surface` emits `var(--surface)`
-   and follows the theme automatically.
+   and a near-black headsign. Operator colour is data, never decoration, and
+   the only accent is the board itself. The palette is defined once as custom
+   properties and exposed to Tailwind through `@theme inline`, so a utility
+   such as `bg-surface` emits `var(--surface)` and follows the theme
+   automatically.
 --------------------------------------------------------------------------- */
 
 @custom-variant dark (&:where([data-theme="dark"], [data-theme="dark"] *));
@@ -29,10 +31,10 @@
   --line: #d8cfbd;
   --line-strong: #b6ab96;
 
-  --accent: #0b6b4f;
-  --accent-hover: #07513c;
-  --accent-ink: #f8f3e7;
-  --accent-soft: #d9e9df;
+  --accent: #17140f;
+  --accent-hover: #2a261f;
+  --accent-ink: #f4efe4;
+  --accent-soft: #ebe4d6;
 
   --warn: #965900;
   --warn-soft: #f4e4cd;
@@ -57,23 +59,41 @@
   --mode-rail: #343f52;
 
   /*
-   * Paper is not flat. A printed map has a tooth, and a soft tint keeps
-   * the large surfaces from looking like a default white card.
+   * The journey palette.
+   *
+   * A ride takes the colour of its operator, because that is the taxonomy
+   * the rider already knows. The palette below keeps a second colour for a
+   * journey that repeats one operator twice, so two Transjakarta corridors
+   * on the same board still separate. The repeats are the violet, the plum
+   * and the olive (route-1, route-4, route-6); the other tokens are kept for
+   * a fourth line and are never a mode colour. Every pair stays distinct for
+   * the common forms of colour blindness, and none is the paper or the ink.
    */
-  --paper-glow: rgb(255 252 244 / 0.9);
-  --paper-shade: rgb(20 20 15 / 0.035);
+  --route-walk: #49453a;
+  --route-1: #5b3fa8;
+  --route-2: #1f4fbf;
+  --route-3: #a45a0a;
+  --route-4: #8b2f7a;
+  --route-5: #0e6f6a;
+  --route-6: #5b5f1a;
+  /*
+   * A pedestrian bridge is a piece of walking infrastructure, not a line
+   * on the network. It is bronze, and it is used only on the walk the
+   * rider is taking now, never as a texture over the city.
+   */
+  --jpo: #8a5a2a;
 
   /* A shadow is the colour of the ink, never of black. */
   --shadow-raised: 0 1px 2px rgb(20 20 15 / 0.1);
   --shadow-pop: 0 2px 6px rgb(20 20 15 / 0.08), 0 24px 60px -26px rgb(20 20 15 / 0.5);
 
-  --radius-card: 12px;
+  --radius-card: 4px;
 
   /*
    * The height of the search board on a phone: the brand strip and the
    * two place rows. The controls below it start where the board ends.
    */
-  --bar-h: 132px;
+  --bar-h: 248px;
 
   /* The bottom app bar on a phone. */
   --bottom-bar-h: 64px;
@@ -89,7 +109,7 @@
   --map-pad-top: 48px;
   --map-pad-bottom: 48px;
   --map-pad-left: 440px;
-  --map-pad-right: 48px;
+  --map-pad-right: 412px;
 
   /* The line that separates a route from the roads under it. */
   --map-halo: rgb(20 20 15 / 0.16);
@@ -97,31 +117,38 @@
   /*
    * The paper map.
    *
+   * A warm printed street: the ground is a little deeper than the roads,
+   * so the street grid stays visible without competing with the route.
    * The basemap is recoloured from these tokens rather than from a second
    * style file, so the map follows the theme with the rest of the window.
    */
-  --map-bg: #efe7d8;
-  --map-park: #e2e7d5;
-  --map-water: #c7d8d4;
-  --map-wood: #dfe6d5;
-  --map-residential: #ece5d7;
-  --map-building: #e5dccb;
-  --map-building-line: #d7ccb9;
-  --map-road: #fbf7ee;
-  --map-road-casing: #d8cebc;
-  --map-road-minor: #f7f1e5;
-  --map-road-subtle: #e6ddcc;
-  --map-motorway: #f3e3c4;
-  --map-motorway-casing: #d8c8a8;
-  --map-rail: #c9bfaa;
-  --map-boundary: #b9af9b;
+  --map-bg: #e6dfd2;
+  --map-park: #d9d8be;
+  --map-water: #a7c4c7;
+  --map-wood: #d4d5ba;
+  --map-residential: #e4ddcf;
+  --map-building: #ddd5c5;
+  --map-building-line: #d2c8b5;
+  --map-road: #f7f3ec;
+  --map-road-casing: #c9bda6;
+  --map-road-minor: #e8e1d3;
+  --map-road-subtle: #ded5c4;
+  --map-motorway: #e8dabd;
+  --map-motorway-casing: #c9b58f;
+  --map-rail: #cec5b2;
+  --map-boundary: #b3a893;
   --map-label: #23231b;
   --map-label-halo: #f7f2e7;
-  --map-water-label: #4f6d75;
+  --map-water-label: #466a72;
   --map-road-label: #6f695c;
 
   --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
   --ease-in-out: cubic-bezier(0.4, 0, 0.2, 1);
+  --ease-sign: cubic-bezier(0.77, 0, 0.175, 1);
+  --ease-drop: cubic-bezier(0.23, 1, 0.32, 1);
+
+  /* The face of the headsign. */
+  --font-sign: "Barlow Condensed", "Plus Jakarta Sans Variable", ui-sans-serif, sans-serif;
 }
 
 [data-theme="dark"] {
@@ -137,10 +164,15 @@
   --line: #293127;
   --line-strong: #3d483a;
 
-  --accent: #64e6ad;
-  --accent-hover: #8af0c2;
-  --accent-ink: #06251a;
-  --accent-soft: #143326;
+  /*
+   * The headsign stays the same near-black board in both themes. Only the
+   * paper around it changes, so the brand is never inverted into a white
+   * card at night.
+   */
+  --accent: #17140f;
+  --accent-hover: #2a261f;
+  --accent-ink: #f4efe4;
+  --accent-soft: #1d231c;
 
   --warn: #f1b76a;
   --warn-soft: #322510;
@@ -155,8 +187,14 @@
   --mode-lrt-jabodebek: #4fd7c9;
   --mode-rail: #a9a2f5;
 
-  --paper-glow: rgb(255 255 255 / 0.035);
-  --paper-shade: rgb(0 0 0 / 0.22);
+  --route-walk: #c9c1b0;
+  --route-1: #b9a6ff;
+  --route-2: #5aa2ff;
+  --route-3: #f3a63a;
+  --route-4: #e58ad8;
+  --route-5: #4fd7c9;
+  --route-6: #c9cf6a;
+  --jpo: #d8a45a;
 
   --shadow-raised: 0 1px 2px rgb(0 0 0 / 0.5);
   --shadow-pop: 0 2px 8px rgb(0 0 0 / 0.45), 0 28px 70px -28px rgb(0 0 0 / 0.9);
@@ -165,20 +203,20 @@
 
   --map-bg: #0e110e;
   --map-park: #141c14;
-  --map-water: #10201f;
-  --map-wood: #162016;
-  --map-residential: #131711;
-  --map-building: #1a1f18;
-  --map-building-line: #242b22;
-  --map-road: #1c221b;
-  --map-road-casing: #262d24;
-  --map-road-minor: #1a211a;
-  --map-road-subtle: #20271f;
-  --map-motorway: #2b2b21;
+  --map-water: #122a2c;
+  --map-wood: #172117;
+  --map-residential: #121612;
+  --map-building: #171c16;
+  --map-building-line: #212820;
+  --map-road: #1e241d;
+  --map-road-casing: #2a3128;
+  --map-road-minor: #161c16;
+  --map-road-subtle: #1c241c;
+  --map-motorway: #29271d;
   --map-motorway-casing: #3a3526;
   --map-rail: #394235;
   --map-boundary: #3d483a;
-  --map-label: #ece5d5;
+  --map-label: #f4efe4;
   --map-label-halo: #0e110e;
   --map-water-label: #7fa3a7;
   --map-road-label: #918977;
@@ -212,9 +250,11 @@
   --color-mode-tram: var(--mode-tram);
   --color-mode-lrt-jabodebek: var(--mode-lrt-jabodebek);
   --color-mode-rail: var(--mode-rail);
+  --color-jpo: var(--jpo);
 
   --font-sans: "Plus Jakarta Sans Variable", ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
   --font-mono: "JetBrains Mono Variable", ui-monospace, "SFMono-Regular", monospace;
+  --font-sign: "Barlow Condensed", "Plus Jakarta Sans Variable", ui-sans-serif, sans-serif;
 
   --radius-card: var(--radius-card);
   --shadow-pop: var(--shadow-pop);
@@ -252,26 +292,29 @@
   }
 
   :focus-visible {
-    outline: 2px solid var(--accent);
+    outline: 2px solid var(--ink);
     outline-offset: 2px;
     border-radius: 4px;
   }
 
   ::selection {
-    background: var(--accent);
-    color: var(--accent-ink);
+    background: var(--ink);
+    color: var(--bg);
   }
 
   ::-webkit-scrollbar {
-    width: 10px;
-    height: 10px;
+    width: 8px;
+    height: 8px;
   }
 
   ::-webkit-scrollbar-thumb {
     background: var(--line-strong);
-    border: 3px solid transparent;
-    border-radius: 999px;
-    background-clip: padding-box;
+    border: 0;
+    border-radius: 4px;
+  }
+
+  ::-webkit-scrollbar-track {
+    background: transparent;
   }
 }
 
@@ -279,15 +322,13 @@
   /*
    * The panel.
    *
-   * A panel is a sheet of paper on the map, not a glass card. It has a
-   * hairline, a slightly warm fill, and a top rule that gives it the
-   * weight of a printed board.
+   * A panel is a flat sheet of paper on the map. There is no sheen and
+   * no coloured rule across the top. The drawings say what kind of
+   * surface it is.
    */
   .panel {
     background-color: var(--surface);
-    background-image: linear-gradient(180deg, var(--paper-glow), transparent 140px);
     border: 1px solid var(--line);
-    border-top-color: var(--line-strong);
     box-shadow: var(--shadow-pop);
   }
 
@@ -295,19 +336,72 @@
     box-shadow: none;
   }
 
-  /* The lower edge of a ticket, torn along a perforation. */
+  /*
+   * The headsign.
+   *
+   * The brand is a bus destination board, not an icon: a near-black plate
+   * with lamp-coloured type. It is the same board in both themes.
+   */
+  .headsign {
+    background-color: var(--accent);
+    color: var(--accent-ink);
+  }
+
+  .headsign__code {
+    font-family: var(--font-sign);
+    font-weight: 700;
+    line-height: 1.05;
+    letter-spacing: 0.01em;
+  }
+
+  .headsign__name {
+    font-family: var(--font-sign);
+    font-weight: 700;
+    line-height: 1.2;
+    letter-spacing: 0.01em;
+  }
+
+  /*
+   * The ticket bite.
+   *
+   * A semicircular notch on the left edge of the journey board, and only
+   * there. It is cut out of the paper, so the map shows through it.
+   */
+  .ticket-bite {
+    --bite-y: 92px;
+    --bite-r: 11px;
+    -webkit-mask-image: radial-gradient(
+      circle var(--bite-r) at 0 var(--bite-y),
+      transparent 96%,
+      #000 100%
+    );
+    mask-image: radial-gradient(
+      circle var(--bite-r) at 0 var(--bite-y),
+      transparent 96%,
+      #000 100%
+    );
+  }
+
+  /* The row of holes between the headsign and the paper slip under it. */
+  .ticket-perforation {
+    height: 10px;
+    background-image: radial-gradient(circle, var(--line-strong) 2px, transparent 2.2px);
+    background-size: 12px 10px;
+    background-position: center;
+    background-repeat: repeat-x;
+  }
+
+  /* A line of a receipt: the tear between two charges, not a section rule. */
   .perforation {
     border-top: 1px dashed var(--line-strong);
   }
 
-  /* A small label in the language of a station sign. */
+  /* A label. Sentence case, never an uppercase tracked kicker. */
   .eyebrow {
-    font-family: var(--font-mono);
+    font-family: var(--font-sans);
     font-size: 12px;
-    line-height: 1.2;
-    font-weight: 500;
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
+    line-height: 1.35;
+    font-weight: 600;
     color: var(--ink-3);
   }
 
@@ -329,9 +423,10 @@
   /*
    * The scrollbar of a panel.
    *
-   * A thin thumb in the strong line colour. The platform bar is hidden
-   * where a drawn thumb replaces it, because the platform bar fades
-   * and does not match the card.
+   * A quiet thumb in the strong line colour, the same thumb as the window:
+   * 8 px wide with a 4 px radius, and no track. The platform bar is hidden
+   * where a drawn thumb replaces it, because the platform bar fades and
+   * does not match the card.
    */
   .scroll-quiet {
     scrollbar-width: thin;
@@ -345,7 +440,8 @@
 
   .scroll-quiet::-webkit-scrollbar-thumb {
     background-color: var(--line-strong);
-    border-radius: 999px;
+    border: 0;
+    border-radius: 4px;
   }
 
   .scroll-quiet::-webkit-scrollbar-track {
@@ -445,7 +541,7 @@
     bottom: 0;
     height: 2px;
     width: 100%;
-    background: var(--accent);
+    background: var(--ink);
     transform: scaleX(0);
     transform-origin: left;
     transition: transform 260ms var(--ease-out);
@@ -453,6 +549,45 @@
 
   .sweep[data-active="true"]::after {
     transform: scaleX(1);
+  }
+
+  /*
+   * The punch chad.
+   *
+   * When a journey first appears, three paper discs fall once from the
+   * ticket bite. They are transform and opacity only, they do not loop,
+   * and they never follow the pointer.
+   */
+  .chad {
+    animation: chad-fall 400ms var(--ease-drop) both;
+  }
+
+  /* A destination that arrives like a split-flap board, once per result. */
+  .flap-line {
+    perspective: 240px;
+  }
+
+  .flap {
+    display: inline-block;
+    transform-origin: center top;
+    animation: flap-in 280ms var(--ease-drop) both;
+  }
+
+  /* The closure stamp: it lands once, then sits tilted. */
+  .stamp {
+    transform: rotate(-8deg);
+    animation: stamp-in 180ms var(--ease-drop) both;
+  }
+
+  /*
+   * The loading slit.
+   *
+   * A cream slit inside the headsign travels from the left edge to the
+   * right while the request is in flight. It is a transform on one bar,
+   * linear, and it stops when the answer arrives.
+   */
+  .slit {
+    animation: slit-travel 1.1s linear infinite;
   }
 }
 
@@ -518,38 +653,48 @@
   }
 }
 
-@keyframes brand-draw {
+@keyframes chad-fall {
   from {
-    stroke-dashoffset: 1;
+    opacity: 0;
+    transform: translate3d(0, -10px, 0) rotate(-16deg);
+  }
+  20% {
+    opacity: 1;
   }
   to {
-    stroke-dashoffset: 0;
-  }
-}
-
-.brand-mark__line {
-  stroke-dasharray: 1;
-  stroke-dashoffset: 1;
-  animation: brand-draw 900ms var(--ease-out) 120ms forwards;
-}
-
-.brand-mark__dot {
-  transform-origin: center;
-  animation: dot-pop 420ms var(--ease-out) 780ms both;
-}
-
-@keyframes dot-pop {
-  0% {
-    transform: scale(0.2);
     opacity: 0;
+    transform: translate3d(var(--chad-x, 0px), 64px, 0) rotate(var(--chad-spin, 18deg));
   }
-  65% {
-    transform: scale(1.25);
-    opacity: 1;
+}
+
+@keyframes flap-in {
+  from {
+    opacity: 0;
+    transform: rotateX(-80deg);
   }
-  100% {
-    transform: scale(1);
+  to {
     opacity: 1;
+    transform: rotateX(0deg);
+  }
+}
+
+@keyframes stamp-in {
+  from {
+    opacity: 0;
+    transform: rotate(-8deg) scale(1.12);
+  }
+  to {
+    opacity: 1;
+    transform: rotate(-8deg) scale(1);
+  }
+}
+
+@keyframes slit-travel {
+  from {
+    transform: translate3d(-110%, 0, 0);
+  }
+  to {
+    transform: translate3d(410%, 0, 0);
   }
 }
 
@@ -567,8 +712,8 @@
   background-image: linear-gradient(
     90deg,
     transparent 0%,
-    var(--accent) 38%,
-    var(--accent) 55%,
+    var(--ink) 38%,
+    var(--ink) 55%,
     transparent 72%
   );
   background-size: 46% 100%;
@@ -658,10 +803,17 @@
   color: var(--ink-3);
 }
 
+.map-popup-pair {
+  margin-top: 4px;
+  font-size: 13px;
+  line-height: 1.35;
+  color: var(--ink);
+}
+
 @media (max-width: 1023px) {
   :root {
-    --bar-h: calc(210px + env(safe-area-inset-top));
-    --map-pad-top: calc(218px + env(safe-area-inset-top));
+    --bar-h: calc(250px + env(safe-area-inset-top));
+    --map-pad-top: calc(258px + env(safe-area-inset-top));
     --map-pad-bottom: 360px;
     --map-pad-left: 20px;
     --map-pad-right: 20px;
@@ -676,6 +828,16 @@
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
     scroll-behavior: auto !important;
+  }
+
+  .chad {
+    animation: none !important;
+    opacity: 0 !important;
+  }
+
+  .flap,
+  .stamp {
+    animation: none !important;
   }
 }
 

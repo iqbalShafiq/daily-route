@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { frequencyLabel, lineRunsAt, serviceAt } from "./service.js";
+import { frequencyLabel, isNightDeparture, lineRunsAt, serviceAt } from "./service.js";
 import type { Line } from "./types.js";
 
 function line(service?: unknown): Line {
@@ -120,6 +120,15 @@ describe("scheduled service", () => {
   it("writes a short rider-facing frequency label", () => {
     expect(frequencyLabel(5, 3, 8)).toBe("Very frequent · about every 5 min · 3–8 min range");
     expect(frequencyLabel(20, 20, 20)).toBe("Infrequent · every 20 min");
+  });
+});
+
+describe("isNightDeparture", () => {
+  it("follows the Jakarta clock at the edges of the night window", () => {
+    expect(isNightDeparture(new Date("2026-10-27T21:59:00+07:00"))).toBe(false);
+    expect(isNightDeparture(new Date("2026-10-27T22:00:00+07:00"))).toBe(true);
+    expect(isNightDeparture(new Date("2026-10-27T04:59:00+07:00"))).toBe(true);
+    expect(isNightDeparture(new Date("2026-10-27T05:00:00+07:00"))).toBe(false);
   });
 });
 

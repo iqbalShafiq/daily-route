@@ -17,28 +17,28 @@ export type ButtonSize = "sm" | "md" | "lg" | "icon";
 const VARIANTS: Record<ButtonVariant, string> = {
   primary:
     "border border-accent-hover bg-accent text-accent-ink shadow-[0_2px_0_0_var(--accent-hover)] " +
-    "hover:-translate-y-px hover:bg-accent-hover hover:shadow-[0_3px_0_0_var(--accent-hover)] " +
+    "hover:bg-accent-hover " +
     "active:translate-y-[2px] active:shadow-none",
   secondary:
-    "border border-line-strong bg-surface text-ink hover:border-ink hover:bg-surface-2 active:translate-y-px",
+    "border border-line bg-surface text-ink hover:bg-surface-2 active:translate-y-px",
   ghost: "text-ink-2 hover:bg-surface-2 hover:text-ink active:translate-y-px",
   subtle: "bg-surface-2 text-ink hover:bg-surface-3 active:translate-y-px",
   danger:
-    "border border-danger/60 bg-danger text-white hover:brightness-105 active:translate-y-px",
+    "border border-danger/60 bg-danger text-bg hover:brightness-105 active:translate-y-px",
 };
 
 const SIZES: Record<ButtonSize, string> = {
-  sm: "h-8 px-3 text-[12px] gap-2 rounded-md",
-  md: "h-10 px-4 text-[13px] gap-2 rounded-lg",
-  lg: "h-12 px-5 text-[15px] gap-2 rounded-lg",
-  icon: "size-9 rounded-lg",
+  sm: "h-8 px-3 text-[12px] gap-2 rounded-[4px]",
+  md: "h-10 px-4 text-[13px] gap-2 rounded-[4px]",
+  lg: "h-12 px-5 text-[15px] gap-2 rounded-[4px]",
+  icon: "size-9 rounded-[4px]",
 };
 
 const BASE =
   "inline-flex shrink-0 items-center justify-center font-semibold tracking-[-0.01em] " +
   "transition-[background-color,border-color,color,transform,box-shadow] duration-150 " +
   "cursor-pointer disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-40 " +
-  "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/40 focus-visible:ring-offset-2 focus-visible:ring-offset-bg";
+  "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ink focus-visible:ring-offset-2 focus-visible:ring-offset-bg";
 
 export type ButtonProps = Omit<ButtonHTMLAttributes<HTMLButtonElement>, "children"> & {
   variant?: ButtonVariant;

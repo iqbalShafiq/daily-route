@@ -64,8 +64,14 @@ export type ChatStatus = "idle" | "streaming" | "error";
 export type ChatContext = {
   origin?: string;
   destination?: string;
+  /** The place the rider marked as "here", so the assistant can start there. */
+  current?: {
+    name: string;
+    address: string | null;
+    latitude: number;
+    longitude: number;
+  };
   at?: string;
-  nightSafe?: boolean;
 };
 
 export type ChatState = {
@@ -132,8 +138,8 @@ export function useChat(): ChatState {
           sessionId: chatSessionId(),
           ...(context.origin ? { origin: context.origin } : {}),
           ...(context.destination ? { destination: context.destination } : {}),
+          ...(context.current ? { current: context.current } : {}),
           ...(context.at ? { at: context.at } : {}),
-          ...(context.nightSafe ? { nightSafe: true } : {}),
         }),
         signal: controller.signal,
       });

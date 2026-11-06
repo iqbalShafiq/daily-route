@@ -11,9 +11,14 @@ import { cn } from "../../lib/cn.js";
  * kept for the screen reader only. The search on a map is built from
  * rows, so the two places it holds are one object and not two boxes
  * inside a box.
+ *
+ * Every field carries a placeholder. The label names the field; the
+ * placeholder says what to type, so an empty field is not a blank box.
  */
-export type InputProps = Omit<InputHTMLAttributes<HTMLInputElement>, "size"> & {
+export type InputProps = Omit<InputHTMLAttributes<HTMLInputElement>, "size" | "placeholder"> & {
   label: string;
+  /** Shown while the field is empty. Required, so a form cannot omit it. */
+  placeholder: string;
   icon?: ReactNode | undefined;
   /** Rendered inside the field on the right, such as a clear button. */
   trailing?: ReactNode | undefined;
@@ -25,7 +30,7 @@ export type InputProps = Omit<InputHTMLAttributes<HTMLInputElement>, "size"> & {
 };
 
 export const Input = forwardRef<HTMLInputElement, InputProps>(function Input(
-  { className, label, icon, trailing, hint, invalid, variant = "field", id, ...props },
+  { className, label, icon, trailing, hint, invalid, variant = "field", id, placeholder, ...props },
   ref,
 ) {
   const inputId = id ?? `field-${props.name ?? label.replace(/\s+/g, "-").toLowerCase()}`;
@@ -43,6 +48,7 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(function Input(
           id={inputId}
           aria-invalid={invalid || undefined}
           aria-describedby={describedBy}
+          placeholder={placeholder}
           className="min-w-0 flex-1 bg-transparent text-[15px] text-ink outline-none placeholder:text-ink-3"
           {...props}
         />
@@ -52,21 +58,21 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(function Input(
   }
 
   return (
-    <div className="flex flex-col gap-2">
+    <div className="flex w-full flex-col gap-2">
       <label
         htmlFor={inputId}
-        className="font-mono text-[12px] font-medium uppercase leading-[1.2] tracking-[0.08em] text-ink-3"
+        className="text-[12px] font-semibold leading-[1.35] text-ink-3"
       >
         {label}
       </label>
       <div
         className={cn(
-          "flex h-11 items-center gap-2 rounded-lg border bg-surface px-3",
+          "flex h-11 items-center gap-2 rounded-[4px] border bg-surface px-3",
           "transition-colors duration-150",
           invalid
             ? "border-danger focus-within:border-danger"
-            : "border-line-strong focus-within:border-accent",
-          "focus-within:ring-2 focus-within:ring-accent/15",
+            : "border-line-strong focus-within:border-ink",
+          "focus-within:ring-2 focus-within:ring-ink/15",
           className,
         )}
       >
@@ -76,6 +82,7 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(function Input(
           id={inputId}
           aria-invalid={invalid || undefined}
           aria-describedby={describedBy}
+          placeholder={placeholder}
           className="min-w-0 flex-1 bg-transparent text-[15px] text-ink outline-none placeholder:text-ink-3"
           {...props}
         />

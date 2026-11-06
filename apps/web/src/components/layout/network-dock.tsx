@@ -1,4 +1,4 @@
-import { Bell, ChevronDown, RadioTower, Route as RouteIcon, X } from "lucide-react";
+import { Bell, ChevronDown, Route as RouteIcon, X } from "lucide-react";
 import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 
 import { NETWORK_SYSTEMS, OperatorBadge } from "../map/operator-mark.js";
@@ -121,7 +121,7 @@ export function NetworkDock({
       aria-hidden={hiddenFromKeyboard || undefined}
       inert={hiddenFromKeyboard || undefined}
       className={cn(
-        "panel flex flex-col overflow-hidden rounded-[12px] border-t-2 border-t-ink",
+        "panel flex flex-col overflow-hidden rounded-[4px]",
         "transition-[transform,opacity] duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] motion-reduce:transition-none",
         "max-h-[calc(100dvh-var(--bar-h)-var(--bottom-bar-h)-24px)] lg:max-h-[min(62dvh,560px)]",
         className,
@@ -129,26 +129,19 @@ export function NetworkDock({
     >
       <header
         ref={headerRef}
-        className="flex shrink-0 items-center justify-between gap-2 border-b border-line/70 px-3 py-2"
+        className="flex shrink-0 items-center justify-between gap-2 px-3 py-2"
       >
-        <div className="flex min-w-0 items-center gap-2">
-          <span className="flex size-7 items-center justify-center rounded-[6px] bg-accent-soft text-accent">
-            <RadioTower aria-hidden className="size-4" />
-          </span>
-          <div className="min-w-0">
-            <p className="eyebrow">Service board</p>
-            <p className="truncate text-[13px] font-semibold leading-[1.3] text-ink">
-              Lines &amp; notices
-            </p>
-          </div>
-        </div>
-        <div className="flex shrink-0 items-center gap-2">
+        <p className="min-w-0 truncate text-[15px] font-semibold leading-[1.2] text-ink">
+          Service board
+        </p>
+        <div className="flex shrink-0 items-center gap-1">
           {onClose ? (
             <button
               type="button"
               onClick={onClose}
               aria-label="Close service board"
-              className="ml-1 flex size-7 cursor-pointer items-center justify-center rounded-md text-ink-3 transition-colors hover:bg-surface-2 hover:text-ink lg:hidden"
+              title="Close service board"
+              className="flex size-11 cursor-pointer items-center justify-center text-ink transition-colors pointer-fine:hover:bg-surface-2 lg:hidden"
             >
               <X aria-hidden className="size-4" />
             </button>
@@ -159,7 +152,8 @@ export function NetworkDock({
               onClick={onToggleOpen}
               aria-expanded={open}
               aria-label={open ? "Collapse service board" : "Expand service board"}
-              className="hidden size-7 cursor-pointer items-center justify-center rounded-md text-ink-3 transition-colors hover:bg-surface-2 hover:text-ink lg:flex"
+              title={open ? "Collapse service board" : "Expand service board"}
+              className="hidden size-11 cursor-pointer items-center justify-center text-ink transition-colors pointer-fine:hover:bg-surface-2 lg:flex"
             >
               <ChevronDown
                 aria-hidden
@@ -266,7 +260,7 @@ function DockTab({
       {label}
       <span className="font-mono text-[12px] font-medium tabular-nums text-ink-3">{meta}</span>
       {active ? (
-        <span aria-hidden className="absolute inset-x-4 bottom-0 h-0.5 bg-accent" />
+        <span aria-hidden className="absolute inset-x-4 bottom-0 h-0.5 bg-ink" />
       ) : null}
     </button>
   );
@@ -337,9 +331,10 @@ function MapLegend({
             return (
               <Tooltip
                 key={entry.id}
+                variant="panel"
                 label={
                   <div>
-                    <p className="text-[12px] font-mono uppercase tracking-[0.04em] text-ink-3">
+                    <p className="text-[12px] font-semibold leading-[1.35] text-ink-3">
                       {entry.label}
                     </p>
                     <p className="mt-1 text-[13px] font-medium text-ink">
@@ -354,18 +349,16 @@ function MapLegend({
                   aria-label={on ? `Hide ${entry.label}` : `Show ${entry.label}`}
                   onClick={() => onToggleSystem(entry.id)}
                   className={cn(
-                    "group relative flex min-w-0 cursor-pointer flex-col items-center gap-1 rounded-md border px-1 py-2 transition-[border-color,background-color,opacity,transform] duration-150 active:translate-y-px",
-                    on
-                      ? "border-line-strong bg-surface hover:border-ink hover:bg-surface-2"
-                      : "border-transparent bg-surface-2/40 opacity-55 hover:opacity-80",
+                    "group relative flex min-w-0 cursor-pointer flex-col items-center gap-1 rounded-[4px] border border-line bg-surface px-1 py-2 transition-[background-color,transform] duration-150 active:translate-y-px",
+                    on ? "hover:bg-surface-2" : "",
                   )}
                 >
                   <span className="flex h-4 w-full items-center justify-center">
                     <OperatorBadge
                       logo={entry.logo}
                       className={cn(
-                        "max-h-4 w-auto max-w-full object-contain transition-[filter,transform] duration-200 group-hover:-translate-y-0.5",
-                        on ? "" : "grayscale",
+                        "max-h-4 w-auto max-w-full object-contain",
+                        on ? "" : "opacity-40 grayscale",
                       )}
                     />
                   </span>
@@ -392,10 +385,10 @@ function MapLegend({
         </p>
 
         {journey ? (
-          <div data-testid="this-journey" className="mt-3 border-t border-line/70 pt-3">
+          <div data-testid="this-journey" className="mt-4">
             <div className="flex items-baseline justify-between gap-2">
               <h3 className="eyebrow">This journey</h3>
-              <p className="font-mono text-[12px] uppercase leading-[1.2] tracking-[0.04em] text-ink-3">
+              <p className="text-[12px] leading-[1.35] text-ink-3">
                 {entries.length} {entries.length === 1 ? "mode" : "modes"}
               </p>
             </div>
@@ -408,7 +401,7 @@ function MapLegend({
                     key={entry.systemId ?? entry.label}
                     title={label}
                     aria-label={label}
-                    className="flex h-8 items-center rounded-[4px] border border-line bg-surface-2 px-2"
+                    className="flex h-8 items-center rounded-[4px] border border-line bg-surface px-2"
                   >
                     {system ? (
                       <OperatorBadge
@@ -427,7 +420,7 @@ function MapLegend({
           </div>
         ) : null}
 
-        <div className="mt-4 border-t border-line/70 pt-3">
+        <div className="mt-4">
           <div className="flex items-baseline justify-between gap-2">
             <h3 className="eyebrow">The network</h3>
             <p className="font-mono text-[12px] leading-[1.2] tabular-nums text-ink-3">
@@ -435,26 +428,26 @@ function MapLegend({
             </p>
           </div>
           <dl className="mt-2 grid grid-cols-3 gap-2">
-            <div className="rounded-md border border-line/70 bg-surface-2/40 px-2 py-2">
+            <div className="px-1 py-1">
               <dt className="eyebrow">Operators</dt>
               <dd className="mt-0.5 font-mono text-[20px] font-semibold leading-[1.2] tabular-nums text-ink">
                 5
               </dd>
             </div>
-            <div className="rounded-md border border-line/70 bg-surface-2/40 px-2 py-2">
+            <div className="px-1 py-1">
               <dt className="eyebrow">Lines</dt>
               <dd className="mt-0.5 font-mono text-[20px] font-semibold leading-[1.2] tabular-nums text-ink">
                 {totalLines}
               </dd>
             </div>
-            <div className="rounded-md border border-line/70 bg-surface-2/40 px-2 py-2">
+            <div className="px-1 py-1">
               <dt className="eyebrow">On</dt>
               <dd className="mt-0.5 font-mono text-[20px] font-semibold leading-[1.2] tabular-nums text-ink">
                 {onSystems}/5
               </dd>
             </div>
           </dl>
-          <div className="mt-2 rounded-md border border-dashed border-line-strong/70 px-2 py-2">
+          <div className="mt-3 px-1 py-1">
             <p className="eyebrow">Reading the map</p>
             <ul className="mt-2 grid grid-cols-2 gap-x-2 gap-y-1 text-[12px] leading-[1.2] text-ink-2">
               <li className="flex items-center gap-2">
@@ -472,6 +465,10 @@ function MapLegend({
               <li className="flex items-center gap-2">
                 <span aria-hidden className="h-[3px] w-5 rounded-full bg-mode-rail" />
                 Rail sleepers
+              </li>
+              <li className="flex items-center gap-2">
+                <span aria-hidden className="h-[3px] w-5 rounded-full bg-jpo" />
+                JPO line
               </li>
             </ul>
           </div>

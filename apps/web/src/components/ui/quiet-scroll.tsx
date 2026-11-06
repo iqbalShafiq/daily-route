@@ -52,7 +52,7 @@ export function QuietScroll({ className, children }: { className?: string; child
       <span
         ref={thumb}
         aria-hidden
-        className="pointer-events-none absolute top-0 right-1 w-1 rounded-full bg-line-strong opacity-0"
+        className="pointer-events-none absolute top-0 right-1 w-2 rounded-[4px] bg-line-strong opacity-0"
       />
     </div>
   );

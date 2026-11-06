@@ -1,0 +1,17 @@
+{
+  "source": "Overture Maps Foundation",
+  "theme": "places",
+  "release": "2026-10-21.0",
+  "license": "CDLA Permissive 2.0, Apache 2.0 for the Foursquare records",
+  "attribution": "Places © Overture Maps Foundation. Foursquare records © Foursquare Labs, Inc. (Apache 2.0).",
+  "bbox": {
+    "minLongitude": 106.4,
+    "maxLongitude": 107.2,
+    "minLatitude": -6.7,
+    "maxLatitude": -6.05
+  },
+  "count": 272727,
+  "file": "data/places-jabodetabek.parquet",
+  "notice": "data/PLACES-NOTICE.txt",
+  "extractedAt": "2026-11-05T03:34:17.381Z"
+}

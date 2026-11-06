@@ -8,6 +8,8 @@ export * from "./fare.js";
 export * from "./geometry.js";
 export * from "./geo.js";
 export * from "./graph.js";
+export * from "./habits.js";
+export * from "./jpo.js";
 export * from "./normalize.js";
 export * from "./service.js";
 export * from "./overview.js";

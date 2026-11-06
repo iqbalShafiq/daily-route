@@ -3,6 +3,9 @@ import type { Database } from "@daily-route/db";
 import type { Env } from "@daily-route/env";
 import type { NetworkCache } from "@daily-route/agent";
 import type { PlaceResolver } from "@daily-route/semantic";
+import type { JpoDocument } from "@daily-route/transit";
+
+import type { AttemptLimiter } from "./attempts.js";
 
 /**
  * The API's dependencies.
@@ -19,4 +22,8 @@ export type ApiDeps = {
   agent: Agent | null;
   /** The id of the most recent provider error, for the health endpoint. */
   lastProviderError: { at: string; message: string } | null;
+  /** The failed-attempt limiter behind the account endpoints. */
+  attempts: AttemptLimiter;
+  /** The official and OpenStreetMap JPO registry, when it is present. */
+  jpos: JpoDocument | null;
 };

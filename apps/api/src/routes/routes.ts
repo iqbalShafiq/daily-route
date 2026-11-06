@@ -1,12 +1,19 @@
 import { Router } from "express";
 import { z } from "zod";
 
-import { findStationsNear, listActiveDisruptions, listNoticeEvidence } from "@daily-route/db";
+import {
+  findStationsNear,
+  insertObservation,
+  labelsForPlaces,
+  listActiveDisruptions,
+  listNoticeEvidence,
+} from "@daily-route/db";
 import { PLACE_CONFIDENCE_THRESHOLD } from "@daily-route/semantic";
 import {
   bestAccess,
   blocksJourney,
   FARE_OPERATOR_LABELS,
+  jakartaDayClock,
   linesUsedBy,
   matchDisruptions,
   planRoutes,
@@ -18,6 +25,10 @@ import {
   diversionsFromMetadata,
   isActiveAt,
   isDemonstration,
+  isNightDeparture,
+  joinWalkEnds,
+  jpoWalkEstimate,
+  jposAlongPath,
   patternActiveAt,
   noticeScopeOf,
   type DiversionDetail,
@@ -28,6 +39,7 @@ import {
   type Disruption,
   type FareRules,
   type Itinerary,
+  type Jpo,
   type NoticeScope,
   type RoadRef,
   type Station,
@@ -37,6 +49,7 @@ import {
 import { storedMark } from "@daily-route/agent";
 
 import type { ApiDeps } from "../deps.js";
+import { readAccountSession } from "../account-session.js";
 import { fetchWalkingRoute } from "./walk.js";
 
 /**
@@ -57,6 +70,15 @@ const optionalCoordinate = z
     return Number.isFinite(number) ? number : undefined;
   });
 
+/** A query boolean. Missing means "the server applies the silent night rule". */
+const optionalBoolean = z
+  .union([z.boolean(), z.enum(["true", "false"])])
+  .optional()
+  .transform((value) => {
+    if (value === undefined) return undefined;
+    return value === true || value === "true";
+  });
+
 const planSchema = z.object({
   origin: z.string().min(1).max(200),
   destination: z.string().min(1).max(200),
@@ -66,7 +88,7 @@ const planSchema = z.object({
   destinationLatitude: optionalCoordinate,
   destinationLongitude: optionalCoordinate,
   at: z.string().datetime({ offset: true }).optional(),
-  nightSafe: z.coerce.boolean().optional(),
+  nightSafe: optionalBoolean,
 });
 
 /**
@@ -227,15 +249,20 @@ export function createRoutesRouter(deps: ApiDeps): Router {
     }
 
     const { origin, destination, limit } = parsed.data;
-    const nightSafe = parsed.data.nightSafe === true;
     const originPin = pinOf(parsed.data.originLatitude, parsed.data.originLongitude);
     const destinationPin = pinOf(
       parsed.data.destinationLatitude,
       parsed.data.destinationLongitude,
     );
+    // A signed-in rider's planned journeys become the evidence for a usual
+    // journey. A signed-out rider is planned exactly as before.
+    const session = await readAccountSession(deps, request, response);
 
     const { network, disruptions, fareRules } = await deps.cache.get();
     const quotedAt = parsed.data.at ? new Date(parsed.data.at) : new Date();
+    // The night rule is silent and follows the departure the caller asked
+    // for. An explicit flag still wins, so an old caller keeps its answer.
+    const nightSafe = parsed.data.nightSafe ?? isNightDeparture(quotedAt);
 
     const namedOrigin = originPin ? null : await resolveNamedStop(deps, origin);
     const namedDestination = destinationPin ? null : await resolveNamedStop(deps, destination);
@@ -282,8 +309,13 @@ export function createRoutesRouter(deps: ApiDeps): Router {
 
     if (closedStops.has(originStop.stationId)) {
       const from = originPin ?? pointOfStop(originStop);
-      const best = pickAccess(network, from, closedStops, (station) =>
-        planRoutes(network, station.id, destinationStop.stationId, { maxAlternatives: 1, at: quotedAt })[0]?.cost ?? null,
+      const best = pickAccess(
+        network,
+        from,
+        closedStops,
+        (station) =>
+          planRoutes(network, station.id, destinationStop.stationId, { maxAlternatives: 1, at: quotedAt })[0]?.cost ?? null,
+        deps.jpos?.jpos ?? [],
       );
       if (best) {
         originStop = asStopChoice(best.access.station);
@@ -292,8 +324,13 @@ export function createRoutesRouter(deps: ApiDeps): Router {
     }
     if (closedStops.has(destinationStop.stationId)) {
       const to = destinationPin ?? pointOfStop(destinationStop);
-      const best = pickAccess(network, to, closedStops, (station) =>
-        planRoutes(network, originStop.stationId, station.id, { maxAlternatives: 1, at: quotedAt })[0]?.cost ?? null,
+      const best = pickAccess(
+        network,
+        to,
+        closedStops,
+        (station) =>
+          planRoutes(network, originStop.stationId, station.id, { maxAlternatives: 1, at: quotedAt })[0]?.cost ?? null,
+        deps.jpos?.jpos ?? [],
       );
       if (best) {
         destinationStop = asStopChoice(best.access.station);
@@ -364,10 +401,10 @@ export function createRoutesRouter(deps: ApiDeps): Router {
 
     const [accessWalk, egressWalk] = await Promise.all([
       boardedFrom
-        ? walkBetween(boardedFrom, originStop, origin, "access", originStop)
+        ? walkBetween(boardedFrom, originStop, origin, "access", originStop, deps.jpos?.jpos ?? [])
         : Promise.resolve(null),
       alightedAt
-        ? walkBetween(destinationStop, alightedAt, destination, "egress", destinationStop)
+        ? walkBetween(destinationStop, alightedAt, destination, "egress", destinationStop, deps.jpos?.jpos ?? [])
         : Promise.resolve(null),
     ]);
 
@@ -385,6 +422,18 @@ export function createRoutesRouter(deps: ApiDeps): Router {
     const presentedItineraries = await Promise.all(
       itineraries.map((itinerary) => followStreets(present(itinerary))),
     );
+
+    if (session !== null && primary) {
+      await recordPlannedJourney(deps, session.userId, {
+        originText: origin,
+        destinationText: destination,
+        originPinned: originPin !== null,
+        destinationPinned: destinationPin !== null,
+        boarded,
+        itinerary: primary,
+        at: quotedAt,
+      });
+    }
 
     response.json({
       origin: {
@@ -764,12 +813,23 @@ function pickAccess(
   from: { latitude: number; longitude: number },
   closed: ReadonlySet<string>,
   costOf: (station: Station) => number | null,
+  jpos: readonly Jpo[] = [],
 ): ReturnType<typeof bestAccess> {
   // Three nearest is not enough: the nearest stops can be poorly connected
   // while a stop four hundred metres away is on the same corridor. Plan
   // against a wider ring and let the total cost choose.
   const candidates = stopsWithinWalk(network, from, { exclude: closed, maxKm: 1.2, limit: 8 });
-  return bestAccess(candidates, costOf);
+  const adjusted = candidates.map((candidate) => {
+    const bridge = jpoWalkEstimate(jpos, from, candidate.station);
+    return bridge
+      ? {
+          ...candidate,
+          distanceKm: bridge.km,
+          minutes: bridge.minutes,
+        }
+      : candidate;
+  });
+  return bestAccess(adjusted, costOf);
 }
 
 function dedupeItineraries(itineraries: readonly Itinerary[]): Itinerary[] {
@@ -787,6 +847,61 @@ function dedupeItineraries(itineraries: readonly Itinerary[]): Itinerary[] {
     unique.push(itinerary);
   }
   return unique;
+}
+
+/**
+ * Record a journey the rider planned, for the usual journeys they see later.
+ *
+ * The write is the server's own bookkeeping; the rider's answer does not
+ * depend on it. A refused or failed write is therefore swallowed, because a
+ * database hiccup in a convenience must never take away the journey that was
+ * just planned.
+ */
+async function recordPlannedJourney(
+  deps: ApiDeps,
+  userId: string,
+  input: {
+    originText: string;
+    destinationText: string;
+    originPinned: boolean;
+    destinationPinned: boolean;
+    boarded: { origin: StopChoice; destination: StopChoice };
+    itinerary: Itinerary;
+    at: Date;
+  },
+): Promise<void> {
+  try {
+    const clock = jakartaDayClock(input.at);
+    const lineCodes = [
+      ...new Set(
+        input.itinerary.legs.flatMap((leg) => (leg.lineCode ? [leg.lineCode] : [])),
+      ),
+    ];
+    const labels = await labelsForPlaces(
+      deps.db,
+      userId,
+      input.boarded.origin.stationId,
+      input.boarded.destination.stationId,
+    );
+    await insertObservation(deps.db, userId, {
+      originKey: input.boarded.origin.stationId,
+      destinationKey: input.boarded.destination.stationId,
+      originLabel: labels.originLabel,
+      destinationLabel: labels.destinationLabel,
+      // A pinned place keeps the name the rider typed; a named stop keeps
+      // the network's spelling, which is what the answer shows.
+      originName: input.originPinned ? input.originText : input.boarded.origin.name,
+      destinationName: input.destinationPinned
+        ? input.destinationText
+        : input.boarded.destination.name,
+      lineCodes,
+      weekday: clock.weekday,
+      minuteOfDay: clock.minuteOfDay,
+      source: "plan",
+    });
+  } catch {
+    // The plan already answered; the habit is a convenience, not the trip.
+  }
 }
 
 function pointOfStop(stop: { latitude: number; longitude: number }): Pin {
@@ -869,6 +984,10 @@ type WalkAttachment = {
   durationMinutes: number;
   distanceKm: number;
   geometry: { latitude: number; longitude: number }[];
+  /** The geometry came from the pedestrian router, not a straight line. */
+  routed: boolean;
+  /** The JPOs the routed walk crosses, when the path touches one. */
+  jpo: { id: string; name: string; official: boolean; source: Jpo["source"] }[];
   placeLabel: string;
   stationId: string;
   stationName: string;
@@ -932,13 +1051,27 @@ async function chooseStops(
 
   if (input.origin && input.destinationPin) {
     const near = await nearbyStops(deps, input.destinationPin, 20);
-    const destination = bestStop(network, near, input.origin.stationId, "to");
+    const destination = bestStop(
+      network,
+      near,
+      input.origin.stationId,
+      "to",
+      input.destinationPin,
+      deps.jpos?.jpos ?? [],
+    );
     return destination ? { origin: input.origin, destination } : null;
   }
 
   if (input.destination && input.originPin) {
     const near = await nearbyStops(deps, input.originPin, 20);
-    const origin = bestStop(network, near, input.destination.stationId, "from");
+    const origin = bestStop(
+      network,
+      near,
+      input.destination.stationId,
+      "from",
+      input.originPin,
+      deps.jpos?.jpos ?? [],
+    );
     return origin ? { origin, destination: input.destination } : null;
   }
 
@@ -957,13 +1090,26 @@ async function chooseStops(
       if (!itinerary) continue;
       const total =
         itinerary.durationMinutes +
-        walkingMinutes(origin.distanceKm) +
-        walkingMinutes(destination.distanceKm);
+        accessMinutesWithJpo(deps.jpos?.jpos ?? [], input.originPin, origin) +
+        accessMinutesWithJpo(deps.jpos?.jpos ?? [], input.destinationPin, destination);
       if (!winner || total < winner.total) winner = { origin, destination, total };
     }
   }
 
   return winner ? { origin: winner.origin, destination: winner.destination } : null;
+}
+
+/** The walk to a stop, over a bridge when one crosses to it. */
+function accessMinutesWithJpo(
+  jpos: readonly Jpo[],
+  from: Pin | null,
+  stop: StopChoice,
+): number {
+  if (from) {
+    const bridge = jpoWalkEstimate(jpos, from, stop);
+    if (bridge) return bridge.minutes;
+  }
+  return walkingMinutes(stop.distanceKm);
 }
 
 /** The nearby stop that makes the whole journey shortest. */
@@ -972,6 +1118,8 @@ function bestStop(
   options: readonly StopChoice[],
   otherId: string,
   direction: "from" | "to",
+  from: Pin | null,
+  jpos: readonly Jpo[],
 ): StopChoice | null {
   let winner: { stop: StopChoice; total: number } | null = null;
 
@@ -983,7 +1131,7 @@ function bestStop(
         : planRoutes(network, otherId, stop.stationId, { maxAlternatives: 1 })
     )[0];
     if (!itinerary) continue;
-    const total = itinerary.durationMinutes + walkingMinutes(stop.distanceKm);
+    const total = itinerary.durationMinutes + accessMinutesWithJpo(jpos, from, stop);
     if (!winner || total < winner.total) winner = { stop, total };
   }
 
@@ -1003,16 +1151,31 @@ async function walkBetween(
   placeLabel: string,
   reason: "access" | "egress",
   station: StopChoice,
+  jpos: readonly Jpo[],
 ): Promise<WalkAttachment | null> {
   const straightKm = haversineKm(from, to);
   if (straightKm < 0.05) return null;
 
   const routed = await fetchWalkingRoute(from, to);
+  const usedJpos = routed
+    ? jposAlongPath(jpos, routed.geometry, { toleranceKm: 0.02 }).filter(
+        (entry) =>
+          entry.jpo.official ||
+          (entry.jpo.name !== "Footbridge" && entry.jpo.name !== "Underpass"),
+      )
+    : [];
   return {
     reason,
     durationMinutes: routed?.durationMinutes ?? walkingMinutes(straightKm),
     distanceKm: routed?.distanceKm ?? Number(straightKm.toFixed(3)),
-    geometry: routed?.geometry ?? [],
+    geometry: routed ? joinWalkEnds(routed.geometry, from, to) : [],
+    routed: routed !== null && routed.geometry.length >= 2,
+    jpo: usedJpos.map((entry) => ({
+      id: entry.jpo.id,
+      name: entry.jpo.name,
+      official: entry.jpo.official,
+      source: entry.jpo.source,
+    })),
     placeLabel,
     stationId: station.stationId,
     stationName: station.name,
@@ -1023,7 +1186,9 @@ async function walkBetween(
 
 type PresentedLeg = ReturnType<typeof legsOf>[number];
 
-function walkLeg(walk: WalkAttachment): PresentedLeg {
+function walkLeg(
+  walk: WalkAttachment,
+): PresentedLeg & { geometryRouted: boolean; jpo: WalkAttachment["jpo"] } {
   const stationStop = {
     stationId: walk.stationId,
     name: walk.stationName,
@@ -1040,6 +1205,7 @@ function walkLeg(walk: WalkAttachment): PresentedLeg {
     lineCode: null,
     serviceClass: null,
     temporary: false,
+    geometryRouted: walk.routed,
     fromStationId: towardStation ? null : walk.stationId,
     toStationId: towardStation ? walk.stationId : null,
     fromName: towardStation ? walk.placeLabel : walk.stationName,
@@ -1047,6 +1213,7 @@ function walkLeg(walk: WalkAttachment): PresentedLeg {
     durationMinutes: walk.durationMinutes,
     distanceKm: Number(walk.distanceKm.toFixed(2)),
     walkReason: walk.reason,
+    jpo: walk.jpo,
     nextLineName: null,
     waitMinutes: 0,
     serviceLabel: null,
@@ -1075,25 +1242,43 @@ function walkLeg(walk: WalkAttachment): PresentedLeg {
  * A walk the planner drew as a straight line is asked of the pedestrian
  * router, so the map follows the street between the two stops.
  *
- * The distance and the time stay the planner's. Only the line changes,
- * and only when the router has a path. A missing router leaves the
- * straight line, because dropping it would open a gap in the journey.
+ * The distance and the time stay the planner's. Only the line changes.
+ * A walk the planner drew as two points is asked of the pedestrian router;
+ * when the router has no path, the leg keeps no line at all. A straight
+ * line between two places is a road that may not exist, and the map must
+ * not invent one. The list still describes the walk by its time and
+ * distance.
  */
-async function followStreets<T extends { legs: { kind: string; geometry: { latitude: number; longitude: number }[]; distanceKm: number }[] }>(
-  itinerary: T,
-): Promise<T> {
+export async function followStreets<
+  T extends {
+    legs: {
+      kind: string;
+      geometry: { latitude: number; longitude: number }[];
+      distanceKm: number;
+      geometryRouted?: boolean;
+    }[];
+    geometry?: { latitude: number; longitude: number }[];
+  },
+>(itinerary: T): Promise<T> {
   const legs = await Promise.all(
     itinerary.legs.map(async (leg) => {
-      if (leg.kind !== "walk" || leg.geometry.length !== 2 || leg.distanceKm < 0.05) return leg;
+      if (leg.kind !== "walk") return leg;
+      if (leg.geometry.length > 2 || leg.geometryRouted === true) return leg;
       const from = leg.geometry[0];
       const to = leg.geometry[1];
-      if (!from || !to) return leg;
+      if (!from || !to) return { ...leg, geometry: [] };
       const routed = await fetchWalkingRoute(from, to);
-      if (!routed || routed.geometry.length < 2) return leg;
-      return { ...leg, geometry: routed.geometry };
+      return {
+        ...leg,
+        geometry: routed ? joinWalkEnds(routed.geometry, from, to) : [],
+      };
     }),
   );
-  return { ...itinerary, legs };
+  // The whole-journey geometry is the lines the map may draw. A leg that
+  // kept no path contributes no point, so a client cannot draw the
+  // straight line the leg came from.
+  const geometry = legs.flatMap((leg) => leg.geometry);
+  return { ...itinerary, legs, geometry };
 }
 
 function presentItinerary(

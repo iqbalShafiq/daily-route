@@ -14,23 +14,31 @@ export function Tabs({
   value,
   onValueChange,
   children,
+  panels,
   className,
 }: {
   value: string;
   onValueChange: (value: string) => void;
   children: ReactNode;
+  /** The panels that belong to the list, rendered underneath it. */
+  panels?: ReactNode;
   className?: string;
 }) {
   return (
-    <BaseTabs.Root value={value} onValueChange={(next) => onValueChange(next as string)}>
+    <BaseTabs.Root
+      value={value}
+      onValueChange={(next) => onValueChange(next as string)}
+      className="flex flex-col gap-3"
+    >
       <BaseTabs.List
         className={cn(
-          "inline-flex items-center gap-0.5 rounded-lg border border-line-strong bg-surface-2 p-0.5",
+          "inline-flex w-fit items-center gap-0.5 rounded-[4px] border border-line-strong bg-surface-2 p-0.5",
           className,
         )}
       >
         {children}
       </BaseTabs.List>
+      {panels}
     </BaseTabs.Root>
   );
 }
@@ -52,7 +60,7 @@ export function Tab({
       value={value}
       title={title}
       className={cn(
-        "inline-flex h-8 cursor-pointer items-center gap-2 rounded-md px-3 text-[13px] font-medium text-ink-3",
+        "inline-flex h-11 cursor-pointer items-center gap-2 rounded-[4px] px-3 text-[13px] font-medium text-ink-3",
         "transition-[background-color,color,box-shadow] duration-150",
         "hover:text-ink",
         // The chosen tab is unmistakable: ink on paper, the way a station

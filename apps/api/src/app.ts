@@ -1,7 +1,11 @@
 import express, { type Express } from "express";
+import { mapPlaces } from "@daily-route/db";
+import { hasGoogleMaps } from "@daily-route/env";
 
 import type { ApiDeps } from "./deps.js";
+import { createAccountRouter } from "./routes/account.js";
 import { createAgentRouter } from "./routes/agent.js";
+import { createJpoRouter } from "./routes/jpo.js";
 import { createMonitorRouter } from "./routes/monitor.js";
 import { createPlacesRouter } from "./routes/places.js";
 import { createRoutesRouter } from "./routes/routes.js";
@@ -22,9 +26,13 @@ export function createApp(deps: ApiDeps): Express {
   app.use(express.json({ limit: "256kb" }));
 
   app.use((_request, response, next) => {
+    // The browser sends the session cookie, so the allowed origin is exact
+    // and credentials are enabled; a wildcard origin cannot carry a cookie.
     response.setHeader("Access-Control-Allow-Origin", deps.env.WEB_ORIGIN);
+    response.setHeader("Access-Control-Allow-Credentials", "true");
     response.setHeader("Access-Control-Allow-Headers", "Content-Type");
-    response.setHeader("Access-Control-Allow-Methods", "GET,POST,OPTIONS");
+    response.setHeader("Access-Control-Allow-Methods", "GET,POST,PUT,DELETE,OPTIONS");
+    response.setHeader("Vary", "Origin");
     next();
   });
 
@@ -32,7 +40,7 @@ export function createApp(deps: ApiDeps): Express {
     response.sendStatus(204);
   });
 
-  app.get("/api/health", (_request, response) => {
+  app.get("/api/health", async (_request, response) => {
     response.json({
       status: "ok",
       agent: deps.agent !== null,
@@ -42,14 +50,17 @@ export function createApp(deps: ApiDeps): Express {
           deps.env.LANGFUSE_SECRET_KEY &&
           (deps.env.LANGFUSE_BASE_URL ?? deps.env.LANGFUSE_HOST),
       ),
+      places: await placeSource(deps),
       lastProviderError: deps.lastProviderError,
     });
   });
 
   app.use("/api", createTransitRouter(deps));
+  app.use("/api/account", createAccountRouter(deps));
   app.use("/api/places", createPlacesRouter(deps));
   app.use("/api/routes", createRoutesRouter(deps));
   app.use("/api/walk", createWalkRouter(deps));
+  app.use("/api/jpo", createJpoRouter(deps));
   app.use("/api/agent", createAgentRouter(deps));
   app.use("/api/monitor", createMonitorRouter(deps));
 
@@ -64,4 +75,23 @@ export function createApp(deps: ApiDeps): Express {
   });
 
   return app;
+}
+
+/**
+ * The source the place field will use.
+ *
+ * The local Overture extract is the directory; a geocoder only fills a
+ * thin list. The check is one row from the primary key, so a health probe
+ * stays cheap. A missing table is not a reason to fail the probe.
+ */
+async function placeSource(deps: ApiDeps): Promise<string> {
+  try {
+    const rows = await deps.db.select({ id: mapPlaces.id }).from(mapPlaces).limit(1);
+    if (rows.length > 0) {
+      return hasGoogleMaps(deps.env) ? "overture+google" : "overture";
+    }
+  } catch {
+    // Fall through to the geocoder the deployment can still reach.
+  }
+  return hasGoogleMaps(deps.env) ? "google" : "openstreetmap";
 }

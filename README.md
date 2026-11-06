@@ -28,15 +28,19 @@ explains the answer. The agent is never the source of truth about the network.
 The graph is.
 
 <p align="center">
-  <img src="docs/images/route.png" alt="Daily Route showing a 41-minute corridor 9 journey from Grogol Reformasi to Simpang Kuningan, with the route on the map and the notice board on the right" width="1100">
+  <img src="docs/images/route.png" alt="A 43-minute journey from Bundaran HI to Kota, with the headsign, the route on the map and the service board" width="1100">
+</p>
+
+<p align="center">
+  <a href="docs/images/daily-route.mp4">Watch a short tour</a>
 </p>
 
 ## What it does
 
 |                                                                                                                                                                                                                                                                                                                                                                                                |                                                                                                                                                                                                                                                                                                                                                                                                   |
 | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| <img src="docs/images/notices-home.png" alt="The operating network on the map with the Lines and Notices board on the right"> **The way that is still open.** Operator announcements become notices with a scope, a validity window and a source. A closed stop is not a closed corridor: the planner boards or alights at the nearest stop the rider can walk to, and the walk becomes a leg. | <img src="docs/images/assistant.png" alt="The route assistant answering with a route card, a service window and an Open this journey action"> **An assistant that cites the graph.** Ask in plain language. The assistant calls the same tools, then answers with semantic cards for a journey, a stop or a notice. A card cannot contain a station id, fare or duration the tool did not return. |
-| <img src="docs/images/patterns.png" alt="Koridor 8 journey showing the via Tomang and via Cideng patterns, the selected pattern and the stops it skips"> **One code, several patterns.** Koridor 8 runs via Tomang or Cideng; Koridor 9 has all-stop and toll runs. The journey says which pattern it boards, which stops it skips, and whether that pattern runs today.                       | <img src="docs/images/departures.png" alt="A stop popover with scheduled departures, headsigns and headways, labelled schedule-based, not live arrivals"> **A schedule, not an invented ETA.** The stop popover shows the scheduled lines, headsigns and headways. The line windows decide what runs; the planner uses half the median headway as the wait.                                       |
+| <img src="docs/images/notices-home.png" alt="The operating network on the map with the Lines and Notices board on the right"> **The way that is still open.** Operator announcements become notices with a scope, a validity window and a source. A closed stop is not a closed corridor: the planner boards or alights at the nearest stop the rider can walk to, and the walk becomes a leg. | <img src="docs/images/assistant.png" alt="The route assistant answering Bundaran HI to Kelapa Gading, with a journey card: 75 minutes, Rp16.000, three changes"> **An assistant that cites the graph.** Ask in plain language. The assistant calls the same tools, then answers with semantic cards for a journey, a stop or a notice. A card cannot contain a station id, fare or duration the tool did not return. |
+| <img src="docs/images/patterns.png" alt="Koridor 8 from Harmoni to Pasar Baru, with the daily pattern selected and the Sunday Cideng pattern that skips Tomang"> **One code, several patterns.** Koridor 8 runs via Tomang or Cideng; Koridor 9 has all-stop and toll runs. The journey says which pattern it boards, which stops it skips, and whether that pattern runs today.                       | <img src="docs/images/departures.png" alt="The Pasar Baru stop card with scheduled departures for corridors 8 and 7F, labelled schedule-based, not live arrivals"> **A schedule, not an invented ETA.** The stop popover shows the scheduled lines, headsigns and headways. The line windows decide what runs; the planner uses half the median headway as the wait.                                       |
 
 A journey is judged on **time, distance and the number of changes together**,
 and the waiting time for a new vehicle is part of it. The planner offers up to
@@ -72,7 +76,7 @@ flowchart LR
 | `packages/transit`  | Pure domain: station graph, A\* planner, geometry, fares, service windows and text normalisation.                    |
 | `packages/semantic` | Embedding providers and the place resolver.                                                                          |
 | `packages/agent`    | The Anvia agent, tools, classifier, monitor, X and Tavily clients.                                                   |
-| `packages/ingest`   | OpenStreetMap extraction, GTFS, administrative enrichment and the curated/OSM merge.                                 |
+| `packages/ingest`   | OpenStreetMap extraction, GTFS, administrative enrichment, the JPO registry and the curated/OSM merge.               |
 | `packages/db`       | Drizzle schema, queries, migrations, seed and snapshot sync.                                                         |
 | `packages/env`      | The one place that validates the environment.                                                                        |
 | `packages/config`   | Shared TypeScript and ESLint configuration.                                                                          |
@@ -128,6 +132,7 @@ that need one.
 | `JEV_MODEL`                                                                             | The decision model behind Jev. Defaults to `typesafe/jev-1.14`.                                                                        |
 | `EMBEDDINGS_BASE_URL`, `EMBEDDINGS_API_KEY`, `EMBEDDINGS_MODEL`                         | Semantic place lookup. The vector column is 768 dimensions.                                                                            |
 | `TAVILY_API_KEY`                                                                        | `search_news` for the assistant, on demand. The monitor does not poll it.                                                              |
+| `GOOGLE_MAPS_API_KEY`                                                                   | Optional fallback for the place field. The local Overture extract answers first; only a thin list is sent to Google, and only when this key is set. Without it, that fallback is Photon/Nominatim. |
 | `X_BEARER_TOKEN`                                                                        | The operator filtered stream. Billing is per Post read, about $0.005.                                                                  |
 | `LANGFUSE_BASE_URL`, `LANGFUSE_PUBLIC_KEY`, `LANGFUSE_SECRET_KEY`                       | Traces for agent runs and evals. Leave them empty to run without telemetry.                                                            |
 | `CLASSIFY_BUDGET_MS`, `CLASSIFY_LEASE_MS`, `CLASSIFY_CONCURRENCY`, `NOTICE_SWEEP_LIMIT` | Classification queue budgets, lease time, parallelism and the notice review sweep.                                                     |
@@ -178,6 +183,9 @@ pnpm data:gtfs            # fill lines with no stops from the operator GTFS
 pnpm data:enrich          # name the kelurahan/kecamatan/kota of every stop
 pnpm db:sync              # apply the snapshot without clearing the notices
 pnpm data:embed           # recompute the station embeddings
+pnpm data:places          # rebuild the Jabodetabek place extract from Overture
+pnpm data:jpo             # rebuild the JPO and footbridge registry
+pnpm db:places            # load the place extract into map_places
 ```
 
 Run them in that order. `data:ingest` rebuilds the snapshot and drops the GTFS
@@ -189,10 +197,60 @@ flag, not a cleanup.
 On a fresh database, `pnpm db:seed` replaces `pnpm db:sync`. The seed loads both
 the network snapshot and the line patterns.
 
+`pnpm data:jpo` is separate: it merges the official Dinas Bina Marga DKI
+Jakarta JPO points with OpenStreetMap footbridges into `data/jpo-network.json`.
+It is committed and loaded by the API, the map and the assistant. The sources,
+the matching and the gaps are in `research/jpo.md`; the notice is
+`data/JPO-NOTICE.txt`. Run it again after a network rebuild so the stop ids in
+the registry are current.
+
+### Places
+
+`data/places-jabodetabek.parquet` is the Overture Maps places extract for the
+Jabodetabek box: 272,727 places with a confidence of at least 0.5, deduplicated
+by name within about 110 m. It is open data (CDLA Permissive 2.0, Apache 2.0 for
+the Foursquare records); the notices are in `data/PLACES-NOTICE.txt`, and the
+release and count are in `data/places-jabodetabek.json`.
+
+```bash
+pnpm data:places          # rebuild the extract from the latest Overture release
+pnpm db:places            # load it into map_places
+pnpm places:check         # compare the snapshot with the latest release
+pnpm places:refresh       # rebuild and load it in one step
+```
+
+Both data commands use the DuckDB command line (`brew install duckdb`); the
+first run downloads the S3 and Postgres extensions. `db:seed` does not load the
+places, so a fresh database needs `pnpm db:places` once. Overture publishes
+monthly; `places:check` is cheap enough for a scheduled job. The place field
+reads `map_places` first, then falls back to Photon/Nominatim (or Google Places
+when `GOOGLE_MAPS_API_KEY` is set) only when the local list holds fewer than
+three answers.
+
+A rider can mark the current location. The browser gives the position and
+`GET /api/places/reverse` turns it into a short name and a full address; the
+Places tab opens the add form with the address prefilled and "Current location"
+as the label. The route search uses the same action to plan from where the
+rider stands, and the assistant receives the marked place with the chat turn.
+
 ## The planner
 
 `packages/transit` is pure TypeScript with no framework and no database. It owns
 the graph, the A\* search, the geometry, the fares and the service windows.
+
+A journey line is a path, not a connection. A ride follows the stored
+OSM-derived line geometry, cut at the foot of the boarding and alighting stop
+on that path, so the line begins and ends at the platform and never overshoots
+it; a stop the vehicle only passes stays on the line. A walk follows the
+pedestrian router, and its two ends are closed to the exact stop or place it
+joins when the router snapped within 120 m, so the dashed walk meets the ride.
+A leg with no routed path is not drawn as a straight line; the join above only
+closes a gap the router left at its own ends. Each vehicle on the
+board has its own colour and the legend lights it on the map.
+
+<p align="center">
+  <img src="docs/images/route-walk.png" alt="The dashed walk from Jakarta Kota station meeting the Tanjung Priok ride at the platform, and the Kota stop at its other end" width="900">
+</p>
 
 - The search cost combines time, distance and the number of changes. The wait
   for a new vehicle is part of the cost, not a fixed five minutes.
@@ -200,9 +258,12 @@ the graph, the A\* search, the geometry, the fares and the service windows.
   runs at an instant. The planner filters the graph with it, uses half the
   median headway as the wait, and carries the service label, headway range and
   daily window on every ride leg.
-- A journey can set `nightSafe`. It adds a walking penalty and orders the result
-  by the night cost, so a shorter ride with a long dark walk does not
-  automatically win. The line windows still decide what runs; nightSafe does not
+- The night rule is silent. A departure between 22:00 and 05:00 WIB, taken from
+  the instant the planner receives (`at`, or now when it is omitted), adds a
+  walking penalty and orders the result by the night cost, so a shorter ride
+  with a long dark walk does not automatically win. It follows the departure,
+  never the moment the page was opened. The rider is not shown a switch or a
+  label for it. The line windows still decide what runs; the rule does not
   invent a service.
 - Every alternative is checked with `routeIsClear` against every active notice.
   A candidate that boards, alights or changes at a closed stop, or rides a
@@ -283,8 +344,8 @@ tool whose credentials are missing is not added.
   and `find_street`. The assistant uses `stops_on_street`; the notice reader
   uses `find_stop` and `list_street_stops` when a name needs grounding. The
   assistant also has `resolve_place`, `plan_journey`, `get_station`,
-  `list_active_disruptions`, `find_toll_routes`, `list_notice_history` and
-  `search_news`.
+  `list_active_disruptions`, `find_toll_routes`, `find_jpo`,
+  `list_notice_history` and `search_news`.
 - Chat cards are semantic values from tool results, not prose parsed with a
   regex. The SSE stream carries `card` next to `delta`, `tool`, `actions` and
   `done`. The browser dedupes a stop card from `resolve_place` when the richer
@@ -296,9 +357,17 @@ tool whose credentials are missing is not added.
   `includeDomains`, `excludeDomains`, `maxResults`). Identical searches are
   coalesced, a successful answer is cached for ten minutes, and only two calls
   run at once.
-- `Watch` is a local memory in `use-watch.ts`. It keeps a journey across a
-  reload and labels it on the result; it is not a push notification and does not
-  claim one.
+- `Watch` is a local memory in `use-watch.ts` until the rider signs in.
+  It keeps a journey across a reload and labels it on the result; it is not a
+  push notification and does not claim one.
+- An account is optional. Saved places, recent journeys and watches move to
+  Postgres when the rider signs in, and the session is an `HttpOnly` cookie.
+  The theme stays on the device. There is no email verification and no
+  password reset.
+- A chat turn may carry the rider's marked current place. The server validates
+  it, keeps it in `currentPlaceStore`, and `plan_journey` starts from the stop
+  whose whole journey is quickest with `originCurrent: true`. The model never
+  receives or supplies the coordinate.
 
 The model never produces a station id, a coordinate, a duration or a fare. The
 model may name a place; the resolver decides which station that name refers to;
@@ -313,6 +382,8 @@ pnpm typecheck
 pnpm lint
 pnpm test                 # unit and integration tests
 pnpm test:e2e             # Playwright, starts the API and the web app
+pnpm trial:current-place  # real-model trial, findings in research/current-place-trial.md
+pnpm eval:current-place   # Anvia eval of the current-place assistant
 pnpm eval:fetch           # fetch the rail corpus once, into research/eval
 pnpm eval:notices         # judge the pipeline against the labelled cases
 pnpm verify:notices       # verify notice windows from X, news and pages
@@ -330,8 +401,12 @@ a planner rule, a scope derivation) belongs in a unit or integration test
 instead. `pnpm eval:notices` compares the pipeline against human-written
 expectations with a model judge; nothing compares strings, because a correct
 answer may spell a place differently and a wrong answer may spell it exactly.
+`pnpm eval:current-place` is the Anvia evaluation of the current-place
+assistant; it adds exact tool and stop-grounding metrics to an LLM judge.
 Traces go to Langfuse through `langfuseObservability`, with the eval run id as
-the session.
+the session. The current-place eval puts each case in `<run id>:<case id>`,
+attaches its three scores to that trace, and the trial uses one session for
+the whole run.
 
 ## Layout
 
@@ -349,7 +424,7 @@ packages/
   agent/    Anvia agent, tools, classifier, monitor, X and Tavily clients
   ingest/   OpenStreetMap extraction and the curated/OSM merge
 data/       The committed network snapshot the seed loads
-docs/images/ Stills in this README
+docs/images/ Stills and a short tour for this README
 research/   The research reports and their structured extracts
 ```
 

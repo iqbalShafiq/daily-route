@@ -12,6 +12,7 @@ import { useEffect, useMemo, useState } from "react";
 import { IncidentIcon } from "../../components/transit/incident-icon.js";
 import { NETWORK_SYSTEMS } from "../../components/map/operator-mark.js";
 import { Tooltip } from "../../components/ui/tooltip.js";
+import { iconWellClass } from "../../components/ui/icon-well.js";
 import {
   getNoticeEvidence,
   type DisruptionSummary,
@@ -154,7 +155,7 @@ export function MonitorStatus({
           <div className="min-w-0">
             {groups.map((group) => (
               <section key={group.key} aria-label={group.label} className="min-w-0">
-                <h3 className="sticky top-0 z-10 flex items-baseline justify-between gap-2 border-b border-line/60 bg-surface/95 px-4 py-2 font-mono text-[12px] font-semibold uppercase tracking-[0.08em] text-ink-3 backdrop-blur">
+                <h3 className="sticky top-0 z-10 flex items-baseline justify-between gap-2 border-b border-line/60 bg-surface/95 px-4 py-2 text-[12px] font-semibold leading-[1.35] text-ink-3 backdrop-blur">
                   <span>{group.label}</span>
                   <span className="font-mono text-[12px] font-normal tabular-nums text-ink-3">
                     {group.notices.length}
@@ -184,7 +185,7 @@ export function MonitorStatus({
 
       <footer className="shrink-0 border-t border-line/70 px-4 py-2">
         <p
-          className="font-mono text-[12px] leading-[1.2] text-ink-3"
+          className="text-[12px] leading-[1.35] text-ink-3"
           aria-live="polite"
         >
           Last check:{" "}
@@ -256,7 +257,7 @@ function NoticeDetail({ notice }: { notice: DisruptionSummary }) {
         <NoticeDiversionDescription description={notice.diversionDescription} />
       ) : null}
 
-      <h3 className="mt-4 text-[12px] font-semibold uppercase tracking-[0.08em] text-ink-3">
+      <h3 className="mt-4 text-[12px] font-semibold leading-[1.35] text-ink-3">
         Original source
       </h3>
       {loading ? (
@@ -305,8 +306,8 @@ function NoticeDiversionDescription({
     (value): value is string => Boolean(value),
   );
   return (
-    <section className="mt-3 rounded-[10px] border border-line bg-surface-2/40 p-3" aria-label="Diverted route">
-      <h3 className="text-[12px] font-semibold uppercase tracking-[0.08em] text-ink-3">
+    <section className="mt-3 rounded-[4px] border border-line bg-surface-2/40 p-3" aria-label="Diverted route">
+      <h3 className="text-[12px] font-semibold leading-[1.35] text-ink-3">
         Diverted route
       </h3>
       <p className="mt-1 text-[13px] leading-[1.45] text-ink-2">
@@ -323,8 +324,8 @@ function NoticeDiversionDescription({
 function NoticeDiversionBlock({ diversion }: { diversion: NoticeDiversion }) {
   const via = diversion.via.slice(0, 9);
   return (
-    <section className="rounded-[10px] border border-line bg-surface-2/40 p-3" aria-label="Diverted route">
-      <h3 className="text-[12px] font-semibold uppercase tracking-[0.08em] text-ink-3">
+    <section className="rounded-[4px] border border-line bg-surface-2/40 p-3" aria-label="Diverted route">
+      <h3 className="text-[12px] font-semibold leading-[1.35] text-ink-3">
         Diverted route
       </h3>
       <p className="mt-1 text-[13px] leading-[1.45] text-ink-2">
@@ -385,7 +386,7 @@ function SourceCard({ source }: { source: NoticeSource }) {
         ? (source.title ?? "News source")
         : "Source";
   return (
-    <li className="rounded-[10px] border border-line bg-surface-2/60 p-3">
+    <li className="rounded-[4px] border border-line bg-surface-2/60 p-3">
       <div className="flex items-baseline justify-between gap-2">
         <span className="text-[12px] font-medium text-ink-2">{label}</span>
         {source.publishedAt ? (
@@ -531,16 +532,8 @@ function NoticeRow({
   const freshness = verificationCopy(notice, todayKey);
   const body = (
     <div className="group flex min-w-0 items-start gap-3 px-4 py-3">
-      <span
-        aria-hidden
-        className="mt-0.5 flex size-8 shrink-0 items-center justify-center rounded-[6px] border transition-transform duration-200 group-hover:-translate-y-0.5"
-        style={{
-          backgroundColor: severity.soft,
-          color: severity.color,
-          borderColor: `color-mix(in oklab, ${severity.color} 30%, transparent)`,
-        }}
-      >
-        <IncidentIcon mark={notice.mark} kind={notice.kind} className="size-3.5" />
+      <span aria-hidden className={cn(iconWellClass, "mt-0.5")}>
+        <IncidentIcon mark={notice.mark} kind={notice.kind} className="size-4" />
       </span>
       <span className="min-w-0 flex-1">
         <span className="flex min-w-0 items-baseline gap-2 font-mono text-[12px] leading-[1.2] text-ink-3">
@@ -548,7 +541,7 @@ function NoticeRow({
             {rowTime(notice.publishedAt, todayKey)}
           </time>
           <span aria-hidden className="shrink-0">·</span>
-          <span className="min-w-0 truncate uppercase tracking-[0.04em]">
+          <span className="min-w-0 truncate ">
             {kindLabel(notice.kind)}
           </span>
           {codeList.length > 0 ? (
@@ -563,7 +556,7 @@ function NoticeRow({
                     {codeList.map((code) => (
                       <span
                         key={code}
-                        className="rounded-[4px] border border-line-strong px-2 py-1 font-mono text-[12px] leading-[1.2] text-ink-2"
+                        className="rounded-[4px] border border-line-strong px-2 py-1 text-[12px] leading-[1.35] text-ink-2"
                       >
                         {code}
                       </span>
@@ -578,7 +571,7 @@ function NoticeRow({
               <span
                 tabIndex={0}
                 onClick={(event) => event.stopPropagation()}
-                className="ml-auto max-w-[42%] shrink-0 cursor-help truncate rounded-[4px] border border-line-strong px-2 text-[12px] tracking-[0.01em] text-ink-2 outline-none focus-visible:ring-2 focus-visible:ring-accent/40"
+                className="ml-auto max-w-[42%] shrink-0 cursor-help truncate rounded-[4px] border border-line-strong px-2 text-[12px] text-ink-2 outline-none focus-visible:ring-2 focus-visible:ring-ink"
               >
                 {codes}
                 {codeList.length > 3 ? (
@@ -606,7 +599,7 @@ function NoticeRow({
         <span className="sr-only">{severity.label} notice</span>
         {activeReason(notice, todayKey) ? (
           <span
-            className="mt-1 block truncate font-mono text-[12px] leading-[1.2] text-ink-3"
+            className="mt-1 block truncate text-[12px] leading-[1.35] text-ink-3"
             title={activeReason(notice, todayKey) ?? undefined}
           >
             {activeReason(notice, todayKey)}
@@ -720,7 +713,7 @@ function NoticeSkeleton() {
     <div className="divide-y divide-line/60" aria-hidden>
       {[0, 1, 2].map((index) => (
         <div key={index} className="flex items-start gap-3 px-4 py-3">
-          <span className="mt-0.5 size-8 shrink-0 rounded-[6px] bg-surface-2" />
+          <span className="mt-0.5 size-8 shrink-0 rounded-[4px] border border-line bg-surface-2" />
           <span className="min-w-0 flex-1">
             <span className="block h-3 w-24 rounded-[4px] bg-surface-2" />
             <span className="mt-2 block h-3 w-full rounded-[4px] bg-surface-2" />
@@ -736,7 +729,7 @@ function EmptyBoard({ upcoming }: { upcoming: number }) {
   return (
     <div className="px-4 py-6">
       <div aria-hidden className="flex items-center gap-2">
-        <span className="size-2 rounded-full border-2 border-accent bg-surface" />
+        <span className="size-2 rounded-full border-2 border-ink bg-surface" />
         <span className="h-px flex-1 bg-line-strong/60" />
         <span className="size-2 rounded-[4px] bg-ink" />
       </div>

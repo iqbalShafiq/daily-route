@@ -106,6 +106,15 @@ export function mapStyleFor(_theme: "light" | "dark"): StyleSpecification {
   setPaint(layer("landuse_residential"), "fill-color", color.residential);
   setPaint(layer("building"), "fill-color", color.building);
   setPaint(layer("building"), "fill-outline-color", color.buildingLine);
+  setPaint(layer("building"), "fill-opacity", [
+    "interpolate",
+    ["linear"],
+    ["zoom"],
+    13,
+    0,
+    15,
+    1,
+  ]);
   setPaint(layer("road_area_pier"), "fill-color", color.road);
   setPaint(layer("road_pier"), "line-color", color.road);
 
@@ -193,8 +202,23 @@ export function mapStyleFor(_theme: "light" | "dark"): StyleSpecification {
   }
 
   for (const id of ["label_city", "label_city_capital", "label_state", "label_other"]) {
-    setLayout(layer(id), "text-transform", "uppercase");
-    setLayout(layer(id), "text-letter-spacing", 0.08);
+    setLayout(layer(id), "text-transform", "none");
+    setLayout(layer(id), "text-letter-spacing", 0);
+  }
+  setLayout(layer("label_town"), "text-letter-spacing", 0);
+  setLayout(layer("label_village"), "text-letter-spacing", 0);
+
+  /*
+   * The generic navigation shields are not part of a printed transit sheet.
+   * They read as turn-by-turn instructions, not as the paper the route is
+   * drawn on, so they are hidden. Road and place names stay.
+   */
+  for (const id of [
+    "highway-shield-non-us",
+    "highway-shield-us-interstate",
+    "road_shield_us",
+  ]) {
+    setLayout(layer(id), "visibility", "none");
   }
 
   setLayout(layer("label_city"), "text-size", [
@@ -219,8 +243,8 @@ export function mapStyleFor(_theme: "light" | "dark"): StyleSpecification {
     11,
     17,
   ]);
-  setLayout(layer("label_town"), "text-letter-spacing", 0.02);
-  setLayout(layer("label_village"), "text-letter-spacing", 0.02);
+  setLayout(layer("label_town"), "text-letter-spacing", 0);
+  setLayout(layer("label_village"), "text-letter-spacing", 0);
 
   return style as unknown as StyleSpecification;
 }

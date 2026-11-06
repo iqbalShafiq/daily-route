@@ -1,0 +1,1070 @@
+{
+  "at": "2026-11-05T06:35:07.972Z",
+  "model": "deepseek/deepseek-v4.1-flash-1017",
+  "sessionId": "current-place-trial:2026-11-05T06:34:21.101Z",
+  "passed": 7,
+  "total": 7,
+  "results": [
+    {
+      "name": "route from the marked current place",
+      "prompt": "How do I get from here to Kelapa Gading? Is anything closed?",
+      "pass": true,
+      "checks": [
+        {
+          "label": "HTTP 200",
+          "pass": true
+        },
+        {
+          "label": "no stream error",
+          "pass": true
+        },
+        {
+          "label": "answer is not empty",
+          "pass": true
+        },
+        {
+          "label": "used plan_journey",
+          "pass": true
+        },
+        {
+          "label": "matches /Kelapa Gading/i",
+          "pass": true
+        },
+        {
+          "label": "matches /(min|Rp|corridor|line|stop)/i",
+          "pass": true
+        },
+        {
+          "label": "at least 1 cards",
+          "pass": true
+        },
+        {
+          "label": "names only stops from the plan (none)",
+          "pass": true
+        }
+      ],
+      "outcome": {
+        "status": 200,
+        "text": "The way is open, with one change. About 65 minutes, Rp8.500.\n\nWalk 4 min (310 m) from Bundaran HI to Imam Bonjol.\nBoard 4C (Jiep - Bundaran Senayan) towards Bundaran Senayan 1 → TU Gas 2 at Imam Bonjol, alight at Tugu Proklamasi.\nWalk 4 min (300 m) to Proklamasi.\nBoard the LRT Jakarta South Line towards Manggarai → Kelapa Gading at Proklamasi, alight at Kelapa Gading.\n\nDon't miss: the change is at Proklamasi, and you board the LRT on the Kelapa Gading-bound side. 4C runs until 22:00 WIB, roughly every 13 minutes. No notices affect this journey.",
+        "tools": [
+          "plan_journey"
+        ],
+        "cards": 1,
+        "error": null,
+        "usage": {
+          "inputTokens": 12066,
+          "outputTokens": 271,
+          "totalTokens": 12337,
+          "cachedInputTokens": 5376,
+          "cacheCreationInputTokens": 0,
+          "details": {
+            "input": 6690,
+            "input_cached_tokens": 5376,
+            "output": 236,
+            "output_reasoning_tokens": 35,
+            "total": 12337
+          }
+        }
+      },
+      "observations": [
+        {
+          "tool": "plan_journey",
+          "args": {
+            "originCurrent": true,
+            "destination": "Kelapa Gading"
+          },
+          "result": {
+            "asal": {
+              "text": "Jalan M.H. Thamrin, Kebon Melati, Jakarta Pusat",
+              "stationId": "transjakarta:imam-bonjol",
+              "name": "Imam Bonjol",
+              "dari": "Bundaran HI",
+              "jalanKaki": {
+                "menit": 4,
+                "km": 0.31
+              }
+            },
+            "tujuan": {
+              "text": "Kelapa Gading",
+              "stationId": "lrt-jakarta:kelapa-gading",
+              "name": "Kelapa Gading"
+            },
+            "rute": [
+              {
+                "durasiMenit": 65,
+                "jarakKm": 13.71,
+                "jarakJalanKakiKm": 0.3,
+                "skor": 73.5,
+                "tarif": {
+                  "total": 8500,
+                  "label": "Rp8.500",
+                  "rincian": [
+                    {
+                      "label": "Transjakarta Metrotrans / Minitrans",
+                      "jumlah": 3500
+                    },
+                    {
+                      "label": "LRT Jakarta",
+                      "jumlah": 5000
+                    }
+                  ]
+                },
+                "jumlahTransfer": 1,
+                "legs": [
+                  {
+                    "jenis": "ride",
+                    "mode": "bus",
+                    "lineId": "transjakarta:4c",
+                    "lineName": "Jiep - Bundaran Senayan",
+                    "lineCode": "4C",
+                    "serviceClass": "non-brt",
+                    "sementara": false,
+                    "dari": "Imam Bonjol",
+                    "ke": "Tugu Proklamasi",
+                    "durasiMenit": 24.5,
+                    "jarakKm": 2.89,
+                    "halte": [
+                      "Imam Bonjol",
+                      "Graha Mandiri",
+                      "KPU",
+                      "Kartini",
+                      "Museum Proklamasi",
+                      "Taman Suropati",
+                      "Gedung Wanita",
+                      "Surabaya",
+                      "Stasiun Cikini Selatan",
+                      "SMPN 8",
+                      "Jalan Penataran",
+                      "Megaria",
+                      "Tugu Proklamasi"
+                    ],
+                    "pola": null,
+                    "polaId": null,
+                    "layananPola": null,
+                    "polaHariLibur": false,
+                    "polaTersedia": [],
+                    "alasanJalanKaki": null,
+                    "gantiDari": null,
+                    "gantiDi": null,
+                    "tungguMenit": 6.5,
+                    "arah": "forward",
+                    "labelArah": "Bundaran Senayan 1 → TU Gas 2",
+                    "platformNaik": "Imam Bonjol",
+                    "platformTurun": "Tugu Proklamasi",
+                    "frekuensi": "Regular · every 13 min",
+                    "headwayMinMenit": 13,
+                    "headwayMaxMenit": 13,
+                    "diLuarLayanan": false,
+                    "detailLayanan": "05:00–22:00 WIB"
+                  },
+                  {
+                    "jenis": "walk",
+                    "mode": "walk",
+                    "lineId": null,
+                    "lineName": null,
+                    "lineCode": null,
+                    "serviceClass": null,
+                    "sementara": false,
+                    "dari": "Tugu Proklamasi",
+                    "ke": "Proklamasi",
+                    "durasiMenit": 4,
+                    "jarakKm": 0.3,
+                    "halte": [
+                      "Tugu Proklamasi",
+                      "Proklamasi"
+                    ],
+                    "pola": null,
+                    "polaId": null,
+                    "layananPola": null,
+                    "polaHariLibur": false,
+                    "polaTersedia": [],
+                    "alasanJalanKaki": "transfer",
+                    "gantiDari": null,
+                    "gantiDi": null,
+                    "tungguMenit": 0,
+                    "arah": null,
+                    "labelArah": null,
+                    "platformNaik": null,
+                    "platformTurun": null,
+                    "frekuensi": null,
+                    "headwayMinMenit": null,
+                    "headwayMaxMenit": null,
+                    "diLuarLayanan": false,
+                    "detailLayanan": null
+                  },
+                  {
+                    "jenis": "ride",
+                    "mode": "tram",
+                    "lineId": "lrt-jakarta:s",
+                    "lineName": "South Line (Lin Selatan) - Kelapa Gading to Manggarai",
+                    "lineCode": "S",
+                    "serviceClass": "lrt",
+                    "sementara": false,
+                    "dari": "Proklamasi",
+                    "ke": "Kelapa Gading",
+                    "durasiMenit": 36,
+                    "jarakKm": 10.53,
+                    "halte": [
+                      "Proklamasi",
+                      "Matraman",
+                      "Pramuka",
+                      "Rawamangun",
+                      "Velodrome",
+                      "Equestrian",
+                      "Pulomas",
+                      "Boulevard Selatan",
+                      "Boulevard Utara Summarecon Mall",
+                      "Kelapa Gading"
+                    ],
+                    "pola": null,
+                    "polaId": null,
+                    "layananPola": null,
+                    "polaHariLibur": false,
+                    "polaTersedia": [],
+                    "alasanJalanKaki": null,
+                    "gantiDari": "Jiep - Bundaran Senayan",
+                    "gantiDi": "Proklamasi",
+                    "tungguMenit": 6,
+                    "arah": "backward",
+                    "labelArah": "Manggarai → Kelapa Gading",
+                    "platformNaik": "Proklamasi",
+                    "platformTurun": "Kelapa Gading",
+                    "frekuensi": null,
+                    "headwayMinMenit": null,
+                    "headwayMaxMenit": null,
+                    "diLuarLayanan": false,
+                    "detailLayanan": null
+                  }
+                ],
+                "peringatan": []
+              }
+            ],
+            "gangguan": [],
+            "status": "terbuka",
+            "hambatan": [],
+            "catatan": [
+              "Mulai dari Bundaran HI (Jalan M.H. Thamrin, Kebon Melati, Jakarta Pusat). Naik dari Imam Bonjol, jalan kaki sekitar 4 menit (0.31 km). Gunakan asal.dari dan asal.jalanKaki sebagai langkah pertama; jangan menyebut halte lain yang tidak ada di rute."
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "where the rider is",
+      "prompt": "Where am I right now, and which stop is nearest?",
+      "pass": true,
+      "checks": [
+        {
+          "label": "HTTP 200",
+          "pass": true
+        },
+        {
+          "label": "no stream error",
+          "pass": true
+        },
+        {
+          "label": "answer is not empty",
+          "pass": true
+        },
+        {
+          "label": "matches /(Bundaran|Thamrin|Jakarta Pusat)/i",
+          "pass": true
+        }
+      ],
+      "outcome": {
+        "status": 200,
+        "text": "You are at Bundaran HI, on Jalan M.H. Thamrin, Kebon Melati, Jakarta Pusat — the browser's marked position.\n\nThe two nearest stops, a short walk apart and directly connected by stairs:\n\n- Bundaran HI Bank Jakarta (MRT Jakarta, code BHI): northern terminus of the North-South Line towards Lebak Bulus Bank Syariah Indonesia. Underground island platform, stairs only, not wheelchair accessible.\n- Bundaran HI ASTRA (Transjakarta, code 1-10): served by corridor 1 (Blok M – Kota), 6A and 6B (Ragunan – Balai Kota), and 9D (Pasar Minggu – Tanah Abang). All are running now.\n\nSay which one you want and where you are going, and I will plan the journey from here.",
+        "tools": [
+          "resolve_place",
+          "get_station"
+        ],
+        "cards": 3,
+        "error": null,
+        "usage": {
+          "inputTokens": 18871,
+          "outputTokens": 587,
+          "totalTokens": 19458,
+          "cachedInputTokens": 5376,
+          "cacheCreationInputTokens": 0,
+          "details": {
+            "input": 13495,
+            "input_cached_tokens": 5376,
+            "output": 328,
+            "output_reasoning_tokens": 259,
+            "total": 19458
+          }
+        }
+      },
+      "observations": [
+        {
+          "tool": "resolve_place",
+          "args": {
+            "query": "Bundaran HI",
+            "limit": 5
+          },
+          "result": {
+            "query": "Bundaran HI",
+            "candidates": [
+              {
+                "stationId": "mrt-jakarta:bundaran-hi-bank-jakarta",
+                "name": "Bundaran HI Bank Jakarta",
+                "systemId": "mrt-jakarta",
+                "systemName": "MRT Jakarta",
+                "mode": "metro",
+                "code": "BHI",
+                "latitude": -6.1918487,
+                "longitude": 106.8230619,
+                "isInterchange": false,
+                "score": 0.718
+              },
+              {
+                "stationId": "transjakarta:bundaran-hi-astra",
+                "name": "Bundaran HI ASTRA",
+                "systemId": "transjakarta",
+                "systemName": "Transjakarta",
+                "mode": "bus",
+                "code": "1-10",
+                "latitude": -6.1936836,
+                "longitude": 106.823091,
+                "isInterchange": false,
+                "score": 0.693
+              },
+              {
+                "stationId": "transjakarta:gtfs-b00220p",
+                "name": "Bundaran Semper",
+                "systemId": "transjakarta",
+                "systemName": "Transjakarta",
+                "mode": "bus",
+                "code": null,
+                "latitude": -6.128609,
+                "longitude": 106.917585,
+                "isInterchange": false,
+                "score": 0.591
+              },
+              {
+                "stationId": "transjakarta:bundaran-cargo",
+                "name": "Bundaran Cargo",
+                "systemId": "transjakarta",
+                "systemName": "Transjakarta",
+                "mode": "bus",
+                "code": null,
+                "latitude": -6.1227751,
+                "longitude": 106.6622814,
+                "isInterchange": false,
+                "score": 0.582
+              },
+              {
+                "stationId": "transjakarta:bundaran-jiep-1",
+                "name": "Bundaran JIEP 1",
+                "systemId": "transjakarta",
+                "systemName": "Transjakarta",
+                "mode": "bus",
+                "code": null,
+                "latitude": -6.2012545,
+                "longitude": 106.9176384,
+                "isInterchange": false,
+                "score": 0.579
+              }
+            ]
+          }
+        },
+        {
+          "tool": "get_station",
+          "args": {
+            "stationId": "mrt-jakarta:bundaran-hi-bank-jakarta"
+          },
+          "result": {
+            "ditemukan": true,
+            "stationId": "mrt-jakarta:bundaran-hi-bank-jakarta",
+            "name": "Bundaran HI Bank Jakarta",
+            "code": "BHI",
+            "systemId": "mrt-jakarta",
+            "latitude": -6.1918487,
+            "longitude": 106.8230619,
+            "isInterchange": false,
+            "area": "Menteng",
+            "description": "Phase 1, underground, single island platform; northern terminus of the operating line. Directly integrated with the Transjakarta Bundaran HI Astra BRT station (stairs only - not wheelchair accessible). id.wikipedia code field 'NS09, BHI'. Named 'Bundaran Hotel Indonesia' until the 2024 Bank DKI naming-rights deal; renamed 'Bundaran HI Bank Jakarta' in July 2025 after Bank DKI rebranded to Bank Jakarta.",
+            "lines": [
+              {
+                "lineId": "mrt-jakarta:ns",
+                "code": "NS",
+                "name": "North-South Line (Lin Utara-Selatan)",
+                "serviceClass": "rapid-transit",
+                "mode": "metro"
+              },
+              {
+                "lineId": "mrt-jakarta:ns",
+                "code": "NS",
+                "name": "North-South Line (Lin Utara-Selatan)",
+                "serviceClass": "rapid-transit",
+                "mode": "metro"
+              }
+            ],
+            "departures": [
+              {
+                "code": "NS",
+                "direction": "backward",
+                "headsign": "Lebak Bulus Bank Syariah Indonesia",
+                "serviceLabel": "Schedule not confirmed",
+                "headwayMinMinutes": null,
+                "detail": null,
+                "active": true
+              },
+              {
+                "code": "NS",
+                "direction": "forward",
+                "headsign": "Bundaran HI Bank Jakarta",
+                "serviceLabel": "Schedule not confirmed",
+                "headwayMinMinutes": null,
+                "detail": null,
+                "active": true
+              }
+            ],
+            "simpulLain": []
+          }
+        },
+        {
+          "tool": "get_station",
+          "args": {
+            "stationId": "transjakarta:bundaran-hi-astra"
+          },
+          "result": {
+            "ditemukan": true,
+            "stationId": "transjakarta:bundaran-hi-astra",
+            "name": "Bundaran HI ASTRA",
+            "code": "1-10",
+            "systemId": "transjakarta",
+            "latitude": -6.1936836,
+            "longitude": 106.823091,
+            "isInterchange": false,
+            "area": "Menteng",
+            "description": "Interchange: LRT Jakarta (Bundaran HI / Grand Indonesia)",
+            "lines": [
+              {
+                "lineId": "transjakarta:1",
+                "code": "1",
+                "name": "Blok M - Kota",
+                "serviceClass": "brt",
+                "mode": "bus"
+              },
+              {
+                "lineId": "transjakarta:1",
+                "code": "1",
+                "name": "Blok M - Kota",
+                "serviceClass": "brt",
+                "mode": "bus"
+              },
+              {
+                "lineId": "transjakarta:6a",
+                "code": "6A",
+                "name": "Ragunan - Balai Kota VIA Kuningan",
+                "serviceClass": "brt",
+                "mode": "bus"
+              },
+              {
+                "lineId": "transjakarta:6a",
+                "code": "6A",
+                "name": "Ragunan - Balai Kota VIA Kuningan",
+                "serviceClass": "brt",
+                "mode": "bus"
+              },
+              {
+                "lineId": "transjakarta:6b",
+                "code": "6B",
+                "name": "Ragunan - Balai Kota VIA Semanggi",
+                "serviceClass": "brt",
+                "mode": "bus"
+              },
+              {
+                "lineId": "transjakarta:6b",
+                "code": "6B",
+                "name": "Ragunan - Balai Kota VIA Semanggi",
+                "serviceClass": "brt",
+                "mode": "bus"
+              },
+              {
+                "lineId": "transjakarta:9d",
+                "code": "9D",
+                "name": "Pasar Minggu - Tanah Abang",
+                "serviceClass": "non-brt",
+                "mode": "bus"
+              },
+              {
+                "lineId": "transjakarta:9d",
+                "code": "9D",
+                "name": "Pasar Minggu - Tanah Abang",
+                "serviceClass": "non-brt",
+                "mode": "bus"
+              }
+            ],
+            "departures": [
+              {
+                "code": "1",
+                "direction": "backward",
+                "headsign": "Museum Sejarah Jakarta",
+                "serviceLabel": "Infrequent · about every 20 min · 6–20 min range",
+                "headwayMinMinutes": 6,
+                "detail": "00:00–23:59 WIB",
+                "active": true
+              },
+              {
+                "code": "1",
+                "direction": "forward",
+                "headsign": "Blok M",
+                "serviceLabel": "Infrequent · about every 20 min · 6–57 min range",
+                "headwayMinMinutes": 6,
+                "detail": "00:00–23:59 WIB",
+                "active": true
+              },
+              {
+                "code": "6A",
+                "direction": "forward",
+                "headsign": "Ragunan",
+                "serviceLabel": "Infrequent · about every 20 min · 13–60 min range",
+                "headwayMinMinutes": 13,
+                "detail": "05:00–22:00 WIB",
+                "active": true
+              },
+              {
+                "code": "6A",
+                "direction": "backward",
+                "headsign": "Balai Kota",
+                "serviceLabel": "Regular · every 13 min",
+                "headwayMinMinutes": 13,
+                "detail": "05:00–22:00 WIB",
+                "active": true
+              },
+              {
+                "code": "6B",
+                "direction": "forward",
+                "headsign": "Ragunan",
+                "serviceLabel": "Infrequent · about every 20 min · 13–60 min range",
+                "headwayMinMinutes": 13,
+                "detail": "05:00–22:00 WIB",
+                "active": true
+              },
+              {
+                "code": "6B",
+                "direction": "backward",
+                "headsign": "Balai Kota",
+                "serviceLabel": "Regular · every 13 min",
+                "headwayMinMinutes": 13,
+                "detail": "05:00–22:00 WIB",
+                "active": true
+              },
+              {
+                "code": "9D",
+                "direction": "forward",
+                "headsign": "Pasar Minggu",
+                "serviceLabel": "Rare · about every 60 min · 9–60 min range",
+                "headwayMinMinutes": 9,
+                "detail": "05:00–22:00 WIB",
+                "active": true
+              },
+              {
+                "code": "9D",
+                "direction": "backward",
+                "headsign": "Jak Lingko Tanah Abang 2",
+                "serviceLabel": "Rare · about every 30 min · 7–30 min range",
+                "headwayMinMinutes": 7,
+                "detail": "05:00–22:00 WIB",
+                "active": true
+              }
+            ],
+            "simpulLain": []
+          }
+        }
+      ]
+    },
+    {
+      "name": "no current place is marked",
+      "prompt": "How do I get from here to Kota?",
+      "pass": true,
+      "checks": [
+        {
+          "label": "HTTP 200",
+          "pass": true
+        },
+        {
+          "label": "no stream error",
+          "pass": true
+        },
+        {
+          "label": "answer is not empty",
+          "pass": true
+        },
+        {
+          "label": "did not use plan_journey",
+          "pass": true
+        },
+        {
+          "label": "matches /(location|from field|where you are|mark)/i",
+          "pass": true
+        }
+      ],
+      "outcome": {
+        "status": 200,
+        "text": "I can't plan the journey yet: your current location isn't marked, so I don't know where \"here\" is. Press \"Use my location\" in the From field, or tell me the stop or station you're starting from, and I'll plan the way to Kota.",
+        "tools": [],
+        "cards": 0,
+        "error": null,
+        "usage": {
+          "inputTokens": 5379,
+          "outputTokens": 91,
+          "totalTokens": 5470,
+          "cachedInputTokens": 0,
+          "cacheCreationInputTokens": 0,
+          "details": {
+            "input": 5379,
+            "input_cached_tokens": 0,
+            "output": 59,
+            "output_reasoning_tokens": 32,
+            "total": 5470
+          }
+        }
+      },
+      "observations": []
+    },
+    {
+      "name": "current place outside Jabodetabek",
+      "prompt": "How do I get from here to Kota?",
+      "pass": true,
+      "checks": [
+        {
+          "label": "HTTP 200",
+          "pass": true
+        },
+        {
+          "label": "no stream error",
+          "pass": true
+        },
+        {
+          "label": "answer is not empty",
+          "pass": true
+        },
+        {
+          "label": "did not use plan_journey",
+          "pass": true
+        },
+        {
+          "label": "matches /(outside|Jabodetabek|not on this network|cannot)/i",
+          "pass": true
+        }
+      ],
+      "outcome": {
+        "status": 200,
+        "text": "I can't use your current location: the browser reported a position outside Jabodetabek, so it can't be placed on this network. Where are you starting from? Give me a nearby stop, station or landmark and I'll plan the trip to Kota.",
+        "tools": [],
+        "cards": 0,
+        "error": null,
+        "usage": {
+          "inputTokens": 5372,
+          "outputTokens": 76,
+          "totalTokens": 5448,
+          "cachedInputTokens": 5120,
+          "cacheCreationInputTokens": 0,
+          "details": {
+            "input": 252,
+            "input_cached_tokens": 5120,
+            "output": 54,
+            "output_reasoning_tokens": 22,
+            "total": 5448
+          }
+        }
+      },
+      "observations": []
+    },
+    {
+      "name": "current place with no destination",
+      "prompt": "How do I get from here?",
+      "pass": true,
+      "checks": [
+        {
+          "label": "HTTP 200",
+          "pass": true
+        },
+        {
+          "label": "no stream error",
+          "pass": true
+        },
+        {
+          "label": "answer is not empty",
+          "pass": true
+        },
+        {
+          "label": "did not use plan_journey",
+          "pass": true
+        },
+        {
+          "label": "matches /(where|destination|going|tujuan)/i",
+          "pass": true
+        }
+      ],
+      "outcome": {
+        "status": 200,
+        "text": "Where would you like to go? Tell me the destination and I'll plan the journey from Bundaran HI.",
+        "tools": [],
+        "cards": 0,
+        "error": null,
+        "usage": {
+          "inputTokens": 5427,
+          "outputTokens": 46,
+          "totalTokens": 5473,
+          "cachedInputTokens": 5120,
+          "cacheCreationInputTokens": 0,
+          "details": {
+            "input": 307,
+            "input_cached_tokens": 5120,
+            "output": 23,
+            "output_reasoning_tokens": 23,
+            "total": 5473
+          }
+        }
+      },
+      "observations": []
+    },
+    {
+      "name": "saved current place used by its label",
+      "prompt": "How do I get from Home to Kelapa Gading?",
+      "pass": true,
+      "checks": [
+        {
+          "label": "HTTP 200",
+          "pass": true
+        },
+        {
+          "label": "no stream error",
+          "pass": true
+        },
+        {
+          "label": "answer is not empty",
+          "pass": true
+        },
+        {
+          "label": "used list_my_places",
+          "pass": true
+        },
+        {
+          "label": "used plan_journey",
+          "pass": true
+        },
+        {
+          "label": "matches /(Home|Kelapa Gading)/i",
+          "pass": true
+        },
+        {
+          "label": "matches /(min|Rp|corridor|line|stop)/i",
+          "pass": true
+        },
+        {
+          "label": "names only stops from the plan (none)",
+          "pass": true
+        }
+      ],
+      "outcome": {
+        "status": 200,
+        "text": "Walk 4 min (310 m) from Home to Imam Bonjol, then board.\n\nBoard 4C (Jiep - Bundaran Senayan) towards Bundaran Senayan 1 → TU Gas 2 at Imam Bonjol, alight at Tugu Proklamasi — about 24.5 minutes.\nWalk 4 min (300 m) to Proklamasi.\nBoard the LRT Jakarta South Line (Lin Selatan) towards Manggarai → Kelapa Gading at Proklamasi, alight at Kelapa Gading — about 36 minutes.\n\nTotal about 65 minutes, 13.71 km, one change, Rp8.500 (Transjakarta Metrotrans/Minitrans Rp3.500 + LRT Jakarta Rp5.000). The way is open, with no notices affecting this journey.",
+        "tools": [
+          "list_my_places",
+          "list_my_habits",
+          "plan_journey"
+        ],
+        "cards": 1,
+        "error": null,
+        "usage": {
+          "inputTokens": 17626,
+          "outputTokens": 322,
+          "totalTokens": 17948,
+          "cachedInputTokens": 10496,
+          "cacheCreationInputTokens": 0,
+          "details": {
+            "input": 7130,
+            "input_cached_tokens": 10496,
+            "output": 279,
+            "output_reasoning_tokens": 43,
+            "total": 17948
+          }
+        }
+      },
+      "observations": [
+        {
+          "tool": "list_my_places",
+          "args": {},
+          "result": {
+            "signedIn": true,
+            "places": [
+              {
+                "label": "Home",
+                "name": "Bundaran HI",
+                "kind": "place",
+                "address": "Jalan M.H. Thamrin, Kebon Melati, Jakarta Pusat"
+              }
+            ]
+          }
+        },
+        {
+          "tool": "list_my_habits",
+          "args": {},
+          "result": {
+            "signedIn": true,
+            "habits": []
+          }
+        },
+        {
+          "tool": "plan_journey",
+          "args": {
+            "origin": "Bundaran HI",
+            "destination": "Kelapa Gading"
+          },
+          "result": {
+            "asal": {
+              "text": "Bundaran HI",
+              "stationId": "transjakarta:imam-bonjol",
+              "name": "Imam Bonjol",
+              "dari": "Home",
+              "jalanKaki": {
+                "menit": 4,
+                "km": 0.31
+              }
+            },
+            "tujuan": {
+              "text": "Kelapa Gading",
+              "stationId": "lrt-jakarta:kelapa-gading",
+              "name": "Kelapa Gading"
+            },
+            "rute": [
+              {
+                "durasiMenit": 65,
+                "jarakKm": 13.71,
+                "jarakJalanKakiKm": 0.3,
+                "skor": 73.5,
+                "tarif": {
+                  "total": 8500,
+                  "label": "Rp8.500",
+                  "rincian": [
+                    {
+                      "label": "Transjakarta Metrotrans / Minitrans",
+                      "jumlah": 3500
+                    },
+                    {
+                      "label": "LRT Jakarta",
+                      "jumlah": 5000
+                    }
+                  ]
+                },
+                "jumlahTransfer": 1,
+                "legs": [
+                  {
+                    "jenis": "ride",
+                    "mode": "bus",
+                    "lineId": "transjakarta:4c",
+                    "lineName": "Jiep - Bundaran Senayan",
+                    "lineCode": "4C",
+                    "serviceClass": "non-brt",
+                    "sementara": false,
+                    "dari": "Imam Bonjol",
+                    "ke": "Tugu Proklamasi",
+                    "durasiMenit": 24.5,
+                    "jarakKm": 2.89,
+                    "halte": [
+                      "Imam Bonjol",
+                      "Graha Mandiri",
+                      "KPU",
+                      "Kartini",
+                      "Museum Proklamasi",
+                      "Taman Suropati",
+                      "Gedung Wanita",
+                      "Surabaya",
+                      "Stasiun Cikini Selatan",
+                      "SMPN 8",
+                      "Jalan Penataran",
+                      "Megaria",
+                      "Tugu Proklamasi"
+                    ],
+                    "pola": null,
+                    "polaId": null,
+                    "layananPola": null,
+                    "polaHariLibur": false,
+                    "polaTersedia": [],
+                    "alasanJalanKaki": null,
+                    "gantiDari": null,
+                    "gantiDi": null,
+                    "tungguMenit": 6.5,
+                    "arah": "forward",
+                    "labelArah": "Bundaran Senayan 1 → TU Gas 2",
+                    "platformNaik": "Imam Bonjol",
+                    "platformTurun": "Tugu Proklamasi",
+                    "frekuensi": "Regular · every 13 min",
+                    "headwayMinMenit": 13,
+                    "headwayMaxMenit": 13,
+                    "diLuarLayanan": false,
+                    "detailLayanan": "05:00–22:00 WIB"
+                  },
+                  {
+                    "jenis": "walk",
+                    "mode": "walk",
+                    "lineId": null,
+                    "lineName": null,
+                    "lineCode": null,
+                    "serviceClass": null,
+                    "sementara": false,
+                    "dari": "Tugu Proklamasi",
+                    "ke": "Proklamasi",
+                    "durasiMenit": 4,
+                    "jarakKm": 0.3,
+                    "halte": [
+                      "Tugu Proklamasi",
+                      "Proklamasi"
+                    ],
+                    "pola": null,
+                    "polaId": null,
+                    "layananPola": null,
+                    "polaHariLibur": false,
+                    "polaTersedia": [],
+                    "alasanJalanKaki": "transfer",
+                    "gantiDari": null,
+                    "gantiDi": null,
+                    "tungguMenit": 0,
+                    "arah": null,
+                    "labelArah": null,
+                    "platformNaik": null,
+                    "platformTurun": null,
+                    "frekuensi": null,
+                    "headwayMinMenit": null,
+                    "headwayMaxMenit": null,
+                    "diLuarLayanan": false,
+                    "detailLayanan": null
+                  },
+                  {
+                    "jenis": "ride",
+                    "mode": "tram",
+                    "lineId": "lrt-jakarta:s",
+                    "lineName": "South Line (Lin Selatan) - Kelapa Gading to Manggarai",
+                    "lineCode": "S",
+                    "serviceClass": "lrt",
+                    "sementara": false,
+                    "dari": "Proklamasi",
+                    "ke": "Kelapa Gading",
+                    "durasiMenit": 36,
+                    "jarakKm": 10.53,
+                    "halte": [
+                      "Proklamasi",
+                      "Matraman",
+                      "Pramuka",
+                      "Rawamangun",
+                      "Velodrome",
+                      "Equestrian",
+                      "Pulomas",
+                      "Boulevard Selatan",
+                      "Boulevard Utara Summarecon Mall",
+                      "Kelapa Gading"
+                    ],
+                    "pola": null,
+                    "polaId": null,
+                    "layananPola": null,
+                    "polaHariLibur": false,
+                    "polaTersedia": [],
+                    "alasanJalanKaki": null,
+                    "gantiDari": "Jiep - Bundaran Senayan",
+                    "gantiDi": "Proklamasi",
+                    "tungguMenit": 6,
+                    "arah": "backward",
+                    "labelArah": "Manggarai → Kelapa Gading",
+                    "platformNaik": "Proklamasi",
+                    "platformTurun": "Kelapa Gading",
+                    "frekuensi": null,
+                    "headwayMinMenit": null,
+                    "headwayMaxMenit": null,
+                    "diLuarLayanan": false,
+                    "detailLayanan": null
+                  }
+                ],
+                "peringatan": []
+              }
+            ],
+            "gangguan": [],
+            "status": "terbuka",
+            "hambatan": [],
+            "catatan": [
+              "Mulai dari Home (Jalan M.H. Thamrin, Kebon Melati, Jakarta Pusat). Naik dari Imam Bonjol, jalan kaki sekitar 4 menit (0.31 km). Gunakan asal.dari dan asal.jalanKaki sebagai langkah pertama; jangan menyebut halte lain yang tidak ada di rute."
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "current place too far from a stop",
+      "prompt": "How do I get from here to Kota?",
+      "pass": true,
+      "checks": [
+        {
+          "label": "HTTP 200",
+          "pass": true
+        },
+        {
+          "label": "no stream error",
+          "pass": true
+        },
+        {
+          "label": "answer is not empty",
+          "pass": true
+        },
+        {
+          "label": "matches /(no stop|not within|too far|walk|halte|route)/i",
+          "pass": true
+        }
+      ],
+      "outcome": {
+        "status": 200,
+        "text": "You are outside the serviced area for now: there is no stop within walking distance of your current position, so I cannot build a route from where you are.\n\nTell me the nearest landmark, street or station you can reach — a name I can look up — and I will plan the journey to Kota from there.",
+        "tools": [
+          "plan_journey"
+        ],
+        "cards": 0,
+        "error": null,
+        "usage": {
+          "inputTokens": 11025,
+          "outputTokens": 141,
+          "totalTokens": 11166,
+          "cachedInputTokens": 10496,
+          "cacheCreationInputTokens": 0,
+          "details": {
+            "input": 529,
+            "input_cached_tokens": 10496,
+            "output": 123,
+            "output_reasoning_tokens": 18,
+            "total": 11166
+          }
+        }
+      },
+      "observations": [
+        {
+          "tool": "plan_journey",
+          "args": {
+            "originCurrent": true,
+            "destination": "Kota"
+          },
+          "result": {
+            "asal": {
+              "text": "A field outside the serviced area",
+              "stationId": null,
+              "name": null
+            },
+            "tujuan": {
+              "text": "Kota",
+              "stationId": "transjakarta:kota",
+              "name": "Kota"
+            },
+            "rute": [],
+            "gangguan": [],
+            "status": "tidak-diketahui",
+            "hambatan": [],
+            "catatan": [
+              "Tidak ada halte dalam jarak jalan kaki dari lokasi sekarang (A field outside the serviced area). Minta pengguna memilih halte asal sendiri."
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}

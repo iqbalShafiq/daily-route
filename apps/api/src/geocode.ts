@@ -1,12 +1,20 @@
 /**
  * Places that are not a halte or a stasiun.
  *
- * The browser never calls the geocoder. This module asks Nominatim, keeps
- * only places inside Jabodetabek, and fails open: a geocoder that does not
- * answer leaves the station list as it was.
+ * Two OpenStreetMap indexes answer. Photon is built for the name a rider
+ * is still typing, so "grand" already finds Grand Indonesia. Nominatim
+ * answers an address or a complete name, which is what a rider pastes
+ * from a message. A place OpenStreetMap does not hold is still missing:
+ * this is the completeness of the open map, not of a business directory.
+ *
+ * The browser never calls a geocoder. This module keeps only places
+ * inside Jabodetabek and fails open: a geocoder that does not answer
+ * leaves the station list as it was.
  */
 
+const PHOTON = "https://photon.komoot.io/api/";
 const NOMINATIM = "https://nominatim.openstreetmap.org/search";
+const NOMINATIM_REVERSE = "https://nominatim.openstreetmap.org/reverse";
 
 /** The box the network covers: Bogor, Depok, Tangerang, Bekasi, Jakarta. */
 export const JABODETABEK = {
@@ -17,13 +25,83 @@ export const JABODETABEK = {
 } as const;
 
 const CACHE_MS = 10 * 60 * 1000;
+const FAILURE_CACHE_MS = 60 * 1000;
+const MAXIMUM_PLACES = 6;
+const PHOTON_TIMEOUT_MS = 5_000;
+const NOMINATIM_TIMEOUT_MS = 4_000;
+const GOOGLE_TIMEOUT_MS = 4_000;
+
+const GOOGLE_TEXT_SEARCH = "https://places.googleapis.com/v1/places:searchText";
+
+type SourceResult = { places: GeocodedPlace[]; ok: boolean };
+
+export type PlaceSource = "google" | "openstreetmap";
 
 export type GeocodedPlace = {
   id: string;
   name: string;
+  /** The neighbourhood or the road, for the second line of a suggestion. */
   detail: string | null;
+  /** A short type label: Mall, University, Street, Place. */
+  kind: string;
   latitude: number;
   longitude: number;
+  /** The index that answered, so the interface can name it. */
+  source: PlaceSource;
+};
+
+/**
+ * A point turned back into a place.
+ *
+ * The current location is a coordinate, not a name. The reverse lookup
+ * gives the rider a readable address for it; `name` is the short place,
+ * and `address` is the full line the browser can prefill into a form.
+ */
+export type ReversedPlace = {
+  name: string;
+  address: string | null;
+  latitude: number;
+  longitude: number;
+  source: "openstreetmap" | "none";
+};
+
+export type FetchLike = (input: string, init?: RequestInit) => Promise<Response>;
+
+export type GeocodeOptions = {
+  signal?: AbortSignal;
+  /** Injected so a test can answer without a network. */
+  fetch?: FetchLike;
+  /**
+   * The server's Google Places key. With one, Google answers first and
+   * OpenStreetMap fills a thin list; without one, OpenStreetMap alone
+   * answers.
+   */
+  googleKey?: string | undefined;
+};
+
+type GooglePlace = {
+  id?: string;
+  displayName?: { text?: string };
+  shortFormattedAddress?: string;
+  formattedAddress?: string;
+  location?: { latitude?: number; longitude?: number };
+  primaryTypeDisplayName?: { text?: string };
+  types?: string[];
+};
+
+type PhotonFeature = {
+  geometry?: { coordinates?: unknown };
+  properties?: {
+    osm_type?: string;
+    osm_id?: number;
+    name?: string;
+    street?: string;
+    district?: string;
+    city?: string;
+    county?: string;
+    osm_value?: string;
+    countrycode?: string;
+  };
 };
 
 type NominatimPlace = {
@@ -32,10 +110,20 @@ type NominatimPlace = {
   lon?: string;
   name?: string;
   display_name?: string;
+  category?: string;
+  type?: string;
   address?: Record<string, string>;
 };
 
-const cache = new Map<string, { at: number; places: GeocodedPlace[] }>();
+type NominatimReverse = {
+  name?: string;
+  display_name?: string;
+  address?: Record<string, string>;
+  error?: string;
+};
+
+const cache = new Map<string, { expiresAt: number; places: GeocodedPlace[] }>();
+const reverseCache = new Map<string, { expiresAt: number; place: ReversedPlace | null }>();
 
 /** Whether a coordinate sits inside the area this app plans for. */
 export function insideJabodetabek(latitude: number, longitude: number): boolean {
@@ -48,21 +136,312 @@ export function insideJabodetabek(latitude: number, longitude: number): boolean 
 }
 
 /**
+ * The address of a point.
+ *
+ * A rider who marks the current location should not have to type the
+ * street they are standing on. The reverse lookup answers with the short
+ * place, the full address and the same coordinate; a point outside the
+ * box, or an index that does not answer, returns `null` rather than a
+ * made-up address. A repeat look at the same ten-metre box is cached.
+ */
+export async function reversePlace(
+  latitude: number,
+  longitude: number,
+  options: GeocodeOptions = {},
+): Promise<ReversedPlace | null> {
+  if (!Number.isFinite(latitude) || !Number.isFinite(longitude)) return null;
+  if (!insideJabodetabek(latitude, longitude)) return null;
+
+  const key = `${latitude.toFixed(4)},${longitude.toFixed(4)}`;
+  const cached = reverseCache.get(key);
+  if (cached && cached.expiresAt > Date.now()) return cached.place;
+
+  const fetchImpl = options.fetch ?? fetch;
+  const url = `${NOMINATIM_REVERSE}?${new URLSearchParams({
+    lat: String(latitude),
+    lon: String(longitude),
+    format: "jsonv2",
+    addressdetails: "1",
+    zoom: "18",
+    "accept-language": "id,en",
+  }).toString()}`;
+
+  try {
+    const response = await fetchImpl(url, {
+      headers: {
+        "User-Agent": "daily-route/0.1 (Jakarta transit planner)",
+        Accept: "application/json",
+      },
+      signal: options.signal ?? AbortSignal.timeout(NOMINATIM_TIMEOUT_MS),
+    });
+    if (!response.ok) {
+      reverseCache.set(key, { expiresAt: Date.now() + FAILURE_CACHE_MS, place: null });
+      return null;
+    }
+
+    const payload = (await response.json()) as unknown;
+    const place = reversePlaceOf(payload, latitude, longitude);
+    reverseCache.set(key, {
+      expiresAt: Date.now() + (place ? CACHE_MS : FAILURE_CACHE_MS),
+      place,
+    });
+    return place;
+  } catch {
+    reverseCache.set(key, { expiresAt: Date.now() + FAILURE_CACHE_MS, place: null });
+    return null;
+  }
+}
+
+function reversePlaceOf(
+  value: unknown,
+  latitude: number,
+  longitude: number,
+): ReversedPlace | null {
+  if (!value || typeof value !== "object") return null;
+  const entry = value as NominatimReverse;
+  if (entry.error) return null;
+
+  const address = cleanAddress(entry.display_name) ?? addressLineOf(entry.address);
+  const shortAddress = address?.split(",")[0]?.trim() ?? null;
+  const name =
+    cleanName(entry.name) ??
+    cleanName(entry.address?.["road"]) ??
+    cleanName(entry.address?.["neighbourhood"]) ??
+    cleanName(entry.address?.["suburb"]) ??
+    cleanName(entry.address?.["city_district"]) ??
+    (shortAddress && shortAddress.length > 0 ? cleanName(shortAddress) : null);
+  if (!name && !address) return null;
+
+  return {
+    name: name ?? "Current location",
+    address,
+    latitude,
+    longitude,
+    source: "openstreetmap",
+  };
+}
+
+/** A structured Nominatim address, when it did not send one line. */
+function addressLineOf(address: Record<string, string> | undefined): string | null {
+  if (!address) return null;
+  const parts = [
+    address["road"],
+    address["house_number"],
+    address["neighbourhood"],
+    address["suburb"],
+    address["city_district"],
+    address["city"] ?? address["town"],
+    address["state"],
+  ]
+    .map((part) => part?.trim())
+    .filter((part): part is string => Boolean(part) && part !== "-");
+
+  const unique: string[] = [];
+  for (const part of parts) {
+    if (unique[unique.length - 1] !== part) unique.push(part);
+  }
+  return unique.length > 0 ? unique.join(", ") : null;
+}
+
+/**
  * Places whose name matches the query.
  *
- * An empty list means the geocoder had nothing, or it could not be reached.
- * It is never an error the rider has to recover from.
+ * An empty list means the geocoders had nothing, or they could not be
+ * reached. It is never an error the rider has to recover from.
  */
 export async function searchPlaces(
   query: string,
-  signal?: AbortSignal,
+  options: GeocodeOptions = {},
 ): Promise<GeocodedPlace[]> {
   const key = query.trim().toLowerCase();
-  if (key.length < 3) return [];
+  if (key.length < 2) return [];
 
   const cached = cache.get(key);
-  if (cached && Date.now() - cached.at < CACHE_MS) return cached.places;
+  if (cached && cached.expiresAt > Date.now()) return cached.places;
 
+  const fetchImpl = options.fetch ?? fetch;
+  const signal = options.signal;
+  const googleKey = options.googleKey?.trim();
+
+  /*
+   * Google Places owns the directory when a key is configured: it knows
+   * the small business that OpenStreetMap never mapped. The rectangle is
+   * the Jabodetabek box, so an answer outside it cannot arrive. A thin
+   * Google list is filled from OpenStreetMap, which is better at streets
+   * and addresses than at shops.
+   */
+  if (googleKey) {
+    const google = await readGoogle(fetchImpl, query, googleKey, signal);
+    if (google.ok && google.places.length > 0) {
+      const filler =
+        google.places.length >= MAXIMUM_PLACES
+          ? { places: [], ok: true }
+          : await readOpenStreetMap(fetchImpl, query, signal);
+      const places = dedupe([...google.places, ...filler.places]).slice(0, MAXIMUM_PLACES);
+      cache.set(key, { expiresAt: Date.now() + CACHE_MS, places });
+      return places;
+    }
+
+    const osm = await readOpenStreetMap(fetchImpl, query, signal);
+    cache.set(key, {
+      // A missing Google answer is retried in a minute, not in ten.
+      expiresAt: Date.now() + (google.ok ? CACHE_MS : FAILURE_CACHE_MS),
+      places: osm.places,
+    });
+    return osm.places;
+  }
+
+  const osm = await readOpenStreetMap(fetchImpl, query, signal);
+  cache.set(key, {
+    expiresAt: Date.now() + (osm.ok ? CACHE_MS : FAILURE_CACHE_MS),
+    places: osm.places,
+  });
+  return osm.places;
+}
+
+async function readOpenStreetMap(
+  fetchImpl: FetchLike,
+  query: string,
+  signal: AbortSignal | undefined,
+): Promise<SourceResult> {
+  /*
+   * "grand indonesia mall" is three words for a place whose own name is
+   * two. Photon reads the first and the last, so the same search is also
+   * asked with the opening words. Both run together; the answer is one
+   * list.
+   */
+  const trimmed = query.trim();
+  const leading = trimmed.split(/\s+/).filter(Boolean).slice(0, 2).join(" ");
+  const queries =
+    leading.length >= 4 && leading !== trimmed ? [trimmed, leading] : [trimmed];
+  const photon = await readPhotonMany(fetchImpl, queries, signal);
+  // Photon is the autocomplete index; one or two answers are enough. A
+  // thinner list leaves room for Nominatim to place an exact address.
+  const nominatim =
+    photon.places.length < 3
+      ? await readNominatim(fetchImpl, query, signal)
+      : { places: [], ok: true };
+
+  return {
+    places: dedupe([...photon.places, ...nominatim.places]).slice(0, MAXIMUM_PLACES),
+    ok: photon.ok || nominatim.ok,
+  };
+}
+
+async function readGoogle(
+  fetchImpl: FetchLike,
+  query: string,
+  apiKey: string,
+  signal: AbortSignal | undefined,
+): Promise<SourceResult> {
+  const body = JSON.stringify({
+    textQuery: query.trim(),
+    languageCode: "en",
+    regionCode: "ID",
+    maxResultCount: 8,
+    locationRestriction: {
+      rectangle: {
+        low: {
+          latitude: JABODETABEK.minLatitude,
+          longitude: JABODETABEK.minLongitude,
+        },
+        high: {
+          latitude: JABODETABEK.maxLatitude,
+          longitude: JABODETABEK.maxLongitude,
+        },
+      },
+    },
+  });
+
+  try {
+    const response = await fetchImpl(GOOGLE_TEXT_SEARCH, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "X-Goog-Api-Key": apiKey,
+        "X-Goog-FieldMask":
+          "places.id,places.displayName,places.shortFormattedAddress,places.formattedAddress,places.location,places.primaryTypeDisplayName,places.types",
+      },
+      body,
+      signal: signal ?? AbortSignal.timeout(GOOGLE_TIMEOUT_MS),
+    });
+    if (!response.ok) return { places: [], ok: false };
+    const payload = (await response.json()) as { places?: unknown };
+    if (!Array.isArray(payload.places)) return { places: [], ok: true };
+
+    return {
+      places: payload.places
+        .map((entry) => googlePlaceOf(entry))
+        .filter((place): place is GeocodedPlace => place !== null),
+      ok: true,
+    };
+  } catch {
+    return { places: [], ok: false };
+  }
+}
+
+async function readPhotonMany(
+  fetchImpl: FetchLike,
+  queries: readonly string[],
+  signal: AbortSignal | undefined,
+): Promise<SourceResult> {
+  const results = await Promise.all(
+    queries.map((query) => readPhoton(fetchImpl, query, signal)),
+  );
+  return {
+    places: dedupe(results.flatMap((result) => result.places)).slice(0, 8),
+    ok: results.some((result) => result.ok),
+  };
+}
+
+async function readPhoton(
+  fetchImpl: FetchLike,
+  query: string,
+  signal: AbortSignal | undefined,
+): Promise<SourceResult> {
+  const url = `${PHOTON}?${new URLSearchParams({
+    q: query.trim(),
+    limit: "8",
+    lang: "en",
+    lat: "-6.2",
+    lon: "106.816",
+    location_bias_scale: "0.5",
+    bbox: [
+      JABODETABEK.minLongitude,
+      JABODETABEK.minLatitude,
+      JABODETABEK.maxLongitude,
+      JABODETABEK.maxLatitude,
+    ].join(","),
+  }).toString()}`;
+
+  try {
+    const response = await fetchImpl(url, {
+      headers: {
+        "User-Agent": "daily-route/0.1 (Jakarta transit planner)",
+        Accept: "application/json",
+      },
+      signal: signal ?? AbortSignal.timeout(PHOTON_TIMEOUT_MS),
+    });
+    if (!response.ok) return { places: [], ok: false };
+    const payload = (await response.json()) as { features?: unknown };
+    if (!Array.isArray(payload.features)) return { places: [], ok: false };
+
+    return {
+      places: payload.features
+        .map((entry) => photonPlaceOf(entry))
+        .filter((place): place is GeocodedPlace => place !== null),
+      ok: true,
+    };
+  } catch {
+    return { places: [], ok: false };
+  }
+}
+
+async function readNominatim(
+  fetchImpl: FetchLike,
+  query: string,
+  signal: AbortSignal | undefined,
+): Promise<SourceResult> {
   const viewbox = [
     JABODETABEK.minLongitude,
     JABODETABEK.maxLatitude,
@@ -74,37 +453,93 @@ export async function searchPlaces(
     q: query.trim(),
     format: "jsonv2",
     addressdetails: "1",
-    limit: "5",
+    dedupe: "1",
+    limit: "8",
     countrycodes: "id",
+    "accept-language": "id,en",
     viewbox,
     bounded: "1",
   }).toString()}`;
 
   try {
-    const response = await fetch(url, {
+    const response = await fetchImpl(url, {
       headers: {
         "User-Agent": "daily-route/0.1 (Jakarta transit planner)",
         Accept: "application/json",
       },
-      signal: signal ?? AbortSignal.timeout(4_000),
+      signal: signal ?? AbortSignal.timeout(NOMINATIM_TIMEOUT_MS),
     });
-    if (!response.ok) return [];
+    if (!response.ok) return { places: [], ok: false };
     const payload = (await response.json()) as unknown;
-    if (!Array.isArray(payload)) return [];
+    if (!Array.isArray(payload)) return { places: [], ok: false };
 
-    const places = payload
-      .map((entry) => placeOf(entry))
-      .filter((place): place is GeocodedPlace => place !== null)
-      .slice(0, 3);
-
-    cache.set(key, { at: Date.now(), places });
-    return places;
+    return {
+      places: payload
+        .map((entry) => nominatimPlaceOf(entry))
+        .filter((place): place is GeocodedPlace => place !== null),
+      ok: true,
+    };
   } catch {
-    return [];
+    return { places: [], ok: false };
   }
 }
 
-function placeOf(value: unknown): GeocodedPlace | null {
+function photonPlaceOf(value: unknown): GeocodedPlace | null {
+  if (!value || typeof value !== "object") return null;
+  const feature = value as PhotonFeature;
+  const coordinates = feature.geometry?.coordinates;
+  if (!Array.isArray(coordinates) || coordinates.length < 2) return null;
+
+  const longitude = Number(coordinates[0]);
+  const latitude = Number(coordinates[1]);
+  if (!Number.isFinite(latitude) || !Number.isFinite(longitude)) return null;
+  if (!insideJabodetabek(latitude, longitude)) return null;
+
+  const properties = feature.properties ?? {};
+  const name =
+    cleanName(properties.name) ??
+    cleanName(properties.street) ??
+    cleanName(properties.district);
+  if (!name) return null;
+
+  const detail =
+    properties.street ?? properties.district ?? properties.city ?? properties.county ?? null;
+
+  return {
+    id: `place:${properties.osm_type ?? "osm"}:${properties.osm_id ?? `${latitude.toFixed(5)},${longitude.toFixed(5)}`}`,
+    name,
+    detail,
+    kind: kindOf(properties.osm_value),
+    latitude,
+    longitude,
+    source: "openstreetmap",
+  };
+}
+
+function googlePlaceOf(value: unknown): GeocodedPlace | null {
+  if (!value || typeof value !== "object") return null;
+  const entry = value as GooglePlace;
+  const latitude = Number(entry.location?.latitude);
+  const longitude = Number(entry.location?.longitude);
+  if (!Number.isFinite(latitude) || !Number.isFinite(longitude)) return null;
+  // The request already carries the rectangle; this is the second lock.
+  if (!insideJabodetabek(latitude, longitude)) return null;
+
+  const name = cleanName(entry.displayName?.text);
+  if (!name) return null;
+
+  return {
+    id: `place:google:${entry.id ?? `${latitude.toFixed(5)},${longitude.toFixed(5)}`}`,
+    name,
+    detail: entry.shortFormattedAddress ?? entry.formattedAddress ?? null,
+    kind: entry.primaryTypeDisplayName?.text ?? kindOf(entry.types?.[0]),
+    latitude,
+    longitude,
+    source: "google",
+  };
+}
+
+function nominatimPlaceOf(value: unknown): GeocodedPlace | null {
   if (!value || typeof value !== "object") return null;
   const entry = value as NominatimPlace;
   const latitude = Number(entry.lat);
@@ -128,13 +563,57 @@ function placeOf(value: unknown): GeocodedPlace | null {
     id: `place:${entry.place_id ?? `${latitude.toFixed(5)},${longitude.toFixed(5)}`}`,
     name,
     detail,
+    kind: kindOf(entry.type ?? entry.category),
     latitude,
     longitude,
+    source: "openstreetmap",
   };
+}
+
+/**
+ * The same place from two indexes is one row.
+ *
+ * Photon and Nominatim both point at OpenStreetMap, so the same mall
+ * arrives twice with two ids. A name that matches within about 150 m is
+ * one place; the first answer keeps its position.
+ */
+function dedupe(places: readonly GeocodedPlace[]): GeocodedPlace[] {
+  const kept: GeocodedPlace[] = [];
+  for (const place of places) {
+    const name = normalise(place.name);
+    const duplicate = kept.some(
+      (other) =>
+        other.id === place.id ||
+        (normalise(other.name) === name &&
+          Math.abs(other.latitude - place.latitude) < 0.0015 &&
+          Math.abs(other.longitude - place.longitude) < 0.0015),
+    );
+    if (!duplicate) kept.push(place);
+  }
+  return kept;
+}
+
+/** A tag value as a label: `shop=mall` reads "Mall". */
+function kindOf(value: string | undefined): string {
+  const raw = value?.trim();
+  if (!raw || raw === "yes") return "Place";
+  const words = raw.split(/[_;]/).filter(Boolean).join(" ");
+  return words.charAt(0).toUpperCase() + words.slice(1);
+}
+
+function normalise(value: string): string {
+  return value.trim().toLowerCase().replace(/\s+/g, " ");
 }
 
 function cleanName(value: string | undefined): string | null {
   const name = value?.trim();
   if (!name) return null;
   return name.length > 80 ? name.slice(0, 80).trimEnd() : name;
+}
+
+/** An address is longer than a name; it is cut at a readable line. */
+function cleanAddress(value: string | undefined): string | null {
+  const address = value?.trim().replace(/\s+/g, " ");
+  if (!address) return null;
+  return address.length > 300 ? address.slice(0, 300).trimEnd() : address;
 }

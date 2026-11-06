@@ -14,6 +14,8 @@ export * from "./shared.js";
 export * from "./stream.js";
 export * from "./recovery.js";
 export * from "./research.js";
+export * from "./rider-context.js";
+export * from "./rider-tools.js";
 export * from "./tools.js";
 export * from "./usage.js";
 export * from "./tracing.js";

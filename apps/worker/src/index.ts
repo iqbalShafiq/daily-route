@@ -1,6 +1,7 @@
 import {
   buildStreamRules,
   superviseStream,
+  cachedNewsSearch,
   createAnnouncementScreen,
   createClassifierAgent,
   createXClient,
@@ -8,8 +9,10 @@ import {
   createNewsSearch,
   createQueryPlanner,
   createResearchReader,
+  newsCacheStore,
   researchNotice,
   setUsageSink,
+  SharedWork,
   DisruptionClassifier,
   DisruptionMonitor,
   modelConfigFromEnv,
@@ -116,7 +119,12 @@ async function main(): Promise<void> {
     message: stream ? "Waiting for the stream." : "The X stream is not configured.",
   });
 
-  const news = createNewsSearch(env.TAVILY_API_KEY);
+  const news = cachedNewsSearch(
+    createNewsSearch(env.TAVILY_API_KEY),
+    new SharedWork(2),
+    10 * 60_000,
+    newsCacheStore(db),
+  );
   const noticeReview = news
     ? new NoticeReviewAgent({ config: modelConfigFromEnv(env), env, news })
     : null;

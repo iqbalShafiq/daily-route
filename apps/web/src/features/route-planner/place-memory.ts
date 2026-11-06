@@ -12,11 +12,25 @@ export type ChosenPlace = {
   kind: "station" | "place";
   id: string;
   name: string;
+  /** The full address, when the place was marked from the rider's position. */
+  address?: string | null;
   latitude: number;
   longitude: number;
   systemId?: string | null;
   systemName?: string | null;
 };
+
+/**
+ * What the route field shows for a place.
+ *
+ * A marked current location is useful as the address the rider is standing
+ * on, not as the short name of the nearest object. A station keeps its
+ * name because it has no address in the graph.
+ */
+export function displayNameOf(place: ChosenPlace): string {
+  const address = typeof place.address === "string" ? place.address.trim() : "";
+  return address.length > 0 ? address : place.name;
+}
 
 export type RecentJourney = {
   originName: string;
@@ -32,7 +46,7 @@ const JOURNEY_KEY = "daily-route.recent-journeys";
 const PLACE_LIMIT = 8;
 const JOURNEY_LIMIT = 6;
 
-function isPlace(value: unknown): value is ChosenPlace {
+export function isPlace(value: unknown): value is ChosenPlace {
   if (!value || typeof value !== "object") return false;
   const place = value as Record<string, unknown>;
   return (
@@ -40,11 +54,14 @@ function isPlace(value: unknown): value is ChosenPlace {
     typeof place["id"] === "string" &&
     typeof place["name"] === "string" &&
     typeof place["latitude"] === "number" &&
-    typeof place["longitude"] === "number"
+    typeof place["longitude"] === "number" &&
+    (place["address"] === undefined ||
+      place["address"] === null ||
+      typeof place["address"] === "string")
   );
 }
 
-function isJourney(value: unknown): value is RecentJourney {
+export function isJourney(value: unknown): value is RecentJourney {
   if (!value || typeof value !== "object") return false;
   const journey = value as Record<string, unknown>;
   const origin = journey["origin"];
@@ -85,6 +102,32 @@ function write(key: string, value: unknown): void {
 
 function remember<T>(items: readonly T[], next: T, same: (item: T) => boolean, limit: number): T[] {
   return [next, ...items.filter((item) => !same(item))].slice(0, limit);
+}
+
+/**
+ * The three local lists, as a signed-in client reads them once.
+ *
+ * This is the same store the hook uses while nobody is signed in, exposed
+ * so the account sync can move it to the server without a second parser.
+ */
+export function readStoredPlaces(): {
+  saved: ChosenPlace[];
+  recentPlaces: ChosenPlace[];
+  journeys: RecentJourney[];
+} {
+  return {
+    saved: readPlaces(SAVED_KEY),
+    recentPlaces: readPlaces(RECENT_KEY),
+    journeys: readJourneys(),
+  };
+}
+
+/** Remove the three local keys. The account owns the lists after a sync. */
+export function clearStoredPlaces(): void {
+  if (typeof window === "undefined") return;
+  window.localStorage.removeItem(SAVED_KEY);
+  window.localStorage.removeItem(RECENT_KEY);
+  window.localStorage.removeItem(JOURNEY_KEY);
 }
 
 export function usePlaceMemory() {
@@ -130,5 +173,28 @@ export function usePlaceMemory() {
     [saved],
   );
 
-  return { saved, recentPlaces, journeys, rememberPlace, toggleSaved, rememberJourney, isSaved };
+  /**
+   * Forget everything on this device.
+   *
+   * It is called after a successful sign-out or account deletion, so the
+   * next rider on a shared phone does not see the previous one's places in
+   * React state. The signed-out store is emptied with it.
+   */
+  const reset = useCallback(() => {
+    setSaved([]);
+    setRecentPlaces([]);
+    setJourneys([]);
+    clearStoredPlaces();
+  }, []);
+
+  return {
+    saved,
+    recentPlaces,
+    journeys,
+    rememberPlace,
+    toggleSaved,
+    rememberJourney,
+    isSaved,
+    reset,
+  };
 }
