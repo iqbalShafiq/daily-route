@@ -5095,6 +5095,118 @@
 }
 
 /* ---------------------------------------------------------------------------
+   PWA surfaces: the install guide, the notification rows and their marks.
+--------------------------------------------------------------------------- */
+.pwa-sheet-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 80;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  background: rgb(0 0 0 / 0.42);
+  animation: fade-in 160ms var(--ease-out) both;
+}
+
+.pwa-sheet-panel {
+  width: min(560px, 100%);
+  max-height: 90dvh;
+  overflow: auto;
+  border-radius: var(--r-xl) var(--r-xl) 0 0;
+  background: var(--srf);
+  color: var(--on);
+  box-shadow: var(--shadow-pop);
+  padding-bottom: env(safe-area-inset-bottom);
+  animation: sheetUp 260ms var(--ease-out) both;
+}
+
+@media (min-width: 768px) {
+  .pwa-sheet-backdrop {
+    align-items: center;
+    padding: 24px;
+  }
+
+  .pwa-sheet-panel {
+    border-radius: var(--r-2xl);
+    padding-bottom: 0;
+  }
+}
+
+.pwa-sheet-body {
+  display: grid;
+  gap: 16px;
+  padding: 20px 20px 16px;
+}
+
+.pwa-sheet-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.pwa-sheet-head h2 {
+  margin: 0;
+}
+
+.pwa-hero {
+  display: grid;
+  justify-items: center;
+  gap: 12px;
+  text-align: center;
+}
+
+.pwa-hero-mark {
+  background: var(--pc);
+  color: var(--onpc);
+}
+
+.pwa-hero-mark img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  border-radius: var(--r-xl);
+}
+
+.pwa-confirm-mark {
+  background: var(--ok);
+  color: var(--okc);
+}
+
+.pwa-banner-mark {
+  background: var(--p);
+  color: var(--onp);
+}
+
+.pwa-notification-mark {
+  background: var(--pc);
+  color: var(--onpc);
+}
+
+.pwa-benefit .m3-list__title,
+.pwa-step .m3-list__title,
+.pwa-benefit .m3-list__subtitle,
+.pwa-step .m3-list__subtitle {
+  overflow: visible;
+  text-overflow: clip;
+  white-space: normal;
+}
+
+.pwa-confirm-mark svg,
+.pwa-banner-mark svg,
+.pwa-notification-mark svg {
+  width: 20px;
+  height: 20px;
+}
+
+.pwa-tip-icon {
+  width: 20px;
+  height: 20px;
+  flex: none;
+  margin-top: 2px;
+}
+
+/* ---------------------------------------------------------------------------
    Reduced motion: loops stop, and a morph resolves to one static frame.
 --------------------------------------------------------------------------- */
 @media (prefers-reduced-motion: reduce) {
