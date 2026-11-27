@@ -1,6 +1,6 @@
-import { ArrowRight, MessageSquare, Moon, Sun, UserRound } from "lucide-react";
+import { Map as MapIcon, MessageSquare, Route as RouteIcon, UserRound } from "lucide-react";
 import { useEffect, useMemo, useRef, useState } from "react";
-
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   RouteMap,
   type MapLeg,
@@ -10,41 +10,67 @@ import {
 } from "../components/map/route-map.js";
 import { legIdOf } from "../components/transit/leg-list.js";
 import { NETWORK_SYSTEMS } from "../components/map/operator-mark.js";
-import { MobileTabBar, type MobileTab } from "../components/layout/mobile-tab-bar.js";
+import { NetworkDock, type NetworkDockTab } from "../components/layout/network-dock.js";
 import {
-  NetworkDock,
-  type NetworkDockTab,
-} from "../components/layout/network-dock.js";
+  M3NavigationBar,
+  M3NavigationRail,
+  type M3NavigationItem,
+} from "../components/m3e/index.js";
 import { AccountPanel } from "../features/account/account-panel.js";
 import { useAccount } from "../features/account/use-account.js";
 import { useRiderMemory } from "../features/account/use-rider-memory.js";
 import { ChatPanel } from "../features/chat/chat-panel.js";
 import type { ChatAction } from "../features/chat/use-chat.js";
-import type { DisruptionSummary } from "../lib/api.js";
-import { RouteResult } from "../features/route-planner/route-result.js";
-import { RouteSearch } from "../features/route-planner/route-search.js";
+import type {
+  DisruptionSummary,
+  NamedPlace,
+  PositionPlan,
+} from "../lib/api.js";
 import { displayNameOf, type ChosenPlace } from "../features/route-planner/place-memory.js";
 import { useCurrentPlace } from "../features/route-planner/use-current-place.js";
 import type { MemorySuggestion } from "../features/route-planner/place-input.js";
 import { usePlan, type PlanRequest } from "../features/route-planner/use-plan.js";
 import { api } from "../lib/api.js";
-import type { NamedPlace, PersonalAlert, PositionPlan } from "../lib/api.js";
-import { Button } from "../components/ui/button.js";
 import { cn } from "../lib/cn.js";
 import { MODE_WIDTH, formatDistance, formatDuration } from "../lib/format.js";
 import { incidentImageId, incidentMarkOf } from "../lib/incident-mark.js";
 import { firstOpenIndex, planChoices } from "../lib/route-choice.js";
 import { lineColorsOf, lineKeyOf, ROUTE_WALK_COLOR } from "../lib/route-colors.js";
 import { useTheme } from "../lib/theme.js";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Tooltip } from "../components/ui/tooltip.js";
 import { useMediaQuery } from "../lib/use-media-query.js";
+import { useMutation as useWalkMutation } from "@tanstack/react-query";
+
+import {
+  MapHomeOverlay,
+  type HomeFeatured,
+  type HomeModeFilter,
+  type HomeQuickPlace,
+} from "../features/route-planner/map-home-overlay.js";
+import { SearchScreen } from "../features/route-planner/search-screen.js";
+import { RouteChoicesView } from "../features/route-planner/route-choices-view.js";
+import { RouteDetailView } from "../features/route-planner/route-detail-view.js";
+import { LiveTripView } from "../features/route-planner/live-trip-view.js";
+import { ArrivedView } from "../features/route-planner/arrived-view.js";
+import type { RouteSortMode } from "../features/route-planner/route-sort.js";
 
 type Submission = {
   origin: string;
   destination: string;
   originPlace: ChosenPlace | null;
   destinationPlace: ChosenPlace | null;
+};
+
+type AppTab = "map" | "lines" | "chat" | "me";
+
+type MapStage = "home" | "search" | "choices" | "detail" | "live" | "arrived";
+
+type FeaturedPair = {
+  originName: string;
+  destinationName: string;
+  origin: ChosenPlace | null;
+  destination: ChosenPlace | null;
+  reason: "alert" | "recent" | "example";
+  alertCount: number;
 };
 
 /** Coordinates travel only for a place that is not itself a stop. */
@@ -68,15 +94,6 @@ function requestOf(submission: Submission, at: string | undefined): PlanRequest 
   };
 }
 
-/** The one sentence a usual-journey notice shows on the empty board. */
-function alertSentenceOf(alert: PersonalAlert): string {
-  const { originName, destinationName, originLabel, destinationLabel } = alert.habit;
-  if (originLabel !== null && destinationLabel !== null) {
-    return `A notice touches your usual way from ${originLabel} to ${destinationLabel}.`;
-  }
-  return `A notice touches your usual way from ${originName} to ${destinationName}.`;
-}
-
 /** Turn a local time into the ISO instant the planner expects. */
 function departureAt(time: string): string | undefined {
   if (!/^\d{2}:\d{2}$/.test(time)) return undefined;
@@ -89,35 +106,57 @@ function departureAt(time: string): string | undefined {
   return `${date}T${time}:00+07:00`;
 }
 
-/**
- * A window control: one cell of the window strip.
- *
- * The strip is paper, the same surface as the panels, with a line border and
- * a 4 px radius. An idle cell shows its full ink icon; a fine pointer washes
- * it with surface-2. Only the open assistant or account cell becomes the
- * near-black headsign, with lamp ink; there is no second underline. The theme
- * is never an open toggle and stays paper in both themes.
- */
-function mapControlClass(active: boolean): string {
-  return cn(
-    "pointer-events-auto relative flex size-11 cursor-pointer items-center justify-center",
-    "text-ink transition-colors duration-150",
-    active
-      ? "bg-accent text-accent-ink pointer-fine:hover:bg-accent-hover"
-      : "pointer-fine:hover:bg-surface-2",
+function greetingOf(date: Date): string {
+  const hour = Number(
+    new Intl.DateTimeFormat("en-GB", {
+      timeZone: "Asia/Jakarta",
+      hour: "2-digit",
+      hourCycle: "h23",
+    }).format(date),
   );
+  if (hour < 11) return "Pagi";
+  if (hour < 15) return "Siang";
+  if (hour < 19) return "Sore";
+  return "Malam";
 }
 
-/** The strip the window controls sit in: one paper well, never a row of buttons. */
-const mapControlStripClass =
-  "pointer-events-none flex overflow-hidden rounded-[4px] border border-line bg-surface";
+function initialTab(): AppTab {
+  if (typeof window === "undefined") return "map";
+  const tab = new URLSearchParams(window.location.search).get("tab");
+  if (tab === "lines" || tab === "alerts") return "lines";
+  if (tab === "chat") return "chat";
+  if (tab === "me") return "me";
+  return "map";
+}
+
+function initialStage(): MapStage {
+  if (typeof window === "undefined") return "home";
+  const action = new URLSearchParams(window.location.search).get("action");
+  return action === "search" ? "search" : "home";
+}
+
+function initialDockTab(): NetworkDockTab {
+  if (typeof window === "undefined") return "lines";
+  return new URLSearchParams(window.location.search).get("tab") === "alerts"
+    ? "notices"
+    : "lines";
+}
+
+function minutesSince(iso: string | null, fallback: number): number {
+  if (!iso) return fallback;
+  const started = Date.parse(iso);
+  if (Number.isNaN(started)) return fallback;
+  return Math.max(1, Math.round((Date.now() - started) / 60_000));
+}
 
 /**
  * The planner page.
  *
- * On a phone the map sits above the controls and the two views — planner
- * and assistant — are tabs. From a laptop upwards the map takes the right
- * half of the window and the controls stay in a column on the left.
+ * The map is the page. On a phone the four destinations are the M3
+ * navigation bar; from 1024 px they become the rail on the left. The map
+ * flow is one state machine: home, search, choices, detail, live and
+ * arrived. A stage that owns a floating toolbar never shows the navigation
+ * bar, so a bar and a toolbar cannot fight for the same edge.
  */
 export function PlannerPage() {
   const [origin, setOrigin] = useState("");
@@ -126,23 +165,33 @@ export function PlannerPage() {
   const [destinationPlace, setDestinationPlace] = useState<ChosenPlace | null>(null);
   const [submitted, setSubmitted] = useState<Submission | null>(null);
   const [departureMode, setDepartureMode] = useState<"now" | "at">("now");
-  const [departureTime, setDepartureTime] = useState(() => {
-    return new Intl.DateTimeFormat("en-GB", {
+  const [departureTime, setDepartureTime] = useState(() =>
+    new Intl.DateTimeFormat("en-GB", {
       timeZone: "Asia/Jakarta",
       hour: "2-digit",
       minute: "2-digit",
       hourCycle: "h23",
-    }).format(new Date());
-  });
+    }).format(new Date()),
+  );
+  const [stage, setStage] = useState<MapStage>(initialStage);
+  const [tab, setTab] = useState<AppTab>(initialTab);
+  const [dockTab, setDockTab] = useState<NetworkDockTab>(initialDockTab);
+  const [dockOpen, setDockOpen] = useState(true);
+  const [homeModeFilter, setHomeModeFilter] = useState<HomeModeFilter>("all");
+  const [sortMode, setSortMode] = useState<RouteSortMode>("fastest");
+  const [tripStartedAt, setTripStartedAt] = useState<string | null>(null);
+  const [chatClosing, setChatClosing] = useState(false);
+  const [greeting] = useState(() => greetingOf(new Date()));
+  const chatTimer = useRef<number | null>(null);
+
+  useEffect(() => {
+    return () => {
+      if (chatTimer.current !== null) window.clearTimeout(chatTimer.current);
+    };
+  }, []);
+
   const account = useAccount();
   const queryClient = useQueryClient();
-  /*
-   * The rider's own data, read only while somebody is signed in.
-   *
-   * A 401 is "nobody is signed in", not a failure of the planner: the
-   * queries stay off while `account.user` is null, and a later failure
-   * only leaves the account section quiet.
-   */
   const namedPlaces = useQuery({
     queryKey: ["account", "places"],
     queryFn: () => api.namedPlaces(),
@@ -172,127 +221,12 @@ export function PlannerPage() {
     retryMemory,
     resetLocal,
   } = riderMemory;
-  const [view, setView] = useState("route");
-  const [accountOpen, setAccountOpen] = useState(false);
-  const [mobileTab, setMobileTab] = useState<MobileTab>("plan");
-  const [resultExpanded, setResultExpanded] = useState(true);
   const isDesktop = useMediaQuery("(min-width: 1024px)");
-  const [dockTab, setDockTab] = useState<NetworkDockTab>("lines");
-  const [chatClosing, setChatClosing] = useState(false);
-  const chatTimer = useRef<number | null>(null);
+  const { theme, toggle: toggleTheme } = useTheme();
 
-  const openChat = (): void => {
-    if (chatTimer.current !== null) window.clearTimeout(chatTimer.current);
-    setAccountOpen(false);
-    setChatClosing(false);
-    setMobileTab("assistant");
-    setView("chat");
-  };
-
-  const closeChat = (): void => {
-    if (view !== "chat" || chatClosing) return;
-    setChatClosing(true);
-    chatTimer.current = window.setTimeout(() => {
-      setView("route");
-      setMobileTab("plan");
-      setChatClosing(false);
-      chatTimer.current = null;
-    }, 180);
-  };
-
-  /** The account sheet and the assistant never share the corner. */
-  const openAccount = (): void => {
-    if (accountOpen) {
-      setAccountOpen(false);
-      return;
-    }
-    setAccountOpen(true);
-    setMobileTab("plan");
-    if (view === "chat") closeChat();
-  };
-
-  const signOutAccount = async (): Promise<void> => {
-    await account.signOut();
-    resetLocal();
-  };
-
-  const deleteAccount = async (password: string): Promise<void> => {
-    await account.deleteAccount(password);
-    resetLocal();
-  };
-
-  /** A named place is written through the account, then cached from its answer. */
-  const saveNamedPlace = async (
-    label: string,
-    place: NamedPlace["place"],
-  ): Promise<void> => {
-    const result = await api.saveNamedPlace(label, place);
-    queryClient.setQueryData(["account", "places"], result);
-  };
-
-  const removeNamedPlace = async (label: string): Promise<void> => {
-    const result = await api.deleteNamedPlace(label);
-    queryClient.setQueryData(["account", "places"], result);
-  };
-
-  /**
-   * The bottom bar is the phone's way around the window.
-   *
-   * It switches between the planner, the service board and the
-   * assistant. The map never unmounts, so the camera and the chosen
-   * journey stay where the reader left them.
-   */
-  const changeMobileTab = (tab: MobileTab): void => {
-    setAccountOpen(false);
-    if (tab === "assistant") {
-      openChat();
-      return;
-    }
-    if (chatTimer.current !== null) {
-      window.clearTimeout(chatTimer.current);
-      chatTimer.current = null;
-    }
-    setChatClosing(false);
-    setView("route");
-    setMobileTab(tab);
-    if (tab === "network" || tab === "alerts") {
-      setDockOpen(true);
-      setDockTab(tab === "alerts" ? "notices" : "lines");
-    }
-  };
-
-  const openNotices = (): void => {
-    setDockOpen(true);
-    setDockTab("notices");
-    setMobileTab("alerts");
-    if (view === "chat") setView("route");
-  };
-
-  /** A first route, for the rider who has not chosen one yet. */
-  const runExample = (from: string, to: string): void => {
-    setOrigin(from);
-    setDestination(to);
-    setOriginPlace(null);
-    setDestinationPlace(null);
-    setWalk(null);
-    setWalkError(null);
-    setActiveIndex(0);
-    setSubmitted({
-      origin: from,
-      destination: to,
-      originPlace: null,
-      destinationPlace: null,
-    });
-    setMobileTab("plan");
-  };
-  /**
-   * The walk from the reader's place to the stop the journey starts
-   * from. It is drawn on the map as the first part of the journey.
-   */
   const [walk, setWalk] = useState<PositionPlan | null>(null);
   const [walkError, setWalkError] = useState<string | null>(null);
-  const [dockOpen, setDockOpen] = useState(true);
-  const walkPlan = useMutation({
+  const walkPlan = useWalkMutation({
     mutationFn: (input: {
       coordinates: { latitude: number; longitude: number };
       destination: string;
@@ -306,7 +240,6 @@ export function PlannerPage() {
       setWalkError("The walk could not be planned. Choose a stop instead.");
     },
   });
-  const { theme, toggle: toggleTheme } = useTheme();
 
   const network = useQuery({
     queryKey: ["network-overview"],
@@ -320,6 +253,13 @@ export function PlannerPage() {
     staleTime: 60 * 60_000,
     retry: false,
   });
+  const watch = useQuery({
+    queryKey: ["disruptions"],
+    queryFn: api.disruptions,
+    refetchInterval: 60_000,
+    retry: false,
+  });
+
   const [hiddenSystems, setHiddenSystems] = useState<ReadonlySet<string>>(() => new Set());
   const visibleSystems = useMemo(
     () => NETWORK_SYSTEMS.map((entry) => entry.id).filter((id) => !hiddenSystems.has(id)),
@@ -343,28 +283,26 @@ export function PlannerPage() {
       return next;
     });
   };
+
   const [glance, setGlance] = useState<{
     id: string;
     token: string;
     longitude: number;
     latitude: number;
   } | null>(null);
-  /**
-   * The notice the reader followed.
-   *
-   * A notice about a corridor has no single point, so the map is asked to
-   * frame the corridor itself and light it up. A notice about a stop (or
-   * several, when a street is closed) frames those stops.
-   */
   const [focus, setFocus] = useState<{
     id: string;
     token: string;
-    /** The journey that owns the camera; a new one drops the old focus. */
     planKey: string;
     points: { latitude: number; longitude: number }[];
     lineId: string | null;
   } | null>(null);
   const noticeToken = useRef(0);
+
+  const planAt = departureMode === "at" ? departureAt(departureTime) : undefined;
+  const plan = usePlan(submitted ? requestOf(submitted, planAt) : null);
+  const planKey = plan.data?.computedAt ?? "";
+
   const showNotice = (notice: DisruptionSummary): void => {
     noticeToken.current += 1;
     const token = `${notice.id}:${noticeToken.current}`;
@@ -395,15 +333,6 @@ export function PlannerPage() {
       setGlance(null);
     }
   };
-  const watch = useQuery({
-    queryKey: ["disruptions"],
-    queryFn: api.disruptions,
-    refetchInterval: 60_000,
-    retry: false,
-  });
-
-  const planAt = departureMode === "at" ? departureAt(departureTime) : undefined;
-  const plan = usePlan(submitted ? requestOf(submitted, planAt) : null);
 
   useEffect(() => {
     if (!plan.data || !submitted) return;
@@ -415,14 +344,15 @@ export function PlannerPage() {
     });
   }, [plan.data, submitted, rememberJourney]);
 
-  const planKey = plan.data?.computedAt ?? "";
-  // The notice the map should follow now. A new journey drops the corridor
-  // the reader followed before, so the camera belongs to one thing at a time.
   const activeFocus = focus && focus.planKey === planKey ? focus : null;
 
   const [selection, setSelection] = useState<{ key: string; index: number | null } | null>(null);
-  const [legState, setLegState] = useState<{ key: string; leg: string | null }>({ key: "", leg: null });
+  const [legState, setLegState] = useState<{ key: string; leg: string | null }>({
+    key: "",
+    leg: null,
+  });
   const [hoveredRouteLine, setHoveredRouteLine] = useState<string | null>(null);
+  const [hoveredStation, setHoveredStation] = useState<string | null>(null);
   const activeIndex =
     selection && selection.key === planKey
       ? selection.index
@@ -430,10 +360,9 @@ export function PlannerPage() {
         ? firstOpenIndex(planChoices(plan.data), plan.data.disruptions)
         : null;
   const activeLeg = legState.key === planKey ? legState.leg : null;
-  const watchedChoice = plan.data
-    ? planChoices(plan.data)[activeIndex ?? firstOpenIndex(planChoices(plan.data), plan.data.disruptions)]
-    : undefined;
-  const watchedLines = (watchedChoice?.legs ?? [])
+  const choices = plan.data ? planChoices(plan.data) : [];
+  const activeRoute = activeIndex === null ? undefined : choices[activeIndex];
+  const watchedLines = (activeRoute?.legs ?? [])
     .filter((leg) => leg.kind === "ride" && leg.lineCode)
     .map((leg) => leg.lineCode as string);
   const watchKey =
@@ -458,80 +387,8 @@ export function PlannerPage() {
     setSelection({ key: planKey, index });
     setActiveLeg(null);
   };
-  const runChatAction = (action: ChatAction): void => {
-    if (action.type === "open_source") {
-      window.open(action.url, "_blank", "noopener,noreferrer");
-      return;
-    }
-    if (action.type === "show_notice") {
-      const notice = (watch.data ?? []).find((item) => item.id === action.disruptionId);
-      if (notice) showNotice(notice);
-      else {
-        setGlance({
-          id: action.disruptionId,
-          token: `${action.disruptionId}:${Date.now()}`,
-          longitude: action.longitude,
-          latitude: action.latitude,
-        });
-      }
-      setView("route");
-      setMobileTab("plan");
-      return;
-    }
-    if (action.type === "show_stop") {
-      setGlance({
-        id: action.stationId,
-        token: `${action.stationId}:${Date.now()}`,
-        longitude: action.longitude,
-        latitude: action.latitude,
-      });
-      setView("route");
-      setMobileTab("plan");
-      return;
-    }
-    if (action.type === "set_origin" || action.type === "set_destination") {
-      const place: ChosenPlace = {
-        kind: "station",
-        id: action.stationId,
-        name: action.name,
-        latitude: action.latitude,
-        longitude: action.longitude,
-      };
-      if (action.type === "set_origin") {
-        setOrigin(action.name);
-        setOriginPlace(place);
-      } else {
-        setDestination(action.name);
-        setDestinationPlace(place);
-      }
-      setView("route");
-      setMobileTab("plan");
-      return;
-    }
-    setOrigin(action.origin);
-    setDestination(action.destination);
-    setOriginPlace(null);
-    setDestinationPlace(null);
-    setWalk(null);
-    setActiveIndex(0);
-    setSubmitted({
-      origin: action.origin,
-      destination: action.destination,
-      originPlace: null,
-      destinationPlace: null,
-    });
-    setView("route");
-    setMobileTab("plan");
-  };
 
-  /*
-   * What an empty place field offers, in the order it should be read.
-   *
-   * The rider's named places come first, because the rider chose those
-   * names. A place that is already named is not listed again under "Saved"
-   * or "Recent", so the same stop does not appear three times.
-   */
-  const memorySuggestions = useMemo<MemorySuggestion[]>(() => {
+  const modeSuggestions = useMemo<MemorySuggestion[]>(() => {
     const named = namedPlaces.data?.places ?? [];
     const namedIds = new Set(named.map((entry) => entry.place.id));
     const savedRows = saved.filter((place) => !namedIds.has(place.id));
@@ -560,27 +417,323 @@ export function PlannerPage() {
     ];
   }, [namedPlaces.data, saved, recentPlaces]);
 
-  /**
-   * The leg of the journey the reader is pointing at.
-   *
-   * The list and the map are one system: pointing at a leg in the list
-   * keeps that leg bright on the map, and pointing at a leg on the map
-   * lights it up in the list.
-   */
-  /** The stop the reader is pointing at in the list. */
-  const [hoveredStation, setHoveredStation] = useState<string | null>(null);
+  const quickPlaces = useMemo<HomeQuickPlace[]>(() => {
+    const named = (namedPlaces.data?.places ?? []).slice(0, 4).map((entry) => ({
+      label: entry.label,
+      detail: displayNameOf(entry.place),
+      place: entry.place,
+    }));
+    const namedIds = new Set((namedPlaces.data?.places ?? []).map((entry) => entry.place.id));
+    const savedShortcuts = saved
+      .filter((place) => !namedIds.has(place.id))
+      .slice(0, 2)
+      .map((place) => ({
+        label: displayNameOf(place),
+        detail: "Tersimpan",
+        place,
+      }));
+    return [...named, ...savedShortcuts];
+  }, [namedPlaces.data, saved]);
 
-  const { legs: mapLegs, markers, frame } = useMemo(() => {
+  const featuredPair = useMemo<FeaturedPair>(() => {
+    const alert = personalAlerts.data?.alerts[0];
+    if (alert) {
+      return {
+        originName: alert.habit.originName,
+        destinationName: alert.habit.destinationName,
+        origin: null,
+        destination: null,
+        reason: "alert",
+        alertCount: alert.notices.length,
+      };
+    }
+    const recent = riderMemory.journeys[0];
+    if (recent) {
+      return {
+        originName: recent.originName,
+        destinationName: recent.destinationName,
+        origin: recent.origin,
+        destination: recent.destination,
+        reason: "recent",
+        alertCount: 0,
+      };
+    }
+    return {
+      originName: "Bundaran HI",
+      destinationName: "Kota",
+      origin: null,
+      destination: null,
+      reason: "example",
+      alertCount: 0,
+    };
+  }, [personalAlerts.data, riderMemory.journeys]);
+
+  const featuredPlan = useQuery({
+    queryKey: [
+      "home-featured",
+      featuredPair.originName,
+      featuredPair.destinationName,
+      featuredPair.origin?.id ?? "",
+      featuredPair.destination?.id ?? "",
+    ],
+    queryFn: () =>
+      api.plan(
+        requestOf(
+          {
+            origin: featuredPair.originName,
+            destination: featuredPair.destinationName,
+            originPlace: featuredPair.origin,
+            destinationPlace: featuredPair.destination,
+          },
+          undefined,
+        ),
+      ),
+    enabled:
+      stage === "home" &&
+      tab === "map" &&
+      (account.user === null || !personalAlerts.isLoading) &&
+      featuredPair.originName.trim().length > 1 &&
+      featuredPair.destinationName.trim().length > 1,
+    staleTime: 5 * 60_000,
+    retry: false,
+  });
+
+  const featured: HomeFeatured = {
+    ...featuredPair,
+    plan: featuredPlan.data,
+    loading: featuredPlan.isFetching,
+  };
+
+  const activeNotices = (watch.data ?? []).filter((notice) => notice.activeNow).length;
+  const personalAlertCount = personalAlerts.data?.alerts.length ?? 0;
+  const noticeHeadline =
+    personalAlerts.data?.alerts[0]?.notices[0]?.title ??
+    (watch.data ?? []).find((notice) => notice.activeNow)?.title ??
+    null;
+
+  const openChat = (): void => {
+    if (chatTimer.current !== null) window.clearTimeout(chatTimer.current);
+    setChatClosing(false);
+    setTab("chat");
+  };
+  const closeChat = (): void => {
+    if (tab !== "chat" || chatClosing) return;
+    setChatClosing(true);
+    chatTimer.current = window.setTimeout(() => {
+      setTab("map");
+      setChatClosing(false);
+      chatTimer.current = null;
+    }, 180);
+  };
+  const closeAccount = (): void => setTab("map");
+  const openNotices = (): void => {
+    setTab("lines");
+    setDockTab("notices");
+    setDockOpen(true);
+  };
+
+  const changeTab = (id: string): void => {
+    if (id === "lines") {
+      setTab("lines");
+      setDockTab("lines");
+      setDockOpen(true);
+      return;
+    }
+    if (id === "chat") {
+      openChat();
+      return;
+    }
+    if (id === "me") {
+      setTab("me");
+      return;
+    }
+    setTab("map");
+  };
+
+  const navItems: M3NavigationItem[] = [
+    { id: "map", label: "Peta", icon: <MapIcon aria-hidden /> },
+    {
+      id: "lines",
+      label: "Jalur",
+      icon: <RouteIcon aria-hidden />,
+      ...(activeNotices > 0 ? { badge: activeNotices } : {}),
+    },
+    { id: "chat", label: "Tanya", icon: <MessageSquare aria-hidden /> },
+    { id: "me", label: "Saya", icon: <UserRound aria-hidden /> },
+  ];
+
+  const hideNav =
+    tab === "map" &&
+    (stage === "search" || stage === "detail" || stage === "live" || stage === "arrived");
+
+  const signOutAccount = async (): Promise<void> => {
+    await account.signOut();
+    resetLocal();
+  };
+  const deleteAccount = async (password: string): Promise<void> => {
+    await account.deleteAccount(password);
+    resetLocal();
+  };
+  const saveNamedPlace = async (
+    label: string,
+    place: NamedPlace["place"],
+  ): Promise<void> => {
+    const result = await api.saveNamedPlace(label, place);
+    queryClient.setQueryData(["account", "places"], result);
+  };
+  const removeNamedPlace = async (label: string): Promise<void> => {
+    const result = await api.deleteNamedPlace(label);
+    queryClient.setQueryData(["account", "places"], result);
+  };
+
+  const resetJourney = (): void => {
+    setSubmitted(null);
+    setWalk(null);
+    setWalkError(null);
+    setSelection(null);
+    setLegState({ key: "", leg: null });
+    setTripStartedAt(null);
+    setStage("home");
+    setTab("map");
+  };
+
+  const submit = (submission: Submission): void => {
+    setOrigin(submission.origin);
+    setDestination(submission.destination);
+    setOriginPlace(submission.originPlace);
+    setDestinationPlace(submission.destinationPlace);
+    setWalk(null);
+    setWalkError(null);
+    setSelection(null);
+    setSubmitted(submission);
+    setTripStartedAt(null);
+    setStage("choices");
+    setTab("map");
+  };
+
+  const startFeatured = (): void => {
+    submit({
+      origin: featuredPair.originName,
+      destination: featuredPair.destinationName,
+      originPlace: featuredPair.origin,
+      destinationPlace: featuredPair.destination,
+    });
+  };
+
+  const openSearch = (): void => {
+    setStage("search");
+    setTab("map");
+  };
+
+  const chooseFeaturedDeparture = (): void => {
+    setOrigin(featuredPair.originName);
+    setDestination(featuredPair.destinationName);
+    setOriginPlace(featuredPair.origin);
+    setDestinationPlace(featuredPair.destination);
+    setDepartureMode("at");
+    setStage("search");
+    setTab("map");
+  };
+
+  const pickQuickPlace = (quick: HomeQuickPlace): void => {
+    setDestination(displayNameOf(quick.place));
+    setDestinationPlace(quick.place);
+    rememberPlace(quick.place);
+    setStage("search");
+    setTab("map");
+  };
+
+  const startFromMyPosition = async (): Promise<void> => {
+    setWalkError(null);
+    const result = await currentPlace.locate();
+    if (!result.ok) {
+      setWalkError(result.error);
+      return;
+    }
+    const here = result.place;
+    const hereName = displayNameOf(here);
+    setOrigin(hereName);
+    setOriginPlace(here);
+    rememberPlace(here);
+    setWalk(null);
+    setWalkError(null);
+    if (destination.trim().length <= 1) return;
+    setSelection(null);
+    setSubmitted({
+      origin: hereName,
+      destination: destination.trim(),
+      originPlace: here,
+      destinationPlace,
+    });
+    setStage("choices");
+    walkPlan.mutate({
+      coordinates: { latitude: here.latitude, longitude: here.longitude },
+      destination: destination.trim(),
+    });
+  };
+
+  const runChatAction = (action: ChatAction): void => {
+    if (action.type === "open_source") {
+      window.open(action.url, "_blank", "noopener,noreferrer");
+      return;
+    }
+    if (action.type === "show_notice") {
+      const notice = (watch.data ?? []).find((item) => item.id === action.disruptionId);
+      if (notice) showNotice(notice);
+      else {
+        setGlance({
+          id: action.disruptionId,
+          token: `${action.disruptionId}:${Date.now()}`,
+          longitude: action.longitude,
+          latitude: action.latitude,
+        });
+      }
+      setTab("map");
+      setStage("home");
+      return;
+    }
+    if (action.type === "show_stop") {
+      setGlance({
+        id: action.stationId,
+        token: `${action.stationId}:${Date.now()}`,
+        longitude: action.longitude,
+        latitude: action.latitude,
+      });
+      setTab("map");
+      setStage("home");
+      return;
+    }
+    if (action.type === "set_origin" || action.type === "set_destination") {
+      const place: ChosenPlace = {
+        kind: "station",
+        id: action.stationId,
+        name: action.name,
+        latitude: action.latitude,
+        longitude: action.longitude,
+      };
+      if (action.type === "set_origin") {
+        setOrigin(action.name);
+        setOriginPlace(place);
+      } else {
+        setDestination(action.name);
+        setDestinationPlace(place);
+      }
+      setStage("search");
+      setTab("map");
+      return;
+    }
+    submit({
+      origin: action.origin,
+      destination: action.destination,
+      originPlace: null,
+      destinationPlace: null,
+    });
+  };
+
+  const { legs: mapLegs, markers } = useMemo(() => {
     const data = plan.data;
-    // A place that is not a stop is drawn as its own circle, not with the
-    // operator's plate and ring: the rider is standing at the address, not
-    // at a halte or a stasiun.
     const originIsPlace = submitted?.originPlace?.kind === "place";
     const destinationIsPlace = submitted?.destinationPlace?.kind === "place";
-    // On the idle map the notice board carries the disruptions. Drawing a
-    // red plate at every closed stop turns the city into a rash; once the
-    // rider has a journey, or follows a notice, the map shows the ones
-    // that matter.
     const showIncidents = Boolean(data) || Boolean(activeFocus) || Boolean(glance);
     const watched = showIncidents
       ? [...(data?.disruptions ?? []), ...(data?.watch ?? []), ...(data ? [] : (watch.data ?? []))]
@@ -591,9 +744,6 @@ export function PlannerPage() {
       if (!notice.activeNow) continue;
       if (seenIncidents.has(notice.id)) continue;
       seenIncidents.add(notice.id);
-      // A notice about a street closure names several stops; each one is a
-      // point on the map. A corridor notice has no stop to draw here: it is
-      // drawn as the corridor when the reader follows it.
       for (const station of notice.stations) {
         incidents.push({
           id: `incident-${notice.id}-${station.id}`,
@@ -608,17 +758,12 @@ export function PlannerPage() {
         });
       }
     }
-    if (!data) return { legs: [] as MapLeg[], markers: incidents, frame: [] };
+    if (!data) return { legs: [] as MapLeg[], markers: incidents };
 
-    const choices = planChoices(data);
-    const primary = activeIndex === null ? undefined : choices[activeIndex];
+    const routeChoices = planChoices(data);
+    const primary = activeIndex === null ? undefined : routeChoices[activeIndex];
 
-    /*
-     * Every leg is drawn in the colour of its operator, because that is the
-     * taxonomy the rider already knows. A second line of the same operator
-     * takes a secondary colour, so two corridors never look like one road.
-     */
-    const lineColors = lineColorsOf(choices);
+    const lineColors = lineColorsOf(routeChoices);
     const legs: MapLeg[] = [];
     for (const [index, leg] of (primary?.legs ?? []).entries()) {
       if (leg.geometry.length < 2) continue;
@@ -638,10 +783,10 @@ export function PlannerPage() {
         kind: leg.kind,
         lineKey: key,
         serviceClass: leg.serviceClass,
-        systemId: leg.lineId ? leg.lineId.split(":")[0] ?? null : null,
+        systemId: leg.lineId ? (leg.lineId.split(":")[0] ?? null) : null,
         label:
           leg.kind === "walk"
-            ? "Walk"
+            ? "Jalan"
             : (leg.lineName ?? leg.lineCode ?? "Transit"),
         detail:
           leg.kind === "walk"
@@ -651,10 +796,6 @@ export function PlannerPage() {
       });
     }
 
-    /*
-     * The walk comes first: it is how the journey begins, and it is the
-     * part the reader has to do on foot.
-     */
     if (walk?.walk && walk.stationName) {
       legs.unshift({
         id: "walk-from-here",
@@ -664,7 +805,7 @@ export function PlannerPage() {
         width: 3,
         kind: "walk",
         lineKey: "walk",
-        label: `Walk to ${walk.stationName}`,
+        label: `Jalan ke ${walk.stationName}`,
         detail: `${formatDuration(walk.walk.durationMinutes)} · ${formatDistance(walk.walk.distanceKm)}`,
         order: 0,
       });
@@ -672,11 +813,6 @@ export function PlannerPage() {
 
     const firstRide = legs.find((leg) => leg.kind === "ride");
     const lastRide = [...legs].reverse().find((leg) => leg.kind === "ride");
-    /*
-     * A journey can start and finish at the same stop: a loop, or two
-     * places that resolve to one station. One mark would hide the other,
-     * so the two ends become one stacked mark that names both.
-     */
     const endpointsMeet =
       Math.abs(data.origin.latitude - data.destination.latitude) < 0.00005 &&
       Math.abs(data.origin.longitude - data.destination.longitude) < 0.00005;
@@ -690,7 +826,7 @@ export function PlannerPage() {
               data.origin.name === data.destination.name
                 ? data.origin.name
                 : `${data.origin.name} / ${data.destination.name}`,
-            detail: "From and To",
+            detail: "Dari dan ke",
             kind: "endpoint",
             systemId: originIsPlace ? null : data.origin.systemId || null,
             order: 1,
@@ -703,15 +839,13 @@ export function PlannerPage() {
             latitude: data.origin.latitude,
             longitude: data.origin.longitude,
             label: data.origin.name,
-            detail: "Origin",
+            detail: "Dari",
             kind: "origin",
             systemId: originIsPlace ? null : (data.origin.systemId || firstRide?.systemId || null),
             order: 1,
           },
         ];
 
-    // The points where the rider changes vehicle. They are marked first,
-    // because they sit on a stop of the line before and after it.
     const transfers: MapMarker[] = [];
     for (const [index, leg] of (primary?.legs ?? []).entries()) {
       if (leg.kind !== "walk") continue;
@@ -726,17 +860,16 @@ export function PlannerPage() {
         longitude: (first.longitude + last.longitude) / 2,
         label: first.name === last.name ? first.name : `${first.name} → ${last.name}`,
         detail: isTransfer
-          ? `Change to ${leg.nextLineName ?? "the next vehicle"}`
+          ? `Transit ke ${leg.nextLineName ?? "kendaraan berikutnya"}`
           : leg.walkReason === "access"
-            ? "Walk to the first vehicle"
-            : "Walk from the last vehicle",
+            ? "Jalan ke kendaraan pertama"
+            : "Jalan dari kendaraan terakhir",
         kind: isTransfer ? "transfer" : "stop",
         systemId: nextRide?.lineId?.split(":")[0] ?? null,
         order: index + 1,
       });
     }
 
-    // The stops of every ride, except the ones a transfer already marks.
     for (const [index, leg] of (primary?.legs ?? []).entries()) {
       if (leg.kind !== "ride") continue;
       for (const stop of leg.stops) {
@@ -769,7 +902,7 @@ export function PlannerPage() {
         latitude: data.destination.latitude,
         longitude: data.destination.longitude,
         label: data.destination.name,
-        detail: "Destination",
+        detail: "Tujuan",
         kind: "destination",
         systemId: destinationIsPlace
           ? null
@@ -778,29 +911,29 @@ export function PlannerPage() {
       });
     }
 
-    // The camera follows the way being read. A closure that this way
-    // avoids stays a point on the map, and does not pull the frame open.
-    return { legs, markers, frame: [] };
-  }, [plan.data, activeIndex, activeLeg, hoveredRouteLine, walk, watch.data, glance, activeFocus, submitted]);
+    return { legs, markers };
+  }, [
+    plan.data,
+    activeIndex,
+    activeLeg,
+    hoveredRouteLine,
+    walk,
+    watch.data,
+    glance,
+    activeFocus,
+    submitted,
+  ]);
 
-  // Under a journey the map keeps the trunk lines and the journey's own
-  // stops. The full local network and 5,700 stop symbols are the idle
-  // map's job; drawing them under a route is noise and costs frames.
   const mapNetwork = useMemo(() => {
     const lines = (network.data?.lines ?? []) as NetworkStroke[];
     return plan.data ? lines.filter((line) => line.tier === "primary") : lines;
   }, [network.data, plan.data]);
   const mapPlaces = plan.data ? [] : (network.data?.places ?? []);
 
-  /*
-   * The only bridges on the map are the ones the rider is about to walk
-   * over. The registry has hundreds of records; painting all of them is a
-   * texture over the city, not information.
-   */
   const activeJpos = useMemo(() => {
     const ids = new Set<string>();
-    const choices = plan.data ? planChoices(plan.data) : [];
-    const primary = activeIndex === null ? undefined : choices[activeIndex];
+    const routeChoices = plan.data ? planChoices(plan.data) : [];
+    const primary = activeIndex === null ? undefined : routeChoices[activeIndex];
     for (const leg of primary?.legs ?? []) {
       for (const bridge of leg.jpo ?? []) ids.add(bridge.id);
     }
@@ -809,54 +942,40 @@ export function PlannerPage() {
     return (jpos.data?.jpos ?? []).filter((bridge) => ids.has(bridge.id));
   }, [plan.data, activeIndex, walk, jpos.data]);
 
-  const demoNotice = watch.data?.find((item) => item.demonstration);
-  const activeNotices = (watch.data ?? []).filter((notice) => notice.activeNow).length;
-
-  /*
-   * One usual-journey notice for the empty board, and only while somebody
-   * is signed in. A signed-out rider is never asked to sign in for it: the
-   * board simply has no strip.
-   */
-  const firstAlert = personalAlerts.data?.alerts[0] ?? null;
-  const firstNotice = firstAlert?.notices[0] ?? null;
-  const emptyAlert =
-    account.user !== null && firstAlert !== null && firstNotice !== null
-      ? {
-          sentence: alertSentenceOf(firstAlert),
-          count: firstAlert.habit.count,
-          noticeTitle: firstNotice.title,
-          onShow: () =>
-            runExample(firstAlert.habit.originName, firstAlert.habit.destinationName),
-        }
-      : undefined;
+  const originName = plan.data?.origin.name ?? submitted?.origin ?? origin;
+  const destinationName = plan.data?.destination.name ?? submitted?.destination ?? destination;
+  const departureLabel =
+    departureMode === "at"
+      ? `Berangkat ${departureTime} WIB`
+      : "Berangkat sekarang";
+  const lineLabel =
+    (activeRoute?.legs ?? [])
+      .filter((leg) => leg.kind === "ride" && leg.lineCode)
+      .map((leg) => leg.lineCode as string)
+      .filter((code, index, all) => all.indexOf(code) === index)
+      .join(" · ") || "Perjalanan";
 
   return (
     <div className="relative h-full min-h-0 overflow-hidden bg-bg">
-      {/*
-       * The map owns the window.
-       *
-       * The rider is looking at a city, and the controls float on top of
-       * it. The brand lives on the search board and the service board, not
-       * in a bar across the top of the window.
-       */}
-      <div className="relative col-start-1 row-start-1 h-full min-h-0">
+      <div className="m3-rail-offset relative h-full min-h-0">
         <RouteMap
           legs={mapLegs}
           markers={markers}
           theme={theme}
           highlightedStationId={hoveredStation}
-          frame={plan.data ? frame : []}
           network={mapNetwork}
           platforms={(network.data?.platforms ?? []) as NetworkPlatform[]}
           jpos={activeJpos}
           places={mapPlaces}
           visibleSystems={visibleSystems}
+          dimmedSystemFilter={
+            tab === "map" && stage === "home" ? homeModeFilter : null
+          }
           glance={glance}
           focus={activeFocus}
           onMarkerClick={(marker) => {
-            // A point on the map points at a leg of the journey.
-            const choices = plan.data ? planChoices(plan.data) : [];
-            const primary = activeIndex === null ? undefined : choices[activeIndex];
+            const routeChoices = plan.data ? planChoices(plan.data) : [];
+            const primary = activeIndex === null ? undefined : routeChoices[activeIndex];
             const index = (primary?.legs ?? []).findIndex((leg) =>
               leg.stops.some(
                 (stop) =>
@@ -869,115 +988,37 @@ export function PlannerPage() {
             }
           }}
         />
-        <p className="pointer-events-none absolute right-2 bottom-[calc(var(--bottom-bar-h)+env(safe-area-inset-bottom)+6px)] z-10 text-[12px] leading-[1.35] text-ink-3 lg:bottom-2 lg:left-[440px] lg:right-auto">
+        <p className="pointer-events-none absolute right-2 bottom-[calc(80px+env(safe-area-inset-bottom)+6px)] z-10 text-[12px] leading-[1.35] text-ink-3 lg:bottom-2 lg:left-2 lg:right-auto">
           © OpenStreetMap · OpenFreeMap
         </p>
-      </div>
 
-      {/*
-       * The controls of the window.
-       *
-       * They sit in the top right corner on a wide screen. The map has no
-       * zoom buttons: the scroll wheel, a pinch, and the keyboard still
-       * zoom.
-       */}
-      <div
-        className={cn(
-          mapControlStripClass,
-          "absolute right-3 top-3 z-50 hidden lg:flex",
-        )}
-      >
-        <Tooltip label={view === "chat" ? "Hide assistant" : "Ask the assistant"}>
-          <button
-            type="button"
-            aria-label="Ask the assistant"
-            aria-pressed={view === "chat"}
-            onClick={() => (view === "chat" ? closeChat() : openChat())}
-            className={mapControlClass(view === "chat")}
-          >
-            <MessageSquare aria-hidden className="size-4" />
-          </button>
-        </Tooltip>
+        {tab === "map" && stage === "home" ? (
+          <MapHomeOverlay
+            desktop={isDesktop}
+            modeFilter={homeModeFilter}
+            onModeFilterChange={setHomeModeFilter}
+            noticeCount={activeNotices}
+            personalAlertCount={personalAlertCount}
+            noticeHeadline={noticeHeadline}
+            onOpenNotices={openNotices}
+            greeting={greeting}
+            riderName={account.user?.email.split("@")[0] ?? "Komuter"}
+            onOpenProfile={() => setTab("me")}
+            onOpenSearch={openSearch}
+            theme={theme}
+            onToggleTheme={toggleTheme}
+            featured={featured}
+            onStartFeatured={startFeatured}
+            onOpenChoices={startFeatured}
+            onChooseDeparture={chooseFeaturedDeparture}
+            onOpenChat={openChat}
+            quickPlaces={quickPlaces}
+            onPickQuickPlace={pickQuickPlace}
+          />
+        ) : null}
 
-        <Tooltip label={accountOpen ? "Close account" : "Account"}>
-          <button
-            type="button"
-            aria-label="Account"
-            aria-pressed={accountOpen}
-            onClick={openAccount}
-            className={mapControlClass(accountOpen)}
-          >
-            <UserRound aria-hidden className="size-4" />
-          </button>
-        </Tooltip>
-
-        <Tooltip label={theme === "dark" ? "Light mode" : "Dark mode"}>
-          <button
-            type="button"
-            onClick={toggleTheme}
-            aria-label="Switch theme"
-            className={mapControlClass(false)}
-          >
-            {theme === "dark" ? (
-              <Sun aria-hidden className="size-4" />
-            ) : (
-              <Moon aria-hidden className="size-4" />
-            )}
-          </button>
-        </Tooltip>
-      </div>
-
-      {/* The account and the theme are the same strip on a phone; the bottom
-          bar owns the assistant. */}
-      <div
-        className={cn(
-          mapControlStripClass,
-          "absolute right-3 top-[calc(var(--bar-h)+8px)] z-30 lg:hidden",
-          view === "chat" && "max-lg:hidden",
-        )}
-      >
-        <Tooltip label={accountOpen ? "Close account" : "Account"}>
-          <button
-            type="button"
-            onClick={openAccount}
-            aria-label="Account"
-            aria-pressed={accountOpen}
-            className={mapControlClass(accountOpen)}
-          >
-            <UserRound aria-hidden className="size-4" />
-          </button>
-        </Tooltip>
-        <Tooltip label={theme === "dark" ? "Light mode" : "Dark mode"}>
-          <button
-            type="button"
-            onClick={toggleTheme}
-            aria-label="Switch theme"
-            className={mapControlClass(false)}
-          >
-            {theme === "dark" ? (
-              <Sun aria-hidden className="size-4" />
-            ) : (
-              <Moon aria-hidden className="size-4" />
-            )}
-          </button>
-        </Tooltip>
-      </div>
-
-      {/*
-       * The search and the answer.
-       *
-       * On a wide screen they are one column on the left. On a phone the
-       * search is the top of the window and the answer is a sheet above
-       * the bottom bar.
-       */}
-      <div
-        className={cn(
-          "pointer-events-none absolute inset-0 z-20 flex flex-col justify-between p-0 pb-3",
-          "lg:right-auto lg:w-[420px] lg:justify-start lg:gap-3 lg:p-4",
-        )}
-      >
-        <div className="pointer-events-auto lg:shrink-0">
-          <RouteSearch
+        {tab === "map" && stage === "search" ? (
+          <SearchScreen
             origin={origin}
             destination={destination}
             onOriginChange={(value) => {
@@ -1018,12 +1059,7 @@ export function PlannerPage() {
             onToggleSavedDestination={() => {
               if (destinationPlace) toggleSaved(destinationPlace);
             }}
-            memory={memorySuggestions}
-            notice={
-              plan.data || !demoNotice
-                ? null
-                : { title: demoNotice.title, demonstration: true }
-            }
+            memory={modeSuggestions}
             departureMode={departureMode}
             departureTime={departureTime}
             onDepartureModeChange={(mode) => {
@@ -1044,10 +1080,7 @@ export function PlannerPage() {
               setDepartureMode("at");
             }}
             onSubmit={() => {
-              setActiveIndex(0);
-              setWalk(null);
-              setMobileTab("plan");
-              setSubmitted({
+              submit({
                 origin: origin.trim(),
                 destination: destination.trim(),
                 originPlace,
@@ -1055,153 +1088,128 @@ export function PlannerPage() {
               });
             }}
             locating={currentPlace.locating}
-            onUseMyPosition={async () => {
-              setWalkError(null);
-              const result = await currentPlace.locate();
-              if (!result.ok) {
-                setWalkError(result.error);
-                return;
-              }
-              const here = result.place;
-              const hereName = displayNameOf(here);
-              setOrigin(hereName);
-              setOriginPlace(here);
-              rememberPlace(here);
-              setWalk(null);
-              setWalkError(null);
-              setActiveIndex(0);
-              if (destination.trim().length <= 1) {
-                // The place is marked, but there is no journey to weigh
-                // yet. The panel returns once a destination is set.
-                return;
-              }
-              // The journey from the rider's own place, asked in one step.
-              // The API plans from the pin and adds the walk to the stop as
-              // the first leg; the panel below still offers another start.
-              setSubmitted({
-                origin: hereName,
-                destination: destination.trim(),
-                originPlace: here,
-                destinationPlace,
-              });
-              walkPlan.mutate({
-                coordinates: {
-                  latitude: here.latitude,
-                  longitude: here.longitude,
-                },
-                destination: destination.trim(),
-              });
-            }}
+            onUseMyPosition={() => void startFromMyPosition()}
             walkError={walkError}
+            quickPlaces={quickPlaces}
+            onPickQuickPlace={pickQuickPlace}
+            onOpenChat={openChat}
+            onBack={() => setStage(plan.data && submitted ? "choices" : "home")}
           />
-        </div>
+        ) : null}
 
-        <div
-          className={cn(
-            "pointer-events-auto relative flex min-h-0 flex-col",
-            "max-lg:fixed max-lg:inset-x-0 max-lg:bottom-[calc(var(--bottom-bar-h)+env(safe-area-inset-bottom))] max-lg:z-30 max-lg:px-2 max-lg:pb-2 max-lg:transition-[height] max-lg:duration-300 max-lg:ease-[cubic-bezier(0.22,1,0.36,1)] motion-reduce:max-lg:transition-none",
-            resultExpanded ? "max-lg:h-[52dvh]" : "max-lg:h-[30dvh]",
-            "lg:static lg:max-h-none lg:flex-1 lg:px-0 lg:pb-0",
-            mobileTab !== "plan" && "max-lg:hidden",
-          )}
-        >
-          {plan.data ? (
-            <button
-              type="button"
-              onClick={() => setResultExpanded((open) => !open)}
-              aria-label={resultExpanded ? "Collapse the journey" : "Expand the journey"}
-              aria-expanded={resultExpanded}
-              className="absolute left-1/2 top-1 z-10 flex h-4 w-12 -translate-x-1/2 cursor-pointer items-center justify-center rounded-full lg:hidden"
-            >
-              <span aria-hidden className="h-1 w-8 rounded-full bg-line-strong" />
-            </button>
-          ) : null}
-          {plan.data || plan.isFetching || plan.isError ? (
-            <RouteResult
-              plan={plan}
-              activeIndex={activeIndex}
-              onActiveIndexChange={setActiveIndex}
-              activeLeg={activeLeg}
-              onLegSelect={setActiveLeg}
-              onStopHover={setHoveredStation}
-              onRetry={() => {
-                setSubmitted((current) => (current ? { ...current } : null));
-              }}
-              watching={watching}
-              onToggleWatch={toggleWatchTrip}
-              pendingDestination={submitted?.destination}
-              hoveredLine={hoveredRouteLine}
-              onHoverLine={setHoveredRouteLine}
-              onClose={() => {
-                setSubmitted(null);
-                setWalk(null);
-                setWalkError(null);
-                setActiveIndex(null);
-                setActiveLeg(null);
-                setResultExpanded(true);
-              }}
-              className="max-lg:h-full"
-            />
-          ) : (
-            <PlanEmptyState
-              notices={activeNotices}
-              networkReady={network.isSuccess}
-              alert={emptyAlert}
-              onExample={runExample}
-              onOpenNotices={openNotices}
-              className="max-lg:hidden"
-            />
-          )}
-        </div>
+        {tab === "map" && stage === "choices" ? (
+          <RouteChoicesView
+            plan={plan}
+            originName={originName}
+            destinationName={destinationName}
+            departureLabel={departureLabel}
+            sortMode={sortMode}
+            onSortModeChange={setSortMode}
+            activeIndex={activeIndex}
+            onOpenRoute={(index) => {
+              setActiveIndex(index);
+              setStage("detail");
+            }}
+            onEdit={() => setStage("search")}
+            onClose={resetJourney}
+            onAsk={openChat}
+            onRetry={() =>
+              setSubmitted((current) => (current ? { ...current } : null))
+            }
+          />
+        ) : null}
+
+        {tab === "map" && stage === "detail" && plan.data && activeRoute ? (
+          <RouteDetailView
+            plan={plan.data}
+            route={activeRoute}
+            activeLeg={activeLeg}
+            onLegSelect={setActiveLeg}
+            onStopHover={setHoveredStation}
+            hoveredLine={hoveredRouteLine}
+            onHoverLine={setHoveredRouteLine}
+            watching={watching}
+            onToggleWatch={toggleWatchTrip}
+            onBack={() => setStage("choices")}
+            onStart={() => {
+              setTripStartedAt(new Date().toISOString());
+              setStage("live");
+            }}
+            onAsk={openChat}
+          />
+        ) : null}
+
+        {tab === "map" && stage === "live" && plan.data && activeRoute ? (
+          <LiveTripView
+            route={activeRoute}
+            lineLabel={lineLabel}
+            originName={plan.data.origin.name}
+            destinationName={plan.data.destination.name}
+            onEnd={() => setStage("detail")}
+            onComplete={() => setStage("arrived")}
+            onAsk={openChat}
+          />
+        ) : null}
+
+        {tab === "map" && stage === "arrived" && plan.data && activeRoute ? (
+          <ArrivedView
+            originName={plan.data.origin.name}
+            destinationName={plan.data.destination.name}
+            origin={submitted?.originPlace ?? null}
+            destination={submitted?.destinationPlace ?? null}
+            route={activeRoute}
+            elapsedMinutes={minutesSince(tripStartedAt, activeRoute.durationMinutes)}
+            departureTime={departureMode === "at" ? departureTime : null}
+            onDone={resetJourney}
+          />
+        ) : null}
       </div>
 
-      {/*
-       * The service board.
-       *
-       * On a wide screen it sits in the bottom right corner. On a phone it
-       * is the sheet behind the Lines and Alerts tabs of the bottom bar.
-       * The account sheet and the assistant take that corner, so the board
-       * slides off instead of vanishing. `hidden` would skip the transition.
-       */}
-      <NetworkDock
-        legs={mapLegs}
-        networkReady={network.isSuccess}
-        networkError={network.isError}
-        hiddenSystems={hiddenSystems}
-        onToggleSystem={toggleSystem}
-        systemCounts={systemCounts}
-        notices={watch.data ?? []}
-        noticesReady={watch.isSuccess}
-        noticesError={watch.isError}
-        activeId={glance?.id ?? null}
-        onShow={showNotice}
-        onRetry={() => void watch.refetch()}
-        open={dockOpen}
-        onToggleOpen={() => setDockOpen((open) => !open)}
-        tab={dockTab}
-        onTabChange={setDockTab}
-        onClose={() => setMobileTab("plan")}
-        hiddenFromKeyboard={
-          view === "chat" ||
-          accountOpen ||
-          (!isDesktop && mobileTab !== "network" && mobileTab !== "alerts")
-        }
-        className={cn(
-          "fixed inset-x-2 bottom-[calc(var(--bottom-bar-h)+env(safe-area-inset-bottom)+8px)] z-40",
-          "lg:inset-x-auto lg:bottom-4 lg:right-4 lg:z-30 lg:w-[380px]",
-          view === "chat" || accountOpen
-            ? "pointer-events-none translate-y-[calc(100%+16px)] opacity-0"
-            : "pointer-events-auto",
-          (mobileTab === "plan" || mobileTab === "assistant") &&
-            "max-lg:pointer-events-none max-lg:translate-y-[calc(100%+16px)] max-lg:opacity-0",
-        )}
+      <M3NavigationRail
+        active={tab}
+        items={navItems}
+        onChange={changeTab}
+        ariaLabel="Navigasi utama"
+        className="fixed inset-y-0 left-0 z-50"
       />
 
-      {view === "chat" ? (
+      {!hideNav ? (
+        <M3NavigationBar
+          active={tab}
+          items={navItems}
+          onChange={changeTab}
+          ariaLabel="Navigasi utama"
+          className="fixed inset-x-0 bottom-0 z-50 lg:hidden"
+        />
+      ) : null}
+
+      {tab === "lines" ? (
+        <NetworkDock
+          legs={mapLegs}
+          networkReady={network.isSuccess}
+          networkError={network.isError}
+          hiddenSystems={hiddenSystems}
+          onToggleSystem={toggleSystem}
+          systemCounts={systemCounts}
+          notices={watch.data ?? []}
+          noticesReady={watch.isSuccess}
+          noticesError={watch.isError}
+          activeId={glance?.id ?? null}
+          onShow={showNotice}
+          onRetry={() => void watch.refetch()}
+          open={dockOpen}
+          onToggleOpen={() => setDockOpen((open) => !open)}
+          tab={dockTab}
+          onTabChange={setDockTab}
+          onClose={() => setTab("map")}
+          className="fixed inset-x-2 bottom-[calc(80px+env(safe-area-inset-bottom)+8px)] z-40 lg:inset-x-auto lg:bottom-4 lg:right-4 lg:z-40 lg:w-[380px]"
+        />
+      ) : null}
+
+      {tab === "chat" ? (
         <div
           className={cn(
-            "pointer-events-none fixed inset-x-2 bottom-[calc(var(--bottom-bar-h)+env(safe-area-inset-bottom)+8px)] top-[calc(var(--bar-h)+8px)] z-40 flex flex-col",
-            "lg:inset-auto lg:right-4 lg:top-16 lg:w-[400px]",
+            "pointer-events-none fixed inset-x-2 bottom-[calc(80px+env(safe-area-inset-bottom)+8px)] top-[calc(env(safe-area-inset-top)+8px)] z-40 flex flex-col lg:inset-auto lg:right-4 lg:top-4 lg:bottom-4 lg:w-[400px]",
             chatClosing ? "chat-sheet-out" : "chat-sheet-in",
           )}
         >
@@ -1215,14 +1223,14 @@ export function PlannerPage() {
             }
             destination={destination.trim() || undefined}
             at={planAt}
-            places={memorySuggestions}
+            places={modeSuggestions}
             currentPlace={currentPlace.place}
           />
         </div>
       ) : null}
 
-      {accountOpen ? (
-        <div className="pointer-events-none fixed inset-x-2 bottom-[calc(var(--bottom-bar-h)+env(safe-area-inset-bottom)+8px)] z-40 flex flex-col justify-end lg:inset-auto lg:bottom-auto lg:right-4 lg:top-16 lg:w-[400px] chat-sheet-in">
+      {tab === "me" ? (
+        <div className="pointer-events-none fixed inset-x-2 bottom-[calc(80px+env(safe-area-inset-bottom)+8px)] top-[calc(env(safe-area-inset-top)+8px)] z-40 flex flex-col justify-end lg:inset-auto lg:bottom-4 lg:right-4 lg:top-4 lg:w-[400px] chat-sheet-in">
           <AccountPanel
             key={account.user?.id ?? "signed-out"}
             user={account.user}
@@ -1239,124 +1247,14 @@ export function PlannerPage() {
             onSavePlace={saveNamedPlace}
             onRemovePlace={removeNamedPlace}
             onUseCurrentLocation={currentPlace.locate}
-            onClose={() => setAccountOpen(false)}
+            onClose={closeAccount}
           />
         </div>
       ) : null}
-
-      <MobileTabBar
-        active={view === "chat" ? "assistant" : mobileTab}
-        noticeCount={activeNotices}
-        onChange={changeMobileTab}
-      />
     </div>
   );
 }
 
-/**
- * The first screen of the planner.
- *
- * A rider who has not chosen a route sees what the board is for, a way to
- * begin, and the state of the network. It is not a dashed empty box.
- */
-function PlanEmptyState({
-  notices,
-  networkReady,
-  alert,
-  onExample,
-  onOpenNotices,
-  className,
-}: {
-  notices: number;
-  networkReady: boolean;
-  /** A usual-journey notice that touches a stored plan, when one exists. */
-  alert?:
-    | {
-        sentence: string;
-        count: number;
-        noticeTitle: string;
-        onShow: () => void;
-      }
-    | undefined;
-  onExample: (from: string, to: string) => void;
-  onOpenNotices: () => void;
-  className?: string;
-}) {
-  return (
-    <section className={cn("panel rounded-[4px] p-4", className)}>
-      {alert ? (
-        <div className="mb-4 border-l-2 border-warn bg-warn-soft px-3 py-2">
-          <p className="text-[13px] leading-[1.5] text-ink">{alert.sentence}</p>
-          <p className="mt-1 text-[12px] leading-[1.5] text-ink-2">{alert.noticeTitle}</p>
-          <p className="mt-1 text-[12px] leading-[1.5] text-ink-3">
-            Based on {alert.count} planned journeys. Not a live departure.
-          </p>
-          <Button variant="secondary" size="sm" className="mt-2" onClick={alert.onShow}>
-            Show this journey
-          </Button>
-        </div>
-      ) : null}
-      <h2 className="headsign__name text-[28px] text-ink">Where to?</h2>
-      <div className="mt-3 flex items-start gap-3">
-        <div aria-hidden className="mt-1 flex flex-col items-center">
-          <span className="size-2.5 rounded-full border-2 border-ink bg-surface" />
-          <span className="my-1 h-6 w-px bg-ink/60" />
-          <span className="size-2.5 rounded-full bg-ink" />
-        </div>
-        <p className="min-w-0 max-w-[34ch] text-[13px] leading-[1.5] text-ink-2">
-          Choose a start and a destination. The board shows the fare, the
-          changes, and any closure on the way.
-        </p>
-      </div>
-
-      <div className="mt-4">
-        <p className="eyebrow">Try a journey</p>
-        <div className="mt-2 grid gap-1">
-          <button
-            type="button"
-            onClick={() => onExample("Bundaran HI", "Kota")}
-            className="press flex min-h-11 w-full cursor-pointer items-center gap-2 rounded-[4px] px-2 py-2 text-left transition-colors hover:bg-surface-2"
-          >
-            <span className="size-2 rounded-full border-2 border-ink bg-surface" />
-            <span className="min-w-0 flex-1 truncate text-[13px] font-medium text-ink">
-              Bundaran HI
-              <span className="mx-2 text-ink-3">→</span>
-              Kota
-            </span>
-            <ArrowRight aria-hidden className="size-3.5 text-ink-3" />
-          </button>
-          <button
-            type="button"
-            onClick={() => onExample("Lebak Bulus", "Dukuh Atas")}
-            className="press flex min-h-11 w-full cursor-pointer items-center gap-2 rounded-[4px] px-2 py-2 text-left transition-colors hover:bg-surface-2"
-          >
-            <span className="size-2 rounded-full bg-ink" />
-            <span className="min-w-0 flex-1 truncate text-[13px] font-medium text-ink">
-              Lebak Bulus
-              <span className="mx-2 text-ink-3">→</span>
-              Dukuh Atas
-            </span>
-            <ArrowRight aria-hidden className="size-3.5 text-ink-3" />
-          </button>
-        </div>
-      </div>
-
-      <div className="mt-3 flex items-center justify-between gap-2">
-        <p className="text-[12px] leading-[1.35] text-ink-3">
-          {networkReady ? `${notices} ${notices === 1 ? "notice" : "notices"} open` : "Loading the network"}
-        </p>
-        <button
-          type="button"
-          onClick={onOpenNotices}
-          className="inline-flex min-h-11 cursor-pointer items-center gap-1 text-[13px] font-medium text-ink underline decoration-line-strong underline-offset-4 hover:decoration-ink"
-        >
-          Open board
-          <ArrowRight aria-hidden className="size-3.5" />
-        </button>
-      </div>
-    </section>
-  );
-}
 /** The flat `[longitude, latitude, …]` of a network stroke, as points. */
 function strokeCoordinates(flat: readonly number[]): { latitude: number; longitude: number }[] {
   const points: { latitude: number; longitude: number }[] = [];
