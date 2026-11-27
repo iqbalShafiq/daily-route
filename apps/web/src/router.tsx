@@ -2,13 +2,15 @@ import { createRootRoute, createRoute, createRouter } from "@tanstack/react-rout
 
 import { RootLayout } from "./routes/__root.js";
 import { PlannerPage } from "./routes/index.js";
+import { OnboardingPage } from "./features/onboarding/onboarding-page.js";
 
 /**
  * The router.
  *
  * The routes are declared in code rather than generated from files: the app
- * has one page today, and a hand-written tree keeps the build free of a
- * generator step.
+ * has two pages today, and a hand-written tree keeps the build free of a
+ * generator step. `/onboarding` is a destination of its own, never a
+ * redirect from the map: a rider who only wants a journey opens `/`.
  */
 const rootRoute = createRootRoute({
   component: RootLayout,
@@ -20,7 +22,13 @@ const plannerRoute = createRoute({
   component: PlannerPage,
 });
 
-const routeTree = rootRoute.addChildren([plannerRoute]);
+const onboardingRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: "/onboarding",
+  component: OnboardingPage,
+});
+
+const routeTree = rootRoute.addChildren([plannerRoute, onboardingRoute]);
 
 export const router = createRouter({ routeTree });
 
