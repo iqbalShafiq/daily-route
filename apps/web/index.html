@@ -11,23 +11,43 @@
       content="Plan a journey on Transjakarta, MRT Jakarta, LRT Jakarta, LRT Jabodebek, and KRL Jabodetabek, and see which lines are closed."
     />
     <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
-    <meta name="theme-color" content="#17140F" />
+    <meta name="theme-color" content="#F4FBFA" />
     <title>Daily Route: Jabodetabek transit</title>
     <script>
-      // The theme is resolved before the first paint so the page never
-      // flashes the wrong colours.
+      // The theme, the seed and the browser chrome are resolved before the
+      // first paint, so the page never flashes the wrong colours. The map of
+      // seed -> surface is the same table as SEED_PRESETS in src/lib/theme.tsx.
       (function () {
         try {
-          var stored = localStorage.getItem("daily-route-theme");
+          var mode = localStorage.getItem("daily-route-theme-mode");
+          if (mode !== "system" && mode !== "light" && mode !== "dark") {
+            var legacy = localStorage.getItem("daily-route-theme");
+            mode = legacy === "light" || legacy === "dark" ? legacy : "system";
+          }
+          var seed = localStorage.getItem("daily-route-seed");
+          var colors = {
+            teal: { light: "#F4FBFA", dark: "#0E1515" },
+            wall: { light: "#FBF8FF", dark: "#0F111B" },
+            coral: { light: "#FFF8F5", dark: "#171210" },
+            blue: { light: "#F9F9FF", dark: "#0E1218" },
+            plum: { light: "#FEF7FD", dark: "#151016" },
+            olive: { light: "#FAFAF2", dark: "#12140E" },
+          };
+          if (!colors[seed]) seed = "teal";
           var theme =
-            stored === "light" || stored === "dark"
-              ? stored
-              : window.matchMedia("(prefers-color-scheme: dark)").matches
+            mode === "system"
+              ? window.matchMedia("(prefers-color-scheme: dark)").matches
                 ? "dark"
-                : "light";
-          document.documentElement.dataset.theme = theme;
+                : "light"
+              : mode;
+          var root = document.documentElement;
+          root.dataset.theme = theme;
+          root.dataset.seed = seed;
+          var meta = document.querySelector('meta[name="theme-color"]');
+          if (meta) meta.setAttribute("content", colors[seed][theme]);
         } catch (error) {
           document.documentElement.dataset.theme = "light";
+          document.documentElement.dataset.seed = "teal";
         }
       })();
     </script>

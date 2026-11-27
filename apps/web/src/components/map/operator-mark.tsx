@@ -28,11 +28,16 @@ import { ServiceMark } from "../transit/service-mark.js";
  */
 
 export const NETWORK_SYSTEMS = [
-  { id: "transjakarta", label: "Transjakarta", logo: transjakarta, color: "var(--mode-bus)" },
-  { id: "mrt-jakarta", label: "MRT Jakarta", logo: mrtJakarta, color: "var(--mode-metro)" },
-  { id: "lrt-jakarta", label: "LRT Jakarta", logo: lrtJakarta, color: "var(--mode-tram)" },
-  { id: "lrt-jabodebek", label: "LRT Jabodebek", logo: lrtJabodebek, color: "var(--mode-lrt-jabodebek)" },
-  { id: "krl-jabodetabek", label: "KRL", logo: krl, color: "var(--mode-rail)" },
+  { id: "transjakarta", label: "Transjakarta", logo: transjakarta, color: "var(--brt)" },
+  { id: "mrt-jakarta", label: "MRT Jakarta", logo: mrtJakarta, color: "var(--mrt)" },
+  { id: "lrt-jakarta", label: "LRT Jakarta", logo: lrtJakarta, color: "var(--lrtk)" },
+  {
+    id: "lrt-jabodebek",
+    label: "LRT Jabodebek",
+    logo: lrtJabodebek,
+    color: "var(--lrtj)",
+  },
+  { id: "krl-jabodetabek", label: "KRL", logo: krl, color: "var(--krl)" },
 ] as const;
 
 const MARK_OF = new Map(NETWORK_SYSTEMS.map((entry) => [entry.id, entry.logo]));
@@ -109,12 +114,6 @@ export function operatorImageId(systemId: string): string {
 }
 
 /** The operator's logo, for the legend. */
-export function OperatorBadge({
-  logo,
-  className,
-}: {
-  logo: string;
-  className?: string;
-}) {
+export function OperatorBadge({ logo, className }: { logo: string; className?: string }) {
   return <img src={logo} alt="" className={className} />;
 }
