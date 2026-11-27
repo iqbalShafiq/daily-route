@@ -4747,6 +4747,487 @@
 }
 
 /* ---------------------------------------------------------------------------
+   The Jalur, Tanya and disruption surfaces.
+
+   A top-level tab is a sheet above the navigation bar on a phone and a
+   420 px panel beside the rail on a wide screen. A detail screen owns the
+   window and hides the bar; the rail stays, so the four places do not move.
+--------------------------------------------------------------------------- */
+@layer components {
+  .m3-tab-panel {
+    position: fixed;
+    inset-inline: 0;
+    top: 0;
+    bottom: calc(80px + env(safe-area-inset-bottom));
+    z-index: 40;
+    display: flex;
+    min-height: 0;
+    flex-direction: column;
+    overflow: hidden;
+    border-radius: 28px 28px 0 0;
+    background: var(--sl1);
+    box-shadow: 0 -1px 3px rgb(0 0 0 / 0.08);
+    padding-top: env(safe-area-inset-top);
+  }
+
+  @media (min-width: 1024px) {
+    .m3-tab-panel {
+      left: 80px;
+      right: auto;
+      top: 16px;
+      bottom: 16px;
+      width: 420px;
+      max-height: calc(100dvh - 32px);
+      border-radius: var(--r-xl);
+      box-shadow: var(--shadow-pop);
+    }
+  }
+
+  .m3-detail-panel {
+    position: fixed;
+    inset-block: 0;
+    left: 0;
+    right: 0;
+    z-index: 40;
+    display: flex;
+    min-height: 0;
+    flex-direction: column;
+    overflow: hidden;
+    background: var(--srf);
+  }
+
+  @media (min-width: 1024px) {
+    .m3-detail-panel {
+      left: 80px;
+    }
+  }
+
+  .m3-detail-scroll {
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+  }
+
+  .m3-detail-inner {
+    display: grid;
+    gap: 16px;
+    width: 100%;
+    max-width: 720px;
+    margin-inline: auto;
+    padding: 16px 16px calc(24px + env(safe-area-inset-bottom));
+  }
+
+  /*
+   * A grid track defaults to min-content. A long line name or source quote
+   * would then widen the whole screen instead of ellipsizing in its row.
+   * Every surface in this flow lets its children shrink below that width.
+   */
+  .m3-tab-panel .grid,
+  .m3-tab-panel .grid > *,
+  .m3-detail-inner,
+  .m3-detail-inner .grid,
+  .m3-detail-inner .grid > *,
+  .m3-detail-inner > *,
+  .m3-chat-thread > * {
+    min-width: 0;
+  }
+
+  .m3-list {
+    min-width: 0;
+  }
+
+  .m3-list__item {
+    min-width: 0;
+  }
+
+  /* The three-cell status summary: a pill on each outer edge. */
+  .m3-status-summary {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 2px;
+  }
+
+  .m3-status-cell {
+    display: grid;
+    align-content: start;
+    gap: 2px;
+    padding: 16px 12px;
+    color: var(--on);
+  }
+
+  .m3-status-cell:first-child {
+    border-radius: 28px 6px 6px 28px;
+  }
+
+  .m3-status-cell:last-child {
+    border-radius: 6px 28px 28px 6px;
+  }
+
+  .m3-status-cell--ok {
+    background: var(--okc);
+    color: var(--onokc);
+  }
+
+  .m3-status-cell--warn {
+    background: var(--warnc);
+    color: var(--onwarnc);
+  }
+
+  .m3-status-cell--error {
+    background: var(--ec);
+    color: var(--onec);
+  }
+
+  .m3-status-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 2px 8px;
+    border-radius: var(--r-full);
+    font-family: var(--font);
+    font-size: 12px;
+    line-height: 16px;
+    font-weight: 560;
+    white-space: nowrap;
+  }
+
+  .m3-status-pill--lancar {
+    background: var(--okc);
+    color: var(--onokc);
+  }
+
+  .m3-status-pill--tersendat {
+    background: var(--warnc);
+    color: var(--onwarnc);
+  }
+
+  .m3-status-pill--terganggu {
+    background: var(--ec);
+    color: var(--onec);
+  }
+
+  /* The curved hero of a line, tinted with the mode token. */
+  .m3-line-hero {
+    position: relative;
+    overflow: hidden;
+    padding: calc(12px + env(safe-area-inset-top)) 16px 24px;
+    border-radius: 0 0 40px 40px;
+    background: var(--sl2);
+    color: var(--on);
+  }
+
+  .m3-line-hero__shape {
+    position: absolute;
+    right: -48px;
+    top: -48px;
+    opacity: 0.16;
+  }
+
+  .m3-search-field {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    min-height: 48px;
+    padding: 0 12px;
+    border-radius: var(--r-xl);
+    background: var(--sl0);
+    color: var(--on);
+  }
+
+  .m3-search-field input {
+    min-width: 0;
+    flex: 1;
+    background: transparent;
+    border: 0;
+    outline: none;
+    font-family: var(--font);
+    font-size: 15px;
+    line-height: 1.45;
+    color: var(--on);
+  }
+
+  .m3-search-field input::placeholder {
+    color: var(--onv);
+  }
+
+  .m3-inbox-button {
+    position: relative;
+    display: inline-flex;
+  }
+
+  .m3-inbox-button__badge {
+    position: absolute;
+    top: -3px;
+    right: -3px;
+    display: grid;
+    place-items: center;
+    min-width: 18px;
+    height: 18px;
+    padding: 0 4px;
+    border-radius: var(--r-full);
+    background: var(--e);
+    color: var(--one);
+    font-family: var(--font);
+    font-size: 12px;
+    line-height: 1;
+    font-weight: 560;
+    font-variant-numeric: tabular-nums;
+    pointer-events: none;
+  }
+
+  /* A stop diagram: one rail, a dot per stop, an interchange tag. */
+  .m3-stop-rail {
+    position: relative;
+    display: grid;
+    gap: 0;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .m3-stop-rail__item {
+    position: relative;
+    display: grid;
+    grid-template-columns: 24px minmax(0, 1fr) 20px;
+    align-items: start;
+    gap: 12px;
+    min-height: 56px;
+    width: 100%;
+    border: 0;
+    background: transparent;
+    padding: 0;
+    text-align: left;
+    color: var(--on);
+    cursor: pointer;
+  }
+
+  .m3-stop-rail__item:last-child .m3-stop-rail__line {
+    display: none;
+  }
+
+  .m3-stop-rail__rail {
+    position: relative;
+    display: grid;
+    justify-items: center;
+    align-self: stretch;
+  }
+
+  .m3-stop-rail__line {
+    position: absolute;
+    top: 24px;
+    bottom: -8px;
+    width: 8px;
+    border-radius: var(--r-full);
+    background: var(--rail-color, var(--line-strong));
+    opacity: 0.9;
+  }
+
+  .m3-stop-rail__dot {
+    position: relative;
+    z-index: 1;
+    margin-top: 8px;
+    display: grid;
+    place-items: center;
+    width: 16px;
+    height: 16px;
+    border-radius: var(--r-full);
+    background: var(--sl0);
+    box-shadow: inset 0 0 0 3px var(--rail-color, var(--p));
+  }
+
+  .m3-stop-rail__dot--interchange {
+    width: 20px;
+    height: 20px;
+    margin-top: 6px;
+    box-shadow:
+      0 0 0 2px var(--sl0),
+      inset 0 0 0 3px var(--rail-color, var(--p));
+    background: var(--sl2);
+  }
+
+  .m3-stop-rail__dot--incident {
+    width: 20px;
+    height: 20px;
+    margin-top: 6px;
+    border-radius: 0;
+    background: var(--e);
+    clip-path: var(--shp-softburst);
+    box-shadow: none;
+  }
+
+  .m3-stop-rail__body {
+    display: grid;
+    gap: 2px;
+    padding: 8px 0 12px;
+    min-width: 0;
+  }
+
+  .m3-stop-rail__item:focus-visible {
+    outline: 2px solid var(--p);
+    outline-offset: 2px;
+    border-radius: var(--r-sm);
+  }
+
+  /* The side-by-side comparison of the affected and the suggested route. */
+  .m3-compare {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 2px;
+  }
+
+  .m3-compare__cell {
+    display: grid;
+    align-content: start;
+    gap: 4px;
+    padding: 16px 12px;
+  }
+
+  .m3-compare__cell:first-child {
+    border-radius: 28px 6px 6px 28px;
+    background: var(--ec);
+    color: var(--onec);
+  }
+
+  .m3-compare__cell:last-child {
+    border-radius: 6px 28px 28px 6px;
+    background: var(--pc);
+    color: var(--onpc);
+  }
+
+  .m3-reason {
+    display: grid;
+    grid-template-columns: 32px minmax(0, 1fr);
+    gap: 12px;
+    align-items: start;
+  }
+
+  .m3-reason__badge {
+    display: grid;
+    place-items: center;
+    width: 32px;
+    height: 32px;
+    background: var(--sc);
+    color: var(--onsc);
+    font-family: var(--font);
+    font-size: 13px;
+    font-weight: 560;
+    font-variant-numeric: tabular-nums;
+  }
+
+  /* The chat. A user bubble is a right tail; an assistant bubble is a left one. */
+  .m3-chat-thread {
+    display: flex;
+    min-height: 0;
+    flex: 1 1 auto;
+    flex-direction: column;
+    gap: 12px;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    padding: 12px 16px 16px;
+  }
+
+  .m3-chat-bubble--user {
+    align-self: flex-end;
+    max-width: 88%;
+    border-radius: 24px 24px 6px 24px;
+    background: var(--p);
+    color: var(--onp);
+    padding: 12px 16px;
+  }
+
+  .m3-chat-bubble--assistant {
+    align-self: flex-start;
+    max-width: 96%;
+    border-radius: 6px 24px 24px 24px;
+    background: var(--sl0);
+    color: var(--on);
+    padding: 12px 16px;
+  }
+
+  .m3-chat-composer {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    min-height: 56px;
+    padding: 0 8px 0 16px;
+    border-radius: var(--r-full);
+    background: var(--sl3);
+  }
+
+  .m3-chat-composer input {
+    min-width: 0;
+    flex: 1;
+    border: 0;
+    background: transparent;
+    outline: none;
+    font-family: var(--font);
+    font-size: 15px;
+    line-height: 1.45;
+    color: var(--on);
+  }
+
+  .m3-chat-composer input::placeholder {
+    color: var(--onv);
+  }
+
+  .m3-inbox-row {
+    display: grid;
+    grid-template-columns: 40px minmax(0, 1fr) auto;
+    gap: 12px;
+    align-items: start;
+    width: 100%;
+    border: 0;
+    background: transparent;
+    padding: 12px;
+    text-align: left;
+    color: var(--on);
+    cursor: pointer;
+  }
+
+  .m3-inbox-row__unread {
+    width: 8px;
+    height: 8px;
+    margin-top: 6px;
+    border-radius: var(--r-full);
+    background: var(--p);
+  }
+
+  /* A long station name in the schedule action runs short instead of
+     pushing the button past the window edge. */
+  .m3-fab-schedule {
+    max-width: calc(100% - 32px);
+  }
+
+  .m3-fab-schedule > span:last-child {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .m3-notice-hero {
+    padding-top: calc(16px + env(safe-area-inset-top));
+  }
+
+  .m3-detail-inner--fab {
+    padding-bottom: calc(96px + env(safe-area-inset-bottom));
+  }
+
+  /*
+   * A rail line has two long headsigns. The connected group keeps its
+   * 40 px minimum but may grow a second line instead of clipping the word.
+   */
+  .line-direction-group .m3-connected__option {
+    height: auto;
+    min-height: 40px;
+    padding-block: 8px;
+    white-space: normal;
+    text-align: center;
+  }
+}
+
+/* ---------------------------------------------------------------------------
    The existing surface language: panels, the headsign, the ticket and the
    small movements that predate M3E.
 --------------------------------------------------------------------------- */

@@ -10,7 +10,6 @@ import {
 } from "../components/map/route-map.js";
 import { legIdOf } from "../components/transit/leg-list.js";
 import { NETWORK_SYSTEMS } from "../components/map/operator-mark.js";
-import { NetworkDock, type NetworkDockTab } from "../components/layout/network-dock.js";
 import {
   M3NavigationBar,
   M3NavigationRail,
@@ -31,7 +30,6 @@ import { useCurrentPlace } from "../features/route-planner/use-current-place.js"
 import type { MemorySuggestion } from "../features/route-planner/place-input.js";
 import { usePlan, type PlanRequest } from "../features/route-planner/use-plan.js";
 import { api } from "../lib/api.js";
-import { cn } from "../lib/cn.js";
 import { MODE_WIDTH, formatDistance, formatDuration } from "../lib/format.js";
 import { incidentImageId, incidentMarkOf } from "../lib/incident-mark.js";
 import { firstOpenIndex, planChoices } from "../lib/route-choice.js";
@@ -52,6 +50,19 @@ import { RouteDetailView } from "../features/route-planner/route-detail-view.js"
 import { LiveTripView } from "../features/route-planner/live-trip-view.js";
 import { ArrivedView } from "../features/route-planner/arrived-view.js";
 import type { RouteSortMode } from "../features/route-planner/route-sort.js";
+import { readRoutines } from "../features/route-planner/live-trip.js";
+import { AlternativeRouteView } from "../features/monitor/alternative-route-view.js";
+import { DisruptionDetailView } from "../features/monitor/disruption-detail-view.js";
+import { InboxView } from "../features/monitor/inbox-view.js";
+import {
+  buildInboxItems,
+  readInboxReadIds,
+  unreadInboxCount,
+} from "../features/monitor/inbox-items.js";
+import { useFollowedLines } from "../features/transit/followed-lines.js";
+import { LineDetailView } from "../features/transit/line-detail-view.js";
+import { LineStatusView } from "../features/transit/line-status-view.js";
+import { StationDetailView } from "../features/transit/station-detail-view.js";
 
 type Submission = {
   origin: string;
@@ -63,6 +74,13 @@ type Submission = {
 type AppTab = "map" | "lines" | "chat" | "me";
 
 type MapStage = "home" | "search" | "choices" | "detail" | "live" | "arrived";
+
+/** One screen stacked over the current tab. The last entry owns the window. */
+type DetailRoute =
+  | { kind: "line"; lineId: string }
+  | { kind: "station"; stationId: string }
+  | { kind: "notice"; noticeId: string }
+  | { kind: "alternatives"; noticeId: string };
 
 type FeaturedPair = {
   originName: string;
@@ -123,23 +141,22 @@ function greetingOf(date: Date): string {
 function initialTab(): AppTab {
   if (typeof window === "undefined") return "map";
   const tab = new URLSearchParams(window.location.search).get("tab");
-  if (tab === "lines" || tab === "alerts") return "lines";
+  if (tab === "lines") return "lines";
+  if (tab === "alerts") return "chat";
   if (tab === "chat") return "chat";
   if (tab === "me") return "me";
   return "map";
+}
+
+function initialInbox(): boolean {
+  if (typeof window === "undefined") return false;
+  return new URLSearchParams(window.location.search).get("tab") === "alerts";
 }
 
 function initialStage(): MapStage {
   if (typeof window === "undefined") return "home";
   const action = new URLSearchParams(window.location.search).get("action");
   return action === "search" ? "search" : "home";
-}
-
-function initialDockTab(): NetworkDockTab {
-  if (typeof window === "undefined") return "lines";
-  return new URLSearchParams(window.location.search).get("tab") === "alerts"
-    ? "notices"
-    : "lines";
 }
 
 function minutesSince(iso: string | null, fallback: number): number {
@@ -175,20 +192,19 @@ export function PlannerPage() {
   );
   const [stage, setStage] = useState<MapStage>(initialStage);
   const [tab, setTab] = useState<AppTab>(initialTab);
-  const [dockTab, setDockTab] = useState<NetworkDockTab>(initialDockTab);
-  const [dockOpen, setDockOpen] = useState(true);
+  const [details, setDetails] = useState<DetailRoute[]>([]);
+  const [inboxOpen, setInboxOpen] = useState(initialInbox);
+  const [inboxReadIds, setInboxReadIds] = useState<string[]>(() => readInboxReadIds());
+  const [chatPrompt, setChatPrompt] = useState<string | null>(null);
+  const [pendingDetail, setPendingDetail] = useState<{
+    origin: string;
+    destination: string;
+    lineCodes: string[];
+  } | null>(null);
   const [homeModeFilter, setHomeModeFilter] = useState<HomeModeFilter>("all");
   const [sortMode, setSortMode] = useState<RouteSortMode>("fastest");
   const [tripStartedAt, setTripStartedAt] = useState<string | null>(null);
-  const [chatClosing, setChatClosing] = useState(false);
   const [greeting] = useState(() => greetingOf(new Date()));
-  const chatTimer = useRef<number | null>(null);
-
-  useEffect(() => {
-    return () => {
-      if (chatTimer.current !== null) window.clearTimeout(chatTimer.current);
-    };
-  }, []);
 
   const account = useAccount();
   const queryClient = useQueryClient();
@@ -260,21 +276,46 @@ export function PlannerPage() {
     retry: false,
   });
 
+  const lineList = useQuery({
+    queryKey: ["line-list"],
+    queryFn: () => api.lines(),
+    staleTime: 10 * 60_000,
+    retry: false,
+  });
+
+  const topDetail = details[details.length - 1] ?? null;
+  const activeLineId = topDetail?.kind === "line" ? topDetail.lineId : null;
+  const lineDetail = useQuery({
+    queryKey: ["line-detail", activeLineId ?? "none"],
+    queryFn: ({ signal }) => {
+      if (!activeLineId) throw new Error("No line");
+      return api.line(activeLineId, signal);
+    },
+    enabled: activeLineId !== null,
+    retry: false,
+  });
+
+  const followedLines = useFollowedLines();
+  const routines = readRoutines();
+  const inboxItems = useMemo(
+    () =>
+      buildInboxItems({
+        notices: watch.data ?? [],
+        personalAlerts: personalAlerts.data?.alerts ?? [],
+        routines,
+        readIds: inboxReadIds,
+      }),
+    [watch.data, personalAlerts.data, routines, inboxReadIds],
+  );
+  const unreadCount = unreadInboxCount(inboxItems);
+  const noticeById = (id: string): DisruptionSummary | null =>
+    (watch.data ?? []).find((notice) => notice.id === id) ?? null;
+
   const [hiddenSystems, setHiddenSystems] = useState<ReadonlySet<string>>(() => new Set());
   const visibleSystems = useMemo(
     () => NETWORK_SYSTEMS.map((entry) => entry.id).filter((id) => !hiddenSystems.has(id)),
     [hiddenSystems],
   );
-  const systemCounts = useMemo(() => {
-    const counts: Record<string, number> = {};
-    const seen = new Set<string>();
-    for (const line of network.data?.lines ?? []) {
-      if (seen.has(line.id)) continue;
-      seen.add(line.id);
-      counts[line.systemId] = (counts[line.systemId] ?? 0) + 1;
-    }
-    return counts;
-  }, [network.data]);
   const toggleSystem = (id: string): void => {
     setHiddenSystems((current) => {
       const next = new Set(current);
@@ -302,6 +343,27 @@ export function PlannerPage() {
   const planAt = departureMode === "at" ? departureAt(departureTime) : undefined;
   const plan = usePlan(submitted ? requestOf(submitted, planAt) : null);
   const planKey = plan.data?.computedAt ?? "";
+
+  // A suggested route is the planner's own itinerary. Matching it by its
+  // line codes lets the map open that choice without a second plan shape.
+  const pendingIndex = useMemo(() => {
+    if (!pendingDetail || !plan.data) return -1;
+    if (
+      plan.data.origin.text !== pendingDetail.origin ||
+      plan.data.destination.text !== pendingDetail.destination
+    ) {
+      return -1;
+    }
+    return planChoices(plan.data).findIndex((route) => {
+      const codes = route.legs
+        .filter((leg) => leg.kind === "ride")
+        .map((leg) => leg.lineCode)
+        .filter((code): code is string => code !== null);
+      return pendingDetail.lineCodes.every((code) => codes.includes(code));
+    });
+  }, [pendingDetail, plan.data]);
+
+  const mapStage: MapStage = pendingIndex >= 0 ? "detail" : stage;
 
   const showNotice = (notice: DisruptionSummary): void => {
     noticeToken.current += 1;
@@ -354,11 +416,13 @@ export function PlannerPage() {
   const [hoveredRouteLine, setHoveredRouteLine] = useState<string | null>(null);
   const [hoveredStation, setHoveredStation] = useState<string | null>(null);
   const activeIndex =
-    selection && selection.key === planKey
-      ? selection.index
-      : plan.data
-        ? firstOpenIndex(planChoices(plan.data), plan.data.disruptions)
-        : null;
+    pendingIndex >= 0
+      ? pendingIndex
+      : selection && selection.key === planKey
+        ? selection.index
+        : plan.data
+          ? firstOpenIndex(planChoices(plan.data), plan.data.disruptions)
+          : null;
   const activeLeg = legState.key === planKey ? legState.leg : null;
   const choices = plan.data ? planChoices(plan.data) : [];
   const activeRoute = activeIndex === null ? undefined : choices[activeIndex];
@@ -511,32 +575,54 @@ export function PlannerPage() {
     (watch.data ?? []).find((notice) => notice.activeNow)?.title ??
     null;
 
+  const pushDetail = (route: DetailRoute): void => {
+    setDetails((current) => [...current, route]);
+  };
+  const popDetail = (): void => {
+    setDetails((current) => current.slice(0, -1));
+  };
   const openChat = (): void => {
-    if (chatTimer.current !== null) window.clearTimeout(chatTimer.current);
-    setChatClosing(false);
+    setDetails([]);
+    setPendingDetail(null);
+    setInboxOpen(false);
+    setTab("chat");
+  };
+  const openChatWith = (prompt: string): void => {
+    setChatPrompt(prompt);
+    setDetails([]);
+    setPendingDetail(null);
+    setInboxOpen(false);
+    setTab("chat");
+  };
+  const openInbox = (): void => {
+    setDetails([]);
+    setInboxOpen(true);
     setTab("chat");
   };
   const closeChat = (): void => {
-    if (tab !== "chat" || chatClosing) return;
-    setChatClosing(true);
-    chatTimer.current = window.setTimeout(() => {
-      setTab("map");
-      setChatClosing(false);
-      chatTimer.current = null;
-    }, 180);
+    setInboxOpen(false);
+    setTab("map");
   };
   const closeAccount = (): void => setTab("map");
   const openNotices = (): void => {
-    setTab("lines");
-    setDockTab("notices");
-    setDockOpen(true);
+    const first =
+      (watch.data ?? []).find((notice) => notice.activeNow) ??
+      (personalAlerts.data?.alerts[0]?.notices[0]
+        ? noticeById(personalAlerts.data.alerts[0].notices[0].id)
+        : null);
+    if (first) {
+      pushDetail({ kind: "notice", noticeId: first.id });
+      return;
+    }
+    openInbox();
   };
 
   const changeTab = (id: string): void => {
+    setDetails([]);
+    setPendingDetail(null);
+    if (id !== "chat") setInboxOpen(false);
     if (id === "lines") {
       setTab("lines");
-      setDockTab("lines");
-      setDockOpen(true);
       return;
     }
     if (id === "chat") {
@@ -563,8 +649,12 @@ export function PlannerPage() {
   ];
 
   const hideNav =
-    tab === "map" &&
-    (stage === "search" || stage === "detail" || stage === "live" || stage === "arrived");
+    details.length > 0 ||
+    (tab === "map" &&
+      (mapStage === "search" ||
+        mapStage === "detail" ||
+        mapStage === "live" ||
+        mapStage === "arrived"));
 
   const signOutAccount = async (): Promise<void> => {
     await account.signOut();
@@ -593,11 +683,14 @@ export function PlannerPage() {
     setSelection(null);
     setLegState({ key: "", leg: null });
     setTripStartedAt(null);
+    setPendingDetail(null);
+    setDetails([]);
     setStage("home");
     setTab("map");
   };
 
   const submit = (submission: Submission): void => {
+    setPendingDetail(null);
     setOrigin(submission.origin);
     setDestination(submission.destination);
     setOriginPlace(submission.originPlace);
@@ -607,6 +700,7 @@ export function PlannerPage() {
     setSelection(null);
     setSubmitted(submission);
     setTripStartedAt(null);
+    setDetails([]);
     setStage("choices");
     setTab("map");
   };
@@ -969,7 +1063,7 @@ export function PlannerPage() {
           places={mapPlaces}
           visibleSystems={visibleSystems}
           dimmedSystemFilter={
-            tab === "map" && stage === "home" ? homeModeFilter : null
+            tab === "map" && mapStage === "home" ? homeModeFilter : null
           }
           glance={glance}
           focus={activeFocus}
@@ -988,11 +1082,11 @@ export function PlannerPage() {
             }
           }}
         />
-        <p className="pointer-events-none absolute right-2 bottom-[calc(80px+env(safe-area-inset-bottom)+6px)] z-10 text-[12px] leading-[1.35] text-ink-3 lg:bottom-2 lg:left-2 lg:right-auto">
+        <p className="pointer-events-none absolute right-2 bottom-[calc(80px+env(safe-area-inset-bottom)+6px)] z-10 text-[12px] leading-[1.35] text-ink-3 lg:bottom-2">
           © OpenStreetMap · OpenFreeMap
         </p>
 
-        {tab === "map" && stage === "home" ? (
+        {tab === "map" && mapStage === "home" ? (
           <MapHomeOverlay
             desktop={isDesktop}
             modeFilter={homeModeFilter}
@@ -1017,7 +1111,7 @@ export function PlannerPage() {
           />
         ) : null}
 
-        {tab === "map" && stage === "search" ? (
+        {tab === "map" && mapStage === "search" ? (
           <SearchScreen
             origin={origin}
             destination={destination}
@@ -1097,7 +1191,7 @@ export function PlannerPage() {
           />
         ) : null}
 
-        {tab === "map" && stage === "choices" ? (
+        {tab === "map" && mapStage === "choices" ? (
           <RouteChoicesView
             plan={plan}
             originName={originName}
@@ -1107,6 +1201,7 @@ export function PlannerPage() {
             onSortModeChange={setSortMode}
             activeIndex={activeIndex}
             onOpenRoute={(index) => {
+              setPendingDetail(null);
               setActiveIndex(index);
               setStage("detail");
             }}
@@ -1119,7 +1214,7 @@ export function PlannerPage() {
           />
         ) : null}
 
-        {tab === "map" && stage === "detail" && plan.data && activeRoute ? (
+        {tab === "map" && mapStage === "detail" && plan.data && activeRoute ? (
           <RouteDetailView
             plan={plan.data}
             route={activeRoute}
@@ -1130,8 +1225,12 @@ export function PlannerPage() {
             onHoverLine={setHoveredRouteLine}
             watching={watching}
             onToggleWatch={toggleWatchTrip}
-            onBack={() => setStage("choices")}
+            onBack={() => {
+              setPendingDetail(null);
+              setStage("choices");
+            }}
             onStart={() => {
+              setPendingDetail(null);
               setTripStartedAt(new Date().toISOString());
               setStage("live");
             }}
@@ -1139,7 +1238,7 @@ export function PlannerPage() {
           />
         ) : null}
 
-        {tab === "map" && stage === "live" && plan.data && activeRoute ? (
+        {tab === "map" && mapStage === "live" && plan.data && activeRoute ? (
           <LiveTripView
             route={activeRoute}
             lineLabel={lineLabel}
@@ -1151,7 +1250,7 @@ export function PlannerPage() {
           />
         ) : null}
 
-        {tab === "map" && stage === "arrived" && plan.data && activeRoute ? (
+        {tab === "map" && mapStage === "arrived" && plan.data && activeRoute ? (
           <ArrivedView
             originName={plan.data.origin.name}
             destinationName={plan.data.destination.name}
@@ -1184,49 +1283,72 @@ export function PlannerPage() {
       ) : null}
 
       {tab === "lines" ? (
-        <NetworkDock
-          legs={mapLegs}
-          networkReady={network.isSuccess}
-          networkError={network.isError}
+        <LineStatusView
+          lines={lineList.data ?? []}
+          notices={watch.data ?? []}
+          loading={lineList.isPending}
+          error={lineList.isError}
+          followed={followedLines.followed}
+          unreadCount={unreadCount}
           hiddenSystems={hiddenSystems}
           onToggleSystem={toggleSystem}
-          systemCounts={systemCounts}
-          notices={watch.data ?? []}
-          noticesReady={watch.isSuccess}
-          noticesError={watch.isError}
-          activeId={glance?.id ?? null}
-          onShow={showNotice}
-          onRetry={() => void watch.refetch()}
-          open={dockOpen}
-          onToggleOpen={() => setDockOpen((open) => !open)}
-          tab={dockTab}
-          onTabChange={setDockTab}
-          onClose={() => setTab("map")}
-          className="fixed inset-x-2 bottom-[calc(80px+env(safe-area-inset-bottom)+8px)] z-40 lg:inset-x-auto lg:bottom-4 lg:right-4 lg:z-40 lg:w-[380px]"
+          onOpenLine={(lineId) => pushDetail({ kind: "line", lineId })}
+          onOpenInbox={openInbox}
+          onRetry={() => void lineList.refetch()}
         />
       ) : null}
 
       {tab === "chat" ? (
-        <div
-          className={cn(
-            "pointer-events-none fixed inset-x-2 bottom-[calc(80px+env(safe-area-inset-bottom)+8px)] top-[calc(env(safe-area-inset-top)+8px)] z-40 flex flex-col lg:inset-auto lg:right-4 lg:top-4 lg:bottom-4 lg:w-[400px]",
-            chatClosing ? "chat-sheet-out" : "chat-sheet-in",
-          )}
-        >
-          <ChatPanel
-            onClose={closeChat}
-            onAction={runChatAction}
-            origin={
-              currentPlace.place && origin.trim() === displayNameOf(currentPlace.place)
-                ? undefined
-                : origin.trim() || undefined
-            }
-            destination={destination.trim() || undefined}
-            at={planAt}
-            places={modeSuggestions}
-            currentPlace={currentPlace.place}
-          />
-        </div>
+        <>
+          <div hidden={inboxOpen}>
+            <ChatPanel
+              onClose={closeChat}
+              onAction={runChatAction}
+              onOpenInbox={openInbox}
+              unreadCount={unreadCount}
+              onOpenNotice={(noticeId) => pushDetail({ kind: "notice", noticeId })}
+              initialPrompt={chatPrompt}
+              onInitialPromptConsumed={() => setChatPrompt(null)}
+              origin={
+                currentPlace.place && origin.trim() === displayNameOf(currentPlace.place)
+                  ? undefined
+                  : origin.trim() || undefined
+              }
+              destination={destination.trim() || undefined}
+              at={planAt}
+              places={modeSuggestions}
+              currentPlace={currentPlace.place}
+            />
+          </div>
+          {inboxOpen ? (
+            <InboxView
+              notices={watch.data ?? []}
+              personalAlerts={personalAlerts.data?.alerts ?? []}
+              routines={routines}
+              loading={watch.isPending}
+              error={watch.isError}
+              refreshing={watch.isFetching}
+              readIds={inboxReadIds}
+              onReadIdsChange={setInboxReadIds}
+              onBack={() => setInboxOpen(false)}
+              onOpenNotice={(noticeId) => pushDetail({ kind: "notice", noticeId })}
+              onOpenRoutine={(routineId) => {
+                const routine = routines.find((entry) => entry.id === routineId);
+                if (!routine) return;
+                submit({
+                  origin: routine.originName,
+                  destination: routine.destinationName,
+                  originPlace: routine.origin,
+                  destinationPlace: routine.destination,
+                });
+              }}
+              onRefresh={() => {
+                void watch.refetch();
+                void personalAlerts.refetch();
+              }}
+            />
+          ) : null}
+        </>
       ) : null}
 
       {tab === "me" ? (
@@ -1250,6 +1372,129 @@ export function PlannerPage() {
             onClose={closeAccount}
           />
         </div>
+      ) : null}
+
+      {topDetail?.kind === "line" ? (
+        <LineDetailView
+          line={lineDetail.data ?? null}
+          loading={lineDetail.isPending}
+          error={lineDetail.isError}
+          notices={watch.data ?? []}
+          followed={followedLines.isFollowed(topDetail.lineId)}
+          onToggleFollow={() => followedLines.toggle(topDetail.lineId)}
+          onBack={popDetail}
+          onOpenNotice={(noticeId) => pushDetail({ kind: "notice", noticeId })}
+          onOpenStation={(stationId) => pushDetail({ kind: "station", stationId })}
+          onRetry={() => void lineDetail.refetch()}
+        />
+      ) : null}
+
+      {topDetail?.kind === "station" ? (
+        <StationDetailView
+          stationId={topDetail.stationId}
+          onBack={popDetail}
+          onOpenLine={(lineId) => pushDetail({ kind: "line", lineId })}
+          onPlanFrom={(name) => {
+            setOrigin(name);
+            setOriginPlace(null);
+            setDetails([]);
+            setStage("search");
+            setTab("map");
+          }}
+          onPlanTo={(name) => {
+            setDestination(name);
+            setDestinationPlace(null);
+            setDetails([]);
+            setStage("search");
+            setTab("map");
+          }}
+          onShowOnMap={(station) => {
+            setGlance({
+              id: station.id,
+              token: `${station.id}:${Date.now()}`,
+              latitude: station.latitude,
+              longitude: station.longitude,
+            });
+            setDetails([]);
+            setStage("home");
+            setTab("map");
+          }}
+        />
+      ) : null}
+
+      {topDetail?.kind === "notice" ? (
+        <DisruptionDetailView
+          notice={noticeById(topDetail.noticeId)}
+          loading={watch.isPending}
+          error={watch.isError}
+          personalAlerts={personalAlerts.data?.alerts ?? []}
+          routines={routines}
+          onBack={popDetail}
+          onOpenAlternatives={() =>
+            pushDetail({ kind: "alternatives", noticeId: topDetail.noticeId })
+          }
+          onShowOnMap={() => {
+            const notice = noticeById(topDetail.noticeId);
+            if (notice) showNotice(notice);
+            setDetails([]);
+            setStage("home");
+            setTab("map");
+          }}
+          onAsk={openChatWith}
+          onRetry={() => void watch.refetch()}
+        />
+      ) : null}
+
+      {topDetail?.kind === "alternatives" ? (
+        <AlternativeRouteView
+          notice={noticeById(topDetail.noticeId)}
+          journey={
+            plan.data
+              ? {
+                  originName: plan.data.origin.name,
+                  destinationName: plan.data.destination.name,
+                  origin: {
+                    kind: "station",
+                    id: plan.data.origin.stationId,
+                    name: plan.data.origin.name,
+                    latitude: plan.data.origin.latitude,
+                    longitude: plan.data.origin.longitude,
+                  },
+                  destination: {
+                    kind: "station",
+                    id: plan.data.destination.stationId,
+                    name: plan.data.destination.name,
+                    latitude: plan.data.destination.latitude,
+                    longitude: plan.data.destination.longitude,
+                  },
+                }
+              : null
+          }
+          personalAlerts={personalAlerts.data?.alerts ?? []}
+          routines={routines}
+          onBack={popDetail}
+          onUseRoute={(journey, lineCodes) => {
+            submit({
+              origin: journey.originName,
+              destination: journey.destinationName,
+              originPlace: journey.origin,
+              destinationPlace: journey.destination,
+            });
+            setPendingDetail({
+              origin: journey.originName,
+              destination: journey.destinationName,
+              lineCodes,
+            });
+          }}
+          onAsk={openChatWith}
+          onShowOnMap={() => {
+            const notice = noticeById(topDetail.noticeId);
+            if (notice) showNotice(notice);
+            setDetails([]);
+            setStage("home");
+            setTab("map");
+          }}
+        />
       ) : null}
     </div>
   );

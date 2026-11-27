@@ -89,6 +89,71 @@ export function createTransitRouter(deps: ApiDeps): Router {
     );
   });
 
+  /**
+   * One line with the stop order of each direction it runs.
+   *
+   * The order comes from `lineStops` and the coordinates from `stations`, so
+   * the answer is read from the graph and never typed. A direction with no
+   * stop is not offered at all: the line does not run that way.
+   */
+  router.get("/lines/:id", async (request, response) => {
+    const { network } = await deps.cache.get();
+    const line = network.lines.find((candidate) => candidate.id === request.params["id"]);
+    if (!line) {
+      response.status(404).json({ error: "Line not found" });
+      return;
+    }
+
+    const directions = (["forward", "backward"] as const)
+      .map((direction) => {
+        const stops = network.lineStops
+          .filter((entry) => entry.lineId === line.id && entry.direction === direction)
+          .sort((a, b) => a.position - b.position)
+          .map((entry) => {
+            const station = network.stations.find(
+              (candidate) => candidate.id === entry.stationId,
+            );
+            return station
+              ? {
+                  id: station.id,
+                  name: station.name,
+                  code: station.code,
+                  isInterchange: station.isInterchange,
+                  area: station.area,
+                  latitude: station.latitude,
+                  longitude: station.longitude,
+                  platform: entry.platform?.name ?? null,
+                }
+              : null;
+          })
+          .filter((stop): stop is NonNullable<typeof stop> => stop !== null);
+        const first = stops[0];
+        const last = stops[stops.length - 1];
+        if (!first || !last) return null;
+        return {
+          direction,
+          label: `${first.name} ke ${last.name}`,
+          headsign: last.name,
+          stops,
+        };
+      })
+      .filter((direction): direction is NonNullable<typeof direction> => direction !== null);
+
+    response.json({
+      id: line.id,
+      systemId: line.systemId,
+      code: line.code,
+      name: line.name,
+      mode: line.mode,
+      serviceClass: line.serviceClass,
+      operator: line.operator,
+      status: line.status,
+      color: line.color,
+      lengthKm: line.lengthKm,
+      directions,
+    });
+  });
+
   router.get("/stations", async (request, response) => {
     const parsed = stationQuerySchema.safeParse(request.query);
     if (!parsed.success) {
