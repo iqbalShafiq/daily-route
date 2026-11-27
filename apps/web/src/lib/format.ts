@@ -6,7 +6,9 @@
  * Jakarta time.
  */
 
-export type TransitMode = "bus" | "minibus" | "tram" | "metro" | "rail";
+import palette from "./m3e-palette.json";
+
+export type TransitMode = "bus" | "minibus" | "tram" | "metro" | "rail" | "walk";
 
 export type ServiceClass =
   | "brt"
@@ -29,6 +31,7 @@ export const MODE_LABEL: Record<TransitMode, string> = {
   tram: "LRT",
   metro: "MRT",
   rail: "KRL",
+  walk: "Walk",
 };
 
 /**
@@ -43,6 +46,7 @@ export const MODE_WIDTH: Record<string, number> = {
   tram: 5.5,
   metro: 6,
   rail: 6.5,
+  walk: 3,
 };
 
 /**
@@ -70,31 +74,223 @@ export const SERVICE_CLASS_LABEL: Record<ServiceClass, string> = {
  * The colour of a mode.
  *
  * The colour comes from the CSS custom properties, so it follows the theme
- * without a second palette in JavaScript.
+ * and the seed without a second palette in JavaScript. The seven M3E mode
+ * tokens are the only sources; a mode is never given an ad-hoc colour.
  */
 export const MODE_COLOR: Record<string, string> = {
-  bus: "var(--mode-bus)",
-  minibus: "var(--mode-bus)",
-  tram: "var(--mode-tram)",
-  metro: "var(--mode-metro)",
-  rail: "var(--mode-rail)",
+  bus: "var(--brt)",
+  minibus: "var(--nonbrt)",
+  tram: "var(--lrtj)",
+  metro: "var(--mrt)",
+  rail: "var(--krl)",
+  walk: "var(--walk)",
 };
 
 /** The colour of a service class. */
 export const SERVICE_CLASS_COLOR: Record<ServiceClass, string> = {
-  brt: "var(--mode-bus)",
-  "non-brt": "var(--mode-bus)",
-  mikrotrans: "var(--mode-bus)",
-  minitrans: "var(--mode-bus)",
-  "rumah-susun": "var(--mode-bus)",
-  amari: "var(--mode-bus)",
-  "rapid-transit": "var(--mode-metro)",
-  lrt: "var(--mode-tram)",
-  "commuter-rail": "var(--mode-rail)",
-  royaltrans: "var(--mode-royaltrans, var(--mode-bus))",
-  wisata: "var(--mode-wisata, var(--mode-bus))",
-  transjabodetabek: "var(--mode-transjabodetabek, var(--mode-bus))",
+  brt: "var(--brt)",
+  "non-brt": "var(--nonbrt)",
+  mikrotrans: "var(--mikro)",
+  minitrans: "var(--nonbrt)",
+  "rumah-susun": "var(--nonbrt)",
+  amari: "var(--nonbrt)",
+  "rapid-transit": "var(--mrt)",
+  // A service class alone cannot tell the two LRT operators apart. The
+  // caller that knows the line passes its system id to `transitModeTokenOf`.
+  lrt: "var(--lrtj)",
+  "commuter-rail": "var(--krl)",
+  royaltrans: "var(--nonbrt)",
+  wisata: "var(--nonbrt)",
+  transjabodetabek: "var(--nonbrt)",
 };
+
+/**
+ * The seven mode tokens of the M3 Expressive sheet, plus the walk.
+ *
+ * The compact labels are the sheet's table: KRL, MRT, LRT, TJ, JAK and
+ * Jalan. The rider-facing `label` is English, as the rest of the interface
+ * is; the compact label is only used where the operator's own shorthand is
+ * already understood.
+ */
+export type TransitModeTokenId =
+  "krl" | "mrt" | "lrtj" | "lrtk" | "brt" | "nonbrt" | "mikro" | "walk";
+
+/** Whether a string is one of the eight mode token ids. */
+export function isTransitModeTokenId(value: string): value is TransitModeTokenId {
+  return (
+    value === "krl" ||
+    value === "mrt" ||
+    value === "lrtj" ||
+    value === "lrtk" ||
+    value === "brt" ||
+    value === "nonbrt" ||
+    value === "mikro" ||
+    value === "walk"
+  );
+}
+
+export type TransitModeToken = {
+  id: TransitModeTokenId;
+  label: string;
+  shortLabel: string;
+  /** The CSS custom property, ready for an inline `color` or `background`. */
+  colorVar: string;
+  /** The light-theme value, for a canvas or an image. */
+  hexLight: string;
+};
+
+const MODE_TOKENS: Record<TransitModeTokenId, TransitModeToken> = {
+  krl: {
+    id: "krl",
+    label: "KRL Commuter",
+    shortLabel: "KRL",
+    colorVar: "var(--krl)",
+    hexLight: palette.modes.krl,
+  },
+  mrt: {
+    id: "mrt",
+    label: "MRT Jakarta",
+    shortLabel: "MRT",
+    colorVar: "var(--mrt)",
+    hexLight: palette.modes.mrt,
+  },
+  lrtj: {
+    id: "lrtj",
+    label: "LRT Jabodebek",
+    shortLabel: "LRT",
+    colorVar: "var(--lrtj)",
+    hexLight: palette.modes.lrtj,
+  },
+  lrtk: {
+    id: "lrtk",
+    label: "LRT Jakarta",
+    shortLabel: "LRT",
+    colorVar: "var(--lrtk)",
+    hexLight: palette.modes.lrtk,
+  },
+  brt: {
+    id: "brt",
+    label: "TransJakarta BRT",
+    shortLabel: "TJ",
+    colorVar: "var(--brt)",
+    hexLight: palette.modes.brt,
+  },
+  nonbrt: {
+    id: "nonbrt",
+    label: "TransJakarta non-BRT",
+    shortLabel: "TJ",
+    colorVar: "var(--nonbrt)",
+    hexLight: palette.modes.nonbrt,
+  },
+  mikro: {
+    id: "mikro",
+    label: "Mikrotrans",
+    shortLabel: "JAK",
+    colorVar: "var(--mikro)",
+    hexLight: palette.modes.mikro,
+  },
+  walk: {
+    id: "walk",
+    label: "Walk",
+    shortLabel: "Jalan",
+    colorVar: "var(--walk)",
+    hexLight: palette.modes.walk,
+  },
+};
+
+export type TransitModeInput = {
+  systemId?: string | null | undefined;
+  serviceClass?: string | null | undefined;
+  mode?: string | null | undefined;
+  lineCode?: string | null | undefined;
+};
+
+function normaliseModeKey(value: string | null | undefined): string {
+  return (value ?? "")
+    .trim()
+    .toLowerCase()
+    .replace(/[\s_.]+/g, "-");
+}
+
+function token(id: TransitModeTokenId): TransitModeToken {
+  return MODE_TOKENS[id];
+}
+
+/** The token for an id that is already known. */
+export function transitModeToken(id: TransitModeTokenId): TransitModeToken {
+  return MODE_TOKENS[id];
+}
+
+/**
+ * Name the one M3E token a line belongs to.
+ *
+ * The system id is the strongest fact; the service class separates the
+ * Transjakarta brands; the line code catches a Mikrotrans "JAK.01" when the
+ * class is missing. An unknown bus defaults to the non-BRT token, which is
+ * the generic Transjakarta colour, rather than inventing a new one.
+ */
+export function transitModeTokenOf(input: TransitModeInput): TransitModeToken {
+  const system = normaliseModeKey(input.systemId);
+  const serviceClass = normaliseModeKey(input.serviceClass);
+  const mode = normaliseModeKey(input.mode);
+  const lineCode = normaliseModeKey(input.lineCode);
+
+  if (mode === "walk" || serviceClass === "walk" || system === "walk" || lineCode === "walk") {
+    return token("walk");
+  }
+
+  if (system.includes("krl") || system.includes("commuter") || mode === "rail") {
+    return token("krl");
+  }
+
+  if (serviceClass === "commuter-rail") {
+    return token("krl");
+  }
+
+  if (system.includes("mrt") || mode === "metro") {
+    return token("mrt");
+  }
+
+  if (serviceClass === "rapid-transit") {
+    return token("mrt");
+  }
+
+  if (system.includes("jabodebek")) {
+    return token("lrtj");
+  }
+
+  if (system.includes("lrt-jakarta") || system === "lrtk" || system === "lrt-jkt") {
+    return token("lrtk");
+  }
+
+  if (system.includes("lrt") || serviceClass === "lrt" || mode === "tram") {
+    // With no system id, an LRT is Jabodebek: it is the larger network and
+    // the one a bare "LRT" line code in the snapshot refers to.
+    return token("lrtj");
+  }
+
+  if (serviceClass === "brt") return token("brt");
+  if (serviceClass === "mikrotrans" || lineCode.startsWith("jak")) return token("mikro");
+  if (
+    serviceClass === "non-brt" ||
+    serviceClass === "minitrans" ||
+    serviceClass === "royaltrans" ||
+    serviceClass === "transjabodetabek" ||
+    serviceClass === "wisata" ||
+    serviceClass === "rumah-susun" ||
+    serviceClass === "amari"
+  ) {
+    return token("nonbrt");
+  }
+
+  if (mode === "minibus") return token("nonbrt");
+  if (mode === "bus") return token("brt");
+
+  // A corridor code (1, 6A, 9) is a BRT corridor; anything else is a feeder.
+  if (/^\d{1,2}[a-z]?$/.test(lineCode)) return token("brt");
+
+  return token("nonbrt");
+}
 
 /**
  * The word for the place a vehicle stops at.

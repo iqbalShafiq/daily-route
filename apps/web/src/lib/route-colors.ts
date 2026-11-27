@@ -1,5 +1,5 @@
 import type { Itinerary, ItineraryLeg } from "./api.js";
-import { MODE_COLOR, SERVICE_CLASS_COLOR, type ServiceClass } from "./format.js";
+import { transitModeTokenOf } from "./format.js";
 
 /**
  * The colours of one journey.
@@ -10,13 +10,13 @@ import { MODE_COLOR, SERVICE_CLASS_COLOR, type ServiceClass } from "./format.js"
  * from the fixed secondary palette, so two Transjakarta corridors on one
  * board are still two different lines.
  *
- * Walking is not in either palette. It keeps the quiet ink colour and a
- * dashed line, so a footpath never looks like a vehicle.
+ * Walking is not in either palette. It keeps the walk token and a dashed
+ * line, so a footpath never looks like a vehicle.
  */
 
 export const WALK_LINE_KEY = "walk";
 
-export const ROUTE_WALK_COLOR = "var(--route-walk)";
+export const ROUTE_WALK_COLOR = "var(--walk)";
 
 /**
  * Secondary colours, used only when one operator appears twice.
@@ -33,11 +33,13 @@ export function lineKeyOf(leg: Pick<ItineraryLeg, "kind" | "lineId">): string {
 }
 
 function baseColorOf(leg: ItineraryLeg): string {
-  return (
-    SERVICE_CLASS_COLOR[leg.serviceClass as ServiceClass] ??
-    MODE_COLOR[leg.mode] ??
-    "var(--ink-2)"
-  );
+  const systemId = leg.lineId ? (leg.lineId.split(":")[0] ?? null) : null;
+  return transitModeTokenOf({
+    systemId,
+    serviceClass: leg.serviceClass,
+    mode: leg.mode,
+    lineCode: leg.lineCode,
+  }).colorVar;
 }
 
 /**

@@ -1,0 +1,44 @@
+{
+  "seeds": {
+    "teal": {
+      "swatchHex": "#00696E",
+      "lightThemeColor": "#F4FBFA",
+      "darkThemeColor": "#0E1515"
+    },
+    "wall": {
+      "swatchHex": "#4F5B92",
+      "lightThemeColor": "#FBF8FF",
+      "darkThemeColor": "#0F111B"
+    },
+    "coral": {
+      "swatchHex": "#9A4521",
+      "lightThemeColor": "#FFF8F5",
+      "darkThemeColor": "#171210"
+    },
+    "blue": {
+      "swatchHex": "#2D5DA8",
+      "lightThemeColor": "#F9F9FF",
+      "darkThemeColor": "#0E1218"
+    },
+    "plum": {
+      "swatchHex": "#7A4A86",
+      "lightThemeColor": "#FEF7FD",
+      "darkThemeColor": "#151016"
+    },
+    "olive": {
+      "swatchHex": "#55652B",
+      "lightThemeColor": "#FAFAF2",
+      "darkThemeColor": "#12140E"
+    }
+  },
+  "modes": {
+    "krl": "#C4202E",
+    "mrt": "#0B4A9E",
+    "lrtj": "#6A3CB8",
+    "lrtk": "#A34E00",
+    "brt": "#1E63D0",
+    "nonbrt": "#2B7A32",
+    "mikro": "#B5195C",
+    "walk": "#5B6566"
+  }
+}
