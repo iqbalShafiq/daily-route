@@ -210,6 +210,25 @@ export type CompletedTripRecord = {
   completedAt: string;
 };
 
+/** The days a routine runs, 0 = Minggu (Sunday) through 6 = Sabtu. */
+export type RoutineDay = 0 | 1 | 2 | 3 | 4 | 5 | 6;
+
+/** The reminder lead times the routine editor offers. */
+export type RoutineReminder = 5 | 10 | 15;
+
+/** Monday to Friday, the default a new routine starts with. */
+export const DEFAULT_ROUTINE_DAYS: readonly RoutineDay[] = [1, 2, 3, 4, 5];
+
+export const ROUTINE_DAY_LABELS: Record<RoutineDay, string> = {
+  0: "Min",
+  1: "Sen",
+  2: "Sel",
+  3: "Rab",
+  4: "Kam",
+  5: "Jum",
+  6: "Sab",
+};
+
 export type RoutineRecord = {
   id: string;
   originName: string;
@@ -219,6 +238,16 @@ export type RoutineRecord = {
   /** The clock the rider usually leaves, "07:10", when one was chosen. */
   departureTime: string | null;
   createdAt: string;
+  /** The rider's own name for the routine, such as "Rutinitas pagi". */
+  label?: string | null;
+  /** The clock the rider wants to arrive by, "07:50", when one was chosen. */
+  arriveBy?: string | null;
+  /** The days it runs. An older row without the field runs Monday to Friday. */
+  days?: RoutineDay[];
+  /** How many minutes before leaving the agent speaks up. */
+  remindMinutes?: RoutineReminder;
+  /** Whether the agent may swap in another route when this one is blocked. */
+  autoReroute?: boolean;
 };
 
 function storage(): Storage | null {
@@ -286,9 +315,38 @@ export function recordCompletedTrip(entry: CompletedTripRecord): CompletedTripRe
   return readCompletedTrips();
 }
 
+function isClock(value: unknown): value is string {
+  return typeof value === "string" && /^([01]\d|2[0-3]):[0-5]\d$/.test(value);
+}
+
+function isRoutineDay(value: unknown): value is RoutineDay {
+  return typeof value === "number" && Number.isInteger(value) && value >= 0 && value <= 6;
+}
+
+/** The days a stored routine runs, with the weekday default for older rows. */
+export function routineDaysOf(routine: Pick<RoutineRecord, "days">): RoutineDay[] {
+  const days = routine.days;
+  if (!Array.isArray(days) || days.length === 0) return [...DEFAULT_ROUTINE_DAYS];
+  return days.filter(isRoutineDay).filter((day, index, all) => all.indexOf(day) === index);
+}
+
 export function isRoutineRecord(value: unknown): value is RoutineRecord {
   if (!value || typeof value !== "object") return false;
   const row = value as Record<string, unknown>;
+  const optionalClock =
+    row["arriveBy"] === undefined || row["arriveBy"] === null || isClock(row["arriveBy"]);
+  const optionalDays =
+    row["days"] === undefined ||
+    (Array.isArray(row["days"]) && row["days"].every(isRoutineDay));
+  const optionalReminder =
+    row["remindMinutes"] === undefined ||
+    row["remindMinutes"] === 5 ||
+    row["remindMinutes"] === 10 ||
+    row["remindMinutes"] === 15;
+  const optionalAuto =
+    row["autoReroute"] === undefined || typeof row["autoReroute"] === "boolean";
+  const optionalLabel =
+    row["label"] === undefined || row["label"] === null || typeof row["label"] === "string";
   return (
     typeof row["id"] === "string" &&
     typeof row["originName"] === "string" &&
@@ -296,7 +354,12 @@ export function isRoutineRecord(value: unknown): value is RoutineRecord {
     (row["origin"] === null || typeof row["origin"] === "object") &&
     (row["destination"] === null || typeof row["destination"] === "object") &&
     (row["departureTime"] === null || typeof row["departureTime"] === "string") &&
-    typeof row["createdAt"] === "string"
+    typeof row["createdAt"] === "string" &&
+    optionalClock &&
+    optionalDays &&
+    optionalReminder &&
+    optionalAuto &&
+    optionalLabel
   );
 }
 
@@ -321,10 +384,51 @@ export function saveRoutine(
   );
   const row: RoutineRecord = {
     ...entry,
+    days: routineDaysOf(entry),
+    remindMinutes: entry.remindMinutes ?? 10,
+    autoReroute: entry.autoReroute ?? true,
+    label: entry.label ?? existing?.label ?? null,
     id: existing?.id ?? `routine-${Date.now()}-${current.length + 1}`,
     createdAt: new Date().toISOString(),
   };
   const next = [row, ...current.filter((item) => item.id !== row.id)];
+  writeList(ROUTINES_KEY, next, 16);
+  return readRoutines();
+}
+
+/**
+ * Change one stored routine.
+ *
+ * The id and the creation instant stay with the row: an edit is the same
+ * routine with a new clock, not a new routine that happens to look alike.
+ */
+export function updateRoutine(
+  id: string,
+  patch: Partial<Omit<RoutineRecord, "id" | "createdAt">>,
+): RoutineRecord[] {
+  const current = readRoutines();
+  const existing = current.find((row) => row.id === id);
+  if (!existing) return current;
+  const merged: RoutineRecord = {
+    ...existing,
+    ...patch,
+    id: existing.id,
+    createdAt: existing.createdAt,
+  };
+  const row: RoutineRecord = {
+    ...merged,
+    days: routineDaysOf(merged),
+    remindMinutes: merged.remindMinutes ?? 10,
+    autoReroute: merged.autoReroute ?? true,
+  };
+  const next = current.map((item) => (item.id === id ? row : item));
+  writeList(ROUTINES_KEY, next, 16);
+  return readRoutines();
+}
+
+/** Remove one routine and return the list after the change. */
+export function deleteRoutine(id: string): RoutineRecord[] {
+  const next = readRoutines().filter((row) => row.id !== id);
   writeList(ROUTINES_KEY, next, 16);
   return readRoutines();
 }

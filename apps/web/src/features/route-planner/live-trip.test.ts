@@ -5,13 +5,16 @@ import type { Itinerary, ItineraryLeg } from "../../lib/api.js";
 import {
   COMPLETED_TRIPS_KEY,
   ROUTINES_KEY,
+  deleteRoutine,
   distanceMeters,
   flattenTripStops,
   readCompletedTrips,
   readRoutines,
   recordCompletedTrip,
+  routineDaysOf,
   saveRoutine,
   stopsRemainingBeforeAlight,
+  updateRoutine,
 } from "./live-trip.js";
 
 function leg(overrides: Partial<ItineraryLeg> = {}): ItineraryLeg {
@@ -313,5 +316,97 @@ describe("local records", () => {
     expect(routines).toHaveLength(1);
     expect(routines[0]?.departureTime).toBe("07:20");
     expect(localStorage.getItem(ROUTINES_KEY)).toContain("Kantor");
+  });
+
+  it("fills the new routine fields without losing the old clock", () => {
+    saveRoutine({
+      originName: "Rumah",
+      destinationName: "Kantor",
+      origin: null,
+      destination: null,
+      departureTime: "07:10",
+      arriveBy: "07:50",
+      days: [1, 2, 3, 4, 5],
+      remindMinutes: 15,
+      autoReroute: false,
+      label: "Rutinitas pagi",
+    });
+    const [routine] = readRoutines();
+    expect(routine?.departureTime).toBe("07:10");
+    expect(routine?.arriveBy).toBe("07:50");
+    expect(routine?.days).toEqual([1, 2, 3, 4, 5]);
+    expect(routine?.remindMinutes).toBe(15);
+    expect(routine?.autoReroute).toBe(false);
+    expect(routine?.label).toBe("Rutinitas pagi");
+  });
+
+  it("reads a routine written before the new fields existed", () => {
+    localStorage.setItem(
+      ROUTINES_KEY,
+      JSON.stringify([
+        {
+          id: "routine-old",
+          originName: "Rumah",
+          destinationName: "Kantor",
+          origin: null,
+          destination: null,
+          departureTime: "07:10",
+          createdAt: "2026-01-01T00:00:00.000Z",
+        },
+      ]),
+    );
+    const [routine] = readRoutines();
+    expect(routine?.id).toBe("routine-old");
+    expect(routineDaysOf(routine ?? { days: [] })).toEqual([1, 2, 3, 4, 5]);
+    expect(routine?.remindMinutes ?? 10).toBe(10);
+  });
+
+  it("updates one routine by id and keeps its identity", () => {
+    saveRoutine({
+      originName: "Rumah",
+      destinationName: "Kantor",
+      origin: null,
+      destination: null,
+      departureTime: null,
+    });
+    const [saved] = readRoutines();
+    expect(saved).toBeDefined();
+    if (!saved) return;
+
+    updateRoutine(saved.id, {
+      arriveBy: "08:10",
+      days: [2, 4],
+      label: "Pagi Rabu",
+    });
+    const [updated] = readRoutines();
+    expect(updated?.id).toBe(saved.id);
+    expect(updated?.createdAt).toBe(saved.createdAt);
+    expect(updated?.arriveBy).toBe("08:10");
+    expect(updated?.days).toEqual([2, 4]);
+    expect(updated?.label).toBe("Pagi Rabu");
+  });
+
+  it("deletes only the routine that was asked for", () => {
+    saveRoutine({
+      originName: "Rumah",
+      destinationName: "Kantor",
+      origin: null,
+      destination: null,
+      departureTime: null,
+    });
+    saveRoutine({
+      originName: "Kantor",
+      destinationName: "Blok M",
+      origin: null,
+      destination: null,
+      departureTime: null,
+    });
+    const [first] = readRoutines();
+    expect(first).toBeDefined();
+    if (!first) return;
+
+    const left = deleteRoutine(first.id);
+    expect(left).toHaveLength(1);
+    expect(left[0]?.destinationName).not.toBe(first.destinationName);
   });
 });

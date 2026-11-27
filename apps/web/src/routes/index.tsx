@@ -1,6 +1,7 @@
 import { Map as MapIcon, MessageSquare, Route as RouteIcon, UserRound } from "lucide-react";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useNavigate } from "@tanstack/react-router";
 import {
   RouteMap,
   type MapLeg,
@@ -15,9 +16,10 @@ import {
   M3NavigationRail,
   type M3NavigationItem,
 } from "../components/m3e/index.js";
-import { AccountPanel } from "../features/account/account-panel.js";
 import { useAccount } from "../features/account/use-account.js";
 import { useRiderMemory } from "../features/account/use-rider-memory.js";
+import { SayaView } from "../features/account/saya-view.js";
+import { useRiderPreferences } from "../features/account/rider-preferences.js";
 import { ChatPanel } from "../features/chat/chat-panel.js";
 import type { ChatAction } from "../features/chat/use-chat.js";
 import type {
@@ -202,7 +204,15 @@ export function PlannerPage() {
     lineCodes: string[];
   } | null>(null);
   const [homeModeFilter, setHomeModeFilter] = useState<HomeModeFilter>("all");
-  const [sortMode, setSortMode] = useState<RouteSortMode>("fastest");
+  /**
+   * The order the rider asked for in this visit, paired with the stored
+   * preference it was chosen against. A change in Pengaturan invalidates
+   * the pair, so the new preference takes over without an effect.
+   */
+  const [sortChoice, setSortChoice] = useState<{
+    mode: RouteSortMode;
+    priority: RouteSortMode;
+  } | null>(null);
   const [tripStartedAt, setTripStartedAt] = useState<string | null>(null);
   const [greeting] = useState(() => greetingOf(new Date()));
 
@@ -239,6 +249,18 @@ export function PlannerPage() {
   } = riderMemory;
   const isDesktop = useMediaQuery("(min-width: 1024px)");
   const { theme, toggle: toggleTheme } = useTheme();
+  const navigate = useNavigate();
+  const { preferences } = useRiderPreferences();
+
+  // The settings surface writes the preferred order; the route list follows
+  // it unless the rider picked another order in this visit.
+  const sortMode: RouteSortMode =
+    sortChoice !== null && sortChoice.priority === preferences.priority
+      ? sortChoice.mode
+      : preferences.priority;
+  const setSortMode = (mode: RouteSortMode): void => {
+    setSortChoice({ mode, priority: preferences.priority });
+  };
 
   const [walk, setWalk] = useState<PositionPlan | null>(null);
   const [walkError, setWalkError] = useState<string | null>(null);
@@ -1352,23 +1374,37 @@ export function PlannerPage() {
       ) : null}
 
       {tab === "me" ? (
-        <div className="pointer-events-none fixed inset-x-2 bottom-[calc(80px+env(safe-area-inset-bottom)+8px)] top-[calc(env(safe-area-inset-top)+8px)] z-40 flex flex-col justify-end lg:inset-auto lg:bottom-4 lg:right-4 lg:top-4 lg:w-[400px] chat-sheet-in">
-          <AccountPanel
-            key={account.user?.id ?? "signed-out"}
+        <div className="m3-saya-panel pointer-events-none fixed inset-x-0 top-0 bottom-[calc(80px+env(safe-area-inset-bottom))] z-40 flex flex-col justify-end lg:inset-auto lg:bottom-4 lg:right-4 lg:top-4 chat-sheet-in">
+          <SayaView
             user={account.user}
-            pending={account.pending}
+            accountPending={account.pending}
             places={namedPlaces.data?.places ?? []}
+            savedPlaces={saved}
+            followedLines={followedLines.followed}
             memoryError={memoryError}
             memoryLoadFailed={memoryLoadFailed}
-            onSignUp={account.signUp}
+            memory={modeSuggestions}
             onSignIn={account.signIn}
+            onSignUp={account.signUp}
             onSignOut={signOutAccount}
             onChangePassword={account.changePassword}
             onDeleteAccount={deleteAccount}
-            onRetryMemory={retryMemory}
             onSavePlace={saveNamedPlace}
             onRemovePlace={removeNamedPlace}
+            onToggleSaved={toggleSaved}
             onUseCurrentLocation={currentPlace.locate}
+            onRetryMemory={retryMemory}
+            onPlanRoutine={(routine) => {
+              submit({
+                origin: routine.originName,
+                destination: routine.destinationName,
+                originPlace: routine.origin,
+                destinationPlace: routine.destination,
+              });
+            }}
+            onOpenFollowedLines={() => changeTab("lines")}
+            onOpenOnboarding={() => void navigate({ to: "/onboarding" })}
+            onOpenMap={resetJourney}
             onClose={closeAccount}
           />
         </div>
