@@ -1,10 +1,14 @@
 import { useQuery } from "@tanstack/react-query";
-import { Send, X } from "lucide-react";
+import { Bell, MessageSquare, Send, X } from "lucide-react";
 import { useEffect, useMemo, useRef, useState } from "react";
 
-import { NETWORK_SYSTEMS, OperatorBadge } from "../../components/map/operator-mark.js";
-import { Button } from "../../components/ui/button.js";
-import { Spinner } from "../../components/ui/feedback.js";
+import {
+  M3Button,
+  M3Chip,
+  M3IconButton,
+  M3LoadingIndicator,
+  M3Shape,
+} from "../../components/m3e/index.js";
 import { cn } from "../../lib/cn.js";
 
 import { api } from "../../lib/api.js";
@@ -16,23 +20,28 @@ import { ChatCards } from "./chat-cards.js";
 import { RichText } from "./rich-text.js";
 
 const PROMPTS = [
-  "How do I get from Bundaran HI to Kelapa Gading?",
-  "Is any stop closed on this journey?",
-  "Tell me about Simpang Kuningan",
-  "When is the next service at Grogol Reformasi?",
+  "Rute Bundaran HI ke Kelapa Gading?",
+  "Apakah ada halte tutup di rute ini?",
+  "Info Stasiun Manggarai",
+  "Jadwal berikut di Grogol?",
 ];
 
 /**
- * The assistant panel.
+ * Tanya Daily.
  *
- * It floats on the map as one sheet. The thread sits above the composer
- * the way a conversation does, and the assistant is marked with the same
- * route glyph as the board, so it reads as a second way into the same
- * network rather than a separate product.
+ * The assistant floats on the map as one sheet. The thread sits above the
+ * composer the way a conversation does, and every card comes from a tool
+ * result, never from the prose. The header names the same network the
+ * planner reads.
  */
 export function ChatPanel({
   onClose,
   onAction,
+  onOpenInbox,
+  unreadCount,
+  onOpenNotice,
+  initialPrompt = null,
+  onInitialPromptConsumed,
   origin,
   destination,
   at,
@@ -41,6 +50,12 @@ export function ChatPanel({
 }: {
   onClose: () => void;
   onAction: (action: ChatAction) => void;
+  onOpenInbox: () => void;
+  unreadCount: number;
+  onOpenNotice?: ((noticeId: string) => void) | undefined;
+  /** A question from another screen, sent once when the panel opens. */
+  initialPrompt?: string | null;
+  onInitialPromptConsumed?: (() => void) | undefined;
   origin?: string | undefined;
   destination?: string | undefined;
   at?: string | undefined;
@@ -64,6 +79,7 @@ export function ChatPanel({
   const [mentionDismissed, setMentionDismissed] = useState(false);
   const scrollRef = useRef<HTMLDivElement | null>(null);
   const inputRef = useRef<HTMLInputElement | null>(null);
+  const consumedPrompt = useRef<string | null>(null);
 
   useEffect(() => {
     const element = scrollRef.current;
@@ -103,10 +119,7 @@ export function ChatPanel({
       .map((place) => ({
         key: place.id,
         title: place.name,
-        detail:
-          place.kind === "station"
-            ? (place.systemName ?? "Stop")
-            : (place.detail ?? "Place"),
+        detail: place.kind === "station" ? (place.systemName ?? "Halte") : (place.detail ?? "Tempat"),
         insert: place.name,
         overture: place.source === "overture",
         google: place.source === "google",
@@ -114,7 +127,10 @@ export function ChatPanel({
     return [
       ...savedMatches.slice(0, 4).map((place) => ({
         key: place.id,
-        title: place.detail && place.detail !== "Saved" && place.detail !== "Recent" ? place.detail : place.name,
+        title:
+          place.detail && place.detail !== "Saved" && place.detail !== "Recent"
+            ? place.detail
+            : place.name,
         detail: place.name,
         insert: place.name,
         overture: false,
@@ -166,91 +182,110 @@ export function ChatPanel({
       }
     : {};
 
+  const context = {
+    ...(origin ? { origin } : {}),
+    ...(destination ? { destination } : {}),
+    ...currentContext,
+    ...(at ? { at } : {}),
+  };
+
   const submit = async (event: React.FormEvent): Promise<void> => {
     event.preventDefault();
     const text = draft;
     setDraft("");
-    await send(text, {
-      ...(origin ? { origin } : {}),
-      ...(destination ? { destination } : {}),
-      ...currentContext,
-      ...(at ? { at } : {}),
-    });
+    await send(text, context);
     inputRef.current?.focus();
   };
 
+  useEffect(() => {
+    if (!initialPrompt) {
+      consumedPrompt.current = null;
+      return;
+    }
+    if (initialPrompt.trim().length === 0) return;
+    if (consumedPrompt.current === initialPrompt) return;
+    consumedPrompt.current = initialPrompt;
+    void send(initialPrompt, context);
+    onInitialPromptConsumed?.();
+    // The guard above makes this one send per prompt, even when a context
+    // value changes while the answer is streaming.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [initialPrompt]);
+
   return (
-    <section className="panel pointer-events-auto flex min-h-0 w-full max-h-[72dvh] flex-col overflow-hidden rounded-[4px] max-lg:h-full max-lg:max-h-none lg:h-[min(520px,calc(100dvh-8rem))] lg:max-h-[calc(100dvh-8rem)]">
-      <header className="flex shrink-0 items-center gap-3 px-3 py-3">
+    <section className="m3-tab-panel">
+      <header className="flex shrink-0 items-center gap-3 border-b border-m3-outline-variant px-4 py-3">
+        <M3Shape
+          shape="clover4"
+          size={44}
+          className="m3-breathe shrink-0 bg-m3-primary text-m3-on-primary"
+        >
+          <MessageSquare aria-hidden className="size-5" />
+        </M3Shape>
         <div className="min-w-0 flex-1">
-          <h2 className="truncate text-[15px] font-semibold leading-[1.2] text-ink">
-            Route assistant
-          </h2>
-          <p className="mt-0.5 text-[12px] leading-[1.35] text-ink-3">
-            {agentReady === false ? "Not connected" : "Same network, same notices"}
+          <h2 className="m3-tm truncate text-m3-on-surface">Tanya Daily</h2>
+          <p className="m3-bs mt-0.5 text-m3-on-surface-variant">
+            {agentReady === false
+              ? "Belum tersambung"
+              : "Jaringan dan gangguan yang sama"}
           </p>
         </div>
-        <button
-          type="button"
-          aria-label="Close assistant"
-          title="Close assistant"
-          onClick={onClose}
-          className="flex size-11 shrink-0 cursor-pointer items-center justify-center text-ink transition-colors pointer-fine:hover:bg-surface-2"
-        >
-          <X aria-hidden className="size-4" />
-        </button>
+        <span className="m3-inbox-button">
+          <M3IconButton
+            label={
+              unreadCount > 0 ? `Kotak masuk, ${unreadCount} belum dibaca` : "Kotak masuk"
+            }
+            variant="tonal"
+            onClick={onOpenInbox}
+          >
+            <Bell aria-hidden />
+          </M3IconButton>
+          {unreadCount > 0 ? (
+            <span className="m3-inbox-button__badge" aria-hidden="true">
+              {unreadCount > 99 ? "99+" : unreadCount}
+            </span>
+          ) : null}
+        </span>
+        <M3IconButton label="Tutup Tanya Daily" onClick={onClose}>
+          <X aria-hidden />
+        </M3IconButton>
       </header>
 
-      <div
-        ref={scrollRef}
-        className="scroll-quiet flex min-h-0 flex-auto flex-col overflow-y-auto px-3 py-3"
-      >
+      <div ref={scrollRef} className="m3-chat-thread">
         {messages.length === 0 ? (
           agentReady === false ? (
-            <p className="px-1 text-[13px] leading-[1.5] text-ink-2">
-              The assistant is not connected. Add the model key, then restart the API.
-              The planner still calculates journeys.
+            <p className="m3-bm text-m3-on-surface-variant">
+              Tanya Daily belum tersambung ke model. Perencana rute tetap menghitung
+              perjalanan, tarif, dan gangguan dari jaringan.
             </p>
           ) : (
-            <div className="flex h-full flex-col">
-              <p className="text-[13px] leading-[1.5] text-ink-2">
-                Ask about the city. A journey, a fare, a closed stop, or the next
-                service at a stop.
+            <div className="grid gap-4">
+              <p className="m3-bm text-m3-on-surface-variant">
+                Tanya soal perjalanan, tarif, halte yang tutup, atau jadwal berikut.
+                Jawaban alat diambil dari jaringan yang sama dengan peta.
               </p>
-              <div className="mt-3 grid gap-1">
+              <div className="flex flex-wrap gap-2">
                 {PROMPTS.map((prompt) => (
-                  <button
+                  <M3Chip
                     key={prompt}
-                    type="button"
+                    variant="suggestion"
+                    className="justify-start"
                     onClick={() => {
-                      void send(prompt, {
-                        ...(origin ? { origin } : {}),
-                        ...(destination ? { destination } : {}),
-                        ...currentContext,
-                        ...(at ? { at } : {}),
-                      });
+                      void send(prompt, context);
                     }}
-                    className="press flex min-h-11 w-full cursor-pointer items-center rounded-[4px] px-2 text-left text-[13px] leading-[1.45] text-ink transition-colors pointer-fine:hover:bg-surface-2"
                   >
-                    <span className="min-w-0 flex-1">{prompt}</span>
-                  </button>
+                    {prompt}
+                  </M3Chip>
                 ))}
               </div>
-              <div className="mt-auto pt-3">
-                <p className="text-[13px] leading-[1.5] text-ink-2">
-                  The planner is the source of truth. The assistant explains the
-                  board; it does not invent a stop, a fare, or a time.
-                </p>
-                <div className="mt-2 flex flex-wrap items-center gap-3">
-                  {NETWORK_SYSTEMS.map((system) => (
-                    <OperatorBadge
-                      key={system.id}
-                      logo={system.logo}
-                      className="h-3.5 w-auto max-w-[64px] object-contain object-left opacity-80"
-                    />
-                  ))}
-                </div>
-              </div>
+              <M3Button
+                variant="tonal"
+                size="s"
+                icon={<MessageSquare aria-hidden />}
+                onClick={() => inputRef.current?.focus()}
+              >
+                Tulis pertanyaan
+              </M3Button>
             </div>
           )
         ) : (
@@ -261,51 +296,65 @@ export function ChatPanel({
                 <li
                   key={message.id}
                   data-message-role={message.role}
-                  className="flex flex-col gap-1"
+                  className={cn(
+                    "flex flex-col gap-1",
+                    user ? "items-end" : "items-start",
+                  )}
                 >
-                  <p className="px-1 text-[12px] leading-[1.35] text-ink-3">
-                    {user ? "You" : "Daily Route"}
+                  <p className="m3-bs px-1 text-m3-on-surface-variant">
+                    {user ? "Kamu" : "Tanya Daily"}
                   </p>
-                  {/* The rider's words are a sentence on the paper, not a
-                      bubble: the chat is a conversation, not a message app. */}
                   <div
                     className={cn(
-                      "min-w-0 text-[13px] leading-[1.55] text-ink",
-                      user ? "max-w-[92%] text-ink-2" : "w-full",
+                      "min-w-0",
+                      user ? "m3-chat-bubble--user" : "m3-chat-bubble--assistant",
                     )}
                   >
-                    {message.activity && message.text.length === 0 ? (
-                      <p className="text-[12px] leading-[1.35] text-ink-3">
-                        {message.activity}
-                      </p>
-                    ) : null}
                     {message.text ? (
-                      <RichText text={message.text} />
-                    ) : message.activity ? null : (
-                      <Spinner label="Writing the answer…" />
+                      <div className="m3-bm">
+                        <RichText text={message.text} />
+                      </div>
+                    ) : message.activity ? (
+                      <div className="flex items-center gap-2">
+                        <M3LoadingIndicator
+                          variant="contained"
+                          size="sm"
+                          label="Menulis jawaban"
+                        />
+                        <p className="m3-bs text-m3-on-surface-variant">{message.activity}</p>
+                      </div>
+                    ) : (
+                      <M3LoadingIndicator
+                        variant="contained"
+                        size="sm"
+                        label="Menulis jawaban"
+                      />
                     )}
+
                     {message.tools.length > 0 ? (
-                      <p className="mt-2 pt-2 text-[12px] leading-[1.35] text-ink-3">
-                        {message.tools.join(" · ")}
+                      <p className="m3-bs mt-2 inline-flex max-w-full items-center gap-1 rounded-m3-full bg-m3-surface-high px-2 py-1 text-m3-on-surface-variant">
+                        <span className="min-w-0 truncate">{message.tools.join(" · ")}</span>
                       </p>
                     ) : null}
+
                     {message.cards.length > 0 ? (
                       <ChatCards
                         cards={message.cards}
                         actions={message.actions}
                         onAction={onAction}
+                        {...(onOpenNotice ? { onOpenNotice } : {})}
                       />
                     ) : message.actions.length > 0 ? (
                       <div className="mt-2 flex flex-wrap gap-2">
                         {message.actions.map((action) => (
-                          <button
+                          <M3Button
                             key={action.key}
-                            type="button"
+                            size="xs"
+                            variant="tonal"
                             onClick={() => onAction(action)}
-                            className="min-h-11 cursor-pointer rounded-[4px] border border-line-strong px-2 py-1 text-left text-[12px] leading-[1.45] text-ink underline decoration-line-strong underline-offset-2 transition-colors hover:bg-surface-2"
                           >
                             {action.label}
-                          </button>
+                          </M3Button>
                         ))}
                       </div>
                     ) : null}
@@ -315,25 +364,29 @@ export function ChatPanel({
             })}
           </ul>
         )}
+
+        {status === "streaming" ? (
+          <p className="m3-bs text-m3-on-surface-variant">Menunggu jawaban...</p>
+        ) : null}
       </div>
 
       {error ? (
-        <p className="px-3 py-2 text-[12px] leading-[1.35] text-danger">
+        <p className="m3-bs px-4 py-2 text-m3-error" role="alert">
           {error}
         </p>
       ) : null}
 
       {agentReady === false ? (
-        <p className="border-t border-line/70 px-3 py-2 text-[12px] leading-[1.45] text-ink-3">
-          You can type a question after the model key is set. The route planner still runs.
+        <p className="border-t border-m3-outline-variant px-4 py-2 text-[12px] leading-[1.45] text-m3-on-surface-variant">
+          Tulis pertanyaan setelah kunci model dipasang. Perencana rute tetap berjalan.
         </p>
       ) : (
-        <form onSubmit={submit} className="relative shrink-0 border-t border-line/70 p-3">
+        <form onSubmit={submit} className="relative shrink-0 p-3">
           {mentionOpen ? (
             <ul
               role="listbox"
-              aria-label="Place suggestions"
-              className="absolute inset-x-3 bottom-full z-10 mb-2 max-h-48 overflow-y-auto rounded-[4px] border border-line bg-surface shadow-pop"
+              aria-label="Saran tempat"
+              className="absolute inset-x-3 bottom-full z-10 mb-2 max-h-48 overflow-y-auto rounded-m3-xl border border-m3-outline-variant bg-m3-surface-lowest shadow-pop"
             >
               {mentionRows.map((row, index) => (
                 <li key={row.key} role="presentation">
@@ -345,42 +398,50 @@ export function ChatPanel({
                     onClick={() => insertMention(row.insert)}
                     className={cn(
                       "flex w-full cursor-pointer flex-col px-3 py-2 text-left",
-                      index === mentionIndex ? "bg-surface-2" : "bg-surface",
+                      index === mentionIndex
+                        ? "bg-m3-surface-high"
+                        : "bg-m3-surface-lowest",
                     )}
                   >
-                    <span className="truncate text-[13px] font-medium text-ink">{row.title}</span>
-                    <span className="truncate text-[12px] leading-[1.2] text-ink-3">{row.detail}</span>
+                    <span className="truncate text-[13px] font-medium text-m3-on-surface">
+                      {row.title}
+                    </span>
+                    <span className="truncate text-[12px] leading-[1.35] text-m3-on-surface-variant">
+                      {row.detail}
+                    </span>
                   </button>
                 </li>
               ))}
               {mentionLoading && mentionRows.length === 0 ? (
-                <li className="px-3 py-3">
-                  <Spinner label="Searching places…" />
+                <li className="flex items-center gap-2 px-3 py-3">
+                  <M3LoadingIndicator size="sm" label="Mencari tempat" />
+                  <span className="m3-bs text-m3-on-surface-variant">Mencari tempat...</span>
                 </li>
               ) : null}
               {mentionFailed ? (
-                <li className="px-3 py-3 text-[12px] leading-[1.45] text-ink-2">
-                  Place suggestions could not be loaded. Check the connection and try again.
+                <li className="px-3 py-3 text-[12px] leading-[1.45] text-m3-on-surface-variant">
+                  Saran tempat tidak bisa dibaca. Periksa koneksi lalu coba lagi.
                 </li>
               ) : null}
               {mentionEmpty ? (
-                <li className="px-3 py-3 text-[12px] leading-[1.45] text-ink-2">
-                  No places match “{mentionNeedle}”.
+                <li className="px-3 py-3 text-[12px] leading-[1.45] text-m3-on-surface-variant">
+                  Tidak ada tempat yang cocok dengan “{mentionNeedle}”.
                 </li>
               ) : null}
               {mentionRows.some((row) => row.overture) ? (
-                <li className="sticky bottom-0 z-10 border-t border-line/70 bg-surface px-3 py-2 text-[12px] leading-[1.35] text-ink-3">
-                  Places © Overture Maps
+                <li className="sticky bottom-0 z-10 border-t border-m3-outline-variant bg-m3-surface-lowest px-3 py-2 text-[12px] leading-[1.35] text-m3-on-surface-variant">
+                  Tempat © Overture Maps
                 </li>
               ) : null}
               {mentionRows.some((row) => row.google) ? (
-                <li className="sticky bottom-0 z-10 border-t border-line/70 bg-surface px-3 py-2 text-[12px] leading-[1.35] text-ink-3">
+                <li className="sticky bottom-0 z-10 border-t border-m3-outline-variant bg-m3-surface-lowest px-3 py-2 text-[12px] leading-[1.35] text-m3-on-surface-variant">
                   Powered by Google
                 </li>
               ) : null}
             </ul>
           ) : null}
-          <div className="flex items-center gap-2">
+
+          <div className="m3-chat-composer">
             <input
               ref={inputRef}
               value={draft}
@@ -409,27 +470,25 @@ export function ChatPanel({
                   setMentionDismissed(true);
                 }
               }}
-              placeholder="Ask about a journey, a fare, or a stop…"
-              aria-label="Message for the route assistant"
-              className="h-11 min-w-0 flex-1 rounded-[4px] border border-line-strong bg-surface px-3 text-[13px] text-ink outline-none transition-colors placeholder:text-ink-3 focus:border-ink"
+              placeholder="Tanya rute, tarif, atau halte..."
+              aria-label="Pesan untuk Tanya Daily"
             />
-            <Button
+            <M3IconButton
               type="submit"
-              variant="primary"
-              size="icon"
+              label="Kirim pesan"
+              variant="filled"
+              size="m"
               disabled={draft.trim().length === 0 || status === "streaming"}
-              aria-label="Send"
-              className="size-10 rounded-[4px]"
             >
               {status === "streaming" ? (
-                <Spinner className="[&_svg]:text-accent-ink" />
+                <M3LoadingIndicator size="sm" label="Mengirim" />
               ) : (
-                <Send aria-hidden className="size-4" />
+                <Send aria-hidden />
               )}
-            </Button>
+            </M3IconButton>
           </div>
-          <p className="mt-2 px-0.5 text-[12px] leading-[1.35] text-ink-3">
-            Schedule-based. Not a live arrival.
+          <p className="m3-bs mt-2 px-1 text-m3-on-surface-variant">
+            Berdasarkan jadwal, bukan kedatangan live.
           </p>
         </form>
       )}

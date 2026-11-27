@@ -186,6 +186,41 @@ export type LineSummary = {
   lengthKm: number | null;
 };
 
+/** One stop of a line in one direction, as the graph orders it. */
+export type LineDirectionStop = {
+  id: string;
+  name: string;
+  code: string | null;
+  isInterchange: boolean;
+  area: string | null;
+  latitude: number;
+  longitude: number;
+  /** The boarding point's name in this direction, when the graph knows it. */
+  platform: string | null;
+};
+
+export type LineDirection = {
+  direction: "forward" | "backward";
+  label: string;
+  headsign: string | null;
+  stops: LineDirectionStop[];
+};
+
+/** One line with the stop order of each direction it actually runs. */
+export type LineDetail = {
+  id: string;
+  systemId: string;
+  code: string;
+  name: string;
+  mode: string;
+  serviceClass: string;
+  operator: string;
+  status: string;
+  color: string | null;
+  lengthKm: number | null;
+  directions: LineDirection[];
+};
+
 export type LegStop = {
   stationId: string;
   name: string;
@@ -606,6 +641,10 @@ export const api = {
 
   lines: (systemId?: string) =>
     request<LineSummary[]>(`/lines${systemId ? `?systemId=${encodeURIComponent(systemId)}` : ""}`),
+
+  /** One line with the ordered stops of every direction it runs. */
+  line: (id: string, signal?: AbortSignal) =>
+    request<LineDetail>(`/lines/${encodeURIComponent(id)}`, signal ? { signal } : undefined),
 
   places: (query: string, signal?: AbortSignal) =>
     request<PlaceSuggestion[]>(

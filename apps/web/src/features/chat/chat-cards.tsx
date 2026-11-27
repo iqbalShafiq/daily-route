@@ -1,9 +1,11 @@
-import { Clock3, ExternalLink, MapPin, Navigation, TriangleAlert } from "lucide-react";
+import { ArrowRight, Clock3, ExternalLink, MapPin, Navigation, TriangleAlert } from "lucide-react";
 
-import { Button } from "../../components/ui/button.js";
-import { Headsign } from "../../components/ui/headsign.js";
+import {
+  M3Button,
+  M3Card,
+  M3ModeBadge,
+} from "../../components/m3e/index.js";
 import { cn } from "../../lib/cn.js";
-import { SERVICE_CLASS_COLOR, type ServiceClass } from "../../lib/format.js";
 import type { ChatCard } from "@daily-route/transit";
 
 import type { ChatAction } from "./use-chat.js";
@@ -19,10 +21,12 @@ export function ChatCards({
   cards,
   actions,
   onAction,
+  onOpenNotice,
 }: {
   cards: readonly ChatCard[];
   actions: readonly ChatAction[];
   onAction: (action: ChatAction) => void;
+  onOpenNotice?: (noticeId: string) => void;
 }) {
   if (cards.length === 0) return null;
   return (
@@ -33,119 +37,139 @@ export function ChatCards({
           card={card}
           actions={actions}
           onAction={onAction}
+          onOpenNotice={onOpenNotice}
         />
       ))}
     </div>
   );
 }
 
+function routeActionOf(
+  card: Extract<ChatCard, { type: "route" }>,
+  actions: readonly ChatAction[],
+): ChatAction {
+  return (
+    actions.find((action) => action.type === "show_route") ?? {
+      key: `route:${card.origin}:${card.destination}`,
+      type: "show_route",
+      label: "Buka perjalanan ini",
+      origin: card.origin,
+      destination: card.destination,
+    }
+  );
+}
+
+function uniqueRides(card: Extract<ChatCard, { type: "route" }>) {
+  const seen = new Set<string>();
+  return card.primary.legs.filter((leg) => {
+    if (leg.kind !== "ride") return false;
+    const key = `${leg.serviceClass}:${leg.lineCode}`;
+    if (seen.has(key)) return false;
+    seen.add(key);
+    return true;
+  });
+}
+
 function ChatCardView({
   card,
   actions,
   onAction,
+  onOpenNotice,
 }: {
   card: ChatCard;
   actions: readonly ChatAction[];
   onAction: (action: ChatAction) => void;
+  onOpenNotice?: ((noticeId: string) => void) | undefined;
 }) {
   if (card.type === "route") {
-    const routeAction =
-      actions.find((action) => action.type === "show_route") ??
-      ({
-        key: `route:${card.origin}:${card.destination}`,
-        type: "show_route",
-        label: "Open this journey",
-        origin: card.origin,
-        destination: card.destination,
-      } satisfies ChatAction);
-    const firstRide = card.primary.legs.find((leg) => leg.kind === "ride");
-    const rideColor = firstRide
-      ? (SERVICE_CLASS_COLOR[firstRide.serviceClass as ServiceClass] ?? "var(--mode-bus)")
-      : null;
+    const routeAction = routeActionOf(card, actions);
+    const rides = uniqueRides(card);
     return (
-      <article className="overflow-hidden rounded-[4px] border border-line">
-        {/* A route answer is the same headsign as the planner's result,
-            not a second card style. */}
-        <Headsign
-          code={firstRide?.lineCode ?? null}
-          codeColor={rideColor}
-          destination={card.destination}
-          closed={card.status === "terhalang"}
-          meta={
-            <>
-              <span>{Math.round(card.primary.durationMinutes)} min</span>
-              <span aria-hidden>·</span>
-              <span>
-                {card.primary.transfers > 0
-                  ? `${card.primary.transfers} change${card.primary.transfers === 1 ? "" : "s"}`
-                  : "no changes"}
-              </span>
-              {card.primary.fareLabel ? (
-                <>
-                  <span aria-hidden>·</span>
-                  <span>Fare</span>
-                  <span>{card.primary.fareLabel}</span>
-                </>
-              ) : null}
-            </>
-          }
-        />
-        <div aria-hidden className="ticket-perforation" />
-
-        <div className="px-3 py-2">
-          <p className="text-[12px] leading-[1.45] text-ink-3">
-            From {card.origin} to {card.destination}
-            {card.primary.walkingKm > 0
-              ? ` · walk ${card.primary.walkingKm.toFixed(1)} km`
-              : ""}
-          </p>
-          <ul className="mt-2 space-y-2">
-            {card.primary.legs.slice(0, 6).map((leg, index) => (
-              <li key={`${leg.from}-${leg.to}-${index}`} className="flex items-center gap-2">
-                <span
-                  className={cn(
-                    "w-9 shrink-0 rounded-[3px] px-1 py-px text-center text-[12px] font-semibold tabular-nums",
-                    leg.kind === "walk"
-                      ? "bg-surface-2 text-ink-3"
-                      : "bg-surface-2 text-ink",
-                  )}
-                  style={
-                    leg.kind === "walk"
-                      ? undefined
-                      : { color: SERVICE_CLASS_COLOR[leg.serviceClass as ServiceClass] }
-                  }
-                >
-                  {leg.kind === "walk" ? "walk" : (leg.lineCode ?? "ride")}
-                </span>
-                <span className="min-w-0 flex-1 truncate text-[12px] leading-[1.45] text-ink-2">
-                  {leg.from} → {leg.to}
-                </span>
-                {leg.kind === "ride" ? <FrequencyBadge leg={leg} /> : null}
-                <span className="shrink-0 text-[12px] tabular-nums text-ink-3">
-                  {Math.round(leg.durationMinutes)} min
-                </span>
-              </li>
-            ))}
-          </ul>
+      <M3Card
+        variant={card.status === "terhalang" ? "error-container" : "primary-container"}
+        radius="xl"
+        className="grid gap-3 p-4"
+      >
+        <div className="flex flex-wrap items-center gap-1">
+          {rides.length > 0 ? (
+            rides.map((leg) => (
+              <M3ModeBadge
+                key={`${leg.lineCode}-${leg.serviceClass}`}
+                serviceClass={leg.serviceClass}
+                lineCode={leg.lineCode}
+                label={leg.lineCode ?? "Transit"}
+              />
+            ))
+          ) : (
+            <M3ModeBadge mode="walk" label="Jalan" />
+          )}
         </div>
 
+        <div className="grid gap-1">
+          <p className="m3-bs flex min-w-0 items-center gap-1">
+            <span className="truncate">{card.origin}</span>
+            <ArrowRight aria-hidden className="size-3 shrink-0" />
+            <span className="truncate">{card.destination}</span>
+          </p>
+          <p className="m3-hs m3-em m3-num">
+            {Math.round(card.primary.durationMinutes)} mnt
+            {card.primary.fareLabel ? (
+              <span className="m3-bs m3-em ml-2">· {card.primary.fareLabel}</span>
+            ) : null}
+          </p>
+          <p className="m3-bs">
+            {card.primary.transfers > 0
+              ? `${card.primary.transfers} kali transit`
+              : "Tanpa transit"}
+            {card.primary.walkingKm > 0
+              ? ` · ${card.primary.walkingKm.toFixed(1)} km jalan`
+              : ""}
+          </p>
+        </div>
+
+        <ul className="grid gap-1">
+          {card.primary.legs.slice(0, 6).map((leg, index) => (
+            <li
+              key={`${leg.from}-${leg.to}-${index}`}
+              className="flex items-center gap-2 text-[13px] leading-[1.45]"
+            >
+              <span
+                className={cn(
+                  "w-10 shrink-0 rounded-m3-sm px-1 py-0.5 text-center font-mono text-[12px] font-semibold",
+                  leg.kind === "walk"
+                    ? "bg-m3-surface-lowest/40"
+                    : "bg-m3-surface-lowest/60",
+                )}
+              >
+                {leg.kind === "walk" ? "Jalan" : (leg.lineCode ?? "Ride")}
+              </span>
+              <span className="min-w-0 flex-1 truncate">
+                {leg.from} ke {leg.to}
+              </span>
+              <span className="m3-num shrink-0 text-[12px]">
+                {Math.round(leg.durationMinutes)} mnt
+              </span>
+            </li>
+          ))}
+        </ul>
+
         {card.notices.length > 0 ? (
-          <div className="bg-warn-soft px-3 py-2">
+          <div className="grid gap-1 rounded-m3-lg bg-m3-error-container p-3 text-m3-on-error-container">
             {card.notices.slice(0, 2).map((notice) => {
-              const noticeAction = actions.find(
-                (action) => action.type === "show_notice" && action.disruptionId === notice.id,
+              const action = actions.find(
+                (entry) => entry.type === "show_notice" && entry.disruptionId === notice.id,
               );
               return (
-                <div key={notice.id} className="flex items-start gap-2 py-0.5 text-[12px] leading-[1.45] text-ink-2">
-                  <TriangleAlert aria-hidden className="mt-px size-3 shrink-0 text-warn" />
+                <div key={notice.id} className="flex items-start gap-2 text-[12px] leading-[1.45]">
+                  <TriangleAlert aria-hidden className="mt-0.5 size-3 shrink-0" />
                   <span className="min-w-0 flex-1">{notice.title}</span>
-                  {noticeAction ? (
+                  {action ? (
                     <button
                       type="button"
-                      onClick={() => onAction(noticeAction)}
-                      className="shrink-0 cursor-pointer text-[12px] text-ink underline underline-offset-2 hover:text-ink-2"
+                      onClick={() => onAction(action)}
+                      className="shrink-0 cursor-pointer underline underline-offset-2"
                     >
-                      Show
+                      Peta
                     </button>
                   ) : null}
                 </div>
@@ -155,34 +179,32 @@ function ChatCardView({
         ) : null}
 
         {card.alternatives.length > 0 ? (
-          <div className="px-3 py-2">
-            <p className="text-[12px] leading-[1.45] text-ink-3">Other ways</p>
-            <ul className="mt-1 space-y-0.5">
-              {card.alternatives.map((option, index) => (
-                <li key={index} className="flex items-baseline gap-2 text-[12px] text-ink-2">
-                  <span className="min-w-0 flex-1 truncate">
-                    {option.legs
-                      .filter((leg) => leg.kind === "ride")
-                      .map((leg) => leg.lineCode)
-                      .filter(Boolean)
-                      .join(" · ") || "Route"}
-                  </span>
-                  <span className="tabular-nums">{option.durationMinutes} min</span>
-                  {option.fareLabel ? <span className="tabular-nums">{option.fareLabel}</span> : null}
-                </li>
-              ))}
-            </ul>
+          <div className="grid gap-1">
+            <p className="m3-lm uppercase">Pilihan lain</p>
+            {card.alternatives.slice(0, 2).map((option, index) => (
+              <p key={index} className="m3-bs flex items-baseline gap-2">
+                <span className="min-w-0 flex-1 truncate">
+                  {option.legs
+                    .filter((leg) => leg.kind === "ride")
+                    .map((leg) => leg.lineCode)
+                    .filter(Boolean)
+                    .join(" · ") || "Perjalanan"}
+                </span>
+                <span className="m3-num">{option.durationMinutes} mnt</span>
+                {option.fareLabel ? <span className="m3-num">{option.fareLabel}</span> : null}
+              </p>
+            ))}
           </div>
         ) : null}
 
-        {routeAction ? (
-          <div className="px-3 py-2">
-            <Button type="button" variant="secondary" size="sm" onClick={() => onAction(routeAction)}>
-              Open this journey
-            </Button>
-          </div>
-        ) : null}
-      </article>
+        <M3Button
+          variant={card.status === "terhalang" ? "tonal" : "filled"}
+          icon={<ArrowRight aria-hidden />}
+          onClick={() => onAction(routeAction)}
+        >
+          Pakai rute ini
+        </M3Button>
+      </M3Card>
     );
   }
 
@@ -194,7 +216,7 @@ function ChatCardView({
       ({
         key: `stop:${card.stationId}`,
         type: "show_stop",
-        label: `Show ${card.name}`,
+        label: `Lihat ${card.name} di peta`,
         stationId: card.stationId,
         name: card.name,
         latitude: card.latitude,
@@ -207,7 +229,7 @@ function ChatCardView({
       ({
         key: `origin:${card.stationId}`,
         type: "set_origin",
-        label: `Use ${card.name} as the origin`,
+        label: `Dari ${card.name}`,
         stationId: card.stationId,
         name: card.name,
         latitude: card.latitude,
@@ -220,54 +242,65 @@ function ChatCardView({
       ({
         key: `destination:${card.stationId}`,
         type: "set_destination",
-        label: `Use ${card.name} as the destination`,
+        label: `Ke ${card.name}`,
         stationId: card.stationId,
         name: card.name,
         latitude: card.latitude,
         longitude: card.longitude,
       } satisfies ChatAction);
     return (
-      <article className="rounded-[4px] border border-line bg-surface px-3 py-3">
-        <p className="flex items-center gap-2 text-[12px] font-semibold leading-[1.35] text-ink-3">
-          <MapPin aria-hidden className="size-3" />
-          Stop
+      <M3Card variant="filled" radius="xl" className="grid gap-2 p-4">
+        <p className="m3-lm uppercase flex items-center gap-2">
+          <MapPin aria-hidden className="size-4" />
+          {card.area ? `Halte · ${card.area}` : "Halte"}
         </p>
-        <p className="mt-0.5 text-[13px] font-medium text-ink">{card.name}</p>
-        {card.area ? <p className="text-[12px] text-ink-3">{card.area}</p> : null}
+        <p className="m3-tm">{card.name}</p>
         {card.lines.length > 0 ? (
-          <p className="mt-2 flex flex-wrap gap-1">
+          <div className="flex flex-wrap gap-1">
             {card.lines.slice(0, 8).map((line) => (
-              <span key={line.code} className="rounded-[3px] bg-surface-2 px-2 py-px text-[12px] font-semibold text-ink-2">
-                {line.code}
-              </span>
+              <M3ModeBadge
+                key={line.code}
+                serviceClass={line.serviceClass}
+                lineCode={line.code}
+                label={line.code}
+              />
             ))}
-          </p>
-        ) : null}
-        {card.departures.length > 0 ? (
-          <div className="mt-2">
-            <p className="flex items-center gap-1 text-[12px] text-ink-3">
-              <Clock3 aria-hidden className="size-3" />
-              Scheduled departures
-            </p>
-            <ul className="mt-1 space-y-0.5">
-              {card.departures.slice(0, 5).map((row, index) => (
-                <li key={`${row.code}-${row.direction}-${index}`} className="flex items-baseline gap-2 text-[12px] text-ink-2">
-                  <span className="w-9 shrink-0 font-semibold text-ink-3">{row.code}</span>
-                  <span className="min-w-0 flex-1 truncate">{row.headsign ?? "Towards the end"}</span>
-                  <span className="shrink-0 tabular-nums text-ink-3">
-                    {row.headwayMinMinutes === null ? "unknown" : `~${Math.round(row.headwayMinMinutes)} min`}
-                  </span>
-                </li>
-              ))}
-            </ul>
           </div>
         ) : null}
-        <div className="mt-2 flex flex-wrap gap-2">
-          {show ? <ActionButton action={show} onAction={onAction} /> : null}
-          {origin ? <ActionButton action={origin} onAction={onAction} /> : null}
-          {destination ? <ActionButton action={destination} onAction={onAction} /> : null}
+        {card.departures.length > 0 ? (
+          <div className="grid gap-1">
+            <p className="m3-bs flex items-center gap-1">
+              <Clock3 aria-hidden className="size-3" />
+              Berdasarkan jadwal, bukan kedatangan live
+            </p>
+            {card.departures.slice(0, 5).map((row, index) => (
+              <p
+                key={`${row.code}-${row.direction}-${index}`}
+                className="m3-bs flex items-baseline gap-2"
+              >
+                <span className="w-10 shrink-0 font-mono">{row.code}</span>
+                <span className="min-w-0 flex-1 truncate">{row.headsign ?? "Ujung jalur"}</span>
+                <span className="m3-num shrink-0">
+                  {row.headwayMinMinutes === null
+                    ? "Jadwal"
+                    : `~${Math.round(row.headwayMinMinutes)} mnt`}
+                </span>
+              </p>
+            ))}
+          </div>
+        ) : null}
+        <div className="flex flex-wrap gap-2">
+          <M3Button size="xs" variant="filled" icon={<MapPin aria-hidden />} onClick={() => onAction(show)}>
+            Lihat di peta
+          </M3Button>
+          <M3Button size="xs" variant="tonal" icon={<Navigation aria-hidden />} onClick={() => onAction(origin)}>
+            Dari sini
+          </M3Button>
+          <M3Button size="xs" variant="tonal" icon={<ArrowRight aria-hidden />} onClick={() => onAction(destination)}>
+            Ke sini
+          </M3Button>
         </div>
-      </article>
+      </M3Card>
     );
   }
 
@@ -280,7 +313,7 @@ function ChatCardView({
         ? ({
             key: `notice:${card.id}`,
             type: "show_notice",
-            label: "Show on map",
+            label: "Lihat di peta",
             disruptionId: card.id,
             latitude: card.latitude,
             longitude: card.longitude,
@@ -292,69 +325,56 @@ function ChatCardView({
         ? ({
             key: `source:${card.url}`,
             type: "open_source",
-            label: "Read the source",
+            label: "Sumber",
             url: card.url,
           } satisfies ChatAction)
         : undefined);
     return (
-      <article className="rounded-[4px] border border-line bg-surface px-3 py-3">
-        <p className="flex items-center gap-2 text-[12px] font-semibold leading-[1.35] text-warn">
-          <TriangleAlert aria-hidden className="size-3" />
+      <M3Card variant="error-container" radius="xl" className="grid gap-2 p-4">
+        <p className="m3-lm uppercase flex items-center gap-2">
+          <TriangleAlert aria-hidden className="size-4" />
           {card.kind} · {card.scope}
         </p>
-        <p className="mt-0.5 text-[13px] font-medium text-ink">{card.title}</p>
-        {card.affects ? <p className="mt-0.5 text-[12px] text-ink-3">{card.affects}</p> : null}
-        <div className="mt-2 flex flex-wrap gap-2">
-          {show ? <ActionButton action={show} onAction={onAction} /> : null}
-          {source ? <ActionButton action={source} onAction={onAction} /> : null}
+        <p className="m3-tm">{card.title}</p>
+        {card.affects ? <p className="m3-bs">{card.affects}</p> : null}
+        <div className="flex flex-wrap gap-2">
+          <M3Button
+            size="xs"
+            variant="filled"
+            icon={<TriangleAlert aria-hidden />}
+            onClick={() => {
+              if (onOpenNotice) onOpenNotice(card.id);
+              else if (show) onAction(show);
+            }}
+          >
+            Lihat detail
+          </M3Button>
+          {source ? (
+            <M3Button
+              size="xs"
+              variant="tonal"
+              icon={<ExternalLink aria-hidden />}
+              onClick={() => onAction(source)}
+            >
+              Sumber
+            </M3Button>
+          ) : null}
         </div>
-      </article>
+      </M3Card>
     );
   }
 
   return (
-    <article className="rounded-[4px] border border-line bg-surface px-3 py-2">
+    <M3Card variant="outlined" radius="xl" className="p-3">
       <a
         href={card.url}
         target="_blank"
         rel="noreferrer"
-        className="flex items-center gap-2 text-[12px] text-ink underline underline-offset-2 hover:text-ink-2"
+        className="m3-bs flex items-center gap-2 underline underline-offset-2"
       >
-        <ExternalLink aria-hidden className="size-3" />
+        <ExternalLink aria-hidden className="size-4 shrink-0" />
         <span className="min-w-0 truncate">{card.title}</span>
       </a>
-    </article>
-  );
-}
-
-function FrequencyBadge({ leg }: { leg: { serviceLabel: string | null; headwayMinMinutes: number | null; headwayMaxMinutes: number | null; outsideService: boolean; serviceDetail: string | null } }) {
-  if (leg.outsideService) {
-    return <span className="shrink-0 text-[12px] text-danger">no service</span>;
-  }
-  if (leg.headwayMinMinutes === null) return null;
-  const min = Math.round(leg.headwayMinMinutes);
-  const max = leg.headwayMaxMinutes === null ? min : Math.round(leg.headwayMaxMinutes);
-  return (
-    <span className="flex shrink-0 items-center gap-0.5 text-[12px] text-ink-3" title={[leg.serviceLabel, leg.serviceDetail].filter(Boolean).join(" · ") || undefined}>
-      <Clock3 aria-hidden className="size-3" />
-      {min === max ? `~${min}m` : `${min}-${max}m`}
-    </span>
-  );
-}
-
-function ActionButton({
-  action,
-  onAction,
-}: {
-  action: ChatAction;
-  onAction: (action: ChatAction) => void;
-}) {
-  return (
-    <Button type="button" variant="secondary" size="sm" onClick={() => onAction(action)}>
-      {action.type === "set_origin" ? (
-        <Navigation aria-hidden className="size-3" />
-      ) : null}
-      {action.label}
-    </Button>
+    </M3Card>
   );
 }

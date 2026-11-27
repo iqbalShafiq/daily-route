@@ -250,11 +250,11 @@ test.describe("route planner", () => {
   test("opens the assistant over the map and closes it again", async ({ page }) => {
     await page.goto("/");
 
-    await page.getByRole("button", { name: "Ask the assistant" }).click();
-    await expect(page.getByRole("heading", { name: "Route assistant" })).toBeVisible();
+    await page.getByRole("button", { name: "Tanya" }).click();
+    await expect(page.getByRole("heading", { name: "Tanya Daily" })).toBeVisible();
 
-    await page.getByRole("button", { name: "Close assistant" }).click();
-    await expect(page.getByRole("heading", { name: "Route assistant" })).toHaveCount(0);
+    await page.getByRole("button", { name: "Tutup Tanya Daily" }).click();
+    await expect(page.getByRole("heading", { name: "Tanya Daily" })).toHaveCount(0);
   });
 
   test("gives the search the whole width of a phone", async ({ page }, testInfo) => {
