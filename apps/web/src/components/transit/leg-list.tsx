@@ -1,41 +1,34 @@
-import { ArrowRight } from "lucide-react";
+import { ArrowRight, Footprints } from "lucide-react";
 import { useEffect, useState } from "react";
 
+import { M3ModeBadge, M3Shape } from "../../components/m3e/index.js";
 import { cn } from "../../lib/cn.js";
-import { iconWellClass } from "../ui/icon-well.js";
 import {
   MODE_LABEL,
   SERVICE_CLASS_COLOR,
   SERVICE_CLASS_LABEL,
   formatDistance,
   formatDuration,
-  stopNoun,
 } from "../../lib/format.js";
 import type { ItineraryLeg } from "../../lib/api.js";
-
-import { operatorCompactForLine, RideIdentity } from "../map/operator-mark.js";
 import { MarqueeText } from "../ui/marquee-text.js";
 import { Tooltip } from "../ui/tooltip.js";
-import { ModeIcon } from "./mode-icon.js";
 import { StopPopover } from "./stop-popover.js";
 import { ServiceChip } from "./service-chip.js";
+
+import { estimateArrivalIso, formatJakartaClock } from "../../lib/jakarta-time.js";
 
 /**
  * The legs of one itinerary.
  *
- * Each leg is a row: the mode icon, the line, the boarding and alighting
- * stops, and the time. The stop list is collapsible, because the full list
- * of every halte is rarely what a rider needs at a glance.
- */
-/**
- * The journey as a list.
- *
- * Every leg can be pointed at, and pointing at it tells the map which
- * leg of the journey the reader is looking at. The two are one system:
- * the list is the keyboard's way into the map.
+ * The timeline is the M3 Expressive version of the printed journey: a 44px
+ * time column, a 28px rail in the colour of the vehicle, and the line, its
+ * stops and its service under it. The rail is dotted for a walk and solid
+ * for a ride, so the two are told apart before the label is read.
  */
 export function LegList({
   legs,
+  startIso,
   dense = false,
   onLegSelect,
   onStopHover,
@@ -43,6 +36,8 @@ export function LegList({
   closedStationIds,
 }: {
   legs: readonly ItineraryLeg[];
+  /** The departure instant, so the time column can name each stop. */
+  startIso?: string | undefined;
   dense?: boolean;
   onLegSelect?: ((legId: string | null) => void) | undefined;
   /** Pointing at a stop in the list points at that stop on the map. */
@@ -51,10 +46,6 @@ export function LegList({
   /** Stops the journey must not use, because a notice removed them. */
   closedStationIds?: ReadonlySet<string> | undefined;
 }) {
-  /*
-   * The stop the reader is pointing at. Its card stands beside the
-   * name, and it closes as soon as the list moves under it.
-   */
   const [pointed, setPointed] = useState<PointedStop | null>(null);
 
   useEffect(() => {
@@ -72,39 +63,52 @@ export function LegList({
     );
   }
 
+  const rows = legs.map((leg, index) => {
+    const before = legs
+      .slice(0, index)
+      .reduce((total, entry) => total + entry.durationMinutes, 0);
+    const start = startIso ? formatJakartaClock(estimateArrivalIso(startIso, before)) : null;
+    return { leg, index, start };
+  });
+
   return (
     <>
-    <ol aria-label="Journey legs" className={cn("space-y-0", dense ? "text-[13px]" : "text-[13px]")}>
-      {legs.map((leg, index) => (
-        <LegRow
-          key={`${leg.fromName}-${leg.toName}-${index}`}
-          leg={leg}
-          last={index === legs.length - 1}
-          previousMode={legs[index - 1]?.kind === "ride" ? (legs[index - 1]?.mode ?? null) : null}
-          nextMode={
-            legs[index + 1]?.kind === "ride" ? (legs[index + 1]?.mode ?? null) : null
-          }
-          legId={legIdOf(leg, index)}
-          active={activeLegId === legIdOf(leg, index)}
-          onSelect={onLegSelect}
-          onStopHover={onStopHover}
-          onStopEnter={(stationId, name, anchor) => setPointed({ stationId, name, anchor })}
-          onStopLeave={() => setPointed(null)}
-          closed={closedStationIds?.has(leg.fromStationId ?? "") || closedStationIds?.has(leg.toStationId ?? "") || leg.stops.some((stop) => closedStationIds?.has(stop.stationId))}
-          closedStationIds={closedStationIds}
-        />
-      ))}
-    </ol>
-    <StopPopover
-      stationId={pointed?.stationId ?? null}
-      name={pointed?.name ?? ""}
-      anchor={pointed?.anchor ?? null}
-    />
+      <ol
+        aria-label="Journey legs"
+        className={cn("m3-leg-list", dense ? "m3-bs" : "m3-bm")}
+      >
+        {rows.map(({ leg, index, start }) => (
+          <LegRow
+            key={`${leg.fromName}-${leg.toName}-${index}`}
+            leg={leg}
+            last={index === rows.length - 1}
+            startClock={start}
+            previousMode={legs[index - 1]?.kind === "ride" ? (legs[index - 1]?.mode ?? null) : null}
+            nextMode={legs[index + 1]?.kind === "ride" ? (legs[index + 1]?.mode ?? null) : null}
+            legId={legIdOf(leg, index)}
+            active={activeLegId === legIdOf(leg, index)}
+            onSelect={onLegSelect}
+            onStopHover={onStopHover}
+            onStopEnter={(stationId, name, anchor) => setPointed({ stationId, name, anchor })}
+            onStopLeave={() => setPointed(null)}
+            closed={
+              closedStationIds?.has(leg.fromStationId ?? "") ||
+              closedStationIds?.has(leg.toStationId ?? "") ||
+              leg.stops.some((stop) => closedStationIds?.has(stop.stationId))
+            }
+            closedStationIds={closedStationIds}
+          />
+        ))}
+      </ol>
+      <StopPopover
+        stationId={pointed?.stationId ?? null}
+        name={pointed?.name ?? ""}
+        anchor={pointed?.anchor ?? null}
+      />
     </>
   );
 }
 
-/** A stop the reader points at, and where its name stands. */
 type PointedStop = {
   stationId: string;
   name: string;
@@ -119,6 +123,7 @@ export function legIdOf(leg: ItineraryLeg, index: number): string {
 function LegRow({
   leg,
   last,
+  startClock,
   legId,
   active,
   onSelect,
@@ -132,151 +137,150 @@ function LegRow({
 }: {
   leg: ItineraryLeg;
   last: boolean;
+  startClock: string | null;
   legId: string;
   active: boolean;
-  /** The mode of the vehicle before this leg, and the one after it. */
   previousMode?: string | null | undefined;
   nextMode?: string | null | undefined;
   onSelect?: ((legId: string | null) => void) | undefined;
   onStopHover?: ((stationId: string | null) => void) | undefined;
-  /** The reader points at a stop: its card opens beside the name. */
   onStopEnter?: ((stationId: string, name: string, anchor: DOMRect) => void) | undefined;
   onStopLeave?: (() => void) | undefined;
-  /** This leg boards or alights at a stop that is out of service. */
   closed?: boolean | undefined;
   closedStationIds?: ReadonlySet<string> | undefined;
 }) {
   const isWalk = leg.kind === "walk";
   const walkText = isWalk ? walkSummary(leg, previousMode, nextMode) : null;
-  const compact = !isWalk && operatorCompactForLine(leg.lineId);
-  const noun = stopNoun(isWalk ? "walk" : leg.mode);
-  const nounLabel = leg.stops.length === 1 ? noun : `${noun}s`;
+  const noun = stopNounId(isWalk ? "walk" : leg.mode);
+  const nounLabel = noun;
   const color = isWalk
-    ? "var(--ink-3)"
-    : SERVICE_CLASS_COLOR[(leg.serviceClass as never) ?? "brt"] ?? "var(--ink-2)";
+    ? "var(--walk)"
+    : (SERVICE_CLASS_COLOR[(leg.serviceClass as never) ?? "brt"] ?? "var(--ink-2)");
 
   return (
     <li
-      className={cn(
-        "group relative flex cursor-pointer gap-3 px-4 py-3 transition-colors",
-        active ? "border-l-2 border-l-ink bg-surface-2" : "hover:bg-surface-2/70",
-      )}
+      className={cn("m3-leg-row", active && "m3-leg-row--active")}
       onClick={() => onSelect?.(active ? null : legId)}
     >
-      <div className="relative flex w-9 shrink-0 flex-col items-center">
-        <span className={cn(iconWellClass, "relative z-20")}>
+      <div className="m3-leg-time">
+        <span className="m3-ts m3-num text-m3-on-surface">
+          {startClock ?? formatDuration(leg.durationMinutes)}
+        </span>
+        {startClock ? (
+          <span className="m3-bs m3-num text-m3-on-surface-variant">
+            {formatDuration(leg.durationMinutes)}
+          </span>
+        ) : null}
+      </div>
+
+      <div className="m3-leg-rail">
+        <span className="m3-leg-plate">
           {isWalk ? (
-            <ModeIcon mode="walk" className="size-4" />
+            <M3Shape
+              shape="cookie6"
+              size={28}
+              className="bg-m3-secondary-container text-m3-on-secondary-container"
+            >
+              <Footprints aria-hidden className="size-4" />
+            </M3Shape>
           ) : (
-            <RideIdentity
-              lineId={leg.lineId}
+            <M3ModeBadge
+              size="icon"
+              systemId={leg.lineId ? (leg.lineId.split(":")[0] ?? null) : null}
               serviceClass={leg.serviceClass}
-              className={compact ? "size-6" : "size-4"}
+              lineCode={leg.lineCode}
             />
           )}
         </span>
         {!last ? (
           <span
             aria-hidden
-            className="absolute bottom-[-30px] left-1/2 top-[30px] z-10 w-[2px] -translate-x-1/2 opacity-55"
-            style={{
-              backgroundImage: `linear-gradient(to bottom, ${color} 55%, transparent 55%)`,
-              backgroundSize: "2px 6px",
-            }}
+            className={cn("m3-leg-line", isWalk && "m3-leg-line--walk")}
+            style={isWalk ? undefined : { backgroundColor: color }}
           />
         ) : null}
       </div>
 
-      <div className="min-w-0 flex-1">
+      <div className="m3-leg-detail min-w-0">
         {isWalk ? (
-          /*
-           * A walk has no transit type and no corridor name, so it keeps
-           * one line: what it is, where it goes, and how long it takes.
-           * The duration sits on the title's line, not below it.
-           */
           <>
             <div className="flex items-baseline gap-2">
-              <span className="shrink-0 text-[15px] font-semibold text-ink">
-                {walkText?.title ?? "Walk"}
+              <span className="m3-ll shrink-0 text-m3-on-surface">
+                {walkText?.title ?? "Jalan"}
               </span>
-              <span className="min-w-0 flex-1 truncate text-[13px] leading-[1.45] text-ink-2">
+              <span className="m3-bs min-w-0 flex-1 truncate text-m3-on-surface-variant">
                 {walkText?.detail}
               </span>
-              <span className="shrink-0 font-mono text-[13px] tabular-nums text-ink-2">
+              <span className="m3-ts m3-num shrink-0 text-m3-on-surface-variant">
                 {formatDuration(leg.durationMinutes)}
               </span>
             </div>
             {leg.jpo && leg.jpo.length > 0 ? (
-              <p className="mt-0.5 truncate text-[12px] leading-[1.45] text-ink-3">
-                Via {leg.jpo.map((jpo) => jpo.name).join(", ")}
-              </p>
+              <span className="m3-chip m3-chip--suggestion mt-2 inline-flex">
+                Via JPO {leg.jpo.map((jpo) => jpo.name).join(", ")}
+              </span>
             ) : null}
             {closed ? (
-              <p className="mt-0.5 text-[12px] font-semibold leading-[1.45] text-danger">Closed</p>
+              <p className="m3-bs mt-1 text-m3-error">Tutup</p>
             ) : null}
             {leg.detour ? <DetourLine detour={leg.detour} /> : null}
           </>
         ) : (
           <>
-            {/*
-             * The name of the line stands on a line of its own, because it
-             * is the longest thing here and the line is read first. The
-             * kind of vehicle and the time stand below it, where they do
-             * not push the name out of the row.
-             */}
             <div className="flex items-baseline gap-2">
               <MarqueeText
                 text={leg.lineName ?? MODE_LABEL[leg.mode as keyof typeof MODE_LABEL] ?? "Journey"}
-                className="min-w-0 flex-1 text-[15px] font-semibold text-ink"
+                className="m3-ll min-w-0 flex-1 text-m3-on-surface"
               />
               {leg.lineCode ? <LinePatternChip leg={leg} color={color} /> : null}
             </div>
 
-            <div className="mt-0.5 flex flex-wrap items-baseline gap-x-2 gap-y-0.5">
+            <div className="mt-1 flex flex-wrap items-center gap-x-2 gap-y-1">
               {leg.serviceClass ? (
-                <span className="text-[12px] leading-[1.45] text-ink-3">
+                <span className="m3-bs text-m3-on-surface-variant">
                   {SERVICE_CLASS_LABEL[leg.serviceClass as never] ?? leg.serviceClass}
                 </span>
               ) : null}
-              {patternSentenceOf(leg) ? (
-                <span className="text-[12px] leading-[1.45] text-ink-3">
-                  {patternSentenceOf(leg)}
+              {leg.temporary ? (
+                <span className="m3-chip m3-chip--suggestion pointer-events-none">
+                  Layanan sementara
                 </span>
               ) : null}
-              {leg.temporary ? (
-                <span className="text-[12px] leading-[1.45] text-ink-2">Temporary service</span>
-              ) : null}
               {closed ? (
-                <span className="text-[12px] font-semibold leading-[1.45] text-danger">Closed</span>
+                <span className="m3-bs font-semibold text-m3-error">Tutup</span>
               ) : null}
               <ServiceChip leg={leg} />
-              <span className="ml-auto shrink-0 text-[13px] tabular-nums text-ink-2">
+              <span className="m3-ts m3-num ml-auto shrink-0 text-m3-on-surface-variant">
                 {formatDuration(leg.durationMinutes)}
               </span>
             </div>
 
             {leg.directionLabel || (leg.fromPlatform && leg.fromPlatform.name !== leg.fromName) ? (
-              <p className="mt-0.5 truncate text-[12px] leading-[1.45] text-ink-3">
-                {leg.directionLabel ? `Towards ${leg.directionLabel.split(" → ").at(-1)}` : null}
+              <p className="m3-bs mt-1 truncate text-m3-on-surface-variant">
+                {leg.directionLabel ? `Arah ${towardsOf(leg.directionLabel)}` : null}
                 {leg.fromPlatform && leg.fromPlatform.name !== leg.fromName
-                  ? `${leg.directionLabel ? " · " : ""}board at ${leg.fromPlatform.name}`
+                  ? `${leg.directionLabel ? " · " : ""}Naik di ${leg.fromPlatform.name}`
                   : null}
               </p>
             ) : null}
 
+            {patternSentenceOf(leg) ? (
+              <p className="m3-bs mt-1 text-m3-on-surface-variant">{patternSentenceOf(leg)}</p>
+            ) : null}
+
             {leg.detour ? <DetourLine detour={leg.detour} /> : null}
 
-            <p className="mt-0.5 flex items-center gap-2 text-[13px] text-ink-2">
+            <p className="m3-bs mt-1 flex min-w-0 items-center gap-1 text-m3-on-surface-variant">
               {leg.changedFrom ? (
                 <span className="truncate">
-                  Change from {leg.changedFrom} at {leg.changedAt}
+                  Ganti dari {leg.changedFrom} di {leg.changedAt}
                 </span>
               ) : leg.fromName === leg.toName ? (
-                <span className="truncate">Stops at {leg.fromName}</span>
+                <span className="truncate">Berhenti di {leg.fromName}</span>
               ) : (
                 <>
                   <span className="truncate">{leg.fromName}</span>
-                  <ArrowRight aria-hidden className="size-3 shrink-0 text-ink-3" />
+                  <ArrowRight aria-hidden className="size-3 shrink-0" />
                   <span className="truncate">{leg.toName}</span>
                 </>
               )}
@@ -285,72 +289,66 @@ function LegRow({
         )}
 
         {leg.stops.length > 2 ? (
-          <details className="group mt-2" open={!isWalk ? true : undefined}>
-            <summary className="inline-flex min-h-11 cursor-pointer list-none items-center gap-2 rounded text-[12px] leading-[1.45] text-ink-3 transition-colors hover:text-ink-2">
+          <details className="m3-leg-stops group mt-2" open={!isWalk ? true : undefined}>
+            <summary className="m3-bs inline-flex min-h-9 cursor-pointer list-none items-center gap-2 text-m3-on-surface-variant transition-colors hover:text-m3-on-surface">
               <ChevronSmall />
               {leg.stops.length} {nounLabel} · {formatDistance(leg.distanceKm)}
-              {!isWalk && leg.waitMinutes > 0 ? ` · wait ${leg.waitMinutes} min` : ""}
+              {!isWalk && leg.waitMinutes > 0 ? ` · tunggu ${leg.waitMinutes} mnt` : ""}
             </summary>
 
             {leg.stops.some((stop) => stop.skipped) ? (
-              <p className="mt-2 text-[12px] leading-[1.45] text-danger">
-                Red dots are passed without stopping. Hover a stop for the notice.
+              <p className="m3-bs mt-2 text-m3-error">
+                Titik merah dilewati tanpa berhenti. Arahkan penunjuk ke halte untuk membaca
+                pengumumannya.
               </p>
             ) : null}
-            {/*
-             * The stops of the ride, as a line the rider can follow:
-             * the place, the moment the vehicle reaches it, and the
-             * distance from the start. Every stop is a point on the map,
-             * so pointing at one of them lights it up there.
-             */}
-            <ol className="mt-2 space-y-0">
+
+            <ol className="mt-2 grid gap-0.5">
               {leg.stops.map((stop, index) => {
                 const first = index === 0;
-                const last = index === leg.stops.length - 1;
-                const skipped = stop.skipped === true || closedStationIds?.has(stop.stationId) === true;
+                const lastStop = index === leg.stops.length - 1;
+                const skipped =
+                  stop.skipped === true || closedStationIds?.has(stop.stationId) === true;
                 const skipNote = skipped
                   ? `${stop.skippedNotice ?? "This stop is closed."} The vehicle passes without stopping.`
                   : undefined;
-                const minutes = Math.round((leg.durationMinutes * index) / Math.max(leg.stops.length - 1, 1));
+                const minutes = Math.round(
+                  (leg.durationMinutes * index) / Math.max(leg.stops.length - 1, 1),
+                );
                 return (
                   <li
                     key={`${stop.stationId}-${index}`}
                     title={skipNote}
-                    className="flex items-center gap-2 rounded-[4px] py-1 text-[12px] transition-colors hover:bg-surface-2"
+                    className="flex items-center gap-2 rounded-[4px] py-1 transition-colors hover:bg-m3-surface-mid"
                     onMouseEnter={(event) => {
                       onStopHover?.(stop.stationId);
-                      onStopEnter?.(stop.stationId, stop.name, event.currentTarget.getBoundingClientRect());
+                      onStopEnter?.(
+                        stop.stationId,
+                        stop.name,
+                        event.currentTarget.getBoundingClientRect(),
+                      );
                     }}
                     onMouseLeave={() => {
                       onStopHover?.(null);
                       onStopLeave?.();
                     }}
                   >
-                    {/*
-                     * The dot stands in the line of the text, in the
-                     * middle of it, and it marks the two ends of the
-                     * ride: the place it starts at and the place it
-                     * ends at.
-                     */}
                     <span
                       aria-hidden
                       className={cn(
-                        "size-[6px] shrink-0 rounded-full border",
-                        skipped || first || last ? "border-transparent" : "border-line-strong",
+                        "size-2 shrink-0 rounded-full border",
+                        skipped || first || lastStop
+                          ? "border-transparent"
+                          : "border-m3-outline",
                       )}
                       style={{
                         backgroundColor: skipped
-                          ? "var(--danger)"
-                          : first || last
+                          ? "var(--e)"
+                          : first || lastStop
                             ? color
-                            : "var(--surface)",
+                            : "var(--srf)",
                       }}
                     />
-                    {/*
-                     * The name is a button, so that a reader with a
-                     * keyboard can ask what the place is as well, and
-                     * so that a finger can ask it on a phone.
-                     */}
                     <button
                       type="button"
                       aria-label={
@@ -376,23 +374,19 @@ function LegRow({
                       className="min-w-0 flex-1 cursor-pointer text-left"
                     >
                       <MarqueeText
-                        text={
-                          skipped
-                            ? `${stop.name} · skipped`
-                            : stop.name
-                        }
+                        text={skipped ? `${stop.name} · skipped` : stop.name}
                         className={cn(
                           "min-w-0 flex-1",
                           skipped
-                            ? "font-medium text-danger line-through decoration-danger/70"
-                            : first || last
-                              ? "font-medium text-ink"
-                              : "text-ink-2",
+                            ? "m3-bs font-medium text-m3-error line-through decoration-m3-error/70"
+                            : first || lastStop
+                              ? "m3-bs font-medium text-m3-on-surface"
+                              : "m3-bs text-m3-on-surface-variant",
                         )}
                       />
                     </button>
-                    <span className="shrink-0 font-mono tabular-nums text-ink-3">
-                      {first ? "0" : `${minutes} min`}
+                    <span className="m3-bs m3-num shrink-0 text-m3-on-surface-variant">
+                      {first ? "0" : `${minutes} mnt`}
                     </span>
                   </li>
                 );
@@ -400,13 +394,13 @@ function LegRow({
             </ol>
           </details>
         ) : (
-          <p className="mt-1 text-[12px] text-ink-3">
+          <p className="m3-bs mt-1 text-m3-on-surface-variant">
             {isWalk
               ? formatDistance(leg.distanceKm)
               : [
                   `${leg.stops.length} ${nounLabel}`,
                   formatDistance(leg.distanceKm),
-                  leg.waitMinutes > 0 ? `wait ${leg.waitMinutes} min` : null,
+                  leg.waitMinutes > 0 ? `tunggu ${leg.waitMinutes} mnt` : null,
                 ]
                   .filter(Boolean)
                   .join(" · ")}
@@ -422,10 +416,14 @@ function patternSentenceOf(leg: ItineraryLeg): string | null {
   const variants = leg.variants ?? [];
   const selected = variants.find((variant) => variant.id === leg.patternId) ?? null;
   if (!selected) return null;
-  if (selected.toll) return "via toll road";
-  if (selected.patternType === "express") return "Express service";
-  if (selected.patternType === "short-turn") return "Short turn";
+  if (selected.toll) return "Via jalan tol";
+  if (selected.patternType === "express") return "Layanan ekspres";
+  if (selected.patternType === "short-turn") return "Perjalanan dipersingkat";
   return null;
+}
+
+function towardsOf(directionLabel: string): string {
+  return directionLabel.split(" → ").at(-1) ?? directionLabel;
 }
 
 /** The corridor code. The pattern it boards is a sentence under it. */
@@ -436,12 +434,8 @@ function LinePatternChip({ leg, color }: { leg: ItineraryLeg; color: string }) {
   const chip = (
     <span
       tabIndex={variants.length > 0 ? 0 : undefined}
-      className="shrink-0 cursor-default rounded-[4px] border px-2 py-px text-[12px] font-semibold leading-[1.2] tabular-nums outline-none transition-colors focus-visible:ring-2 focus-visible:ring-ink"
-      style={{
-        backgroundColor: `color-mix(in oklab, ${color} 10%, transparent)`,
-        borderColor: `color-mix(in oklab, ${color} 30%, transparent)`,
-        color,
-      }}
+      className="m3-chip m3-chip--suggestion m3-num shrink-0"
+      style={{ color }}
     >
       {code}
     </span>
@@ -454,10 +448,10 @@ function LinePatternChip({ leg, color }: { leg: ItineraryLeg; color: string }) {
       label={
         <div>
           <p className="text-[12px] font-semibold leading-[1.35] text-ink-3">
-            Corridor patterns
+            Pola koridor
           </p>
           <p className="mt-1 text-[12px] leading-[1.45] text-ink-2">
-            {leg.lineName ?? code} · {selected?.headsign ?? "Choose a pattern"}
+            {leg.lineName ?? code} · {selected?.headsign ?? "Pilih pola"}
           </p>
           <ul className="mt-2 max-h-64 space-y-2 overflow-y-auto pr-1">
             {variants.map((variant) => {
@@ -475,18 +469,18 @@ function LinePatternChip({ leg, color }: { leg: ItineraryLeg; color: string }) {
                       {variant.headsign}
                     </span>
                     {current ? (
-                      <span className="text-[12px] font-medium text-ink">this journey</span>
+                      <span className="text-[12px] font-medium text-ink">perjalanan ini</span>
                     ) : null}
                   </div>
                   <p className="mt-0.5 text-[12px] text-ink-3">
                     {variant.serviceLabel}
-                    {variant.toll ? " · toll" : ""}
-                    {variant.situational ? " · situational" : ""}
-                    {variant.activeNow ? "" : " · not today"}
+                    {variant.toll ? " · tol" : ""}
+                    {variant.situational ? " · situasional" : ""}
+                    {variant.activeNow ? "" : " · tidak hari ini"}
                   </p>
                   {variant.skipped.length > 0 ? (
                     <p className="mt-0.5 text-[12px] text-danger">
-                      Skips {variant.skipped.slice(0, 4).join(" · ")}
+                      Melewati {variant.skipped.slice(0, 4).join(" · ")}
                       {variant.skipped.length > 4 ? ` +${variant.skipped.length - 4}` : ""}
                     </p>
                   ) : null}
@@ -509,26 +503,33 @@ function DetourLine({ detour }: { detour: NonNullable<ItineraryLeg["detour"]> })
   const via = served.length > 0 ? served : alignment;
   const skipped =
     detour.skipped.length > 0
-      ? ` · skips ${detour.skipped.slice(0, 3).join(", ")}${detour.skipped.length > 3 ? ` +${detour.skipped.length - 3}` : ""}`
+      ? ` · lewati ${detour.skipped.slice(0, 3).join(", ")}${
+          detour.skipped.length > 3 ? ` +${detour.skipped.length - 3}` : ""
+        }`
       : "";
   return (
-    <p className="mt-1 text-[12px] leading-[1.45] text-ink-3">
-      <span className="font-medium text-ink-2">Diverted</span>
+    <p className="m3-bs mt-1 text-m3-on-surface-variant">
+      <span className="font-medium text-m3-on-surface">Dialihkan</span>
       {detour.viaLineCodes.length > 0 ? ` via ${detour.viaLineCodes.join("/")}` : ""}
       {via.length > 0 ? ` · ${via.slice(0, 3).join(" → ")}${via.length > 3 ? " …" : ""}` : ""}
-      {detour.approximate ? " · approximate path" : ""}
+      {detour.approximate ? " · jalur perkiraan" : ""}
       {skipped}
     </p>
   );
+}
+
+/** The Indonesian word for the place a vehicle stops at. */
+function stopNounId(mode: string | null | undefined): "halte" | "stasiun" {
+  return mode === "metro" || mode === "tram" || mode === "rail" ? "stasiun" : "halte";
 }
 
 /**
  * What a walk on the way is for.
  *
  * The title and the rest of the sentence are separate so the row can read
- * as one line: "Walk to the station Grogol". Walking to the first vehicle
- * and walking from the last one are part of the journey. Only the walk in
- * between asks the rider to change vehicle, and it is titled "Change".
+ * as one line: "Jalan ke stasiun Grogol". Walking to the first vehicle and
+ * walking from the last one are part of the journey. Only the walk in
+ * between asks the rider to change vehicle, and it is titled "Transit".
  */
 function walkSummary(
   leg: ItineraryLeg,
@@ -537,18 +538,18 @@ function walkSummary(
 ): { title: string; detail: string } {
   switch (leg.walkReason) {
     case "access":
-      return { title: "Walk", detail: `to the ${stopNoun(nextMode)} ${leg.toName}` };
+      return { title: "Jalan", detail: `ke ${stopNounId(nextMode)} ${leg.toName}` };
     case "egress":
-      return { title: "Walk", detail: `from the ${stopNoun(previousMode)} ${leg.fromName}` };
+      return { title: "Jalan", detail: `dari ${stopNounId(previousMode)} ${leg.fromName}` };
     case "transfer":
       return {
-        title: "Change",
+        title: "Transit",
         detail: leg.nextLineName
-          ? `to ${leg.nextLineName} at ${leg.fromName}`
-          : `vehicles at ${leg.fromName}`,
+          ? `ke ${leg.nextLineName} di ${leg.fromName}`
+          : `ganti kendaraan di ${leg.fromName}`,
       };
     default:
-      return { title: "Walk", detail: `${leg.fromName} → ${leg.toName}` };
+      return { title: "Jalan", detail: `${leg.fromName} → ${leg.toName}` };
   }
 }
 
@@ -566,4 +567,3 @@ function ChevronSmall() {
     </svg>
   );
 }
-

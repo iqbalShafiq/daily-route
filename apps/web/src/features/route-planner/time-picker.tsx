@@ -45,13 +45,16 @@ function nearestEquivalent(previous: number, target: number): number {
 export function TimePicker({
   value,
   onChange,
+  align = "center",
 }: {
   value: string;
   onChange: (value: string) => void;
+  /** Which edge of the trigger the clock opens from. */
+  align?: "center" | "left";
 }) {
-  // The picker mounts when the rider chooses "Leave at", so showing the
+  // The picker mounts when the rider chooses "Pilih jam", so showing the
   // choices immediately is the expected next step. It can still be closed
-  // with Escape, Done, or a click outside.
+  // with Escape, Selesai, or a click outside.
   const [open, setOpen] = useState(true);
   const [mode, setMode] = useState<"hour" | "minute">("hour");
   const [hoverAngle, setHoverAngle] = useState<number | null>(null);
@@ -191,7 +194,7 @@ export function TimePicker({
         type="button"
         aria-haspopup="dialog"
         aria-expanded={open}
-        aria-label={`Departure time ${value}`}
+        aria-label={`Waktu berangkat ${value}`}
         onClick={() => setOpen((current) => !current)}
         className={cn(
           "inline-flex h-7 cursor-pointer items-center gap-1 rounded px-2 text-[12px] tabular-nums transition-colors",
@@ -209,20 +212,23 @@ export function TimePicker({
       {open ? (
         <div
           role="dialog"
-          aria-label="Choose departure time"
-          className="fade-in absolute left-1/2 top-[calc(100%+6px)] z-50 w-[300px] max-w-[calc(100vw-24px)] -translate-x-1/2 rounded-[4px] border border-line bg-surface p-4 shadow-pop"
+          aria-label="Pilih waktu berangkat"
+          className={cn(
+            "fade-in absolute top-[calc(100%+6px)] z-50 w-[300px] max-w-[calc(100vw-24px)] rounded-[4px] border border-line bg-surface p-4 shadow-pop",
+            align === "left" ? "left-0" : "left-1/2 -translate-x-1/2",
+          )}
         >
           <div className="flex items-start justify-between gap-2">
             <div>
               <p className="flex items-center gap-2 text-[12px] font-medium leading-[1.35] text-ink-3">
                 <CalendarClock aria-hidden className="size-3.5" />
-                Leave at · WIB
+                Berangkat · WIB
               </p>
               <div className="mt-1 flex items-baseline gap-1">
                 <button
                   type="button"
                   onClick={() => setMode("hour")}
-                  aria-label={`Edit hour, ${hour12}`}
+                  aria-label={`Ubah jam, ${hour12}`}
                   className={cn(
                     "cursor-pointer rounded px-0.5 text-[28px] leading-[1.05] font-semibold tabular-nums transition-colors",
                     mode === "hour" ? "text-ink" : "text-ink-3 hover:text-ink",
@@ -234,7 +240,7 @@ export function TimePicker({
                 <button
                   type="button"
                   onClick={() => setMode("minute")}
-                  aria-label={`Edit minute, ${String(minute).padStart(2, "0")}`}
+                  aria-label={`Ubah menit, ${String(minute).padStart(2, "0")}`}
                   className={cn(
                     "cursor-pointer rounded px-0.5 text-[28px] leading-[1.05] font-semibold tabular-nums transition-colors",
                     mode === "minute" ? "text-ink" : "text-ink-3 hover:text-ink",
@@ -245,7 +251,7 @@ export function TimePicker({
                 <button
                   type="button"
                   onClick={togglePeriod}
-                  aria-label={`Switch to ${period === "AM" ? "PM" : "AM"}`}
+                  aria-label={`Ganti ke ${period === "AM" ? "PM" : "AM"}`}
                   className="ml-1 cursor-pointer rounded px-1 text-[12px] font-semibold text-accent transition-colors hover:bg-accent-soft"
                 >
                   {period}
@@ -258,12 +264,12 @@ export function TimePicker({
               className="inline-flex cursor-pointer items-center gap-1 rounded px-2 py-1 text-[12px] font-medium text-accent transition-colors hover:bg-accent-soft"
             >
               <Check aria-hidden className="size-3" />
-              Done
+              Selesai
             </button>
           </div>
 
           <div className="mt-2 flex items-center justify-between text-[12px] text-ink-3">
-            <span>{mode === "hour" ? "Choose an hour" : "Choose a minute"}</span>
+            <span>{mode === "hour" ? "Pilih jam" : "Pilih menit"}</span>
             <span className="flex gap-1">
               <button
                 type="button"
@@ -274,7 +280,7 @@ export function TimePicker({
                   mode === "hour" ? "bg-accent-soft font-medium text-accent" : "hover:bg-surface-2",
                 )}
               >
-                Hour
+                Jam
               </button>
               <button
                 type="button"
@@ -285,7 +291,7 @@ export function TimePicker({
                   mode === "minute" ? "bg-accent-soft font-medium text-accent" : "hover:bg-surface-2",
                 )}
               >
-                Minute
+                Menit
               </button>
             </span>
           </div>
@@ -332,7 +338,7 @@ export function TimePicker({
                     clearPreview();
                   }}
                   aria-pressed={active}
-                  aria-label={mode === "hour" ? `Hour ${label}` : `Minute ${String(label).padStart(2, "0")}`}
+                  aria-label={mode === "hour" ? `Jam ${label}` : `Menit ${String(label).padStart(2, "0")}`}
                   className={cn(
                     "absolute z-10 flex size-8 -translate-x-1/2 -translate-y-1/2 cursor-pointer items-center justify-center rounded-full text-[12px] font-medium tabular-nums transition-colors",
                     active ? "bg-ink text-bg" : "text-ink-2 hover:bg-surface",
@@ -345,7 +351,7 @@ export function TimePicker({
             })}
             <div
               role="group"
-              aria-label="Clock face. Use the arrow keys to adjust the time."
+              aria-label="Muka jam. Gunakan tombol panah untuk mengubah waktu."
               tabIndex={0}
               onPointerDown={onFacePointerDown}
               onPointerUp={onFacePointerUp}
@@ -390,9 +396,9 @@ export function TimePicker({
               }}
               className="cursor-pointer rounded px-2 py-1 transition-colors hover:bg-surface-2 hover:text-ink"
             >
-              Now
+              Sekarang
             </button>
-            <span>Hover to preview. Drag or tap to set.</span>
+            <span>Arahkan untuk pratinjau. Geser atau ketuk untuk memilih.</span>
           </div>
         </div>
       ) : null}

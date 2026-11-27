@@ -57,17 +57,17 @@ export function StopPopover({
       role="dialog"
       aria-label={`Details for ${name}`}
       style={{ left: `${left}px`, top: `${top}px`, width: `${width}px` }}
-      className="fade-in fixed z-50 rounded-[4px] border border-line bg-surface p-3 shadow-pop"
+      className="m3-card m3-card--elevated m3-card--radius-lgi fade-in fixed z-50 grid gap-2"
     >
-      <p className="text-[13px] font-semibold text-ink">{name}</p>
+      <p className="m3-tm text-m3-on-surface">{name}</p>
 
       {place ? (
         <>
-          <p className="mt-0.5 flex items-center gap-2 text-[12px] text-ink-3">
+          <p className="m3-bs flex items-center gap-2 text-m3-on-surface-variant">
             {place.stationType === "stasiun" ? (
-              <Network aria-hidden className="size-3.5 shrink-0" />
+              <Network aria-hidden className="size-4 shrink-0" />
             ) : (
-              <MapPin aria-hidden className="size-3.5 shrink-0" />
+              <MapPin aria-hidden className="size-4 shrink-0" />
             )}
             <span className="truncate">
               {place.stationType === "stasiun" ? "Station" : "Stop"}
@@ -76,41 +76,41 @@ export function StopPopover({
           </p>
 
           {place.description ? (
-            <p className="mt-2 text-[12px] leading-[1.45] text-ink-2">{place.description}</p>
+            <p className="m3-bs leading-[1.45] text-m3-on-surface-variant">{place.description}</p>
           ) : null}
 
           {lines.length > 0 ? (
-            <p className="mt-2 flex flex-wrap items-center gap-1">
+            <p className="flex flex-wrap items-center gap-1">
               {lines.slice(0, 8).map((line) => (
                 <span
                   key={line.id}
-                  className="rounded-[4px] bg-surface-2 px-2 py-px text-[12px] font-semibold text-ink-2"
+                  className="m3-chip m3-chip--suggestion m3-num h-6 min-h-0 px-2 text-[12px]"
                 >
                   {line.code}
                 </span>
               ))}
               {lines.length > 8 ? (
-                <span className="text-[12px] text-ink-3">+{lines.length - 8}</span>
+                <span className="m3-bs text-m3-on-surface-variant">+{lines.length - 8}</span>
               ) : null}
             </p>
           ) : null}
 
           {departures.data && departures.data.lines.length > 0 ? (
-            <div className="mt-3 border-t border-line pt-2">
-              <p className="flex items-center gap-2 text-[12px] font-medium text-ink-3">
-                <Clock3 aria-hidden className="size-3" />
+            <div className="mt-2 border-t border-m3-outline-variant pt-2">
+              <p className="m3-bs flex items-center gap-2 font-medium text-m3-on-surface-variant">
+                <Clock3 aria-hidden className="size-3.5" />
                 Scheduled departures
               </p>
-              <ul className="mt-2 space-y-2">
+              <ul className="mt-2 grid gap-2">
                 {departures.data.lines.slice(0, 6).map((row) => (
                   <li key={`${row.lineId}-${row.direction}`} className="flex items-baseline gap-2">
-                    <span className="w-10 shrink-0 rounded-[3px] bg-surface-2 px-1 py-px text-center text-[12px] font-semibold tabular-nums text-ink-2">
+                    <span className="m3-bs m3-num w-10 shrink-0 rounded-[4px] bg-m3-surface-mid px-1 py-px text-center font-semibold text-m3-on-surface-variant">
                       {row.code}
                     </span>
-                    <span className="min-w-0 flex-1 truncate text-[12px] text-ink-2">
+                    <span className="m3-bs min-w-0 flex-1 truncate text-m3-on-surface-variant">
                       {row.headsign ?? row.name}
                     </span>
-                    <span className="shrink-0 text-[12px] tabular-nums text-ink-3">
+                    <span className="m3-bs m3-num shrink-0 text-m3-on-surface-variant">
                       {row.headwayMinMinutes === null
                         ? "unknown"
                         : `~${Math.round(row.headwayMinMinutes)} min`}
@@ -118,15 +118,15 @@ export function StopPopover({
                   </li>
                 ))}
               </ul>
-              <p className="mt-1 text-[12px] leading-[1.45] text-ink-3">
+              <p className="m3-bs mt-1 text-m3-on-surface-variant">
                 Schedule-based, not live arrivals.
               </p>
             </div>
           ) : null}
 
           {interchange.length > 0 ? (
-            <p className="mt-2 flex items-start gap-2 text-[12px] leading-[1.45] text-ink-2">
-              <Users aria-hidden className="mt-px size-3.5 shrink-0 text-ink-3" />
+            <p className="m3-bs flex items-start gap-2 leading-[1.45] text-m3-on-surface-variant">
+              <Users aria-hidden className="mt-0.5 size-4 shrink-0" />
               <span className="min-w-0">
                 Connects with {interchange.map((other) => other.name).join(", ")}
               </span>
@@ -134,9 +134,9 @@ export function StopPopover({
           ) : null}
         </>
       ) : detail.isError ? (
-        <p className="mt-2 text-[12px] text-ink-3">Place details could not be loaded.</p>
+        <p className="m3-bs text-m3-on-surface-variant">Place details could not be loaded.</p>
       ) : (
-        <p className="mt-2 text-[12px] text-ink-3">Loading details…</p>
+        <p className="m3-bs text-m3-on-surface-variant">Loading details…</p>
       )}
     </div>,
     document.body,

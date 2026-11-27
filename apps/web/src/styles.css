@@ -4455,6 +4455,298 @@
 }
 
 /* ---------------------------------------------------------------------------
+   The map flow surfaces: home, search, choices, detail and the live trip.
+   These classes hold the few radii and rail widths that the flow shares, so
+   a screen never writes a one-off pixel value into its markup.
+--------------------------------------------------------------------------- */
+@layer components {
+  .m3-home-panel {
+    display: grid;
+    gap: 16px;
+    padding: 16px;
+    border-radius: var(--r-xl);
+    background: var(--sl1);
+    box-shadow: var(--shadow-pop);
+  }
+
+  .m3-suggestion-list {
+    border-radius: var(--r-lgi);
+    background: var(--sl1);
+  }
+
+  .m3-suggestion-list > .m3-list__item:nth-child(2) {
+    border-radius: 20px 20px 4px 4px;
+  }
+
+  @media (max-width: 767px) {
+    .m3-suggestion-list {
+      border-radius: var(--r-lgi) var(--r-lgi) 0 0;
+    }
+  }
+
+  .m3-place-field {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    min-height: 56px;
+    padding: 0 8px 0 16px;
+    background: var(--sl0);
+    transition: box-shadow var(--fx-def-ms) var(--fx-def);
+  }
+
+  .m3-place-field--from {
+    border-radius: 20px 20px 4px 4px;
+  }
+
+  .m3-place-field--to {
+    border-radius: 4px 4px 20px 20px;
+    margin-top: 2px;
+  }
+
+  .m3-place-field:focus-within {
+    box-shadow: inset 0 0 0 2px var(--p);
+  }
+
+  .m3-choices-panel {
+    border-radius: 28px 28px 0 0;
+    background: var(--sl1);
+    box-shadow: 0 -1px 3px rgb(0 0 0 / 0.08);
+  }
+
+  @media (min-width: 1024px) {
+    .m3-choices-panel {
+      border-radius: var(--r-xl);
+      box-shadow: var(--shadow-pop);
+    }
+  }
+
+  .m3-route-list {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .m3-route-card {
+    display: block;
+    width: 100%;
+    padding: 16px;
+    border: 0;
+    border-radius: 6px;
+    background: var(--sl0);
+    color: var(--on);
+    text-align: left;
+    cursor: pointer;
+    transition:
+      background-color var(--fx-def-ms) var(--fx-def),
+      box-shadow var(--fx-def-ms) var(--fx-def),
+      transform var(--sp-fast-ms) var(--sp-fast);
+  }
+
+  .m3-route-list > li:first-child .m3-route-card {
+    border-radius: 28px 28px 6px 6px;
+  }
+
+  .m3-route-list > li:last-child .m3-route-card {
+    border-radius: 6px 6px 28px 28px;
+  }
+
+  .m3-route-list > li:only-child .m3-route-card {
+    border-radius: 28px;
+  }
+
+  .m3-route-card:hover {
+    background: var(--sl1);
+  }
+
+  .m3-route-card:focus-visible {
+    outline: 2px solid var(--p);
+    outline-offset: 2px;
+  }
+
+  .m3-route-card:active {
+    transform: scale(0.995);
+  }
+
+  .m3-route-card--best {
+    background: var(--pc);
+    color: var(--onpc);
+  }
+
+  .m3-route-card--best:hover {
+    background: color-mix(in oklab, var(--pc) 88%, var(--onpc));
+  }
+
+  .m3-route-card--blocked {
+    box-shadow: inset 0 0 0 1px color-mix(in oklab, var(--e) 38%, transparent);
+  }
+
+  .m3-leg-list {
+    display: grid;
+    gap: 0;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .m3-leg-row {
+    position: relative;
+    display: grid;
+    grid-template-columns: 44px 28px minmax(0, 1fr);
+    gap: 12px;
+    padding: 12px 0;
+    cursor: pointer;
+  }
+
+  .m3-leg-row--active {
+    background: var(--sl1);
+    border-radius: var(--r-lgi);
+    box-shadow: 0 0 0 8px var(--sl1);
+  }
+
+  .m3-leg-time {
+    display: grid;
+    align-content: start;
+    gap: 2px;
+    padding-top: 2px;
+    text-align: right;
+  }
+
+  .m3-leg-rail {
+    position: relative;
+    display: grid;
+    justify-items: center;
+  }
+
+  .m3-leg-plate {
+    position: relative;
+    z-index: 2;
+    display: grid;
+    place-items: center;
+    width: 28px;
+    height: 28px;
+  }
+
+  .m3-leg-plate .m3-mode-badge--icon {
+    width: 28px;
+    height: 28px;
+    border-radius: 10px;
+  }
+
+  .m3-leg-plate.m3-leg-plate svg {
+    width: 15px;
+    height: 15px;
+  }
+
+  .m3-leg-line {
+    position: absolute;
+    top: 30px;
+    bottom: -12px;
+    left: 50%;
+    width: 3px;
+    transform: translateX(-50%);
+    border-radius: 2px;
+    opacity: 0.9;
+  }
+
+  .m3-leg-line--walk {
+    background: repeating-linear-gradient(
+      to bottom,
+      var(--walk) 0 2px,
+      transparent 2px 6px
+    );
+  }
+
+  .m3-leg-detail {
+    padding-top: 2px;
+  }
+
+  .m3-leg-stops summary {
+    list-style: none;
+  }
+
+  .m3-stat-row {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 3px;
+  }
+
+  .m3-stat {
+    display: grid;
+    align-content: start;
+    gap: 2px;
+    padding: 12px;
+    background: var(--sl2);
+  }
+
+  .m3-stat:first-child {
+    border-radius: 20px 4px 4px 20px;
+  }
+
+  .m3-stat:last-child {
+    border-radius: 4px 20px 20px 4px;
+  }
+
+  .m3-live-hero {
+    position: relative;
+    overflow: hidden;
+    border-radius: var(--r-xl);
+    background: var(--p);
+    color: var(--onp);
+  }
+
+  .m3-live-hero__shape {
+    position: absolute;
+    right: -80px;
+    top: -80px;
+    background: var(--onp);
+    opacity: 0.1;
+  }
+
+  .m3-live-ring .m3-circular-wavy__fill {
+    stroke: var(--onp);
+  }
+
+  .m3-live-ring .m3-circular-wavy__track {
+    stroke: color-mix(in oklab, var(--onp) 30%, transparent);
+  }
+
+  .m3-confetti {
+    position: absolute;
+    z-index: 1;
+  }
+
+  .m3-spin-slow {
+    animation: m3Spin 28s linear infinite;
+  }
+}
+
+@keyframes m3Spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/*
+ * The desktop rail is 80 px wide. The stage panels start beside it, and the
+ * map area is offset by the same rail, so neither a panel nor the map hides
+ * the navigation.
+ */
+@media (min-width: 1024px) {
+  .m3-rail-offset {
+    margin-left: 80px;
+  }
+
+  .m3-stage-panel {
+    left: 80px;
+    right: auto;
+  }
+}
+
+/* ---------------------------------------------------------------------------
    The existing surface language: panels, the headsign, the ticket and the
    small movements that predate M3E.
 --------------------------------------------------------------------------- */
@@ -5230,7 +5522,8 @@
   .m3-wobble,
   .m3-bob,
   .m3-ripple,
-  .m3-pulse-ring {
+  .m3-pulse-ring,
+  .m3-spin-slow {
     animation: none !important;
   }
 

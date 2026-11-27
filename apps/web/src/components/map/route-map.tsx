@@ -125,6 +125,14 @@ export type RouteMapProps = {
    */
   visibleSystems?: readonly string[] | undefined;
   /**
+   * A mode filter from the map home, applied by fading the other modes.
+   *
+   * `all` and an absent value paint the network at its normal strength. A
+   * value such as `krl` keeps KRL bright and drops every other line to ten
+   * percent, so the rider still sees the shape of the whole city.
+   */
+  dimmedSystemFilter?: string | null | undefined;
+  /**
    * A stop the reader asked to see from the notice list.
    *
    * The token changes on every request, so choosing the same stop again
@@ -229,6 +237,7 @@ export function RouteMap({
   platforms = EMPTY_PLATFORMS,
   jpos = [],
   visibleSystems = ALL_SYSTEMS,
+  dimmedSystemFilter = null,
   glance = null,
   focus = null,
 }: RouteMapProps) {
@@ -261,6 +270,7 @@ export function RouteMap({
   const platformsKeyRef = useRef<string | null>(null);
   const jposRef = useRef(jpos);
   const systemsRef = useRef(visibleSystems);
+  const dimFilterRef = useRef(dimmedSystemFilter);
 
   // --- Create the map once ---------------------------------------------
   useEffect(() => {
@@ -309,7 +319,7 @@ export function RouteMap({
       syncJpos(map, jposRef.current);
       applyNetworkSystems(map, systemsRef.current);
       syncLegs(map, legsRef.current);
-      paintNetworkDim(map, legsRef.current.some((leg) => leg.kind === "ride"));
+      paintNetworkDim(map, legsRef.current.some((leg) => leg.kind === "ride"), dimFilterRef.current);
       syncMarkers(map, markersRef.current);
       paintLegEmphasis(map, legsRef.current);
       frameJourney(map, legsRef.current, frameRef.current ?? [], framedKeyRef);
@@ -510,7 +520,7 @@ export function RouteMap({
     const map = mapRef.current;
     if (!map || !map.getLayer(ROUTE_LAYER)) return;
     paintLegEmphasis(map, legs);
-    paintNetworkDim(map, legs.some((leg) => leg.kind === "ride"));
+    paintNetworkDim(map, legs.some((leg) => leg.kind === "ride"), dimFilterRef.current);
   }, [legs]);
 
   // --- Follow the theme -------------------------------------------------
@@ -535,7 +545,7 @@ export function RouteMap({
       syncLegs(map, legs);
     }
     frameJourney(map, legs, frame ?? [], framedKeyRef);
-    paintNetworkDim(map, legs.some((leg) => leg.kind === "ride"));
+    paintNetworkDim(map, legs.some((leg) => leg.kind === "ride"), dimFilterRef.current);
   }, [legs, frame]);
 
   useEffect(() => {
@@ -546,7 +556,7 @@ export function RouteMap({
     if (signature === networkKeyRef.current) return;
     networkKeyRef.current = signature;
     syncNetwork(map, network);
-    paintNetworkDim(map, legsRef.current.some((leg) => leg.kind === "ride"));
+    paintNetworkDim(map, legsRef.current.some((leg) => leg.kind === "ride"), dimFilterRef.current);
   }, [network]);
 
   useEffect(() => {
@@ -575,6 +585,17 @@ export function RouteMap({
     if (!map || !map.getSource(NETWORK_SOURCE)) return;
     applyNetworkSystems(map, visibleSystems);
   }, [visibleSystems]);
+
+  useEffect(() => {
+    dimFilterRef.current = dimmedSystemFilter;
+    const map = mapRef.current;
+    if (!map || !map.getSource(NETWORK_SOURCE)) return;
+    paintNetworkDim(
+      map,
+      legsRef.current.some((leg) => leg.kind === "ride"),
+      dimmedSystemFilter,
+    );
+  }, [dimmedSystemFilter]);
 
   useEffect(() => {
     const map = mapRef.current;
@@ -773,6 +794,7 @@ function addNetworkLayers(map: MapLibreMap): void {
       "line-opacity": 0.86,
     },
   });
+  networkRestOpacity.set(NETWORK_BACK_LAYER, 0.86);
   map.addSource(PLACE_SOURCE, { type: "geojson", data: emptyFeatureCollection() });
   const colors = themeColors();
   for (const tier of ["primary", "local"] as const) {
@@ -1196,14 +1218,85 @@ function placesSignature(places: readonly NetworkPlace[]): string {
   return `${places.length}:${first?.id ?? ""}:${last?.id ?? ""}`;
 }
 
-function paintNetworkDim(map: MapLibreMap, dim: boolean): void {
+/** The systems a home mode chip keeps bright. The rest fade to ten percent. */
+const DIM_FILTER_SYSTEMS: Record<string, readonly string[]> = {
+  krl: ["krl-jabodetabek"],
+  mrt: ["mrt-jakarta"],
+  lrt: ["lrt-jakarta", "lrt-jabodebek"],
+  brt: ["transjakarta"],
+  mikro: ["transjakarta"],
+};
+
+function dimmedSystemsOf(filter: string | null | undefined): readonly string[] | null {
+  if (!filter || filter === "all") return null;
+  return DIM_FILTER_SYSTEMS[filter] ?? [filter];
+}
+
+/**
+ * The opacity of one network layer under a mode filter.
+ *
+ * A matching line keeps the opacity it has on the idle map; every other
+ * line is still drawn, at ten percent, so the city keeps its shape. The
+ * ten percent is not a removal: a rider can still see where the other
+ * modes run while reading the chosen one.
+ */
+function filteredOpacity(
+  systems: readonly string[],
+  rest: ExpressionSpecification | number,
+): ExpressionSpecification {
+  return [
+    "case",
+    ["in", ["get", "systemId"], ["literal", [...systems]]],
+    rest,
+    0.1,
+  ] as ExpressionSpecification;
+}
+
+function filteredIconOpacity(systems: readonly string[]): ExpressionSpecification {
+  return [
+    "case",
+    ["in", ["get", "systemId"], ["literal", [...systems]]],
+    1,
+    0.1,
+  ] as ExpressionSpecification;
+}
+
+function paintNetworkDim(
+  map: MapLibreMap,
+  dim: boolean,
+  dimmedSystemFilter: string | null | undefined = null,
+): void {
+  const systems = dimmedSystemsOf(dimmedSystemFilter);
   for (const [id, expression] of networkRestOpacity) {
     if (!map.getLayer(id)) continue;
-    map.setPaintProperty(id, "line-opacity", dim ? (id.includes("-local-") ? 0.1 : 0.22) : expression);
+    if (dim) {
+      map.setPaintProperty(
+        id,
+        "line-opacity",
+        id.includes("-local-") ? 0.1 : 0.22,
+      );
+      continue;
+    }
+    map.setPaintProperty(
+      id,
+      "line-opacity",
+      systems ? filteredOpacity(systems, expression) : expression,
+    );
   }
   for (const id of PLACE_LAYERS) {
     if (!map.getLayer(id)) continue;
-    map.setPaintProperty(id, "icon-opacity", dim ? 0.3 : 1);
+    map.setPaintProperty(
+      id,
+      "icon-opacity",
+      dim ? 0.3 : systems ? filteredIconOpacity(systems) : 1,
+    );
+  }
+  if (map.getLayer(PLATFORM_LAYER)) {
+    map.setPaintProperty(
+      PLATFORM_LAYER,
+      "circle-opacity",
+      dim ? 0.3 : systems ? filteredIconOpacity(systems) : 0.95,
+    );
   }
 }
 

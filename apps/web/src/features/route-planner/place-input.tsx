@@ -13,7 +13,7 @@ import type { ChosenPlace } from "./place-memory.js";
 /**
  * The place field.
  *
- * It accepts free text — a station name, a district, a landmark — and
+ * It accepts free text (a station name, a district, a landmark) and
  * offers the stations and the places that match. The suggestions come
  * from the server. A landmark is not rewritten into the nearest halte:
  * the reader keeps the name they chose, and the walk is part of the route.
@@ -351,40 +351,44 @@ export function PlaceInput({
       role="listbox"
       aria-label={`Places matching ${label}`}
       className={cn(
-        "list-in overflow-y-auto overscroll-contain rounded-[4px] border border-line bg-surface shadow-pop",
+        "list-in m3-list m3-suggestion-list overflow-y-auto overscroll-contain shadow-pop",
         floating
-          ? "fixed z-[75] max-md:inset-x-0 max-md:bottom-0 max-md:top-auto max-md:max-h-[62dvh] max-md:rounded-b-none max-md:rounded-t-[16px] max-md:border-x-0 max-md:border-b-0 max-md:pb-[calc(12px+env(safe-area-inset-bottom))]"
+          ? "fixed z-[75] max-md:inset-x-0 max-md:bottom-0 max-md:top-auto max-md:max-h-[62dvh] max-md:pb-[calc(12px+env(safe-area-inset-bottom))]"
           : [
               // On a phone the list becomes a sheet at the bottom of the
               // screen: the keyboard covers half of it, and a dropdown
               // under the field would be covered with it.
               "absolute inset-x-0 top-full z-50 mt-2 max-h-72",
               "max-md:fixed max-md:inset-x-0 max-md:top-auto max-md:bottom-0 max-md:mt-0",
-              "max-md:max-h-[62dvh] max-md:rounded-b-none max-md:rounded-t-[16px] max-md:border-x-0 max-md:border-b-0 max-md:pb-[calc(12px+env(safe-area-inset-bottom))]",
+              "max-md:max-h-[62dvh] max-md:pb-[calc(12px+env(safe-area-inset-bottom))]",
             ],
       )}
       style={floating ? (anchor ?? undefined) : undefined}
     >
-      <li role="presentation" className="sticky top-0 z-10 bg-surface px-3 pb-1 pt-2 md:hidden">
-        <span aria-hidden className="mx-auto block h-1 w-10 rounded-full bg-line-strong/70" />
+      <li role="presentation" className="sticky top-0 z-10 bg-m3-surface-low px-3 pb-1 pt-2 md:hidden">
+        <span aria-hidden className="mx-auto block h-1 w-10 rounded-full bg-m3-outline-variant" />
       </li>
 
       {loading && rows.length === 0 ? (
-        <li className="flex items-center justify-center px-3 py-5">
+        <li className="m3-list__item flex items-center justify-center px-3 py-5">
           <Spinner label="Searching places…" />
         </li>
       ) : null}
 
       {showError ? (
-        <li className="flex items-center gap-2 px-3 py-4 text-[13px] leading-[1.5] text-ink-2">
-          <AlertCircle aria-hidden className="size-4 shrink-0 text-danger" />
-          Place suggestions could not be loaded. Check the connection and try again.
+        <li className="m3-list__item flex items-center gap-2 px-3 py-4">
+          <AlertCircle aria-hidden className="size-4 shrink-0 text-m3-error" />
+          <span className="m3-bs text-m3-on-surface-variant">
+            Place suggestions could not be loaded. Check the connection and try again.
+          </span>
         </li>
       ) : null}
 
       {showEmpty ? (
-        <li className="px-3 py-5 text-[13px] leading-[1.5] text-ink-2">
-          No places match “{query}”.
+        <li className="m3-list__item px-3 py-5">
+          <span className="m3-bs text-m3-on-surface-variant">
+            No places match “{query}”.
+          </span>
         </li>
       ) : null}
 
@@ -395,12 +399,7 @@ export function PlaceInput({
             id={optionId(index)}
             role="option"
             aria-selected={index === highlight}
-            className={cn(
-              "border-l-2 transition-colors",
-              index === highlight
-                ? "border-l-accent bg-surface-2"
-                : "border-l-transparent bg-surface",
-            )}
+            className={cn("m3-list__item", index === highlight && "is-selected")}
           >
             <button
               type="button"
@@ -408,23 +407,25 @@ export function PlaceInput({
               onMouseDown={(event) => event.preventDefault()}
               onMouseEnter={() => setHighlight(index)}
               onClick={() => choose(suggestion)}
-              className="flex w-full cursor-pointer items-center gap-3 px-3 py-3 text-left transition-colors"
+              className="m3-list__row cursor-pointer"
             >
-              <span className="flex size-6 shrink-0 items-center justify-center rounded-[4px] border border-line bg-surface text-ink">
-                <MapPin aria-hidden className="size-3" />
+              <span
+                className="m3-list__lead m3-list__lead--secondary"
+                aria-hidden="true"
+                style={{ clipPath: "var(--shp-cookie6)" }}
+              >
+                <MapPin aria-hidden className="size-5" />
               </span>
-              <span className="min-w-0 flex-1">
-                <span className="block truncate text-[15px] font-medium text-ink">
+              <span className="m3-list__text">
+                <span className="m3-list__title">
                   <Highlighted text={suggestion.name} ranges={suggestion.ranges} />
                 </span>
                 {suggestion.detail ? (
-                  <span className="mt-0.5 block truncate text-[12px] leading-[1.35] text-ink-3">
-                    {suggestion.detail}
-                  </span>
+                  <span className="m3-list__subtitle">{suggestion.detail}</span>
                 ) : null}
               </span>
               {suggestion.interchange ? (
-                <span className="shrink-0 rounded-[4px] border border-line-strong px-2 py-0.5 text-[12px] leading-[1.35] text-ink-3">
+                <span className="m3-chip m3-chip--suggestion pointer-events-none">
                   Interchange
                 </span>
               ) : null}
@@ -436,7 +437,7 @@ export function PlaceInput({
       {rows.some((row) => row.source === "overture") ? (
         <li
           role="presentation"
-          className="sticky bottom-0 z-10 border-t border-line/70 bg-surface px-3 py-2 text-[12px] leading-[1.35] text-ink-3"
+          className="m3-bs sticky bottom-0 z-10 border-t border-m3-outline-variant bg-m3-surface-low px-4 py-2 text-m3-on-surface-variant"
         >
           Places © Overture Maps
         </li>
@@ -445,7 +446,7 @@ export function PlaceInput({
       {rows.some((row) => row.source === "google") ? (
         <li
           role="presentation"
-          className="sticky bottom-0 z-10 border-t border-line/70 bg-surface px-3 py-2 text-[12px] leading-[1.35] text-ink-3"
+          className="m3-bs sticky bottom-0 z-10 border-t border-m3-outline-variant bg-m3-surface-low px-4 py-2 text-m3-on-surface-variant"
         >
           Powered by Google
         </li>
@@ -469,6 +470,7 @@ export function PlaceInput({
         autoFocus={autoFocus}
         autoComplete="off"
         role="combobox"
+        aria-label={label}
         aria-expanded={showList}
         aria-controls={listId}
         aria-autocomplete="list"
@@ -559,7 +561,7 @@ function Highlighted({ text, ranges }: { text: string; ranges: readonly MatchedR
         part.matched ? (
           <mark
             key={index}
-            className="rounded-[3px] bg-accent-soft px-0.5 font-semibold text-ink"
+            className="rounded-[3px] bg-m3-secondary-container px-0.5 font-semibold text-m3-on-secondary-container"
           >
             {part.value}
           </mark>

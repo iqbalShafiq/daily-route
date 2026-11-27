@@ -19,7 +19,7 @@ export function ServiceChip({ leg }: { leg: ItineraryLeg }) {
     return (
       <span className="inline-flex items-center gap-1 rounded-[4px] bg-danger-soft px-2 py-px text-[12px] leading-[1.35] font-medium text-danger">
         <Clock3 aria-hidden className="size-3" />
-        No service
+        Tidak beroperasi
       </span>
     );
   }
@@ -27,7 +27,7 @@ export function ServiceChip({ leg }: { leg: ItineraryLeg }) {
   const min = leg.headwayMinMinutes ?? null;
   const max = leg.headwayMaxMinutes ?? null;
   if (min === null || max === null) {
-    return <span className="text-[12px] text-ink-3">Schedule unknown</span>;
+    return <span className="text-[12px] text-ink-3">Jadwal belum diketahui</span>;
   }
 
   const median = leg.waitMinutes > 0 ? leg.waitMinutes * 2 : (min + max) / 2;
@@ -55,12 +55,12 @@ export function ServiceChip({ leg }: { leg: ItineraryLeg }) {
           : "bg-danger-soft text-danger";
   const description =
     band === "rare"
-      ? "Rare service"
+      ? "Layanan jarang"
       : band === "infrequent"
-        ? "Infrequent service"
+        ? "Layanan tidak sering"
         : band === "regular"
-          ? "Regular service"
-          : "Frequent service";
+          ? "Layanan reguler"
+          : "Layanan sering";
 
   return (
     <Tooltip
@@ -68,14 +68,14 @@ export function ServiceChip({ leg }: { leg: ItineraryLeg }) {
       label={
         <div>
           <p className="text-[12px] font-semibold leading-[1.35] text-ink-3">
-            Service window
+            Jendela layanan
           </p>
           <p className="mt-1 text-[13px] font-medium text-ink">
-            Every {range}
+            Setiap {range}
             {leg.serviceDetail ? ` · ${leg.serviceDetail}` : ""}
           </p>
           <p className="mt-1 text-[12px] text-ink-3">
-            Scheduled service, not a live arrival. The chip colour marks how often it runs.
+            Layanan terjadwal, bukan kedatangan langsung. Warna chip menandai seberapa sering layanan berjalan.
           </p>
         </div>
       }
