@@ -1,0 +1,58 @@
+{
+  "id": "/",
+  "name": "Daily — Transportasi Umum Jabodetabek",
+  "short_name": "Daily",
+  "description": "Peta transportasi umum Jabodetabek (KRL, MRT, LRT, TransJakarta, Mikrotrans) dengan pemantau gangguan dan panduan rute.",
+  "lang": "id",
+  "start_url": "/?source=pwa",
+  "scope": "/",
+  "display": "standalone",
+  "display_override": ["window-controls-overlay", "standalone"],
+  "orientation": "portrait-primary",
+  "background_color": "#F4FBFA",
+  "theme_color": "#00696E",
+  "categories": ["navigation", "travel", "utilities"],
+  "icons": [
+    {
+      "src": "/icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icons/icon-maskable-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "maskable"
+    },
+    {
+      "src": "/icons/icon-maskable-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Cari rute",
+      "short_name": "Cari rute",
+      "url": "/?action=search"
+    },
+    {
+      "name": "Status jalur",
+      "short_name": "Status jalur",
+      "url": "/?tab=lines"
+    },
+    {
+      "name": "Tanya Daily",
+      "short_name": "Tanya Daily",
+      "url": "/?tab=chat"
+    }
+  ]
+}

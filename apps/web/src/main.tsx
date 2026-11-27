@@ -4,6 +4,7 @@ import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 
 import { router } from "./router.js";
+import { PwaProvider } from "./features/pwa/index.js";
 import { ThemeProvider } from "./lib/theme.js";
 import "./styles.css";
 
@@ -33,7 +34,9 @@ createRoot(container).render(
   <StrictMode>
     <ThemeProvider>
       <QueryClientProvider client={queryClient}>
-        <RouterProvider router={router} />
+        <PwaProvider>
+          <RouterProvider router={router} />
+        </PwaProvider>
       </QueryClientProvider>
     </ThemeProvider>
   </StrictMode>,
