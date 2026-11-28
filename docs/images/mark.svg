@@ -1,5 +1,7 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" width="32" height="32">
-  <rect x="1" y="1" width="30" height="30" rx="4" fill="#17140F"/>
-  <rect x="5" y="7" width="5" height="18" rx="1" fill="#1F4FBF"/>
-  <rect x="13" y="13.5" width="14" height="5" rx="1" fill="#F4EFE4"/>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64" role="img" aria-label="Daily Route">
+  <rect width="64" height="64" rx="15" fill="#00696E"/>
+  <rect x="8" y="8" width="48" height="48" rx="16" fill="#A2EEF1"/>
+  <circle cx="30.5" cy="36" r="10.5" fill="none" stroke="#00393C" stroke-width="6.5"/>
+  <rect x="40" y="16" width="7" height="33" rx="3.5" fill="#00393C"/>
+  <circle cx="43.5" cy="21.5" r="2.6" fill="#FFFFFF"/>
 </svg>
